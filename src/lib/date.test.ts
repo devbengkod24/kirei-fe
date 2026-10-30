@@ -8,6 +8,8 @@ import {
   formatTimeSpanWIB,
   monthName,
   toWibDateKey,
+  toWibTimeKey,
+  wibToIso,
 } from "./date";
 
 describe("date (WIB)", () => {
@@ -24,6 +26,12 @@ describe("date (WIB)", () => {
     expect(formatLongDateWIB("2025-03-18T01:00:00Z")).toBe("Selasa, 18 Maret 2025");
     expect(formatShortDateWIB("2025-03-01T18:00:00Z")).toBe("2 Mar 2025");
     expect(formatTimeSpanWIB("2025-03-18T01:00:00Z", "2025-03-18T03:00:00Z")).toBe("08.00 - 10.00");
+  });
+
+  it("converts between WIB wall-clock values and UTC", () => {
+    expect(wibToIso("2026-10-30", "09:30")).toBe("2026-10-30T02:30:00.000Z");
+    expect(wibToIso("2026-10-31", "01:00")).toBe("2026-10-30T18:00:00.000Z");
+    expect(toWibTimeKey("2026-10-30T18:05:00Z")).toBe("01:05");
   });
 
   it("names months in Indonesian", () => {

@@ -1,5 +1,6 @@
 // TODO: match these values to the Laravel OpenAPI spec once the reservation endpoints exist.
 export type ReservationStatus =
+  | "draft"
   | "menunggu_konfirmasi"
   | "disetujui"
   | "ditolak"
@@ -55,4 +56,11 @@ export interface ReservationRecord {
   reschedule: ReservationReschedule | null;
   /** Filled when the reservation was cancelled, e.g. no replacement slot was available. */
   cancellationReason: string | null;
+}
+
+/** A saved reservation still waiting for its loan letter. */
+export interface ReservationDraft extends ReservationRecord {
+  status: "draft";
+  /** ISO 8601 (UTC), set by the API. The letter must be uploaded before this moment. */
+  letterDeadline: string;
 }

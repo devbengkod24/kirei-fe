@@ -25,7 +25,8 @@ export async function getReservationHistory(
   }
 
   const past = ofType
-    .filter((record) => !ACTIVE_STATUSES.has(record.status))
+    // drafts live on their own page until the letter is uploaded
+    .filter((record) => !ACTIVE_STATUSES.has(record.status) && record.status !== "draft")
     .sort((a, b) => Date.parse(b.startsAt) - Date.parse(a.startsAt));
   const totalPages = Math.max(1, Math.ceil(past.length / query.perPage));
   const page = Math.min(query.page, totalPages);

@@ -35,8 +35,9 @@ Ormawa dan dosen memakai layar dan URL yang sama. Menu dan URL ada di `modules/o
 | Menu | URL | Isi | Komponen |
 |---|---|---|---|
 | Dashboard | `/dashboard` | Sapaan, kalender log reservasi, kartu Total Reservasi, reservasi hari ini, pengumuman terbaru | `shared/dashboard` (`UserDashboard`) |
-| Buat Reservasi | `/reservasi/baru` | Pilih jenis (ruangan, GOR, kendaraan), lalu jadwal dan unit. Ruangan dipilih dari denah lantai. Detail pemesanan ditampilkan sebelum dikirim. | `shared/reservation-form` |
-| Draft Reservasi | `/reservasi/draft` | Reservasi yang menunggu surat peminjaman. Timer hitung mundur sampai tenggat unggah PDF. | `modules/ormawa` |
+| Buat Reservasi | `/reservasi/baru` | Pilih jenis (Ruangan, Kendaraan, GOR). Kendaraan dan GOR masih "Segera hadir". | `shared/reservation-form` (`ReservationTypePicker`) |
+| Buat Reservasi: Ruangan | `/reservasi/baru/ruangan` | Gedung dan lantai, tanggal, jam, lalu ruangan dari denah (dengan filter jenis ruangan). Detail pemesanan dibuka di dialog: No HP, keperluan, surat. "Pesan" butuh surat PDF; "Simpan Draft" tidak. | `shared/reservation-form` (`ReservationFormPage tipe="ruangan"`) |
+| Draft Reservasi | `/reservasi/draft` | Reservasi yang menunggu surat peminjaman. Tiap draft punya timer hitung mundur ke tenggat dari API (`hooks/useCountdown`) dan batasnya dalam WIB. Unggah PDF lalu "Pesan", atau "Batal". Setelah tenggat lewat, unggah dan "Pesan" dinonaktifkan. | `modules/ormawa/drafts` |
 | Reservasi & Riwayat | `/reservasi/riwayat` | Tab Ruangan, Kendaraan, GOR, lalu tab Aktif (kartu "Hari ini" dan "Akan datang") dan Riwayat (tabel berhalaman). Pilihan disimpan di URL: `?tipe=gor&tampilan=riwayat&halaman=2&per=25`. | `shared/reservation-history` (`ReservationHistoryPage`, `showTypeTabs`) |
 | Pengumuman | `/pengumuman` | Tab Informasi dan Pengingat. Hanya baca. | `shared/announcements` (`canManage={false}`) |
 | Profil | `/profil` | Data diri dan ubah kata sandi. | `shared/profile` |

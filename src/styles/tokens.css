@@ -7,6 +7,8 @@
  * - muted text #ababab / #888888 -> #5f6368
  * - danger text #dc1f26 on danger-soft -> #b91c1c (border/outline keeps #dc1f26)
  * - success text #327b1e on success-soft -> #2d711b (background keeps #327b1e at 15%)
+ * - chip text #6b6e76 on chip -> muted #5f6368
+ * - selected room on the floor plan #3c82f6 -> #2563eb, so its white label reaches 4.5:1
  */
 @theme {
   --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
@@ -16,6 +18,9 @@
   --color-primary-hover: #1e40af;
   --color-primary-soft: #f0f5fe;
   --color-on-primary: #ffffff;
+  /* drop zone and time picker fill */
+  --color-primary-tint: #e2ecff;
+  --color-primary-tint-border: #b7cfff;
 
   --color-page: #f7f9fa;
   --color-surface: #ffffff;
@@ -36,6 +41,13 @@
   --color-info-soft: rgb(60 130 246 / 0.15);
 
   --color-neutral-soft: rgb(222 223 225 / 0.5);
+  --color-chip: #eaeaea;
+
+  /* floor plan room states */
+  --color-plan-available: #d9d9d9;
+  --color-plan-selected: #2563eb;
+  --color-plan-booked: #dc1f26;
+  --color-plan-filtered: #111836;
   --color-calendar-past: #dedfe1;
 
   --radius-sm: 4px;
