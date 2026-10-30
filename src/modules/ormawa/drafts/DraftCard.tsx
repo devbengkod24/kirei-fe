@@ -8,7 +8,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { useCountdown } from "@/hooks/useCountdown";
-import { formatLongDateWIB, formatTimeRangeWIB } from "@/lib/date";
+import { formatDateLongWIB, formatTimeRangeWIB } from "@/lib/date";
 import { letterFileSchema } from "@/shared/reservation/letter";
 import { RESERVATION_TYPE_LABEL } from "@/shared/reservation/reservationTypes";
 import type { ReservationDraft } from "@/types/reservation";
@@ -59,7 +59,7 @@ export function DraftCard({ draft, onSubmitted, onRequestCancel }: DraftCardProp
     <article aria-labelledby={`${id}-title`} className="grid gap-4 lg:grid-cols-[minmax(0,724fr)_minmax(0,394fr)] lg:gap-6">
       <Card className="flex flex-col gap-4 p-4">
         <h2 id={`${id}-title`} className="sr-only">
-          Draft {draft.unitName}, {formatLongDateWIB(draft.startsAt)}
+          Draft {draft.unitName}, {formatDateLongWIB(draft.startsAt)}
         </h2>
 
         {expired ? (
@@ -95,7 +95,7 @@ export function DraftCard({ draft, onSubmitted, onRequestCancel }: DraftCardProp
             </div>
             <div className="flex flex-col gap-4">
               <Field label="Waktu Reservasi">
-                {formatLongDateWIB(draft.startsAt)}
+                {formatDateLongWIB(draft.startsAt)}
                 <br />
                 {formatTimeRangeWIB(draft.startsAt, draft.endsAt)}
               </Field>

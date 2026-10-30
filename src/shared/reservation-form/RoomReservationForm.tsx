@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { Card } from "@/components/ui/Card";
-import { formatLongDateWIB, toWibDateKey, wibToIso } from "@/lib/date";
+import { formatDateLongWIB, toWibDateKey, wibToIso } from "@/lib/date";
 import type { Building, FloorPlanRoom, RoomCategory, UnitBooking } from "@/types/facility";
 import { crossFacultyApprover, defaultSchedule, roomStatus, toIsoRange } from "./availability";
 import { toRoomReservationRequest } from "./createReservation";
@@ -372,7 +372,7 @@ export function RoomReservationForm({
               <FieldError id="reservation-phone-error" message={errors.phone?.message} />
             </div>
             <SummaryWhen
-              date={formatLongDateWIB(wibToIso(date, startTime))}
+              date={formatDateLongWIB(wibToIso(date, startTime))}
               startTime={startTime}
               endTime={endTime}
               places={[

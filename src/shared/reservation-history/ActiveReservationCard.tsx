@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/Card";
-import { formatLongDateWIB, formatTimeRangeWIB } from "@/lib/date";
+import { formatDateLongWIB, formatTimeRangeWIB } from "@/lib/date";
 import type { ReservationRecord } from "@/types/reservation";
 import { ReservationStatusBadge } from "@/shared/reservation/ReservationStatusBadge";
 import { RESERVATION_TYPE_LABEL } from "@/shared/reservation/reservationTypes";
@@ -19,10 +19,10 @@ export function ActiveReservationCard({ reservation }: { reservation: Reservatio
   return (
     <Card as="article" className="flex flex-col gap-2 p-3">
       <div className="flex flex-wrap items-start gap-2">
-        <ReservationStatusBadge status={reservation.status} />
+        <ReservationStatusBadge status={reservation.status} size="sm" />
         {reschedule && (
           <p className="rounded-sm bg-primary-soft px-2 py-1 text-[11px] text-primary italic">
-            Jadwal dipindah admin dari {formatLongDateWIB(reschedule.previousStartsAt)},{" "}
+            Jadwal dipindah admin dari {formatDateLongWIB(reschedule.previousStartsAt)},{" "}
             {formatTimeRangeWIB(reschedule.previousStartsAt, reschedule.previousEndsAt)}. Alasan: {reschedule.reason}
           </p>
         )}
@@ -35,7 +35,7 @@ export function ActiveReservationCard({ reservation }: { reservation: Reservatio
         </div>
         <div className="flex flex-col gap-3">
           <Field label="Waktu Reservasi">
-            {formatLongDateWIB(reservation.startsAt)}
+            {formatDateLongWIB(reservation.startsAt)}
             <br />
             {formatTimeRangeWIB(reservation.startsAt, reservation.endsAt)}
           </Field>

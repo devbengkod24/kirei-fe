@@ -1,23 +1,25 @@
-import { Badge, type BadgeProps } from "@/components/ui/Badge";
+import { Badge, type BadgeProps, type BadgeTone } from "@/components/ui/Badge";
 import type { ReservationStatus } from "@/types/reservation";
 
-const STATUS_DISPLAY: Record<ReservationStatus, { label: string; tone: NonNullable<BadgeProps["tone"]> }> = {
+/** One label and color per status, shared by borrower and admin screens. */
+export const RESERVATION_STATUS: Record<ReservationStatus, { label: string; tone: BadgeTone }> = {
   draft: { label: "Draft", tone: "neutral" },
-  menunggu_konfirmasi: { label: "Menunggu konfirmasi", tone: "neutral" },
-  disetujui: { label: "Disetujui", tone: "primary" },
-  selesai: { label: "Selesai", tone: "success" },
+  menunggu_konfirmasi: { label: "Menunggu", tone: "warning" },
+  disetujui: { label: "Disetujui", tone: "success" },
   ditolak: { label: "Ditolak", tone: "danger" },
+  selesai: { label: "Selesai", tone: "primary" },
   dibatalkan: { label: "Dibatalkan", tone: "danger" },
 };
 
 export function reservationStatusLabel(status: ReservationStatus) {
-  return STATUS_DISPLAY[status].label;
+  return RESERVATION_STATUS[status].label;
 }
 
-export function ReservationStatusBadge({ status, size = "sm" }: { status: ReservationStatus; size?: BadgeProps["size"] }) {
-  const { label, tone } = STATUS_DISPLAY[status];
+/** `md` (default) is the pill used in tables; `sm` fits inside cards. */
+export function ReservationStatusBadge({ status, size = "md" }: { status: ReservationStatus; size?: BadgeProps["size"] }) {
+  const { label, tone } = RESERVATION_STATUS[status];
   return (
-    <Badge tone={tone} size={size} className={size === "md" ? "uppercase" : ""}>
+    <Badge tone={tone} size={size}>
       {label}
     </Badge>
   );

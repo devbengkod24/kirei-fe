@@ -1,45 +1,75 @@
+"use client";
+
 import Image from "next/image";
-import Link from "next/link";
+import { useId } from "react";
+
+export const PAGE_SIZE_OPTIONS = [5, 10, 20] as const;
 
 export interface PaginationProps {
   page: number;
-  totalPages: number;
-  /** null on the first page */
-  prevHref: string | null;
-  /** null on the last page */
-  nextHref: string | null;
+  pageCount: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (pageSize: number) => void;
 }
 
-function PageLink({ href, label, iconSrc }: { href: string | null; label: string; iconSrc: string }) {
-  const icon = <Image src={iconSrc} alt="" width={20} height={20} />;
-  const className = "flex size-11 items-center justify-center rounded-md";
+const ARROW_BUTTON =
+  "flex size-11 items-center justify-center rounded-md hover:bg-primary-soft disabled:opacity-40 disabled:hover:bg-transparent";
 
-  if (!href) {
-    return (
-      <span aria-disabled="true" aria-label={label} role="link" className={`${className} opacity-30`}>
-        {icon}
-      </span>
-    );
-  }
+export function Pagination({ page, pageCount, pageSize, onPageChange, onPageSizeChange }: PaginationProps) {
+  const sizeId = useId();
 
   return (
-    <Link href={href} scroll={false} aria-label={label} className={`${className} hover:bg-primary-soft active:bg-border`}>
-      {icon}
-    </Link>
-  );
-}
+    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-xs">
+      <div className="flex items-center gap-2">
+        <div className="relative">
+          <select
+            id={sizeId}
+            value={pageSize}
+            onChange={(event) => onPageSizeChange(Number(event.target.value))}
+            className="min-h-11 appearance-none rounded-md bg-primary-soft py-1 pr-6 pl-2 text-xs"
+          >
+            {PAGE_SIZE_OPTIONS.map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
+          <Image
+            src="/icons/admin/page-size-chevron.svg"
+            alt=""
+            width={16}
+            height={16}
+            className="pointer-events-none absolute top-1/2 right-1 -translate-y-1/2"
+          />
+        </div>
+        <label htmlFor={sizeId}>per halaman</label>
+      </div>
 
-export function Pagination({ page, totalPages, prevHref, nextHref }: PaginationProps) {
-  return (
-    <nav aria-label="Halaman" className="flex items-center gap-1 text-xs">
-      <span className="rounded-sm bg-primary-soft px-2 py-1" aria-current="page">
-        {page}
-      </span>
-      <span>dari {totalPages} halaman</span>
-      <span className="-mr-3 flex">
-        <PageLink href={prevHref} label="Halaman sebelumnya" iconSrc="/icons/page-prev.svg" />
-        <PageLink href={nextHref} label="Halaman berikutnya" iconSrc="/icons/page-next.svg" />
-      </span>
-    </nav>
+      <nav aria-label="Halaman" className="flex items-center gap-1">
+        <span className="flex min-w-[26px] justify-center rounded-sm bg-primary-soft p-1" aria-current="page">
+          {page}
+        </span>
+        <span>dari {pageCount} halaman</span>
+        <button
+          type="button"
+          onClick={() => onPageChange(page - 1)}
+          disabled={page <= 1}
+          aria-label="Halaman sebelumnya"
+          className={ARROW_BUTTON}
+        >
+          <Image src="/icons/admin/page-prev.svg" alt="" width={20} height={20} />
+        </button>
+        <button
+          type="button"
+          onClick={() => onPageChange(page + 1)}
+          disabled={page >= pageCount}
+          aria-label="Halaman berikutnya"
+          className={`${ARROW_BUTTON} -ml-2`}
+        >
+          <Image src="/icons/admin/page-next.svg" alt="" width={20} height={20} />
+        </button>
+      </nav>
+    </div>
   );
 }

@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { Card } from "@/components/ui/Card";
-import { formatLongDateWIB, toWibDateKey, wibToIso } from "@/lib/date";
+import { formatDateLongWIB, toWibDateKey, wibToIso } from "@/lib/date";
 import type { SportsHall, UnitBooking } from "@/types/facility";
 import { toSportsHallReservationRequest } from "./createReservation";
 import { LetterPanel } from "./LetterPanel";
@@ -135,7 +135,7 @@ export function SportsHallReservationForm({ hall, bookings, now, requester, link
                     key={day.dateKey}
                     type="button"
                     aria-pressed={active}
-                    aria-label={formatLongDateWIB(wibToIso(day.dateKey, "12:00"))}
+                    aria-label={formatDateLongWIB(wibToIso(day.dateKey, "12:00"))}
                     onClick={() => chooseDay(day.dateKey)}
                     className={`flex min-h-16 flex-col items-center justify-center rounded-md py-2 ${
                       active ? "bg-primary text-on-primary" : "text-ink hover:bg-primary-soft"
@@ -150,7 +150,7 @@ export function SportsHallReservationForm({ hall, bookings, now, requester, link
           </fieldset>
 
           <fieldset aria-describedby="slot-legend">
-            <legend className="sr-only">Jam reservasi pada {formatLongDateWIB(wibToIso(date, "12:00"))}</legend>
+            <legend className="sr-only">Jam reservasi pada {formatDateLongWIB(wibToIso(date, "12:00"))}</legend>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
               {slots.map((slot, index) => {
                 const state = isSelected(index) ? "selected" : statuses[index];
@@ -274,7 +274,7 @@ export function SportsHallReservationForm({ hall, bookings, now, requester, link
           >
             <SummaryValue label="Peminjam">{requester.name}</SummaryValue>
             <SummaryWhen
-              date={formatLongDateWIB(wibToIso(date, startTime))}
+              date={formatDateLongWIB(wibToIso(date, startTime))}
               startTime={startTime}
               endTime={endTime}
               places={[{ iconSrc: "/icons/building-solid.svg", iconWidth: 13, iconHeight: 15, label: hall.name }]}

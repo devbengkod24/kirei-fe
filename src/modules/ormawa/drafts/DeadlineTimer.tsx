@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/Card";
 import type { Countdown } from "@/hooks/useCountdown";
-import { formatLongDateWIB, formatTimeWIB } from "@/lib/date";
+import { formatDateLongWIB, formatTimeWIB } from "@/lib/date";
 
 export interface DeadlineTimerProps {
   id: string;
@@ -60,7 +60,7 @@ export function DeadlineTimer({ id, deadline, countdown }: DeadlineTimerProps) {
       </div>
       <p className={`text-xs ${expired ? "font-medium text-danger" : "text-muted"}`}>
         {expired ? "Tenggat sudah lewat: " : "Batas unggah surat: "}
-        {formatLongDateWIB(deadline)}, {formatTimeWIB(deadline)} WIB
+        {formatDateLongWIB(deadline)}, {formatTimeWIB(deadline)} WIB
       </p>
     </Card>
   );

@@ -6,7 +6,7 @@ import { ResultDialog } from "@/components/feedback/ResultDialog";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Modal } from "@/components/ui/Modal";
-import { formatLongDateWIB, formatTimeRangeWIB } from "@/lib/date";
+import { formatDateLongWIB, formatTimeRangeWIB } from "@/lib/date";
 import type { ReservationDraft } from "@/types/reservation";
 import { cancelDraft, type DraftActionResult } from "./draftActions";
 import { DraftCard } from "./DraftCard";
@@ -84,7 +84,7 @@ export function DraftList({ drafts, links }: DraftListProps) {
       <Modal open={cancelTarget !== null} onClose={() => !cancelling && setCancelTarget(null)} title="Batalkan draft?">
         {cancelTarget && (
           <p className="text-sm">
-            Draft reservasi {cancelTarget.unitName} pada {formatLongDateWIB(cancelTarget.startsAt)},{" "}
+            Draft reservasi {cancelTarget.unitName} pada {formatDateLongWIB(cancelTarget.startsAt)},{" "}
             {formatTimeRangeWIB(cancelTarget.startsAt, cancelTarget.endsAt)} akan dihapus.
           </p>
         )}

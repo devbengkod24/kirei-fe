@@ -87,6 +87,27 @@ src/components/layout/Shell.tsx       → shell generik; judul header diambil da
 
 Halaman yang ada di menu tetapi belum dibangun memakai `components/feedback/ComingSoon` supaya tidak ada tautan mati.
 
+### Contoh: Admin Fakultas (Figma V3, section "Admin Fakultas")
+
+Semua URL berawalan `/fakultas`. Halamannya ditulis di `shared/` karena Admin Universitas memakai layar yang sama.
+
+```
+src/app/(admin-fakultas)/layout.tsx            → AdminFakultasShell (menu + avatar dalam Suspense)
+src/app/(admin-fakultas)/fakultas/*/page.tsx   → requireRole(["admin_fakultas"]) lalu loader shared dengan scope { fakultasId }
+src/app/(admin-fakultas)/fakultas/*/loading.tsx→ satu loading per halaman (cacheComponents butuh Suspense per segmen)
+src/modules/admin-fakultas/                    → routes.ts, nav.ts, shell, link tab reservasi
+src/shared/layout/RoleShell.tsx                → shell + menu ikon, dipakai semua role
+src/shared/admin-dashboard/                    → dashboard admin (stat, grafik mingguan, reservasi hari ini, laporan)
+src/shared/rooms/                              → Kelola Ruangan + dialog edit
+src/shared/room-booking/                       → Reservasi Internal: denah, pilih jam, konfirmasi (booking.ts ada tes)
+src/shared/reservation-management/             → Kelola Reservasi: tab Persetujuan/Riwayat sebagai URL, prop tipe
+src/shared/reports/, src/shared/announcements/ → daftar + filter (logika filter murni, ada tes)
+src/shared/profile/                            → profil + ubah kata sandi
+src/shared/admin-scope.ts                      → tipe AdminScope { fakultasId } yang dikirim ke loader
+```
+
+Data masih dari `src/mocks/` (lihat `mockRoomsInScope`). Aksi tulis (setujui, tolak, simpan ruangan, buat pengumuman, reservasi) baru mengubah state lokal dan ditandai `TODO` di titik pemanggilan API.
+
 ## 3. Aturan dependensi
 
 ```

@@ -41,8 +41,8 @@ export function Avatar({ src, name, size = 48, className = "" }: AvatarProps) {
     <span
       role="img"
       aria-label={name}
-      style={dimension}
-      className={`inline-flex shrink-0 items-center justify-center rounded-full bg-primary-soft text-sm font-semibold text-primary ${className}`}
+      style={{ ...dimension, fontSize: Math.round(size * 0.3) }}
+      className={`inline-flex shrink-0 items-center justify-center rounded-full bg-primary-soft font-semibold text-primary ${className}`}
     >
       {initialsOf(name)}
     </span>

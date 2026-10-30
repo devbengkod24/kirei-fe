@@ -3,12 +3,8 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { formatDateTimeShortWIB } from "@/lib/date";
-import type { Announcement, AnnouncementCategory } from "@/types/announcement";
-
-const CATEGORY_BADGE: Record<AnnouncementCategory, { label: string; tone: "primary" | "danger" }> = {
-  informasi: { label: "Informasi", tone: "primary" },
-  pemberitahuan: { label: "Pemberitahuan", tone: "danger" },
-};
+import type { Announcement } from "@/types/announcement";
+import { ANNOUNCEMENT_CATEGORY } from "@/shared/announcements/announcement-labels";
 
 export interface LatestAnnouncementsCardProps {
   announcements: Announcement[];
@@ -40,7 +36,7 @@ export function LatestAnnouncementsCard({ announcements, allHref, className = ""
       ) : (
         <ul>
           {announcements.map((announcement) => {
-            const badge = CATEGORY_BADGE[announcement.category];
+            const badge = ANNOUNCEMENT_CATEGORY[announcement.category];
             return (
               <li key={announcement.id} className="border-b border-border px-2 py-2">
                 <article className="flex flex-col gap-1.5">
