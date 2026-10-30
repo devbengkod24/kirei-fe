@@ -133,7 +133,7 @@ export function Shell({ brand, navGroups, sidebarFooter, headerEnd, children }: 
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex h-[69px] items-center justify-between gap-3 bg-surface px-4 md:static md:px-6">
+        <header className="sticky top-0 z-20 flex h-[69px] items-center justify-between gap-3 bg-surface px-4 md:px-6">
           <div className="flex min-w-0 items-center gap-2">
             <button
               ref={menuButtonRef}

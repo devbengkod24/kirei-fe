@@ -9,6 +9,8 @@
  * - success text #327b1e on success-soft -> #2f6b1b
  * - warning text #f97315 on warning-soft -> #b03a0a; edit button fill #f97315 -> #ea580c (white icon 3:1)
  * - teal stat text #1ba794 on teal-soft -> #0f766e
+ * - chip text #6b6e76 on chip -> muted #5f6368
+ * - selected room on the floor plan #3c82f6 -> #2563eb, so its white label reaches 4.5:1
  */
 @theme {
   --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
@@ -18,6 +20,9 @@
   --color-primary-hover: #1e40af;
   --color-primary-soft: #f0f5fe;
   --color-on-primary: #ffffff;
+  /* drop zone and time picker fill */
+  --color-primary-tint: #e2ecff;
+  --color-primary-tint-border: #b7cfff;
 
   --color-page: #f7f9fa;
   --color-surface: #ffffff;
@@ -49,9 +54,18 @@
   --color-stat-teal-soft: rgb(27 167 148 / 0.15);
 
   --color-neutral-soft: rgb(222 223 225 / 0.5);
+  --color-chip: #eaeaea;
+
+  /* floor plan room states */
+  --color-plan-available: #d9d9d9;
+  --color-plan-selected: #2563eb;
+  --color-plan-booked: #dc1f26;
+  --color-plan-filtered: #111836;
   --color-calendar-past: #dedfe1;
 
   --radius-sm: 4px;
+  /* segment inside a segmented picker, status pill in tables */
+  --radius-inner: 6px;
   --radius-md: 8px;
   --radius-lg: 10px;
   --radius-xl: 14px;

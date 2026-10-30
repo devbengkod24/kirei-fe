@@ -1,9 +1,17 @@
 import type { Metadata } from "next";
-import { ComingSoon } from "@/components/feedback/ComingSoon";
-import { ORMAWA_ROUTES } from "@/modules/ormawa/routes";
+import { createReservationFor } from "@/modules/ormawa/routes";
+import { ReservationTypePicker } from "@/shared/reservation-form/ReservationTypePicker";
 
 export const metadata: Metadata = { title: "Buat Reservasi" };
 
 export default function Page() {
-  return <ComingSoon title="Buat Reservasi" backHref={ORMAWA_ROUTES.dashboard} backLabel="Kembali ke Dashboard" />;
+  return (
+    <ReservationTypePicker
+      hrefs={{
+        ruangan: createReservationFor("ruangan"),
+        kendaraan: createReservationFor("kendaraan"),
+        gor: createReservationFor("gor"),
+      }}
+    />
+  );
 }

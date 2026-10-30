@@ -1,3 +1,5 @@
+import type { ReservationType } from "@/types/reservation";
+
 // Ormawa and dosen use the same screens and URLs.
 export const ORMAWA_ROUTES = {
   dashboard: "/dashboard",
@@ -9,3 +11,7 @@ export const ORMAWA_ROUTES = {
   contact: "/bantuan/kontak",
   faq: "/bantuan/faq",
 } as const;
+
+export function createReservationFor(tipe: ReservationType) {
+  return `${ORMAWA_ROUTES.createReservation}/${tipe}`;
+}
