@@ -1,0 +1,62 @@
+:root {
+  /* Brand colors */
+  --brand-primary: #1e3a8a;
+  --brand-primary-hover: #1e40af;
+  --brand-primary-active: #172554;
+  --brand-primary-foreground: #ffffff;
+  --brand-secondary: #2563eb;
+
+  /* Surfaces & backgrounds */
+  --surface-page: #f8fafc;
+  --surface-card: #ffffff;
+  --surface-muted: #f1f5f9;
+  --surface-hover: #f8fafc;
+
+  /* Borders */
+  --border-subtle: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --border-focus: #3b82f6;
+
+  /* Typography / Text colors */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-inverse: #ffffff;
+
+  /* Semantic Alerts & Badges */
+  --alert-danger-bg: #fef2f2;
+  --alert-danger-border: #fecaca;
+  --alert-danger-text: #991b1b;
+
+  --alert-warning-bg: #fffbeb;
+  --alert-warning-border: #fde68a;
+  --alert-warning-text: #92400e;
+
+  --stat-blue-bg: #eff6ff;
+  --stat-blue-border: #dbeafe;
+  --stat-blue-text: #1d4ed8;
+  --stat-blue-icon: #2563eb;
+
+  --stat-amber-bg: #fffbeb;
+  --stat-amber-border: #fef3c7;
+  --stat-amber-text: #b45309;
+  --stat-amber-icon: #d97706;
+
+  --badge-info-bg: #e0f2fe;
+  --badge-info-text: #0369a1;
+
+  --badge-notice-bg: #fee2e2;
+  --badge-notice-text: #991b1b;
+
+  /* Border Radii */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-card: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+  --shadow-elevated: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+}
+
