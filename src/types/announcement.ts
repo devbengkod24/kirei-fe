@@ -1,4 +1,4 @@
-export type AnnouncementCategory = "informasi" | "pemberitahuan";
+export type AnnouncementCategory = "informasi" | "pemberitahuan" | "pemeliharaan";
 
 export interface Announcement {
   id: string;

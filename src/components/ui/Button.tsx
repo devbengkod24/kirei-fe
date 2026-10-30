@@ -1,12 +1,13 @@
 import React from "react";
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "outline" | "danger-outline";
+  variant?: "primary" | "outline" | "primary-outline" | "danger-outline";
 }
 
 const VARIANT_STYLES = {
   primary: "bg-primary text-on-primary hover:bg-primary-hover",
   outline: "border border-border bg-surface text-ink hover:bg-page",
+  "primary-outline": "border border-primary bg-surface text-primary hover:bg-primary-soft",
   "danger-outline": "border border-danger-strong bg-surface text-danger-strong hover:bg-danger-soft",
 } as const;
 

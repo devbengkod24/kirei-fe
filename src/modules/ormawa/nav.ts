@@ -1,12 +1,5 @@
+import type { NavLinkConfig } from "@/shared/layout/RoleShell";
 import { ORMAWA_ROUTES } from "./routes";
-
-export interface NavLinkConfig {
-  label: string;
-  href: string;
-  /** Single-color SVG in /public, rendered with MaskIcon so it follows the text color. */
-  iconSrc: string;
-  iconSize?: number;
-}
 
 export const ORMAWA_NAV: NavLinkConfig[][] = [
   [

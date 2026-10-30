@@ -1,5 +1,7 @@
+export type BadgeTone = "primary" | "danger" | "success" | "warning";
+
 export interface BadgeProps {
-  tone?: "primary" | "danger";
+  tone?: BadgeTone;
   className?: string;
   children: React.ReactNode;
 }
@@ -7,6 +9,8 @@ export interface BadgeProps {
 const TONE_STYLES = {
   primary: "bg-primary-soft text-primary",
   danger: "bg-danger-soft text-danger",
+  success: "bg-success-soft text-success",
+  warning: "bg-warning-soft text-warning",
 } as const;
 
 export function Badge({ tone = "primary", className = "", children }: BadgeProps) {
