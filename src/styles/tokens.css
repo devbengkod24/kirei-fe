@@ -6,7 +6,6 @@
  * Deviations from Figma, made to pass WCAG AA contrast:
  * - muted text #ababab / #888888 -> #5f6368
  * - danger text #dc1f26 on danger-soft -> #b91c1c (border/outline keeps #dc1f26)
- * - penalty number #ffc150 -> #b45309 (the soft amber background is unchanged)
  */
 @theme {
   --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
@@ -31,9 +30,6 @@
 
   --color-info: #3c82f6;
   --color-info-soft: rgb(60 130 246 / 0.15);
-
-  --color-warning: #b45309;
-  --color-warning-soft: rgb(255 193 80 / 0.15);
 
   --color-neutral-soft: rgb(222 223 225 / 0.5);
   --color-calendar-past: #dedfe1;

@@ -26,12 +26,6 @@ export function formatDateWIB(input: DateInput): string {
   return `${pick("weekday")}, ${pick("day")} ${pick("month")} ${pick("year")}`;
 }
 
-/** "28 April" */
-export function formatDayMonthWIB(input: DateInput): string {
-  const pick = partsOf(input, { day: "numeric", month: "long" });
-  return `${pick("day")} ${pick("month")}`;
-}
-
 /** "09.30" */
 export function formatTimeWIB(input: DateInput): string {
   const pick = partsOf(input, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });

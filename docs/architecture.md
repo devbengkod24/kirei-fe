@@ -116,6 +116,19 @@ export default async function Page() {
 
 `scope` hanya mengirim filter yang sah ke API. Pembatasan data sebenarnya dilakukan Laravel.
 
+**Scope fakultas.** Model data per fakultas dijelaskan di AGENTS.md ("Model fakultas"). Admin fakultas selalu terkunci ke fakultasnya. Admin Universitas melihat semua fakultas dan bisa menyaringnya lewat filter, yang nilainya dibawa di URL agar bisa dibagikan:
+
+```tsx
+// contoh: Admin Universitas, /admin/ruangan/persetujuan?fakultas=fik
+export default async function Page({ params, searchParams }: PageProps<"/admin/[tipe]/persetujuan">) {
+  await requireRole(["admin_universitas"]);
+  const { tipe } = await params;
+  const { fakultas } = await searchParams;
+  return <PersetujuanPage tipe={tipe} scope={{ fakultasId: fakultas ?? null }} showFakultasFilter />;
+}
+```
+
+`fakultasId: null` berarti semua fakultas. Untuk GOR, kendaraan, dan gedung universitas, filter fakultas tidak ditampilkan karena datanya tidak punya fakultas.
 
 ## 5. Penamaan
 

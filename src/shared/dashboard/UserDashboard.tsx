@@ -1,22 +1,17 @@
 import { Card } from "@/components/ui/Card";
 import type { Announcement } from "@/types/announcement";
 import type { ReservationSummary } from "@/types/reservation";
-import { AccountBlockedAlert } from "./AccountBlockedAlert";
 import { DashboardHero } from "./DashboardHero";
 import { LatestAnnouncementsCard } from "./LatestAnnouncementsCard";
 import { ReservationLogCalendar } from "./ReservationLogCalendar";
-import { ReservationStats } from "./ReservationStats";
+import { ReservationTotal } from "./ReservationTotal";
 import { TodayReservationCard } from "./TodayReservationCard";
 
 export interface UserDashboardData {
   userName: string;
   /** "YYYY-MM-DD" in WIB */
   todayKey: string;
-  /** ISO 8601 (UTC); null when the account is not blocked */
-  blockedUntil: string | null;
   totalReservations: number;
-  penaltyCount: number;
-  penaltyLimit: number;
   todayReservation: ReservationSummary | null;
   reservationStarts: string[];
   announcements: Announcement[];
@@ -43,13 +38,8 @@ export function UserDashboard({ data, links }: UserDashboardProps) {
         <ReservationLogCalendar todayKey={data.todayKey} reservationStarts={data.reservationStarts} />
 
         <div className="flex flex-col gap-2">
-          <Card className="flex flex-col gap-2 p-3">
-            {data.blockedUntil && <AccountBlockedAlert blockedUntil={data.blockedUntil} />}
-            <ReservationStats
-              totalReservations={data.totalReservations}
-              penaltyCount={data.penaltyCount}
-              penaltyLimit={data.penaltyLimit}
-            />
+          <Card className="p-3">
+            <ReservationTotal totalReservations={data.totalReservations} />
           </Card>
           <TodayReservationCard
             reservation={data.todayReservation}

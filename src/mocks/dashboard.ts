@@ -56,10 +56,7 @@ export function buildDashboardMock(now: Date) {
   return {
     userName: MOCK_CURRENT_USER.name,
     todayKey,
-    blockedUntil: wibDateTime(todayKey, 5, "00:00"),
     totalReservations: 12,
-    penaltyCount: 2,
-    penaltyLimit: 3,
     todayReservation,
     reservationStarts: [-10, -8, -7, 0, 1, 2].map((days) => wibDateTime(todayKey, days, "09:30")),
     announcements,

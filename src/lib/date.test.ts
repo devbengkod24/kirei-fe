@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   formatDateTimeShortWIB,
   formatDateWIB,
-  formatDayMonthWIB,
   formatTimeRangeWIB,
   monthName,
   toWibDateKey,
@@ -17,7 +16,6 @@ describe("date (WIB)", () => {
 
   it("formats dates and times for display", () => {
     expect(formatDateWIB("2026-11-18T02:30:00Z")).toBe("Rabu, 18 Nov 2026");
-    expect(formatDayMonthWIB("2026-04-27T17:00:00Z")).toBe("28 April");
     expect(formatTimeRangeWIB("2026-11-18T02:30:00Z", "2026-11-18T03:20:00Z")).toBe("09.30 - 10.20 WIB");
     expect(formatDateTimeShortWIB("2026-02-25T06:45:00Z")).toBe("25 Feb 13.45 WIB");
   });
