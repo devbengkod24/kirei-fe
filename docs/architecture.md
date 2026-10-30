@@ -15,10 +15,11 @@ Isi detail per fitur dan per role sengaja tidak dicantumkan. Struktur di dalam f
 ```
 kirei-fe/
 ├─ public/
-├─ mocks/
 ├─ tests/
+├─ docs/
 └─ src/
    ├─ app/
+   ├─ mocks/
    ├─ shared/
    ├─ modules/
    ├─ components/
@@ -35,8 +36,7 @@ kirei-fe/
 
 | Folder / file | Fungsi |
 |---|---|
-| `public/` | Aset statis: logo, ikon PWA, gambar, `manifest.webmanifest`. |
-| `mocks/` | Handler MSW untuk bekerja tanpa backend (opsional). |
+| `public/` | Aset statis dari Figma: `brand/` (logo), `images/`, `icons/` (ikon kartu), `icons/nav/` (ikon menu satu warna, dirender lewat `MaskIcon`), ikon PWA, `manifest.webmanifest`. |
 | `tests/` | Tes end-to-end (Playwright) dan setup tes. Tes unit diletakkan dekat kodenya. |
 | `orval.config.ts` | Konfigurasi pembuat client API dari OpenAPI Laravel. |
 | `next.config.ts` | Konfigurasi Next.js, termasuk proxy (`rewrites`) ke Laravel. |
@@ -56,6 +56,7 @@ kirei-fe/
 | `providers/` | **Provider tingkat aplikasi**: TanStack Query, tema, dan sejenisnya, digabung dalam satu `Providers`. | Context dan provider global | Logika fitur |
 | `config/` | **Konstanta dan konfigurasi aplikasi**: info situs, kontak, batas aturan yang ditampilkan di UI. | Nilai tetap | Rahasia dan kunci API |
 | `styles/` | **Token desain dari Figma** (warna, radius, font) sebagai variabel CSS. | Variabel dan gaya global | Gaya khusus satu komponen |
+| `mocks/` | **Data contoh** selama endpoint Laravel belum ada. Hanya dipanggil dari loader (`lib/auth`, `shared/*/get*.ts`), tidak dari komponen. Nanti diganti client orval atau handler MSW. | Fixture dan pembuat data contoh | Logika aplikasi |
 | `types/` | **Tipe TypeScript bersama** yang tidak berasal dari OpenAPI. | Deklarasi tipe global | Tipe hasil generate (ada di `lib/api/generated`) |
 | `proxy.ts` | **Pagar kasar di level request**: mengalihkan ke `/login` bila tidak ada cookie sesi. Di Next.js sebelum v16 bernama `middleware.ts`. | Pengalihan sederhana | Pengecekan peran yang mendalam (itu di layout dan backend) |
 
@@ -67,6 +68,25 @@ kirei-fe/
 4. Apakah bukan UI (API, auth, tanggal, env)? Taruh di `lib/`.
 5. Apakah hanya penentu URL, layout, atau guard? Taruh di `app/`.
 
+### Contoh: dashboard ormawa dan dosen
+
+Ormawa dan dosen memakai layar dan URL yang sama, jadi keduanya berada di satu route group `(ormawa)`.
+
+```
+src/app/(ormawa)/layout.tsx           → OrmawaShell (sidebar, header, logout)
+src/app/(ormawa)/error.tsx            → state error untuk semua halaman di grup
+src/app/(ormawa)/dashboard/page.tsx   → getUserDashboard() lalu <UserDashboard data links />
+src/app/(ormawa)/dashboard/loading.tsx→ DashboardSkeleton
+src/modules/ormawa/routes.ts          → URL halaman ormawa/dosen
+src/modules/ormawa/nav.ts             → menu sidebar (memakai routes.ts)
+src/modules/ormawa/OrmawaShell.tsx    → merakit Shell generik dengan menu ormawa
+src/shared/dashboard/                 → komponen dashboard peminjam + calendar.ts (logika murni, ada tes)
+src/shared/layout/                    → avatar pengguna dan tombol logout, dipakai semua role
+src/components/layout/Shell.tsx       → shell generik; judul header diambil dari item menu yang aktif
+```
+
+Halaman yang ada di menu tetapi belum dibangun memakai `components/feedback/ComingSoon` supaya tidak ada tautan mati.
+
 ## 3. Aturan dependensi
 
 ```
@@ -76,7 +96,7 @@ app → modules/<role> → shared → components, lib, hooks
 - `shared/` tidak boleh mengimpor dari `modules/`.
 - `modules/<role>` tidak boleh mengimpor dari `modules/<role lain>`. Bila perlu dipakai bersama, pindahkan ke `shared/`.
 - `components/` dan `lib/` tidak boleh mengimpor dari `shared/` atau `modules/`.
-- Aturan ini ditegakkan dengan `eslint-plugin-boundaries` atau `no-restricted-imports`.
+- Aturan ini ditegakkan dengan `no-restricted-imports` di `eslint.config.mjs`.
 
 Tanda perlu dipecah: komponen di `shared/` punya lebih dari 3 prop boolean, atau ada percabangan berdasarkan nama role. Bagian yang sama tetap di `shared/`, halaman utuhnya pindah ke `modules/<role>/`.
 

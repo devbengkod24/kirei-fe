@@ -1,69 +1,24 @@
+import { ORMAWA_ROUTES } from "./routes";
+
 export interface NavLinkConfig {
-  id: string;
   label: string;
   href: string;
-  iconName:
-    | "dashboard"
-    | "create_reservation"
-    | "draft_reservation"
-    | "reservation_history"
-    | "announcements"
-    | "profile"
-    | "contact"
-    | "faq";
+  /** Single-color SVG in /public, rendered with MaskIcon so it follows the text color. */
+  iconSrc: string;
+  iconSize?: number;
 }
 
-export const ORMAWA_PRIMARY_NAV: NavLinkConfig[] = [
-  {
-    id: "dashboard",
-    label: "Dashboard",
-    href: "/dashboard",
-    iconName: "dashboard",
-  },
-  {
-    id: "buat-reservasi",
-    label: "Buat Reservasi",
-    href: "/reservasi/baru",
-    iconName: "create_reservation",
-  },
-  {
-    id: "draft-reservasi",
-    label: "Draft Reservasi",
-    href: "/reservasi/draft",
-    iconName: "draft_reservation",
-  },
-  {
-    id: "reservasi-riwayat",
-    label: "Reservasi & Riwayat",
-    href: "/reservasi/riwayat",
-    iconName: "reservation_history",
-  },
-  {
-    id: "pengumuman",
-    label: "Pengumuman",
-    href: "/pengumuman",
-    iconName: "announcements",
-  },
+export const ORMAWA_NAV: NavLinkConfig[][] = [
+  [
+    { label: "Dashboard", href: ORMAWA_ROUTES.dashboard, iconSrc: "/icons/nav/dashboard.svg" },
+    { label: "Buat Reservasi", href: ORMAWA_ROUTES.createReservation, iconSrc: "/icons/nav/create-reservation.svg" },
+    { label: "Draft Reservasi", href: ORMAWA_ROUTES.draftReservation, iconSrc: "/icons/nav/draft-reservation.svg" },
+    { label: "Reservasi & Riwayat", href: ORMAWA_ROUTES.reservationHistory, iconSrc: "/icons/nav/reservation-history.svg" },
+    { label: "Pengumuman", href: ORMAWA_ROUTES.announcements, iconSrc: "/icons/nav/announcements.svg", iconSize: 20 },
+  ],
+  [
+    { label: "Profil", href: ORMAWA_ROUTES.profile, iconSrc: "/icons/nav/profile.svg" },
+    { label: "Hubungi Kami", href: ORMAWA_ROUTES.contact, iconSrc: "/icons/nav/contact.svg" },
+    { label: "FAQ", href: ORMAWA_ROUTES.faq, iconSrc: "/icons/nav/faq.svg" },
+  ],
 ];
-
-export const ORMAWA_SECONDARY_NAV: NavLinkConfig[] = [
-  {
-    id: "profil",
-    label: "Profil",
-    href: "/profil",
-    iconName: "profile",
-  },
-  {
-    id: "hubungi-kami",
-    label: "Hubungi Kami",
-    href: "/bantuan/kontak",
-    iconName: "contact",
-  },
-  {
-    id: "faq",
-    label: "FAQ",
-    href: "/bantuan/faq",
-    iconName: "faq",
-  },
-];
-

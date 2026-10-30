@@ -1,50 +1,50 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 
 export interface AvatarProps {
   src?: string;
-  alt: string;
-  initials?: string;
-  size?: "sm" | "md" | "lg";
+  name: string;
+  size?: number;
   className?: string;
 }
 
-export function Avatar({ src, alt, initials = "U", size = "md", className = "" }: AvatarProps) {
-  const [imageError, setImageError] = useState(false);
+function initialsOf(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0]?.toUpperCase())
+    .join("");
+}
 
-  const sizeStyles = {
-    sm: "w-8 h-8 text-xs",
-    md: "w-10 h-10 text-sm",
-    lg: "w-12 h-12 text-base",
-  }[size];
+export function Avatar({ src, name, size = 48, className = "" }: AvatarProps) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const dimension = { width: size, height: size };
 
-  if (src && !imageError) {
+  if (src && !imageFailed) {
     return (
-      <div
-        className={`relative inline-block rounded-full overflow-hidden border border-[var(--border-subtle)] ${sizeStyles} ${className}`}
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={src}
-          alt={alt}
-          width={48}
-          height={48}
-          className="w-full h-full object-cover"
-          onError={() => setImageError(true)}
-        />
-      </div>
+      // eslint-disable-next-line @next/next/no-img-element -- avatar URLs come from the API, not a known host
+      <img
+        src={src}
+        alt={name}
+        width={size}
+        height={size}
+        style={dimension}
+        className={`shrink-0 rounded-full object-cover ${className}`}
+        onError={() => setImageFailed(true)}
+      />
     );
   }
 
   return (
-    <div
-      aria-label={alt}
+    <span
       role="img"
-      className={`inline-flex items-center justify-center rounded-full bg-[var(--surface-muted)] text-[var(--text-secondary)] font-semibold border border-[var(--border-subtle)] ${sizeStyles} ${className}`}
+      aria-label={name}
+      style={dimension}
+      className={`inline-flex shrink-0 items-center justify-center rounded-full bg-primary-soft text-sm font-semibold text-primary ${className}`}
     >
-      <span>{initials}</span>
-    </div>
+      {initialsOf(name)}
+    </span>
   );
 }
-

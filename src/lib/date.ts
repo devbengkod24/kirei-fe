@@ -1,76 +1,57 @@
 /**
- * Utilities for formatting dates and times in Western Indonesia Time (WIB / UTC+7).
+ * Date helpers. The API sends UTC/ISO 8601; everything shown to users is WIB (Asia/Jakarta).
  */
 
-export const INDONESIAN_MONTHS = [
-  "Januari",
-  "Februari",
-  "Maret",
-  "April",
-  "Mei",
-  "Juni",
-  "Juli",
-  "Agustus",
-  "September",
-  "Oktober",
-  "November",
-  "Desember",
-] as const;
+export const WIB_TIME_ZONE = "Asia/Jakarta";
 
-const INDONESIAN_MONTHS_SHORT = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "Mei",
-  "Jun",
-  "Jul",
-  "Agt",
-  "Sep",
-  "Okt",
-  "Nov",
-  "Des",
-] as const;
+type DateInput = Date | string | number;
 
-const INDONESIAN_DAYS = [
-  "Minggu",
-  "Senin",
-  "Selasa",
-  "Rabu",
-  "Kamis",
-  "Jumat",
-  "Sabtu",
-] as const;
-
-export function formatDateWIB(dateInput: Date | string | number): string {
-  const date = new Date(dateInput);
-  const day = INDONESIAN_DAYS[date.getDay()];
-  const dateNum = date.getDate();
-  const month = INDONESIAN_MONTHS_SHORT[date.getMonth()];
-  const year = date.getFullYear();
-
-  return `${day}, ${dateNum} ${month} ${year}`;
+function partsOf(input: DateInput, options: Intl.DateTimeFormatOptions) {
+  const parts = new Intl.DateTimeFormat("id-ID", { timeZone: WIB_TIME_ZONE, ...options }).formatToParts(
+    new Date(input),
+  );
+  const pick = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)?.value ?? "";
+  return pick;
 }
 
-export function formatTimeRangeWIB(startInput: Date | string, endInput: Date | string): string {
-  const start = new Date(startInput);
-  const end = new Date(endInput);
-
-  const startHours = String(start.getHours()).padStart(2, "0");
-  const startMinutes = String(start.getMinutes()).padStart(2, "0");
-  const endHours = String(end.getHours()).padStart(2, "0");
-  const endMinutes = String(end.getMinutes()).padStart(2, "0");
-
-  return `${startHours}.${startMinutes} - ${endHours}.${endMinutes} WIB`;
+/** "2026-10-30" for the WIB calendar day of the given instant. */
+export function toWibDateKey(input: DateInput): string {
+  const pick = partsOf(input, { year: "numeric", month: "2-digit", day: "2-digit" });
+  return `${pick("year")}-${pick("month")}-${pick("day")}`;
 }
 
-export function formatAnnouncementDateWIB(dateInput: Date | string): string {
-  const date = new Date(dateInput);
-  const dateNum = date.getDate();
-  const month = INDONESIAN_MONTHS_SHORT[date.getMonth()];
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-
-  return `${dateNum} ${month} ${hours}:${minutes} WIB`;
+/** "Rabu, 18 Nov 2026" */
+export function formatDateWIB(input: DateInput): string {
+  const pick = partsOf(input, { weekday: "long", day: "numeric", month: "short", year: "numeric" });
+  return `${pick("weekday")}, ${pick("day")} ${pick("month")} ${pick("year")}`;
 }
 
+/** "28 April" */
+export function formatDayMonthWIB(input: DateInput): string {
+  const pick = partsOf(input, { day: "numeric", month: "long" });
+  return `${pick("day")} ${pick("month")}`;
+}
+
+/** "09.30" */
+export function formatTimeWIB(input: DateInput): string {
+  const pick = partsOf(input, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+  return `${pick("hour")}.${pick("minute")}`;
+}
+
+/** "09.30 - 10.20 WIB" */
+export function formatTimeRangeWIB(start: DateInput, end: DateInput): string {
+  return `${formatTimeWIB(start)} - ${formatTimeWIB(end)} WIB`;
+}
+
+/** "25 Feb 13.45 WIB" */
+export function formatDateTimeShortWIB(input: DateInput): string {
+  const pick = partsOf(input, { day: "numeric", month: "short" });
+  return `${pick("day")} ${pick("month")} ${formatTimeWIB(input)} WIB`;
+}
+
+/** "April", for a zero-based month index. */
+export function monthName(monthIndex: number): string {
+  return new Intl.DateTimeFormat("id-ID", { month: "long", timeZone: "UTC" }).format(
+    new Date(Date.UTC(2000, monthIndex, 1)),
+  );
+}

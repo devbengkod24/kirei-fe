@@ -1,25 +1,20 @@
-import React from "react";
-
-export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: "info" | "danger" | "warning" | "neutral";
+export interface BadgeProps {
+  tone?: "primary" | "danger";
+  className?: string;
   children: React.ReactNode;
 }
 
-export function Badge({ variant = "neutral", className = "", children, ...props }: BadgeProps) {
-  const variantStyles = {
-    info: "bg-[var(--badge-info-bg)] text-[var(--badge-info-text)] border border-[#BAE6FD]",
-    danger: "bg-[var(--badge-notice-bg)] text-[var(--badge-notice-text)] border border-[#FECACA]",
-    warning: "bg-[var(--alert-warning-bg)] text-[var(--alert-warning-text)] border border-[var(--alert-warning-border)]",
-    neutral: "bg-[var(--surface-muted)] text-[var(--text-secondary)] border border-[var(--border-subtle)]",
-  }[variant];
+const TONE_STYLES = {
+  primary: "bg-primary-soft text-primary",
+  danger: "bg-danger-soft text-danger",
+} as const;
 
+export function Badge({ tone = "primary", className = "", children }: BadgeProps) {
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-[var(--radius-full)] text-xs font-medium tracking-wide ${variantStyles} ${className}`}
-      {...props}
+      className={`inline-flex items-center justify-center rounded-sm px-2 py-0.5 text-[11px] font-semibold leading-4 whitespace-nowrap ${TONE_STYLES[tone]} ${className}`}
     >
       {children}
     </span>
   );
 }
-

@@ -1,221 +1,159 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 export interface NavItem {
-  id: string;
-  label: string;
   href: string;
+  label: string;
   icon: React.ReactNode;
-  isActive?: boolean;
 }
 
 export interface ShellProps {
-  brandLogo: React.ReactNode;
-  brandTitle: string;
-  brandSubtitle?: string;
-  navItems: NavItem[];
-  secondaryNavItems?: NavItem[];
-  bottomAction?: React.ReactNode;
-  userAvatar?: React.ReactNode;
-  currentPageTitle: string;
+  brand: React.ReactNode;
+  /** Each group is separated by a divider line. */
+  navGroups: NavItem[][];
+  sidebarFooter?: React.ReactNode;
+  headerEnd?: React.ReactNode;
   children: React.ReactNode;
 }
 
-export function Shell({
-  brandLogo,
-  brandTitle,
-  brandSubtitle,
-  navItems,
-  secondaryNavItems = [],
-  bottomAction,
-  userAvatar,
-  currentPageTitle,
-  children,
-}: ShellProps) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+function isActive(pathname: string, href: string) {
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
 
-  // Close mobile drawer on Escape key
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && mobileMenuOpen) {
-        setMobileMenuOpen(false);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [mobileMenuOpen]);
-
-  // Prevent background scroll when drawer is open
-  useEffect(() => {
-    if (mobileMenuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [mobileMenuOpen]);
-
-  const renderNavList = (items: NavItem[]) => (
-    <ul className="space-y-1.5 list-none p-0 m-0">
-      {items.map((item) => {
-        const activeClass = item.isActive
-          ? "bg-[var(--brand-primary)] text-white shadow-sm font-semibold"
-          : "text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] font-medium";
-
-        return (
-          <li key={item.id}>
-            <a
-              href={item.href}
-              className={`flex items-center gap-3.5 px-4 py-2.5 rounded-[var(--radius-md)] text-sm transition-colors min-h-[44px] ${activeClass}`}
-            >
-              <span className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
-                {item.icon}
-              </span>
-              <span>{item.label}</span>
-            </a>
-          </li>
-        );
-      })}
-    </ul>
+function NavList({
+  groups,
+  pathname,
+  onNavigate,
+}: {
+  groups: NavItem[][];
+  pathname: string;
+  onNavigate?: () => void;
+}) {
+  return (
+    <>
+      {groups.map((group, index) => (
+        <ul key={index} className={`flex flex-col ${index > 0 ? "mx-4 mt-2 border-t border-border pt-2" : ""}`}>
+          {group.map((item) => {
+            const active = isActive(pathname, item.href);
+            return (
+              <li key={item.href} className={`py-0.5 ${index > 0 ? "" : "px-4"}`}>
+                <Link
+                  href={item.href}
+                  onClick={onNavigate}
+                  aria-current={active ? "page" : undefined}
+                  className={`flex min-h-11 items-center gap-2 rounded-md px-4 text-sm transition-colors ${
+                    active ? "bg-primary text-on-primary" : "text-ink hover:bg-primary-soft hover:text-primary"
+                  }`}
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      ))}
+    </>
   );
+}
+
+export function Shell({ brand, navGroups, sidebarFooter, headerEnd, children }: ShellProps) {
+  const pathname = usePathname();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  const pageTitle = navGroups.flat().find((item) => isActive(pathname, item.href))?.label ?? "";
+
+  useEffect(() => {
+    if (!drawerOpen) return;
+
+    closeButtonRef.current?.focus();
+    document.body.style.overflow = "hidden";
+    const menuButton = menuButtonRef.current;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setDrawerOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
+      menuButton?.focus();
+    };
+  }, [drawerOpen]);
+
+  const closeDrawer = () => setDrawerOpen(false);
 
   return (
-    <div className="min-h-screen bg-[var(--surface-page)] flex flex-col md:flex-row">
-      {/* Mobile Top Navigation Bar */}
-      <header className="md:hidden flex items-center justify-between px-4 py-3 bg-[var(--surface-card)] border-b border-[var(--border-subtle)] sticky top-0 z-20">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(true)}
-            aria-label="Buka menu navigasi"
-            className="p-2 -ml-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-[var(--radius-md)] focus-visible:outline-2"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-          <div className="flex items-center gap-2">
-            {brandLogo}
-            <div>
-              <div className="font-bold text-sm text-[var(--text-primary)] leading-tight">{brandTitle}</div>
-              {brandSubtitle && (
-                <div className="text-[10px] text-[var(--text-muted)] leading-tight">{brandSubtitle}</div>
-              )}
-            </div>
-          </div>
+    <div className="min-h-screen md:flex">
+      <aside
+        aria-label="Navigasi samping"
+        className="sticky top-0 hidden h-screen w-[250px] shrink-0 flex-col justify-between border-r border-border bg-surface pb-8 md:flex"
+      >
+        <div className="flex flex-col gap-10 overflow-y-auto py-5">
+          <div className="py-2 pr-2 pl-6">{brand}</div>
+          <nav aria-label="Menu utama">
+            <NavList groups={navGroups} pathname={pathname} />
+          </nav>
         </div>
-        {userAvatar && <div>{userAvatar}</div>}
-      </header>
+        {sidebarFooter && <div className="px-4">{sidebarFooter}</div>}
+      </aside>
 
-      {/* Mobile Backdrop & Drawer */}
-      {mobileMenuOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Navigasi"
-          className="fixed inset-0 z-50 md:hidden flex"
-        >
-          <div
-            className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity"
-            onClick={() => setMobileMenuOpen(false)}
-            aria-hidden="true"
-          />
-          <div className="relative w-72 max-w-[80vw] bg-[var(--surface-card)] h-full p-5 flex flex-col shadow-xl z-10 overflow-y-auto">
-            <div className="flex items-center justify-between pb-5 border-b border-[var(--border-subtle)] mb-5">
-              <div className="flex items-center gap-3">
-                {brandLogo}
-                <div>
-                  <div className="font-bold text-sm text-[var(--text-primary)]">{brandTitle}</div>
-                  {brandSubtitle && (
-                    <div className="text-[10px] text-[var(--text-muted)]">{brandSubtitle}</div>
-                  )}
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setMobileMenuOpen(false)}
-                aria-label="Tutup menu navigasi"
-                className="p-2 -mr-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-[var(--radius-md)]"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
+      {drawerOpen && (
+        <div role="dialog" aria-modal="true" aria-label="Menu navigasi" className="fixed inset-0 z-50 flex md:hidden">
+          <div className="fixed inset-0 bg-ink/40" onClick={closeDrawer} aria-hidden="true" />
+          <div className="relative flex h-full w-72 max-w-[85vw] flex-col justify-between overflow-y-auto bg-surface pb-6">
+            <div className="flex flex-col gap-6 py-4">
+              <div className="flex items-center justify-between pr-2 pl-6">
+                {brand}
+                <button
+                  ref={closeButtonRef}
+                  type="button"
+                  onClick={closeDrawer}
+                  aria-label="Tutup menu"
+                  className="flex size-11 items-center justify-center rounded-md text-ink hover:bg-primary-soft"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                    <path strokeLinecap="round" d="M6 18 18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <nav aria-label="Menu utama">
+                <NavList groups={navGroups} pathname={pathname} onNavigate={closeDrawer} />
+              </nav>
             </div>
-
-            <nav aria-label="Navigasi Utama" className="flex-1 space-y-6">
-              {renderNavList(navItems)}
-              {secondaryNavItems.length > 0 && (
-                <div className="pt-4 border-t border-[var(--border-subtle)]">
-                  {renderNavList(secondaryNavItems)}
-                </div>
-              )}
-            </nav>
-
-            {bottomAction && <div className="pt-4 border-t border-[var(--border-subtle)] mt-auto">{bottomAction}</div>}
+            {sidebarFooter && <div className="px-4">{sidebarFooter}</div>}
           </div>
         </div>
       )}
 
-      {/* Desktop Persistent Sidebar */}
-      <aside
-        aria-label="Navigasi Samping"
-        className="hidden md:flex flex-col w-64 lg:w-72 bg-[var(--surface-card)] border-r border-[var(--border-subtle)] p-6 min-h-screen flex-shrink-0"
-      >
-        {/* Brand Header */}
-        <div className="flex items-center gap-3 mb-8">
-          {brandLogo}
-          <div>
-            <h1 className="font-bold text-base text-[var(--text-primary)] leading-tight tracking-tight">
-              {brandTitle}
-            </h1>
-            {brandSubtitle && (
-              <p className="text-xs text-[var(--text-muted)] mt-0.5">{brandSubtitle}</p>
-            )}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-20 flex h-[69px] items-center justify-between gap-3 bg-surface px-4 md:static md:px-6">
+          <div className="flex min-w-0 items-center gap-2">
+            <button
+              ref={menuButtonRef}
+              type="button"
+              onClick={() => setDrawerOpen(true)}
+              aria-label="Buka menu"
+              aria-expanded={drawerOpen}
+              className="-ml-2 flex size-11 items-center justify-center rounded-md text-ink hover:bg-primary-soft md:hidden"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <path strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <h1 className="truncate text-xs leading-6 font-medium text-primary">{pageTitle}</h1>
           </div>
-        </div>
-
-        {/* Primary and Secondary Navigation */}
-        <nav aria-label="Menu Aplikasi" className="flex-1 space-y-6">
-          {renderNavList(navItems)}
-          {secondaryNavItems.length > 0 && (
-            <div className="pt-5 border-t border-[var(--border-subtle)]">
-              {renderNavList(secondaryNavItems)}
-            </div>
-          )}
-        </nav>
-
-        {/* Bottom Action (e.g. Logout button) */}
-        {bottomAction && <div className="pt-6 mt-auto">{bottomAction}</div>}
-      </aside>
-
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Desktop Top Header Bar */}
-        <header className="hidden md:flex items-center justify-between px-8 py-5 border-b border-[var(--border-subtle)] bg-[var(--surface-card)]">
-          <h2 className="text-sm font-semibold text-[var(--brand-primary)]">{currentPageTitle}</h2>
-          {userAvatar && <div className="flex items-center gap-3">{userAvatar}</div>}
+          {headerEnd}
         </header>
 
-        {/* Dynamic Page Content */}
-        <main className="flex-1 p-4 md:p-6 lg:p-8 max-w-7xl w-full mx-auto">{children}</main>
+        <main className="flex-1 px-4 pt-5 pb-6 md:px-6">{children}</main>
       </div>
     </div>
   );
 }
-
