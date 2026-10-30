@@ -63,6 +63,10 @@
   --color-plan-filtered: #111836;
   --color-calendar-past: #dedfe1;
 
+  /* login hero overlay, top to bottom */
+  --color-hero-start: rgb(30 50 105 / 0.85);
+  --color-hero-end: rgb(15 14 127 / 0.85);
+
   --radius-sm: 4px;
   /* segment inside a segmented picker, status pill in tables */
   --radius-inner: 6px;

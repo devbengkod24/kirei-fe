@@ -12,13 +12,15 @@ export interface PasswordFieldProps {
   onChange: (value: string) => void;
   error?: string;
   autoComplete: "current-password" | "new-password";
+  /** Profile uses the small caps label, the login form the plain one. */
+  labelStyle?: "plain" | "caps";
 }
 
-export function PasswordField({ id, label, placeholder, value, onChange, error, autoComplete }: PasswordFieldProps) {
+export function PasswordField({ id, label, placeholder, value, onChange, error, autoComplete, labelStyle = "caps" }: PasswordFieldProps) {
   const [visible, setVisible] = useState(false);
 
   return (
-    <Field label={label} htmlFor={id} labelStyle="caps" error={error}>
+    <Field label={label} htmlFor={id} labelStyle={labelStyle} error={error}>
       <div className="relative">
         <input
           id={id}

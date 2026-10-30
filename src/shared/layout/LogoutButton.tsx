@@ -1,10 +1,12 @@
 import { Button } from "@/components/ui/Button";
+import { logout } from "@/lib/auth/actions";
 
 export function LogoutButton() {
-  // TODO: POST /logout (Sanctum) and redirect to /login once auth is wired up.
   return (
-    <Button variant="danger-outline" disabled title="Logout belum tersedia" className="w-full tracking-[0.05em]">
-      Logout
-    </Button>
+    <form action={logout} className="w-full">
+      <Button type="submit" variant="danger-outline" className="w-full tracking-[0.05em]">
+        Logout
+      </Button>
+    </form>
   );
 }

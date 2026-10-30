@@ -1,9 +1,11 @@
-import { connection } from "next/server";
-import { MOCK_CURRENT_USER } from "@/mocks/user";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import type { CurrentUser } from "@/types/user";
+import { LOGIN_PATH, SESSION_COOKIE, userFromSession } from "./session";
 
+/** The signed-in user. Without a session it redirects to the login page. */
 export async function getCurrentUser(): Promise<CurrentUser> {
-  await connection();
-  // TODO: replace with GET /api/user (Sanctum session) once the orval client is generated.
-  return MOCK_CURRENT_USER;
+  const user = userFromSession((await cookies()).get(SESSION_COOKIE)?.value);
+  if (!user) redirect(LOGIN_PATH);
+  return user;
 }

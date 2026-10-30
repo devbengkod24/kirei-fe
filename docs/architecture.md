@@ -106,6 +106,8 @@ src/shared/profile/                            → profil + ubah kata sandi
 src/shared/admin-scope.ts                      → tipe AdminScope { fakultasId } yang dikirim ke loader
 ```
 
+**Login mock.** `/login` (`shared/auth`) memanggil server action `lib/auth/actions.ts`, yang mencocokkan akun di `mocks/user.ts` (`MOCK_ACCOUNTS`, kata sandi `MOCK_PASSWORD`) lalu menyimpan id user di cookie httpOnly `kirei_session`. `proxy.ts` mengalihkan tamu ke `/login` dan pengguna yang sudah masuk dari `/login` atau `/` ke beranda role-nya (`homeFor` di `lib/auth/session.ts`). `getCurrentUser` membaca cookie itu, dan `requireRole` mengembalikan role lain ke berandanya sendiri. Cookie ini bisa dipalsukan dan hanya untuk mencoba alur. Saat Sanctum siap, yang diganti cukup isi `login`/`logout` dan `userFromSession`.
+
 Data masih dari `src/mocks/` (lihat `mockRoomsInScope`). Aksi tulis (setujui, tolak, simpan ruangan, buat pengumuman, reservasi) baru mengubah state lokal dan ditandai `TODO` di titik pemanggilan API.
 
 ## 3. Aturan dependensi
