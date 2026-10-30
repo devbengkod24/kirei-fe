@@ -8,6 +8,14 @@ import { LetterField } from "./LetterField";
 import type { ReservationIntent } from "./schema";
 import { SUMMARY_LABEL } from "./summaryParts";
 
+/** Where the result dialog sends the user next. */
+export interface ReservationLinks {
+  history: string;
+  /** Link text for `history`; defaults to the borrower's "Reservasi & Riwayat". */
+  historyLabel?: string;
+  drafts?: string;
+}
+
 /** Fields every reservation form has, whatever its type. */
 type SubmissionFields = { letter: File | null; intent: ReservationIntent };
 
@@ -23,8 +31,12 @@ export interface ReservationSubmitDialogProps {
   onSubmit: (intent: ReservationIntent) => void;
   /** Set after the API accepted the reservation. */
   result: ReservationIntent | null;
-  links: { history: string; drafts: string };
+  links: ReservationLinks;
   onCreateAnother: () => void;
+  /** Off for admins: no letter field and no "Simpan Draft". */
+  withLetter?: boolean;
+  /** Replaces the default "waiting for approval" text after a successful send; shown after `subject`. */
+  submittedText?: string;
   /** Type-specific summary and inputs, shown above the letter field. */
   children: React.ReactNode;
 }
@@ -44,6 +56,8 @@ export function ReservationSubmitDialog({
   result,
   links,
   onCreateAnother,
+  withLetter = true,
+  submittedText,
   children,
 }: ReservationSubmitDialogProps) {
   const {
@@ -59,7 +73,7 @@ export function ReservationSubmitDialog({
       <Modal open={open} onClose={onClose} title={submitted ? "Reservasi terkirim" : "Draft tersimpan"}>
         <p role="status" className="text-sm">
           {submitted
-            ? `${subject} sedang menunggu konfirmasi admin${approver ? ` ${approver}` : ""}. Statusnya bisa dipantau di Reservasi & Riwayat.`
+            ? `${subject} ${submittedText ?? `sedang menunggu konfirmasi admin${approver ? ` ${approver}` : ""}. Statusnya bisa dipantau di Reservasi & Riwayat.`}`
             : `${subject} disimpan sebagai draft. Unggah surat peminjaman di Draft Reservasi sebelum tenggatnya berakhir.`}
         </p>
         <div className="flex flex-wrap justify-end gap-2">
@@ -67,12 +81,12 @@ export function ReservationSubmitDialog({
             Buat reservasi lain
           </Button>
           <Link
-            href={submitted ? links.history : links.drafts}
+            href={submitted || !links.drafts ? links.history : links.drafts}
             // start over first, so going back shows a fresh form instead of this result
             onClick={onCreateAnother}
             className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-on-primary hover:bg-primary-hover"
           >
-            {submitted ? "Lihat Reservasi & Riwayat" : "Buka Draft Reservasi"}
+            {submitted ? (links.historyLabel ?? "Lihat Reservasi & Riwayat") : "Buka Draft Reservasi"}
           </Link>
         </div>
       </Modal>
@@ -84,15 +98,17 @@ export function ReservationSubmitDialog({
       <div className="flex flex-col gap-3">
         {children}
 
-        <div className="flex flex-col gap-1">
-          <p className={SUMMARY_LABEL}>Surat Peminjaman</p>
-          <LetterField
-            variant="inline"
-            file={letter ?? null}
-            onChange={(file) => setValue("letter", file, { shouldValidate: true })}
-            error={errors.letter?.message}
-          />
-        </div>
+        {withLetter && (
+          <div className="flex flex-col gap-1">
+            <p className={SUMMARY_LABEL}>Surat Peminjaman</p>
+            <LetterField
+              variant="inline"
+              file={letter ?? null}
+              onChange={(file) => setValue("letter", file, { shouldValidate: true })}
+              error={errors.letter?.message}
+            />
+          </div>
+        )}
 
         {approver && (
           <p className="rounded-md bg-primary-soft px-3 py-2 text-xs text-primary">
@@ -111,9 +127,11 @@ export function ReservationSubmitDialog({
         <Button variant="danger-outline" onClick={onClose} disabled={submitting}>
           Kembali
         </Button>
-        <Button variant="success-outline" onClick={() => onSubmit("draft")} disabled={submitting}>
-          Simpan Draft
-        </Button>
+        {withLetter && (
+          <Button variant="success-outline" onClick={() => onSubmit("draft")} disabled={submitting}>
+            Simpan Draft
+          </Button>
+        )}
         <Button variant="primary-outline" onClick={() => onSubmit("submit")} disabled={submitting}>
           {submitting ? "Mengirim..." : "Pesan"}
         </Button>

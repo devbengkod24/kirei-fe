@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Field, INPUT_CLASS, SelectInput } from "@/components/form/Field";
 import { Button } from "@/components/ui/Button";
-import { Dialog } from "@/components/ui/Dialog";
+import { Modal } from "@/components/ui/Modal";
 import type { AnnouncementCategory } from "@/types/announcement";
 import { ANNOUNCEMENT_CATEGORY } from "./announcement-labels";
 
@@ -41,7 +41,7 @@ export function CreateAnnouncementDialog({ onClose, onCreate }: CreateAnnounceme
   const describedBy = (field: keyof NewAnnouncement, id: string) => (errors[field] ? `${id}-error` : undefined);
 
   return (
-    <Dialog
+    <Modal
       open
       onClose={onClose}
       title="Tambah Pengumuman"
@@ -100,6 +100,6 @@ export function CreateAnnouncementDialog({ onClose, onCreate }: CreateAnnounceme
           />
         </Field>
       </form>
-    </Dialog>
+    </Modal>
   );
 }

@@ -9,5 +9,5 @@ export default async function Page() {
   const user = await requireRole(["admin_fakultas"]);
   const announcements = await getAnnouncements({ fakultasId: user.fakultasId });
 
-  return <AnnouncementManager announcements={announcements} authorName={user.name} loadedAt={new Date().toISOString()} />;
+  return <AnnouncementManager announcements={announcements} canManage authorName={user.name} loadedAt={new Date().toISOString()} />;
 }

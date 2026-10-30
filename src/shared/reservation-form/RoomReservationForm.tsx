@@ -11,10 +11,10 @@ import { crossFacultyApprover, defaultSchedule, roomStatus, toIsoRange } from ".
 import { toRoomReservationRequest } from "./createReservation";
 import { FloorPlan } from "./FloorPlan";
 import { ROOM_CATEGORY_LABEL, ROOM_STATUS_LABEL } from "./labels";
-import { LetterPanel } from "./LetterPanel";
+import { LetterPanel, ReviewButton } from "./LetterPanel";
 import { PanelHeading } from "./PanelHeading";
 import { ReservationSteps, STEPS_BY_TYPE } from "./ReservationSteps";
-import { ReservationSubmitDialog } from "./ReservationSubmitDialog";
+import { ReservationSubmitDialog, type ReservationLinks } from "./ReservationSubmitDialog";
 import { RoomPreview } from "./RoomPreview";
 import {
   ROOM_RESERVATION_FIELD_MAP,
@@ -32,9 +32,20 @@ export interface RoomReservationFormProps {
   /** ISO 8601 server time, for the default date and time */
   now: string;
   requester: { name: string; fakultasId: string | null };
+  /** Label for the requester in the summary: "Peminjam" for borrowers, "Pemesan" for admins. */
+  requesterLabel?: string;
+  /** Borrowers give a phone number in the summary. */
+  askPhone?: boolean;
+  /** Borrowers upload a loan letter (or save a draft without one). */
+  withLetter?: boolean;
   /** Lets admins pick a booked room; the replacement-schedule flow is not built yet. */
   canUseBookedSlot?: boolean;
-  links: { history: string; drafts: string };
+  /** Reservation rules shown under the floor plan, from the API. */
+  rules?: string[];
+  purposePlaceholder?: string;
+  /** Replaces the default "waiting for approval" text after sending, e.g. "sudah dibuat." */
+  submittedText?: string;
+  links: ReservationLinks;
 }
 
 const CATEGORIES = Object.keys(ROOM_CATEGORY_LABEL) as RoomCategory[];
@@ -59,10 +70,16 @@ export function RoomReservationForm({
   bookings,
   now,
   requester,
+  requesterLabel = "Peminjam",
+  askPhone = true,
+  withLetter = true,
   canUseBookedSlot = false,
+  rules = [],
+  purposePlaceholder = "Contoh: Rapat pengurus bulanan",
+  submittedText,
   links,
 }: RoomReservationFormProps) {
-  const schema = useMemo(() => createRoomReservationSchema(), []);
+  const schema = useMemo(() => createRoomReservationSchema(undefined, { askPhone, withLetter }), [askPhone, withLetter]);
   const defaults = useMemo((): RoomReservationInput => {
     const building = buildings.find((b) => b.floors.length > 0) ?? buildings[0];
     return {
@@ -147,7 +164,7 @@ export function RoomReservationForm({
         className="flex flex-col gap-2 lg:grid lg:grid-cols-[minmax(0,1fr)_16rem] lg:items-start"
       >
         <Card className="order-2 flex flex-col gap-3 p-3 lg:order-none lg:col-start-1 lg:row-start-1">
-          <ReservationSteps steps={STEPS_BY_TYPE.ruangan} />
+          <ReservationSteps steps={withLetter ? STEPS_BY_TYPE.ruangan : STEPS_BY_TYPE.ruangan.slice(0, 3)} />
           <hr className="border-border" />
 
           <div className="grid gap-3.5 xl:grid-cols-[minmax(0,471fr)_minmax(0,356fr)]">
@@ -222,6 +239,20 @@ export function RoomReservationForm({
               <RoomPreview room={selectedRoom} approver={approver} />
             </div>
           </div>
+
+          {rules.length > 0 && (
+            <section aria-labelledby="reservation-rules-title" className="flex flex-col gap-2 rounded-md bg-primary-soft p-3">
+              <h2 id="reservation-rules-title" className="flex items-center gap-2 text-sm font-semibold tracking-wide">
+                <Image src="/icons/admin/rules.svg" alt="" width={20} height={20} />
+                Peraturan Reservasi
+              </h2>
+              <ol className="list-decimal pl-5 text-[11px] leading-[17px]">
+                {rules.map((rule) => (
+                  <li key={rule}>{rule}</li>
+                ))}
+              </ol>
+            </section>
+          )}
         </Card>
 
         <div className="contents lg:col-start-2 lg:row-start-1 lg:flex lg:flex-col lg:gap-2">
@@ -331,13 +362,17 @@ export function RoomReservationForm({
             )}
           </Card>
 
-          <LetterPanel
-            className="order-3 lg:order-none"
-            file={letter ?? null}
-            onChange={(file) => setValue("letter", file, { shouldValidate: true })}
-            error={errors.letter?.message}
-            onReview={() => void flow.openSummary([...SCHEDULE_FIELDS])}
-          />
+          {withLetter ? (
+            <LetterPanel
+              className="order-3 lg:order-none"
+              file={letter ?? null}
+              onChange={(file) => setValue("letter", file, { shouldValidate: true })}
+              error={errors.letter?.message}
+              onReview={() => void flow.openSummary([...SCHEDULE_FIELDS])}
+            />
+          ) : (
+            <ReviewButton className="order-3 lg:order-none" onReview={() => void flow.openSummary([...SCHEDULE_FIELDS])} />
+          )}
         </div>
 
         {building && selectedRoom && (
@@ -352,8 +387,11 @@ export function RoomReservationForm({
             result={flow.result}
             links={links}
             onCreateAnother={flow.createAnother}
+            withLetter={withLetter}
+            submittedText={submittedText}
           >
-            <SummaryValue label="Peminjam">{requester.name}</SummaryValue>
+            <SummaryValue label={requesterLabel}>{requester.name}</SummaryValue>
+            {askPhone && (
             <div className="flex flex-col gap-1">
               <label htmlFor="reservation-phone" className={SUMMARY_LABEL}>
                 No HP
@@ -371,6 +409,7 @@ export function RoomReservationForm({
               />
               <FieldError id="reservation-phone-error" message={errors.phone?.message} />
             </div>
+            )}
             <SummaryWhen
               date={formatDateLongWIB(wibToIso(date, startTime))}
               startTime={startTime}
@@ -387,7 +426,7 @@ export function RoomReservationForm({
               <textarea
                 id="reservation-purpose"
                 rows={2}
-                placeholder="Contoh: Rapat pengurus bulanan"
+                placeholder={purposePlaceholder}
                 aria-invalid={errors.purpose ? true : undefined}
                 aria-describedby={errors.purpose ? "reservation-purpose-error" : undefined}
                 className={`${SUMMARY_INPUT} max-h-32 resize-y`}

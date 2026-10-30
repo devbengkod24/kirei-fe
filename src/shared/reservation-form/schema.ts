@@ -57,7 +57,17 @@ const ALWAYS = { when: () => true };
 /** Fields checked before the summary dialog opens. */
 export const SCHEDULE_FIELDS = ["buildingId", "floorId", "date", "startTime", "endTime", "roomId"] as const;
 
-export function createRoomReservationSchema(now: () => Date = () => new Date()) {
+export interface RoomReservationSchemaOptions {
+  /** Borrowers give a phone number; admins booking for themselves do not. */
+  askPhone?: boolean;
+  /** Borrowers need a letter to send (or save a draft); admins book without one. */
+  withLetter?: boolean;
+}
+
+export function createRoomReservationSchema(
+  now: () => Date = () => new Date(),
+  { askPhone = true, withLetter = true }: RoomReservationSchemaOptions = {},
+) {
   return z
     .object({
       buildingId: z.string().min(1, "Pilih gedung."),
@@ -66,7 +76,7 @@ export function createRoomReservationSchema(now: () => Date = () => new Date()) 
       startTime: z.string().regex(TIME, "Pilih jam mulai."),
       endTime: z.string().regex(TIME, "Pilih jam selesai."),
       roomId: z.string().min(1, "Pilih ruangan pada denah."),
-      phone: phoneSchema,
+      phone: askPhone ? phoneSchema : z.string(),
       purpose: describe("keperluan", 5),
       ...submissionShape,
     })
@@ -75,7 +85,7 @@ export function createRoomReservationSchema(now: () => Date = () => new Date()) 
         ctx.addIssue({ code: "custom", path: ["endTime"], message: "Jam selesai harus setelah jam mulai." });
       }
       requireFutureStart(values.date, values.startTime, values.endTime, now(), "startTime", ctx);
-      requireLetterToSubmit(values, ctx);
+      if (withLetter) requireLetterToSubmit(values, ctx);
     }, ALWAYS);
 }
 

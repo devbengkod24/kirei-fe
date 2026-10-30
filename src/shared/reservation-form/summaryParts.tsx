@@ -1,10 +1,11 @@
 import Image from "next/image";
+import { CAPS_LABEL_CLASS, INPUT_CLASS } from "@/components/form/Field";
 
 /** Small building blocks shared by the summary dialogs of every reservation type. */
 
-export const SUMMARY_LABEL = "text-[11px] tracking-wide text-primary uppercase";
-export const SUMMARY_INPUT =
-  "min-h-11 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm aria-invalid:border-danger-strong";
+// Same field styling as components/form/Field, used by every role's forms.
+export const SUMMARY_LABEL = CAPS_LABEL_CLASS;
+export const SUMMARY_INPUT = INPUT_CLASS;
 
 export function FieldError({ id, message }: { id: string; message?: string }) {
   if (!message) return null;

@@ -41,7 +41,7 @@ Ormawa dan dosen memakai layar dan URL yang sama. Menu dan URL ada di `modules/o
 | Buat Reservasi: Kendaraan | `/reservasi/baru/kendaraan` | Data peminjam (No HP, tujuan, jumlah peserta, keterangan kegiatan), tanggal mulai dan selesai, surat. Kendaraan ditentukan admin. Tanpa catatan lintas fakultas. | `shared/reservation-form` (`ReservationFormPage tipe="kendaraan"`) |
 | Draft Reservasi | `/reservasi/draft` | Reservasi yang menunggu surat peminjaman. Tiap draft punya timer hitung mundur ke tenggat dari API (`hooks/useCountdown`) dan batasnya dalam WIB. Unggah PDF lalu "Pesan", atau "Batal". Setelah tenggat lewat, unggah dan "Pesan" dinonaktifkan. | `modules/ormawa/drafts` |
 | Reservasi & Riwayat | `/reservasi/riwayat` | Tab Ruangan, Kendaraan, GOR, lalu tab Aktif (kartu "Hari ini" dan "Akan datang") dan Riwayat (tabel berhalaman). Pilihan disimpan di URL: `?tipe=gor&tampilan=riwayat&halaman=2&per=25`. | `shared/reservation-history` (`ReservationHistoryPage`, `showTypeTabs`) |
-| Pengumuman | `/pengumuman` | Tab Informasi dan Pengingat. Hanya baca. | `shared/announcements` (`canManage={false}`) |
+| Pengumuman | `/pengumuman` | Daftar dan filter sama dengan admin, tanpa Tambah Pengumuman. | `shared/announcements` (tanpa `canManage`) |
 | Profil | `/profil` | Data diri dan ubah kata sandi. | `shared/profile` |
 | Hubungi Kami | `/bantuan/kontak` | Formulir pengaduan ke admin dan kontak. | `modules/ormawa` |
 | FAQ | `/bantuan/faq` | | `modules/ormawa` |
@@ -59,7 +59,7 @@ Semua data terkunci ke fakultas admin (`scope={{ fakultasId: user.fakultasId }}`
 |---|---|---|---|
 | Dashboard | `/fakultas/dashboard` | Kartu Total Reservasi Hari Ini, Check-in Hari Ini, Ruangan Tersedia; grafik distribusi reservasi; tabel reservasi hari ini; laporan pengguna terbaru | `shared/dashboard` (`AdminDashboard`) |
 | Kelola Ruangan | `/fakultas/ruangan` | Daftar ruangan di gedung milik fakultas, ubah detail dan status ruangan. Tidak termasuk edit denah. | `shared/unit-management` (`tipe="ruangan"`) |
-| Reservasi Internal | `/fakultas/reservasi-internal` | Admin memesan ruangan, termasuk memakai slot yang sudah dipesan (lihat "Memakai slot yang sudah dipesan"). | `shared/reservation-form` |
+| Reservasi Internal | `/fakultas/reservasi-internal` | Admin memesan ruangan di gedung fakultasnya. Komponen sama dengan Buat Reservasi: Ruangan milik peminjam, tetapi tanpa No HP, surat, dan draft. Memakai slot yang sudah dipesan belum dibangun. | `shared/reservation-form` (`RoomReservationForm` dengan `askPhone={false}`, `withLetter={false}`) |
 | Kelola Reservasi: Persetujuan | `/fakultas/persetujuan` | Reservasi ruangan fakultas yang menunggu keputusan, termasuk dari peminjam luar fakultas. | `shared/reservation-approval` |
 | Kelola Reservasi: Riwayat | `/fakultas/riwayat` | | `shared/reservation-history` |
 | Laporan Pengguna | `/fakultas/laporan` | Pengaduan pengguna, dengan filter status, kategori, dan tanggal. | `shared/user-reports` |

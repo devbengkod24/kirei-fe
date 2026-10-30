@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/Card";
 import { LinkPagination } from "@/components/ui/LinkPagination";
 import { PerPageSelect } from "@/components/ui/PerPageSelect";
+import { TABLE, TABLE_CELL, TABLE_HEAD_CELL, TABLE_ROW } from "@/components/ui/table";
 import { formatDateShortWIB, formatTimeSpanWIB } from "@/lib/date";
 import type { ReservationRecord, ReservationType } from "@/types/reservation";
 import { ReservationStatusBadge } from "@/shared/reservation/ReservationStatusBadge";
@@ -19,9 +20,8 @@ export interface ReservationHistoryTableProps {
   baseParams: Record<string, string>;
 }
 
-const TH_BASE = "px-3 py-2 text-xs font-semibold tracking-wide whitespace-nowrap first:pl-6 last:pr-6";
-const TH = `${TH_BASE} text-left`;
-const TD = "px-3 py-2 align-middle first:pl-6 last:pr-6";
+const TH = `${TABLE_HEAD_CELL} text-left`;
+const TD = TABLE_CELL;
 
 function Purpose({ reservation }: { reservation: ReservationRecord }) {
   return (
@@ -57,21 +57,21 @@ export function ReservationHistoryTable({
         <p className="py-8 text-center text-sm text-muted">Belum ada riwayat reservasi {RESERVATION_TYPE_LABEL[tipe]}.</p>
       ) : (
         <>
-          <table className="hidden w-full border-collapse text-xs tracking-wide lg:table">
+          <table className={`hidden ${TABLE} lg:table`}>
             <caption className="sr-only">{title}, halaman {page} dari {totalPages}</caption>
             <thead>
-              <tr className="border-b border-border">
+              <tr className={TABLE_ROW}>
                 <th scope="col" className={TH}>Tanggal</th>
                 <th scope="col" className={TH}>Nama Pemesan</th>
                 {unitLabel && <th scope="col" className={TH}>{unitLabel}</th>}
                 <th scope="col" className={TH}>Waktu (WIB)</th>
                 <th scope="col" className={TH}>Keperluan</th>
-                <th scope="col" className={`${TH_BASE} text-center`}>Status</th>
+                <th scope="col" className={`${TABLE_HEAD_CELL} text-center`}>Status</th>
               </tr>
             </thead>
             <tbody>
               {items.map((reservation) => (
-                <tr key={reservation.id} className="border-b border-border">
+                <tr key={reservation.id} className={TABLE_ROW}>
                   <td className={`${TD} whitespace-nowrap`}>{formatDateShortWIB(reservation.startsAt)}</td>
                   <td className={TD}>{reservation.bookerName}</td>
                   {unitLabel && <td className={TD}>{reservation.unitName}</td>}

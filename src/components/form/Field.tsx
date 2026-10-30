@@ -1,7 +1,10 @@
 import Image from "next/image";
 
 export const INPUT_CLASS =
-  "min-h-11 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-ink placeholder:text-muted hover:border-primary/50 focus-visible:border-primary disabled:bg-page";
+  "min-h-11 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-ink placeholder:text-muted hover:border-primary/50 focus-visible:border-primary disabled:bg-page aria-invalid:border-danger-strong";
+
+/** Small uppercase label used in summaries and detail dialogs. */
+export const CAPS_LABEL_CLASS = "text-[11px] tracking-wide text-primary uppercase";
 
 export interface FieldProps {
   label: string;
@@ -15,7 +18,7 @@ export interface FieldProps {
 
 export function Field({ label, htmlFor, error, labelStyle = "plain", className = "", children }: FieldProps) {
   const labelClass =
-    labelStyle === "caps" ? "text-[10px] tracking-[0.05em] uppercase text-primary" : "text-xs text-primary";
+    labelStyle === "caps" ? CAPS_LABEL_CLASS : "text-xs text-primary";
 
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
@@ -24,7 +27,7 @@ export function Field({ label, htmlFor, error, labelStyle = "plain", className =
       </label>
       {children}
       {error && (
-        <p id={`${htmlFor}-error`} className="text-xs text-danger">
+        <p id={`${htmlFor}-error`} className="text-[11px] text-danger">
           {error}
         </p>
       )}

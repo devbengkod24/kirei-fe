@@ -8,6 +8,8 @@ export interface ModalProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  /** Buttons row under the content, right-aligned. */
+  footer?: React.ReactNode;
   className?: string;
 }
 
@@ -15,7 +17,7 @@ export interface ModalProps {
  * Controlled modal on the native <dialog>: focus stays inside, Escape closes it, and the
  * opener gets focus back on close. Clicking the backdrop closes it too.
  */
-export function Modal({ open, onClose, title, children, className = "" }: ModalProps) {
+export function Modal({ open, onClose, title, children, footer, className = "" }: ModalProps) {
   const ref = useModalDialog(open, onClose);
   const titleId = useId();
 
@@ -45,6 +47,7 @@ export function Modal({ open, onClose, title, children, className = "" }: ModalP
           </button>
         </div>
         {children}
+        {footer && <div className="flex flex-wrap items-center justify-end gap-2">{footer}</div>}
       </div>
     </dialog>
   );

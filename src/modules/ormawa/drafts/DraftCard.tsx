@@ -14,6 +14,7 @@ import { RESERVATION_TYPE_LABEL } from "@/shared/reservation/reservationTypes";
 import type { ReservationDraft } from "@/types/reservation";
 import { submitDraft, type DraftActionResult } from "./draftActions";
 import { DeadlineTimer } from "./DeadlineTimer";
+import { CAPS_LABEL_CLASS } from "@/components/form/Field";
 
 const schema = z.object({
   letter: z.custom<File | null>((value) => value instanceof File, "Unggah surat peminjaman dulu.").pipe(letterFileSchema),
@@ -104,7 +105,7 @@ export function DraftCard({ draft, onSubmitted, onRequestCancel }: DraftCardProp
             <div className="flex flex-col gap-4 sm:gap-7">
               <Field label="Dipinjam">{draft.unitName}</Field>
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] tracking-wide text-primary uppercase" id={`${id}-letter-label`}>
+                <span className={CAPS_LABEL_CLASS} id={`${id}-letter-label`}>
                   Surat Peminjaman
                 </span>
                 <label

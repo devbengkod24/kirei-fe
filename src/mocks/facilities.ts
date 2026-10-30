@@ -112,6 +112,13 @@ export function buildRoomBookingsMock(now: Date): UnitBooking[] {
   ]);
 }
 
+// Rules from the Figma V3 "Peraturan Reservasi" box, without the penalty items (penalties were dropped).
+export const MOCK_ROOM_RULES = [
+  "Satu pemesan hanya dapat meminjam ruangan yang sama 1 kali dalam 1 hari.",
+  "Jika tidak hadir dalam 1 jam dari waktu reservasi, reservasi akan hangus.",
+  "Dilarang membawa makanan berbau menyengat yang dapat mengganggu pengguna lainnya.",
+];
+
 export const MOCK_SPORTS_HALL: SportsHall = {
   id: "gor-udinus",
   name: "GOR Udinus",

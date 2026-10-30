@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Field, INPUT_CLASS } from "@/components/form/Field";
 import { Button } from "@/components/ui/Button";
-import { Dialog } from "@/components/ui/Dialog";
+import { Modal } from "@/components/ui/Modal";
 import { formatDateShortWIB } from "@/lib/date";
 import type { ReservationRequest } from "@/types/reservation";
 
@@ -24,7 +24,7 @@ export function RejectReservationDialog({ reservation, onClose, onReject }: Reje
   };
 
   return (
-    <Dialog
+    <Modal
       open
       onClose={onClose}
       title="Tolak Reservasi"
@@ -60,6 +60,6 @@ export function RejectReservationDialog({ reservation, onClose, onReject }: Reje
           />
         </Field>
       </form>
-    </Dialog>
+    </Modal>
   );
 }

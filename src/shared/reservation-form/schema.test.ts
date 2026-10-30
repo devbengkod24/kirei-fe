@@ -69,6 +69,23 @@ describe("room reservation schema", () => {
   });
 });
 
+describe("room reservation schema for an admin booking", () => {
+  // admins book for the faculty: no phone and no loan letter
+  const adminSchema = createRoomReservationSchema(() => new Date("2026-10-30T01:00:00Z"), { askPhone: false, withLetter: false });
+
+  it("accepts a booking without phone or letter", () => {
+    expect(adminSchema.safeParse({ ...valid, phone: "", letter: null }).success).toBe(true);
+  });
+
+  it("still checks the schedule, room, and purpose", () => {
+    const result = adminSchema.safeParse({ ...valid, phone: "", letter: null, roomId: "", purpose: "" });
+    const paths = result.success ? [] : result.error.issues.map((issue) => issue.path.join("."));
+    expect(paths).toEqual(expect.arrayContaining(["roomId", "purpose"]));
+    expect(paths).not.toContain("phone");
+    expect(paths).not.toContain("letter");
+  });
+});
+
 describe("GOR reservation schema", () => {
   const gorSchema = createSportsHallReservationSchema(() => new Date("2026-10-30T01:00:00Z"));
   const validGor: SportsHallReservationInput = {

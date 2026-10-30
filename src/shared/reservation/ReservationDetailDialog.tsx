@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import { Button } from "@/components/ui/Button";
-import { Dialog } from "@/components/ui/Dialog";
+import { Modal } from "@/components/ui/Modal";
 import { formatDateLongWIB, formatTimeWIB } from "@/lib/date";
 import type { ReservationRequest } from "@/types/reservation";
+import { CAPS_LABEL_CLASS } from "@/components/form/Field";
 
 export interface ReservationDetailDialogProps {
   reservation: ReservationRequest;
@@ -15,7 +16,7 @@ const READONLY_BOX = "flex min-h-10 items-center rounded-md border border-border
 
 export function ReservationDetailDialog({ reservation, onClose }: ReservationDetailDialogProps) {
   return (
-    <Dialog
+    <Modal
       open
       onClose={onClose}
       title="Detail Reservasi"
@@ -27,7 +28,7 @@ export function ReservationDetailDialog({ reservation, onClose }: ReservationDet
     >
       <dl className="flex flex-col gap-3">
         <div className="flex flex-col gap-2">
-          <dt className="text-[10px] tracking-[0.05em] text-primary uppercase">Nama pemesan</dt>
+          <dt className={CAPS_LABEL_CLASS}>Nama pemesan</dt>
           <dd className="rounded-xl border border-border px-4 py-3">
             <p className="text-xs font-medium">{reservation.borrowerName}</p>
             <p className="text-[11px] text-muted">{reservation.borrowerDetail}</p>
@@ -35,7 +36,7 @@ export function ReservationDetailDialog({ reservation, onClose }: ReservationDet
         </div>
 
         <div className="flex flex-col">
-          <dt className="text-[10px] tracking-[0.05em] text-primary uppercase">Waktu peminjaman</dt>
+          <dt className={CAPS_LABEL_CLASS}>Waktu peminjaman</dt>
           <dd className="flex flex-col text-xs">
             <span className="flex min-h-[30px] items-center gap-2">
               <Image src="/icons/admin/detail-date.svg" alt="" width={16} height={16} />
@@ -63,12 +64,12 @@ export function ReservationDetailDialog({ reservation, onClose }: ReservationDet
         </div>
 
         <div className="flex flex-col gap-1">
-          <dt className="text-[10px] tracking-[0.05em] text-primary uppercase">Keperluan</dt>
+          <dt className={CAPS_LABEL_CLASS}>Keperluan</dt>
           <dd className={READONLY_BOX}>{reservation.purpose}</dd>
         </div>
 
         <div className="flex flex-col gap-1">
-          <dt className="text-[10px] tracking-[0.05em] text-primary uppercase">Surat peminjaman</dt>
+          <dt className={CAPS_LABEL_CLASS}>Surat peminjaman</dt>
           <dd className={READONLY_BOX}>
             {/* TODO: link to the signed file URL from the API once uploads exist. */}
             {reservation.letterFileName ?? <span className="text-muted">Belum ada surat yang diunggah.</span>}
@@ -76,10 +77,10 @@ export function ReservationDetailDialog({ reservation, onClose }: ReservationDet
         </div>
 
         <div className="flex flex-col gap-1">
-          <dt className="text-[10px] tracking-[0.05em] text-primary uppercase">Kode tiket</dt>
+          <dt className={CAPS_LABEL_CLASS}>Kode tiket</dt>
           <dd className="text-xs">{reservation.ticketCode}</dd>
         </div>
       </dl>
-    </Dialog>
+    </Modal>
   );
 }

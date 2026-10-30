@@ -3,7 +3,10 @@ import { buildAnnouncementsMock } from "@/mocks/announcements";
 import type { AdminScope } from "@/shared/admin-scope";
 import type { Announcement } from "@/types/announcement";
 
-/** Announcements an admin manages: the faculty's own, or all of them for admin universitas. */
+/**
+ * Announcements for a faculty scope: an admin's own faculty, all faculties for admin universitas
+ * (null), or what a borrower sees (their faculty plus university-wide ones).
+ */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- the mock has one faculty; the API filters by scope
 export async function getAnnouncements(scope: AdminScope): Promise<Announcement[]> {
   await connection();

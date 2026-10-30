@@ -25,10 +25,17 @@ export function LetterPanel({ file, onChange, error, onReview, className = "" }:
         <LetterField variant="dropzone" file={file} onChange={onChange} error={error} />
       </Card>
 
-      {/* type="button": before hydration a submit button would send the fields as a GET query */}
-      <Button onClick={onReview} className={`min-h-12 w-full text-base font-normal ${className}`}>
-        Reservasi sekarang
-      </Button>
+      <ReviewButton onReview={onReview} className={className} />
     </>
+  );
+}
+
+/** "Reservasi sekarang": validates the first step and opens the summary. */
+export function ReviewButton({ onReview, className = "" }: { onReview: () => void; className?: string }) {
+  // type="button": before hydration a submit button would send the fields as a GET query
+  return (
+    <Button onClick={onReview} className={`min-h-12 w-full text-base font-normal ${className}`}>
+      Reservasi sekarang
+    </Button>
   );
 }

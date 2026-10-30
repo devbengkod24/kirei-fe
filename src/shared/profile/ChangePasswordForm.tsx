@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { Dialog } from "@/components/ui/Dialog";
+import { ResultDialog } from "@/components/feedback/ResultDialog";
 import { changePassword, validatePasswordChange, type PasswordErrors } from "./changePassword";
 import { PasswordField } from "./PasswordField";
 
@@ -75,23 +75,14 @@ export function ChangePasswordForm() {
         </Button>
       </form>
 
-      {result && (
-        <Dialog
-          open
-          onClose={() => setResult(null)}
-          title={result.ok ? "Kata Sandi Diubah" : "Kata Sandi Gagal Diubah"}
-          className="max-w-[348px] text-center"
-          footer={
-            <Button onClick={() => setResult(null)} className="mx-auto px-6">
-              OK
-            </Button>
-          }
-        >
-          <p role="alert" className="text-sm">
-            {result.ok ? "Gunakan kata sandi baru saat login berikutnya." : result.message}
-          </p>
-        </Dialog>
-      )}
+      <ResultDialog
+        open={result !== null}
+        onClose={() => setResult(null)}
+        tone={result?.ok === false ? "failure" : "success"}
+        title={result?.ok === false ? "Kata Sandi Gagal Diubah" : "Kata Sandi Diubah"}
+      >
+        {result && (result.ok ? "Gunakan kata sandi baru saat login berikutnya." : result.message)}
+      </ResultDialog>
     </section>
   );
 }

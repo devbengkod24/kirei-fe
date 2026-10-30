@@ -13,8 +13,9 @@ export interface PaginationProps {
   onPageSizeChange: (pageSize: number) => void;
 }
 
+/** Callback-driven pagination for client lists; looks the same as LinkPagination, which uses URLs. */
 const ARROW_BUTTON =
-  "flex size-11 items-center justify-center rounded-md hover:bg-primary-soft disabled:opacity-40 disabled:hover:bg-transparent";
+  "flex size-11 items-center justify-center rounded-md hover:bg-primary-soft active:bg-border disabled:opacity-30 disabled:hover:bg-transparent";
 
 export function Pagination({ page, pageCount, pageSize, onPageChange, onPageSizeChange }: PaginationProps) {
   const sizeId = useId();
@@ -27,7 +28,7 @@ export function Pagination({ page, pageCount, pageSize, onPageChange, onPageSize
             id={sizeId}
             value={pageSize}
             onChange={(event) => onPageSizeChange(Number(event.target.value))}
-            className="min-h-11 appearance-none rounded-md bg-primary-soft py-1 pr-6 pl-2 text-xs"
+            className="min-h-11 appearance-none rounded-inner bg-primary-soft py-1 pr-6 pl-2 text-xs hover:bg-border"
           >
             {PAGE_SIZE_OPTIONS.map((size) => (
               <option key={size} value={size}>
@@ -36,7 +37,7 @@ export function Pagination({ page, pageCount, pageSize, onPageChange, onPageSize
             ))}
           </select>
           <Image
-            src="/icons/admin/page-size-chevron.svg"
+            src="/icons/chevron-down-small.svg"
             alt=""
             width={16}
             height={16}
@@ -47,7 +48,7 @@ export function Pagination({ page, pageCount, pageSize, onPageChange, onPageSize
       </div>
 
       <nav aria-label="Halaman" className="flex items-center gap-1">
-        <span className="flex min-w-[26px] justify-center rounded-sm bg-primary-soft p-1" aria-current="page">
+        <span className="rounded-sm bg-primary-soft px-2 py-1" aria-current="page">
           {page}
         </span>
         <span>dari {pageCount} halaman</span>
@@ -58,7 +59,7 @@ export function Pagination({ page, pageCount, pageSize, onPageChange, onPageSize
           aria-label="Halaman sebelumnya"
           className={ARROW_BUTTON}
         >
-          <Image src="/icons/admin/page-prev.svg" alt="" width={20} height={20} />
+          <Image src="/icons/page-prev.svg" alt="" width={20} height={20} />
         </button>
         <button
           type="button"
@@ -67,7 +68,7 @@ export function Pagination({ page, pageCount, pageSize, onPageChange, onPageSize
           aria-label="Halaman berikutnya"
           className={`${ARROW_BUTTON} -ml-2`}
         >
-          <Image src="/icons/admin/page-next.svg" alt="" width={20} height={20} />
+          <Image src="/icons/page-next.svg" alt="" width={20} height={20} />
         </button>
       </nav>
     </div>

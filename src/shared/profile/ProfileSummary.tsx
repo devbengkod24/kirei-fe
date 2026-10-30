@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
+import { CAPS_LABEL_CLASS } from "@/components/form/Field";
 
 export interface ProfileSummaryProps {
   name: string;
@@ -12,7 +13,7 @@ export interface ProfileSummaryProps {
   avatarUrl?: string;
 }
 
-const TERM = "text-[10px] tracking-[0.05em] text-primary uppercase";
+const TERM = CAPS_LABEL_CLASS;
 const VALUE = "text-xs tracking-[0.1em] uppercase";
 
 export function ProfileSummary({ name, email, roleLabel, avatarUrl }: ProfileSummaryProps) {

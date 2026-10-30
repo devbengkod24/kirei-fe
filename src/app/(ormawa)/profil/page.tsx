@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
-import { ComingSoon } from "@/components/feedback/ComingSoon";
-import { ORMAWA_ROUTES } from "@/modules/ormawa/routes";
+import { getCurrentUser } from "@/lib/auth/getCurrentUser";
+import { ProfilePage } from "@/shared/profile/ProfilePage";
 
 export const metadata: Metadata = { title: "Profil" };
 
-export default function Page() {
-  return <ComingSoon title="Profil" backHref={ORMAWA_ROUTES.dashboard} backLabel="Kembali ke Dashboard" />;
+export default async function Page() {
+  const user = await getCurrentUser();
+  // Ormawa and dosen share this screen.
+  return <ProfilePage user={user} roleLabel={user.role === "dosen" ? "Dosen" : "Ormawa"} />;
 }

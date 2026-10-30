@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Field, INPUT_CLASS, SelectInput } from "@/components/form/Field";
 import { Button } from "@/components/ui/Button";
-import { Dialog } from "@/components/ui/Dialog";
+import { Modal } from "@/components/ui/Modal";
 import type { Building, Room, RoomType } from "@/types/room";
 import { ROOM_TYPE_LABEL } from "./room-labels";
 
@@ -37,11 +37,10 @@ export function EditRoomDialog({ room, buildings, takenCodes, onClose, onSave }:
   };
 
   return (
-    <Dialog
+    <Modal
       open
       onClose={onClose}
       title="Edit Ruangan"
-      className="max-w-[431px]"
       footer={
         <>
           <Button variant="danger-outline" onClick={onClose}>
@@ -140,6 +139,6 @@ export function EditRoomDialog({ room, buildings, takenCodes, onClose, onSave }:
           </div>
         </fieldset>
       </form>
-    </Dialog>
+    </Modal>
   );
 }

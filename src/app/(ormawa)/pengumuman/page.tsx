@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
-import { ComingSoon } from "@/components/feedback/ComingSoon";
-import { ORMAWA_ROUTES } from "@/modules/ormawa/routes";
+import { getCurrentUser } from "@/lib/auth/getCurrentUser";
+import { AnnouncementManager } from "@/shared/announcements/AnnouncementManager";
+import { getAnnouncements } from "@/shared/announcements/getAnnouncements";
 
 export const metadata: Metadata = { title: "Pengumuman" };
 
-export default function Page() {
-  return <ComingSoon title="Pengumuman" backHref={ORMAWA_ROUTES.dashboard} backLabel="Kembali ke Dashboard" />;
+export default async function Page() {
+  const user = await getCurrentUser();
+  const announcements = await getAnnouncements({ fakultasId: user.fakultasId });
+
+  return <AnnouncementManager announcements={announcements} loadedAt={new Date().toISOString()} />;
 }

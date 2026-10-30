@@ -16,15 +16,21 @@ import { AnnouncementFilterForm } from "./AnnouncementFilterForm";
 import { CreateAnnouncementDialog } from "./CreateAnnouncementDialog";
 import { DEFAULT_ANNOUNCEMENT_FILTER, filterAnnouncements, isDefaultAnnouncementFilter } from "./filterAnnouncements";
 
-export interface AnnouncementManagerProps {
+export type AnnouncementManagerProps = {
   announcements: Announcement[];
-  /** Name shown as the author of announcements created here. */
-  authorName: string;
   loadedAt: string;
-}
+} & (
+  | {
+      /** Shows "Tambah Pengumuman"; borrowers only read. */
+      canManage: true;
+      /** Name shown as the author of announcements created here. */
+      authorName: string;
+    }
+  | { canManage?: false; authorName?: never }
+);
 
-/** Announcement list with filter and a "Tambah Pengumuman" form, for admins. */
-export function AnnouncementManager({ announcements: initial, authorName, loadedAt }: AnnouncementManagerProps) {
+/** Announcement list with filter; admins also get a "Tambah Pengumuman" form. */
+export function AnnouncementManager({ announcements: initial, loadedAt, canManage, authorName }: AnnouncementManagerProps) {
   const [announcements, setAnnouncements] = useState(initial);
   const [filter, setFilter] = useState(DEFAULT_ANNOUNCEMENT_FILTER);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -65,10 +71,12 @@ export function AnnouncementManager({ announcements: initial, authorName, loaded
               }}
             />
           </Popover>
-          <button type="button" onClick={() => setCreating(true)} className={FILTER_BUTTON}>
-            <Image src="/icons/admin/plus.svg" alt="" width={14} height={14} />
-            Tambah Pengumuman
-          </button>
+          {canManage && (
+            <button type="button" onClick={() => setCreating(true)} className={FILTER_BUTTON}>
+              <Image src="/icons/admin/plus.svg" alt="" width={14} height={14} />
+              Tambah Pengumuman
+            </button>
+          )}
         </div>
       </div>
 
@@ -79,9 +87,11 @@ export function AnnouncementManager({ announcements: initial, authorName, loaded
       {visible.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-12 text-center">
           <p className="text-sm text-muted">
-            {announcements.length === 0
-              ? "Belum ada pengumuman. Pengumuman yang Anda buat akan tampil di dashboard peminjam."
-              : "Tidak ada pengumuman yang cocok dengan filter."}
+            {announcements.length > 0
+              ? "Tidak ada pengumuman yang cocok dengan filter."
+              : canManage
+                ? "Belum ada pengumuman. Pengumuman yang Anda buat akan tampil di dashboard peminjam."
+                : "Belum ada pengumuman."}
           </p>
           {filtered && (
             <Button variant="outline" onClick={() => setFilter(DEFAULT_ANNOUNCEMENT_FILTER)}>
@@ -126,7 +136,7 @@ export function AnnouncementManager({ announcements: initial, authorName, loaded
         onPageSizeChange={paging.setPageSize}
       />
 
-      {creating && (
+      {canManage && creating && (
         <CreateAnnouncementDialog
           onClose={() => setCreating(false)}
           onCreate={(created) => {
