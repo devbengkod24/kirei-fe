@@ -1,0 +1,58 @@
+/*
+ * Design tokens from Figma "KIREI - RESERVASI" page V3.
+ * Declared in @theme so Tailwind generates utilities (bg-primary, text-muted, ...)
+ * and the same names are available as CSS variables (var(--color-primary)).
+ *
+ * Deviations from Figma, made to pass WCAG AA contrast:
+ * - muted text #ababab / #888888 -> #5f6368
+ * - danger text #dc1f26 on danger-soft -> #b91c1c (border/outline keeps #dc1f26)
+ * - success text #327b1e on success-soft -> #2f6b1b
+ * - warning text #f97315 on warning-soft -> #b03a0a; edit button fill #f97315 -> #ea580c (white icon 3:1)
+ * - teal stat text #1ba794 on teal-soft -> #0f766e
+ */
+@theme {
+  --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  --font-brand: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --color-primary: #1e3a8a;
+  --color-primary-hover: #1e40af;
+  --color-primary-soft: #f0f5fe;
+  --color-on-primary: #ffffff;
+
+  --color-page: #f7f9fa;
+  --color-surface: #ffffff;
+  --color-border: #dedfe1;
+  --color-border-focus: #3c82f6;
+
+  --color-ink: #000000;
+  --color-muted: #5f6368;
+
+  --color-danger: #b91c1c;
+  --color-danger-strong: #dc1f26;
+  --color-danger-soft: rgb(220 31 38 / 0.15);
+
+  --color-info: #3c82f6;
+  --color-info-soft: rgb(60 130 246 / 0.15);
+
+  --color-success: #2f6b1b;
+  --color-success-strong: #15803d;
+  --color-success-soft: rgb(50 123 30 / 0.12);
+
+  --color-warning: #b03a0a;
+  --color-warning-strong: #ea580c;
+  --color-warning-soft: rgb(249 115 21 / 0.15);
+
+  /* Admin dashboard stat tiles: one hue per metric, as in Figma. */
+  --color-stat-violet: #680689;
+  --color-stat-violet-soft: rgb(104 6 137 / 0.15);
+  --color-stat-teal: #0f766e;
+  --color-stat-teal-soft: rgb(27 167 148 / 0.15);
+
+  --color-neutral-soft: rgb(222 223 225 / 0.5);
+  --color-calendar-past: #dedfe1;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+}
