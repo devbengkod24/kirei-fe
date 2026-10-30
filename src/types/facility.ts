@@ -33,9 +33,21 @@ export interface Building {
   floors: Floor[];
 }
 
-/** A time range in which a room is already taken. */
-export interface RoomBooking {
-  roomId: string;
+/** The university sports hall. It has no faculty and is booked in fixed slots. */
+export interface SportsHall {
+  id: string;
+  name: string;
+  /** WIB wall-clock "HH:mm" */
+  openTime: string;
+  closeTime: string;
+  slotMinutes: number;
+  /** Activity types the hall can be booked for, e.g. "Badminton". */
+  activities: string[];
+}
+
+/** A time range in which a unit (room, GOR) is already taken. */
+export interface UnitBooking {
+  unitId: string;
   /** ISO 8601 (UTC) */
   startsAt: string;
   /** ISO 8601 (UTC) */

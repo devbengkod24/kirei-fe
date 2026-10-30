@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { createRoomReservationSchema, type RoomReservationInput } from "./schema";
+import {
+  createRoomReservationSchema,
+  createSportsHallReservationSchema,
+  createVehicleReservationSchema,
+  type RoomReservationInput,
+  type SportsHallReservationInput,
+  type VehicleReservationInput,
+} from "./schema";
 
 // 30 Oct 2026, 08:00 WIB
 const schema = createRoomReservationSchema(() => new Date("2026-10-30T01:00:00Z"));
@@ -59,5 +66,80 @@ describe("room reservation schema", () => {
     expect(issues({ ...valid, letter: new File(["x"], "surat.docx", { type: "application/msword" }) })).toMatchObject({
       letter: "Surat harus berformat PDF.",
     });
+  });
+});
+
+describe("GOR reservation schema", () => {
+  const gorSchema = createSportsHallReservationSchema(() => new Date("2026-10-30T01:00:00Z"));
+  const validGor: SportsHallReservationInput = {
+    date: "2026-10-30",
+    startTime: "10:00",
+    endTime: "12:00",
+    activity: "Badminton",
+    notes: "",
+    letter,
+    intent: "submit",
+  };
+  const gorIssues = (input: SportsHallReservationInput) => {
+    const result = gorSchema.safeParse(input);
+    return result.success ? {} : Object.fromEntries(result.error.issues.map((issue) => [issue.path.join("."), issue.message]));
+  };
+
+  it("accepts slots picked on the grid with optional notes", () => {
+    expect(gorIssues(validGor)).toEqual({});
+  });
+
+  it("asks for a slot and an activity", () => {
+    expect(gorIssues({ ...validGor, startTime: "", endTime: "" })).toMatchObject({ startTime: "Pilih jam pada jadwal." });
+    expect(gorIssues({ ...validGor, activity: "" })).toMatchObject({ activity: "Pilih jenis kegiatan." });
+  });
+
+  it("rejects a slot that has started and keeps the letter rule", () => {
+    expect(gorIssues({ ...validGor, startTime: "07:00", endTime: "09:00" })).toHaveProperty("startTime");
+    expect(gorIssues({ ...validGor, letter: null })).toHaveProperty("letter");
+    expect(gorIssues({ ...validGor, letter: null, intent: "draft" })).toEqual({});
+  });
+});
+
+describe("vehicle reservation schema", () => {
+  const vehicleSchema = createVehicleReservationSchema(() => "2026-10-30");
+  const validVehicle: VehicleReservationInput = {
+    phone: "0857 1112 11",
+    destination: "Bali",
+    participants: "12",
+    activity: "Kunjungan studi mahasiswa teknik informatika",
+    startDate: "2026-10-30",
+    endDate: "2026-10-31",
+    letter,
+    intent: "submit",
+  };
+  const vehicleIssues = (input: VehicleReservationInput) => {
+    const result = vehicleSchema.safeParse(input);
+    return result.success ? {} : Object.fromEntries(result.error.issues.map((issue) => [issue.path.join("."), issue.message]));
+  };
+
+  it("accepts a trip and turns the participant count into a number", () => {
+    const result = vehicleSchema.parse(validVehicle);
+    expect(result.participants).toBe(12);
+    expect(result.phone).toBe("0857111211");
+  });
+
+  it("allows a one-day trip but not one that ends before it starts", () => {
+    expect(vehicleIssues({ ...validVehicle, endDate: "2026-10-30" })).toEqual({});
+    expect(vehicleIssues({ ...validVehicle, endDate: "2026-10-29" })).toMatchObject({
+      endDate: "Tanggal selesai tidak boleh sebelum tanggal mulai.",
+    });
+    expect(vehicleIssues({ ...validVehicle, startDate: "2026-10-29" })).toMatchObject({ startDate: "Tanggal mulai sudah lewat." });
+  });
+
+  it("needs at least one participant as a whole number", () => {
+    expect(vehicleIssues({ ...validVehicle, participants: "" })).toMatchObject({ participants: "Jumlah peserta minimal 1." });
+    expect(vehicleIssues({ ...validVehicle, participants: "2.5" })).toMatchObject({ participants: "Jumlah peserta harus bilangan bulat." });
+    expect(vehicleIssues({ ...validVehicle, participants: "dua" })).toHaveProperty("participants");
+  });
+
+  it("checks the destination and activity text", () => {
+    expect(vehicleIssues({ ...validVehicle, destination: "  " })).toHaveProperty("destination");
+    expect(vehicleIssues({ ...validVehicle, activity: "Tur" })).toHaveProperty("activity");
   });
 });

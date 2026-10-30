@@ -37,7 +37,7 @@ export function DraftList({ drafts, links }: DraftListProps) {
         body: (
           <>
             Selamat! Reservasi {draft.unitName} sudah diajukan dan bisa dipantau di bagian{" "}
-            <Link href={links.history} className="font-bold underline-offset-2 hover:underline">
+            <Link href={links.history} onClick={() => setOutcome(null)} className="font-bold underline-offset-2 hover:underline">
               “Reservasi &amp; Riwayat”
             </Link>
             .

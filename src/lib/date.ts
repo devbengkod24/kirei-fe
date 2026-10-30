@@ -43,6 +43,12 @@ export function formatLongDateWIB(input: DateInput): string {
   return `${pick("weekday")}, ${pick("day")} ${pick("month")} ${pick("year")}`;
 }
 
+/** "18 November 2026" */
+export function formatFullDateWIB(input: DateInput): string {
+  const pick = partsOf(input, { day: "numeric", month: "long", year: "numeric" });
+  return `${pick("day")} ${pick("month")} ${pick("year")}`;
+}
+
 /** "18 Nov 2026" */
 export function formatShortDateWIB(input: DateInput): string {
   const pick = partsOf(input, { day: "numeric", month: "short", year: "numeric" });

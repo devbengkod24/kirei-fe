@@ -19,6 +19,11 @@ export function useModalDialog(open: boolean, onClose: () => void) {
     if (!dialog) return;
     if (open && !dialog.open) dialog.showModal();
     if (!open && dialog.open) dialog.close();
+    // Next.js keeps the previous page mounted but hidden after a client navigation. A modal left
+    // open there keeps the whole new page inert, so close it whenever this effect is torn down.
+    return () => {
+      if (dialog.open) dialog.close();
+    };
   }, [open]);
 
   // Escape fires `cancel`. In testing the native `close` event did not always follow it,

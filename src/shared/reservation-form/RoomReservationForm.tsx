@@ -4,32 +4,31 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
-import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { applyFormErrors } from "@/lib/api/form-errors";
-import { toWibDateKey } from "@/lib/date";
-import type { Building, FloorPlanRoom, RoomBooking, RoomCategory } from "@/types/facility";
+import { formatLongDateWIB, toWibDateKey, wibToIso } from "@/lib/date";
+import type { Building, FloorPlanRoom, RoomCategory, UnitBooking } from "@/types/facility";
 import { crossFacultyApprover, defaultSchedule, roomStatus, toIsoRange } from "./availability";
-import { createRoomReservation } from "./createRoomReservation";
+import { toRoomReservationRequest } from "./createReservation";
 import { FloorPlan } from "./FloorPlan";
 import { ROOM_CATEGORY_LABEL, ROOM_STATUS_LABEL } from "./labels";
-import { LetterField } from "./LetterField";
+import { LetterPanel } from "./LetterPanel";
 import { PanelHeading } from "./PanelHeading";
-import { ReservationSteps } from "./ReservationSteps";
-import { ReservationSummaryDialog } from "./ReservationSummaryDialog";
+import { ReservationSteps, STEPS_BY_TYPE } from "./ReservationSteps";
+import { ReservationSubmitDialog } from "./ReservationSubmitDialog";
 import { RoomPreview } from "./RoomPreview";
 import {
   ROOM_RESERVATION_FIELD_MAP,
   SCHEDULE_FIELDS,
   createRoomReservationSchema,
-  type ReservationIntent,
   type RoomReservationInput,
   type RoomReservationValues,
 } from "./schema";
+import { FieldError, SUMMARY_INPUT, SUMMARY_LABEL, SummaryValue, SummaryWhen } from "./summaryParts";
+import { useReservationSubmit } from "./useReservationSubmit";
 
 export interface RoomReservationFormProps {
   buildings: Building[];
-  bookings: RoomBooking[];
+  bookings: UnitBooking[];
   /** ISO 8601 server time, for the default date and time */
   now: string;
   requester: { name: string; fakultasId: string | null };
@@ -48,7 +47,7 @@ const LEGEND = [
 
 const FIELD_ROW = "flex min-h-11 items-center gap-2 rounded-md border border-border px-2.5";
 const SELECT =
-  "min-h-8 w-full min-w-0 appearance-none rounded-sm bg-primary-soft py-1 pr-7 pl-2 text-center text-[11px] font-medium text-primary hover:bg-primary-tint";
+  "min-h-11 w-full min-w-0 appearance-none rounded-sm bg-primary-soft py-1 pr-7 pl-2 text-center text-[11px] font-medium text-primary hover:bg-primary-tint lg:min-h-8";
 const ERROR = "text-[11px] text-danger";
 
 function firstFloorId(building: Building | undefined) {
@@ -83,7 +82,7 @@ export function RoomReservationForm({
     defaultValues: defaults,
     mode: "onTouched",
   });
-  const { register, setValue, trigger, handleSubmit, setError, clearErrors, reset, control, formState } = form;
+  const { register, setValue, control, formState } = form;
   const { errors } = formState;
 
   const [buildingId, floorId, date, startTime, endTime, roomId, letter] = useWatch({
@@ -91,8 +90,12 @@ export function RoomReservationForm({
     name: ["buildingId", "floorId", "date", "startTime", "endTime", "roomId", "letter"],
   });
   const [category, setCategory] = useState<RoomCategory | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [result, setResult] = useState<ReservationIntent | null>(null);
+  const flow = useReservationSubmit(form, {
+    defaults,
+    toRequest: toRoomReservationRequest,
+    fieldMap: ROOM_RESERVATION_FIELD_MAP,
+    onReset: () => setCategory(null),
+  });
 
   const todayKey = toWibDateKey(new Date(now));
   const building = buildings.find((b) => b.id === buildingId);
@@ -127,34 +130,6 @@ export function RoomReservationForm({
     setValue("roomId", room.id === roomId ? "" : room.id, { shouldValidate: Boolean(errors.roomId) });
   };
 
-  const openSummary = async () => {
-    if (await trigger([...SCHEDULE_FIELDS])) {
-      clearErrors("root");
-      setDialogOpen(true);
-    }
-  };
-
-  const submit = (intent: ReservationIntent) => {
-    setValue("intent", intent);
-    void handleSubmit(async (values) => {
-      const response = await createRoomReservation(values);
-      if (response.ok) {
-        setResult(response.intent);
-      } else if ("validation" in response) {
-        applyFormErrors(response.validation, setError, ROOM_RESERVATION_FIELD_MAP);
-      } else {
-        setError("root.server", { message: response.message });
-      }
-    })();
-  };
-
-  const createAnother = () => {
-    reset(defaults);
-    setCategory(null);
-    setResult(null);
-    setDialogOpen(false);
-  };
-
   if (buildings.length === 0) {
     return (
       <Card className="px-6 py-12 text-center">
@@ -172,7 +147,7 @@ export function RoomReservationForm({
         className="flex flex-col gap-2 lg:grid lg:grid-cols-[minmax(0,1fr)_16rem] lg:items-start"
       >
         <Card className="order-2 flex flex-col gap-3 p-3 lg:order-none lg:col-start-1 lg:row-start-1">
-          <ReservationSteps />
+          <ReservationSteps steps={STEPS_BY_TYPE.ruangan} />
           <hr className="border-border" />
 
           <div className="grid gap-3.5 xl:grid-cols-[minmax(0,471fr)_minmax(0,356fr)]">
@@ -356,39 +331,71 @@ export function RoomReservationForm({
             )}
           </Card>
 
-          <Card as="section" aria-labelledby="panel-letter" className="order-3 flex flex-col gap-2 p-3 lg:order-none">
-            <PanelHeading id="panel-letter" iconSrc="/icons/sticky-note.svg">
-              Upload Surat Peminjaman
-            </PanelHeading>
-            <LetterField
-              variant="dropzone"
-              file={letter ?? null}
-              onChange={(file) => setValue("letter", file, { shouldValidate: true })}
-              error={errors.letter?.message}
-            />
-          </Card>
-
-          {/* type="button": before hydration a submit button would send the fields as a GET query */}
-          <Button onClick={() => void openSummary()} className="order-3 min-h-12 w-full text-base font-normal lg:order-none">
-            Reservasi sekarang
-          </Button>
+          <LetterPanel
+            className="order-3 lg:order-none"
+            file={letter ?? null}
+            onChange={(file) => setValue("letter", file, { shouldValidate: true })}
+            error={errors.letter?.message}
+            onReview={() => void flow.openSummary([...SCHEDULE_FIELDS])}
+          />
         </div>
 
         {building && selectedRoom && (
-          <ReservationSummaryDialog
-            open={dialogOpen}
-            // after a successful send, closing starts a fresh form
-            onClose={() => (result ? createAnother() : setDialogOpen(false))}
-            requesterName={requester.name}
-            buildingName={building.name}
-            roomCode={selectedRoom.code}
+          <ReservationSubmitDialog
+            open={flow.dialogOpen}
+            onClose={flow.close}
+            title="Detail Pemesanan"
+            subject={`Reservasi ${selectedRoom.code}`}
             approver={approver}
             submitting={formState.isSubmitting}
-            onSubmit={submit}
-            result={result}
+            onSubmit={flow.submit}
+            result={flow.result}
             links={links}
-            onCreateAnother={createAnother}
-          />
+            onCreateAnother={flow.createAnother}
+          >
+            <SummaryValue label="Peminjam">{requester.name}</SummaryValue>
+            <div className="flex flex-col gap-1">
+              <label htmlFor="reservation-phone" className={SUMMARY_LABEL}>
+                No HP
+              </label>
+              <input
+                id="reservation-phone"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                placeholder="081234567890"
+                aria-invalid={errors.phone ? true : undefined}
+                aria-describedby={errors.phone ? "reservation-phone-error" : undefined}
+                className={SUMMARY_INPUT}
+                {...register("phone")}
+              />
+              <FieldError id="reservation-phone-error" message={errors.phone?.message} />
+            </div>
+            <SummaryWhen
+              date={formatLongDateWIB(wibToIso(date, startTime))}
+              startTime={startTime}
+              endTime={endTime}
+              places={[
+                { iconSrc: "/icons/building-solid.svg", iconWidth: 13, iconHeight: 15, label: building.name },
+                { iconSrc: "/icons/classroom.svg", label: selectedRoom.code },
+              ]}
+            />
+            <div className="flex flex-col gap-1">
+              <label htmlFor="reservation-purpose" className={SUMMARY_LABEL}>
+                Keperluan
+              </label>
+              <textarea
+                id="reservation-purpose"
+                rows={2}
+                placeholder="Contoh: Rapat pengurus bulanan"
+                aria-invalid={errors.purpose ? true : undefined}
+                aria-describedby={errors.purpose ? "reservation-purpose-error" : undefined}
+                className={`${SUMMARY_INPUT} max-h-32 resize-y`}
+                {...register("purpose")}
+              />
+              <FieldError id="reservation-purpose-error" message={errors.purpose?.message} />
+            </div>
+          </ReservationSubmitDialog>
         )}
       </form>
     </FormProvider>

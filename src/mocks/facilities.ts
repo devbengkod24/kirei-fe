@@ -1,5 +1,5 @@
 import { toWibDateKey } from "@/lib/date";
-import type { Building, FloorPlanRoom, RoomBooking } from "@/types/facility";
+import type { Building, FloorPlanRoom, SportsHall, UnitBooking } from "@/types/facility";
 import { wibDateTime } from "./time";
 
 const SAMPLE_PHOTO = "/images/sample-room.jpg";
@@ -94,10 +94,10 @@ export const MOCK_BUILDINGS: Building[] = [
 ];
 
 /** Bookings over the next days so the plan shows some taken rooms. */
-export function buildRoomBookingsMock(now: Date): RoomBooking[] {
+export function buildRoomBookingsMock(now: Date): UnitBooking[] {
   const todayKey = toWibDateKey(now);
-  const booking = (code: string, days: number, start: string, end: string): RoomBooking => ({
-    roomId: `room-${code}`,
+  const booking = (code: string, days: number, start: string, end: string): UnitBooking => ({
+    unitId: `room-${code}`,
     startsAt: new Date(wibDateTime(todayKey, days, start)).toISOString(),
     endsAt: new Date(wibDateTime(todayKey, days, end)).toISOString(),
   });
@@ -110,4 +110,28 @@ export function buildRoomBookingsMock(now: Date): RoomBooking[] {
     booking("H.7", days, "09:00", "11:00"),
     booking("E.2.2", days, "10:00", "15:00"),
   ]);
+}
+
+export const MOCK_SPORTS_HALL: SportsHall = {
+  id: "gor-udinus",
+  name: "GOR Udinus",
+  openTime: "08:00",
+  closeTime: "22:00",
+  slotMinutes: 60,
+  activities: ["Badminton", "Futsal", "Basket", "Voli"],
+};
+
+/** GOR bookings over the next week; tomorrow is fully booked to show a day with no free slot. */
+export function buildSportsHallBookingsMock(now: Date): UnitBooking[] {
+  const todayKey = toWibDateKey(now);
+  const booking = (days: number, start: string, end: string): UnitBooking => ({
+    unitId: MOCK_SPORTS_HALL.id,
+    startsAt: new Date(wibDateTime(todayKey, days, start)).toISOString(),
+    endsAt: new Date(wibDateTime(todayKey, days, end)).toISOString(),
+  });
+
+  return [
+    booking(1, "08:00", "22:00"),
+    ...[0, 2, 3, 4, 5, 6].flatMap((days) => [booking(days, "08:00", "09:00"), booking(days, "16:00", "18:00")]),
+  ];
 }

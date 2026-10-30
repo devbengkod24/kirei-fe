@@ -1,10 +1,10 @@
 import { toWibDateKey, toWibTimeKey, wibToIso } from "@/lib/date";
-import type { Building, FloorPlanRoom, RoomBooking, RoomCategory } from "@/types/facility";
+import type { Building, FloorPlanRoom, UnitBooking, RoomCategory } from "@/types/facility";
 
 export type RoomStatus = "selected" | "booked" | "available" | "filtered";
 
 export interface RoomStatusInput {
-  bookings: RoomBooking[];
+  bookings: UnitBooking[];
   /** ISO 8601, null while the time range is incomplete or invalid */
   startsAt: string | null;
   endsAt: string | null;
@@ -19,9 +19,9 @@ export function rangesOverlap(aStart: string, aEnd: string, bStart: string, bEnd
   return Date.parse(aStart) < Date.parse(bEnd) && Date.parse(bStart) < Date.parse(aEnd);
 }
 
-export function isRoomBooked(roomId: string, bookings: RoomBooking[], startsAt: string, endsAt: string) {
+export function isRoomBooked(roomId: string, bookings: UnitBooking[], startsAt: string, endsAt: string) {
   return bookings.some(
-    (booking) => booking.roomId === roomId && rangesOverlap(booking.startsAt, booking.endsAt, startsAt, endsAt),
+    (booking) => booking.unitId === roomId && rangesOverlap(booking.startsAt, booking.endsAt, startsAt, endsAt),
   );
 }
 

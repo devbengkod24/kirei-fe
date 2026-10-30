@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Building, FloorPlanRoom, RoomBooking } from "@/types/facility";
+import type { Building, FloorPlanRoom, UnitBooking } from "@/types/facility";
 import { crossFacultyApprover, defaultSchedule, rangesOverlap, roomStatus, toIsoRange } from "./availability";
 
 const room = (id: string, category: FloorPlanRoom["category"] = "kelas"): FloorPlanRoom => ({
@@ -14,7 +14,7 @@ const room = (id: string, category: FloorPlanRoom["category"] = "kelas"): FloorP
 });
 
 // H.5.2 is taken 09:00-11:00 WIB on 30 Oct 2026
-const bookings: RoomBooking[] = [{ roomId: "H.5.2", startsAt: "2026-10-30T02:00:00Z", endsAt: "2026-10-30T04:00:00Z" }];
+const bookings: UnitBooking[] = [{ unitId: "H.5.2", startsAt: "2026-10-30T02:00:00Z", endsAt: "2026-10-30T04:00:00Z" }];
 
 const base = {
   bookings,
