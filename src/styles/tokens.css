@@ -6,6 +6,7 @@
  * Deviations from Figma, made to pass WCAG AA contrast:
  * - muted text #ababab / #888888 -> #5f6368
  * - danger text #dc1f26 on danger-soft -> #b91c1c (border/outline keeps #dc1f26)
+ * - success text #327b1e on success-soft -> #2d711b (background keeps #327b1e at 15%)
  */
 @theme {
   --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
@@ -28,6 +29,9 @@
   --color-danger-strong: #dc1f26;
   --color-danger-soft: rgb(220 31 38 / 0.15);
 
+  --color-success: #2d711b;
+  --color-success-soft: rgb(50 123 30 / 0.15);
+
   --color-info: #3c82f6;
   --color-info-soft: rgb(60 130 246 / 0.15);
 
@@ -35,6 +39,8 @@
   --color-calendar-past: #dedfe1;
 
   --radius-sm: 4px;
+  /* segment inside a segmented picker, status pill in tables */
+  --radius-inner: 6px;
   --radius-md: 8px;
   --radius-lg: 10px;
 }

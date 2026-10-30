@@ -26,6 +26,18 @@ export function formatDateWIB(input: DateInput): string {
   return `${pick("weekday")}, ${pick("day")} ${pick("month")} ${pick("year")}`;
 }
 
+/** "Rabu, 18 November 2026" */
+export function formatLongDateWIB(input: DateInput): string {
+  const pick = partsOf(input, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  return `${pick("weekday")}, ${pick("day")} ${pick("month")} ${pick("year")}`;
+}
+
+/** "18 Nov 2026" */
+export function formatShortDateWIB(input: DateInput): string {
+  const pick = partsOf(input, { day: "numeric", month: "short", year: "numeric" });
+  return `${pick("day")} ${pick("month")} ${pick("year")}`;
+}
+
 /** "09.30" */
 export function formatTimeWIB(input: DateInput): string {
   const pick = partsOf(input, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
@@ -35,6 +47,11 @@ export function formatTimeWIB(input: DateInput): string {
 /** "09.30 - 10.20 WIB" */
 export function formatTimeRangeWIB(start: DateInput, end: DateInput): string {
   return `${formatTimeWIB(start)} - ${formatTimeWIB(end)} WIB`;
+}
+
+/** "09.30 - 10.20", for places where a header already says WIB. */
+export function formatTimeSpanWIB(start: DateInput, end: DateInput): string {
+  return `${formatTimeWIB(start)} - ${formatTimeWIB(end)}`;
 }
 
 /** "25 Feb 13.45 WIB" */
