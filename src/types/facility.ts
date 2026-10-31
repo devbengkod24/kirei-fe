@@ -53,3 +53,13 @@ export interface UnitBooking {
   /** ISO 8601 (UTC) */
   endsAt: string;
 }
+
+/** A campus vehicle. Borrowers ask for a trip; the admin assigns the vehicle. */
+export interface Vehicle {
+  id: string;
+  name: string;
+  plateNumber: string;
+  /** Seats, driver included. */
+  capacity: number;
+  isActive: boolean;
+}

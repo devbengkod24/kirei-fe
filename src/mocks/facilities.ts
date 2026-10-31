@@ -1,5 +1,5 @@
 import { toWibDateKey } from "@/lib/date";
-import type { Building, FloorPlanRoom, SportsHall, UnitBooking } from "@/types/facility";
+import type { Building, FloorPlanRoom, SportsHall, UnitBooking, Vehicle } from "@/types/facility";
 import { wibDateTime } from "./time";
 
 const SAMPLE_PHOTO = "/images/sample-room.jpg";
@@ -142,3 +142,10 @@ export function buildSportsHallBookingsMock(now: Date): UnitBooking[] {
     ...[0, 2, 3, 4, 5, 6].flatMap((days) => [booking(days, "08:00", "09:00"), booking(days, "16:00", "18:00")]),
   ];
 }
+
+export const MOCK_VEHICLES: Vehicle[] = [
+  { id: "vehicle-hiace", name: "Toyota Hiace", plateNumber: "H 1234 UD", capacity: 15, isActive: true },
+  { id: "vehicle-bus", name: "Bus Udinus", plateNumber: "H 7012 UD", capacity: 40, isActive: true },
+  { id: "vehicle-innova", name: "Toyota Innova", plateNumber: "H 1888 UD", capacity: 7, isActive: true },
+  { id: "vehicle-elf", name: "Isuzu Elf", plateNumber: "H 1560 UD", capacity: 19, isActive: false },
+];

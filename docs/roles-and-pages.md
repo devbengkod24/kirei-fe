@@ -12,7 +12,7 @@ URL di bawah adalah rencana. Yang sudah ada di kode hanya halaman ormawa/dosen; 
 |---|---|---|---|
 | `ormawa`, `dosen` | `(ormawa)` | `/` | Sidebar |
 | `admin_fakultas` | `(admin-fakultas)` | `/fakultas` | Sidebar |
-| `admin_universitas` | `(admin-universitas)` | `/admin` | Sidebar + pilihan tipe (Ruangan, GOR, Kendaraan) |
+| `admin_universitas` | `(admin-universitas)` | `/admin` | Sidebar + tab tipe (Ruangan, Kendaraan, GOR) di halaman yang sama untuk tiap tipe |
 | `operator` | `(operator)` | `/operator` | Header saja, tanpa sidebar |
 | Publik | `(auth)` | `/` | Tanpa shell |
 
@@ -70,29 +70,23 @@ Persetujuan dan Riwayat tampil sebagai dua tab di satu halaman "Kelola Reservasi
 
 ## Admin Universitas
 
-Mengambil alih semua menu SuperAdmin lama. Di atas sidebar ada pilihan tipe (Ruangan, GOR, Kendaraan) yang menentukan segmen `[tipe]` di URL. `/admin` mengarah ke `/admin/ruangan/dashboard`.
+Mengambil alih semua menu SuperAdmin lama. Satu sidebar untuk semua tipe. Menu yang fiturnya sama untuk ruangan, kendaraan, dan GOR membuka halaman dengan **tab tipe** di atasnya (Ruangan · Kendaraan · GOR, `TypeTabs`). Tipe dibawa di segmen dinamis `[tipe]` (`ruangan | kendaraan | gor`); link menu membuka Ruangan. `/admin` mengarah ke `/admin/dashboard`.
 
-**Menu per tipe** (`[tipe]` = `ruangan | gor | kendaraan`)
+| Menu | Tab tipe | URL | Isi | Komponen |
+|---|---|---|---|---|
+| Dashboard | | `/admin/dashboard` | Satu dashboard gabungan semua tipe: ringkasan per tipe (hari ini, menunggu, unit tersedia), grafik mingguan dengan pilihan tipe, reservasi hari ini (dengan kolom tipe), laporan terbaru | `modules/admin-universitas/dashboard`, memakai potongan `shared/admin-dashboard` |
+| Kelola Fasilitas | Ruangan, Kendaraan, GOR | `/admin/fasilitas/[tipe]` | Daftar dan ubah unit per tipe | `shared/rooms` (ruangan), komponen setara untuk GOR dan kendaraan |
+| Reservasi Internal | Ruangan, Kendaraan, GOR | `/admin/reservasi-internal/[tipe]` | Admin memesan atas nama kampus. Ruangan boleh memakai slot yang sudah dipesan di semua gedung. | `shared/reservation-form` |
+| Kelola Reservasi | Ruangan, Kendaraan, GOR | `/admin/reservasi/[tipe]/persetujuan`, `/admin/reservasi/[tipe]/riwayat` | Tab Persetujuan dan Riwayat, masing-masing ber-URL | `shared/reservation-management` |
+| Kelola Denah | | `/admin/denah` | Editor denah lantai (react-konva). Hanya Admin Universitas. | `modules/admin-universitas` |
+| Kelola Pengguna | | `/admin/pengguna` | Tab Ormawa dan Dosen: daftar, detail, tambah, status akun. | `modules/admin-universitas` |
+| Laporan Pengguna | | `/admin/laporan` | | `shared/reports` |
+| Pengumuman | | `/admin/pengumuman` | Pengumuman universitas dan fakultas. | `shared/announcements` (`canManage`) |
+| Profil | | `/admin/profil` | | `shared/profile` |
 
-| Menu | URL | Isi | Komponen |
-|---|---|---|---|
-| Dashboard | `/admin/[tipe]/dashboard` | Sama dengan dashboard Admin Fakultas, untuk tipe terpilih | `shared/dashboard` (`AdminDashboard`) |
-| Kelola Reservasi: Persetujuan | `/admin/[tipe]/persetujuan` | | `shared/reservation-approval` |
-| Kelola Reservasi: Riwayat | `/admin/[tipe]/riwayat` | | `shared/reservation-history` |
-| Reservasi Internal | `/admin/[tipe]/reservasi-internal` | Boleh memakai slot yang sudah dipesan di semua ruangan. | `shared/reservation-form` |
-| Kelola Ruangan / GOR / Kendaraan | `/admin/[tipe]/unit` | Label menu mengikuti tipe. | `shared/unit-management` |
+Berpindah tab di Kelola Reservasi mempertahankan tab Persetujuan atau Riwayat yang sedang dibuka.
 
-**Menu umum** (tidak bergantung tipe)
-
-| Menu | URL | Isi | Komponen |
-|---|---|---|---|
-| Kelola Denah | `/admin/denah` | Editor denah lantai (react-konva). Hanya Admin Universitas. | `modules/admin-universitas` |
-| Kelola Pengguna | `/admin/pengguna` | Tab Ormawa dan Dosen: daftar, detail, tambah, status akun. | `modules/admin-universitas` |
-| Laporan Pengguna | `/admin/laporan` | | `shared/user-reports` |
-| Pengumuman | `/admin/pengumuman` | Pengumuman universitas dan fakultas. | `shared/announcements` (`canManage`) |
-| Profil | `/admin/profil` | | `shared/profile` |
-
-**Filter fakultas.** Ditampilkan di halaman yang memuat data fakultas: semua halaman `/admin/ruangan/*`, Kelola Denah, Laporan Pengguna, dan Pengumuman. Nilainya dibawa di URL (`?fakultas=<id>`), kosong berarti semua fakultas. Tidak ditampilkan untuk GOR dan kendaraan. Contoh kode ada di `docs/architecture.md` bagian "Scope fakultas".
+**Filter fakultas.** Ditampilkan di halaman yang memuat data fakultas: halaman ber-`[tipe]` dengan tipe `ruangan`, Dashboard (hanya memengaruhi angka ruangan), Kelola Denah, Laporan Pengguna, dan Pengumuman. Nilainya dibawa di URL (`?fakultas=<id>`), kosong berarti semua fakultas. Tidak ditampilkan untuk GOR dan kendaraan. Contoh kode ada di `docs/architecture.md` bagian "Scope fakultas".
 
 ## Operator
 
@@ -129,6 +123,7 @@ Kemampuan ini dikirim ke `shared/reservation-form` lewat prop (mis. `canUseBooke
 | `shared/user-reports` | Kedua admin | `scope`, `showFakultasFilter` |
 | `shared/announcements` | Ormawa/dosen, kedua admin | `canManage`, `scope` |
 | `shared/profile` | Ormawa/dosen, kedua admin | |
+| `shared/fakultas-filter` | Admin Universitas | `options`, `value` (`?fakultas=` di URL) |
 | `shared/layout` | Semua | |
 
 ## Perbedaan dengan Figma V3
@@ -141,7 +136,7 @@ Bagian ini juga menjadi daftar yang perlu diperbarui di Figma.
 | Kartu penalti dan peringatan akun diblokir di dashboard ormawa | Dihapus; hanya kartu Total Reservasi | Tidak ada penalti dan blokir akun |
 | Angka "Pengguna terblokir" di Distribusi Pengguna (semua dashboard admin) | Dihapus | Sama |
 | Seri "Reservasi Pelanggaran" di grafik dashboard admin | Dihapus; grafik memuat reservasi berhasil dan dibatalkan | Sama |
-| Admin Universitas hanya punya pilihan tipe | Ditambah filter fakultas di halaman yang memuat data fakultas | Fakultas adalah batas data |
+| Admin Universitas memakai pilihan tipe di atas sidebar dan dashboard per tipe | Satu sidebar, tab tipe di halaman per tipe, satu dashboard gabungan, dan filter fakultas di halaman yang memuat data fakultas | Keputusan tim; fakultas adalah batas data |
 | Reservasi Internal belum punya layar jadwal pengganti | Ditambah alur "Memakai slot yang sudah dipesan" | Aturan bisnis di AGENTS.md |
 | Kelola Pengguna hanya Ormawa dan Dosen | Belum ada desain untuk akun admin fakultas dan operator | Perlu dikonfirmasi ke desainer |
 | Merek "Bengkel Koding / Coworking Space" | Belum diputuskan; aset sementara dipakai | Perlu dikonfirmasi |

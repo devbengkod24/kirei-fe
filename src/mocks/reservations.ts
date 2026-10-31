@@ -109,6 +109,7 @@ export function buildReservationsMock(now: Date): ReservationRequest[] {
   return ROWS.map((row, index) => ({
     id: `res-${String(index + 1).padStart(3, "0")}`,
     ticketCode: `#${828374 + index * 17}`,
+    type: "ruangan",
     startsAt: wibDateTime(todayKey, row.days, row.start),
     endsAt: wibDateTime(todayKey, row.days, row.end),
     buildingName: "Gedung H",
@@ -118,5 +119,36 @@ export function buildReservationsMock(now: Date): ReservationRequest[] {
     borrowerDetail: row.borrowerDetail,
     purpose: row.purpose,
     letterFileName: index % 4 === 3 ? null : `Surat Peminjaman Ruang ${row.roomName}.pdf`,
+  }));
+}
+
+// GOR and vehicle requests, for the admin universitas pages.
+const FACILITY_ROWS: (Row & { type: "gor" | "kendaraan"; buildingName: string })[] = [
+  { type: "gor", buildingName: "GOR Udinus", roomName: "GOR Udinus", days: 0, start: "16:00", end: "18:00", borrowerName: "UKM Bulu Tangkis", borrowerDetail: "Ormawa tingkat universitas", purpose: "Latihan rutin badminton", status: "disetujui" },
+  { type: "gor", buildingName: "GOR Udinus", roomName: "GOR Udinus", days: 0, start: "08:00", end: "09:00", borrowerName: "UKM Futsal", borrowerDetail: "Ormawa tingkat universitas", purpose: "Latihan futsal", status: "selesai" },
+  { type: "gor", buildingName: "GOR Udinus", roomName: "GOR Udinus", days: 2, start: "15:00", end: "17:00", borrowerName: "HMTI", borrowerDetail: "Ormawa • HMTI", purpose: "Turnamen voli antar angkatan", status: "menunggu_konfirmasi" },
+  { type: "gor", buildingName: "GOR Udinus", roomName: "GOR Udinus", days: 4, start: "19:00", end: "21:00", borrowerName: "UKM Basket", borrowerDetail: "Ormawa tingkat universitas", purpose: "Persiapan liga mahasiswa", status: "menunggu_konfirmasi" },
+  { type: "gor", buildingName: "GOR Udinus", roomName: "GOR Udinus", days: -3, start: "16:00", end: "18:00", borrowerName: "UKM Bulu Tangkis", borrowerDetail: "Ormawa tingkat universitas", purpose: "Latihan rutin badminton", status: "selesai" },
+  { type: "kendaraan", buildingName: "Kendaraan", roomName: "Toyota Hiace", days: 0, start: "06:00", end: "18:00", borrowerName: "BEM Universitas", borrowerDetail: "Ormawa tingkat universitas", purpose: "Kunjungan industri ke Kudus", status: "disetujui" },
+  { type: "kendaraan", buildingName: "Kendaraan", roomName: "Bus Udinus", days: 3, start: "05:00", end: "20:00", borrowerName: "Dr. Hendra Gunawan, S.Kom", borrowerDetail: "Dosen Pembimbing BEM • NPP: 19820411", purpose: "Studi banding ke Yogyakarta", status: "menunggu_konfirmasi" },
+  { type: "kendaraan", buildingName: "Kendaraan", roomName: "Toyota Innova", days: 1, start: "08:00", end: "15:00", borrowerName: "Dr. Maria Lestari, M.Pd.", borrowerDetail: "Dosen • NPP: 19800521", purpose: "Pendampingan lomba", status: "menunggu_konfirmasi" },
+  { type: "kendaraan", buildingName: "Kendaraan", roomName: "Toyota Hiace", days: -6, start: "07:00", end: "17:00", borrowerName: "HMTI", borrowerDetail: "Ormawa • HMTI", purpose: "Bakti sosial", status: "selesai" },
+];
+
+export function buildFacilityRequestsMock(now: Date): ReservationRequest[] {
+  const todayKey = toWibDateKey(now);
+  return FACILITY_ROWS.map((row, index) => ({
+    id: `res-${row.type}-${String(index + 1).padStart(3, "0")}`,
+    ticketCode: `#${829100 + index * 13}`,
+    type: row.type,
+    startsAt: wibDateTime(todayKey, row.days, row.start),
+    endsAt: wibDateTime(todayKey, row.days, row.end),
+    buildingName: row.buildingName,
+    roomName: row.roomName,
+    status: row.status,
+    borrowerName: row.borrowerName,
+    borrowerDetail: row.borrowerDetail,
+    purpose: row.purpose,
+    letterFileName: `Surat Peminjaman ${row.roomName}.pdf`,
   }));
 }

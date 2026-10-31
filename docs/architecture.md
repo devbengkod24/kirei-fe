@@ -106,6 +106,22 @@ src/shared/profile/                            → profil + ubah kata sandi
 src/shared/admin-scope.ts                      → tipe AdminScope { fakultasId } yang dikirim ke loader
 ```
 
+### Admin Universitas
+
+Semua URL berawalan `/admin`. Satu sidebar; fitur yang sama untuk ruangan, kendaraan, dan GOR memilih tipe lewat tab di atas halaman (`TypeTabs`, dipasang di `layout.tsx` fitur itu). Tipe dibawa di segmen `[tipe]`.
+
+```
+src/app/(admin-universitas)/layout.tsx              → AdminUniversitasShell (requireRole di avatar, seperti admin fakultas)
+src/app/(admin-universitas)/admin/**/[tipe]/page.tsx → generateStaticParams = reservationTypeParams, tipe dibaca parseReservationTypeParam (404 bila tidak dikenal)
+src/app/(admin-universitas)/admin/{fasilitas,reservasi-internal,reservasi}/layout.tsx → TypeTabs di atas halaman
+src/modules/admin-universitas/                      → routes.ts (pembuat URL per tipe), nav.ts, shell, TypeTabs
+src/modules/admin-universitas/dashboard/            → dashboard gabungan: ringkasan per tipe, grafik dengan pilihan tipe, reservasi hari ini berkolom Tipe
+src/shared/fakultas-filter/                         → FakultasFilter (?fakultas= di URL), fakultasScopeFromSearchParams, getFakultasOptions
+src/shared/reservation/reservationTypeParam.ts      → helper segmen [tipe]
+```
+
+Filter fakultas hanya menyaring data ruangan; GOR dan kendaraan milik universitas. Dashboard menuliskannya di UI supaya angka GOR dan kendaraan tidak disangka ikut tersaring.
+
 **Login mock.** `/login` (`shared/auth`) memanggil server action `lib/auth/actions.ts`, yang mencocokkan akun di `mocks/user.ts` (`MOCK_ACCOUNTS`, kata sandi `MOCK_PASSWORD`) lalu menyimpan id user di cookie httpOnly `kirei_session`. `proxy.ts` mengalihkan tamu ke `/login` dan pengguna yang sudah masuk dari `/login` atau `/` ke beranda role-nya (`homeFor` di `lib/auth/session.ts`). `getCurrentUser` membaca cookie itu, dan `requireRole` mengembalikan role lain ke berandanya sendiri. Cookie ini bisa dipalsukan dan hanya untuk mencoba alur. Saat Sanctum siap, yang diganti cukup isi `login`/`logout` dan `userFromSession`.
 
 Data masih dari `src/mocks/` (lihat `mockRoomsInScope`). Aksi tulis (setujui, tolak, simpan ruangan, buat pengumuman, reservasi) baru mengubah state lokal dan ditandai `TODO` di titik pemanggilan API.
@@ -142,8 +158,8 @@ export default async function Page() {
 **Scope fakultas.** Model data per fakultas dijelaskan di AGENTS.md ("Model fakultas"). Admin fakultas selalu terkunci ke fakultasnya. Admin Universitas melihat semua fakultas dan bisa menyaringnya lewat filter, yang nilainya dibawa di URL agar bisa dibagikan:
 
 ```tsx
-// contoh: Admin Universitas, /admin/ruangan/persetujuan?fakultas=fik
-export default async function Page({ params, searchParams }: PageProps<"/admin/[tipe]/persetujuan">) {
+// contoh: Admin Universitas, /admin/reservasi/ruangan/persetujuan?fakultas=fik
+export default async function Page({ params, searchParams }: PageProps<"/admin/reservasi/[tipe]/persetujuan">) {
   await requireRole(["admin_universitas"]);
   const { tipe } = await params;
   const { fakultas } = await searchParams;

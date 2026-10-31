@@ -67,6 +67,7 @@ export interface ReservationDraft extends ReservationRecord {
 
 /** A reservation as an admin sees it: who booked, for what, and the uploaded letter. */
 export interface ReservationRequest extends ReservationSummary {
+  type: ReservationType;
   borrowerName: string;
   /** e.g. "Dosen Pembimbing BEM • NPP: 19820411" */
   borrowerDetail: string;

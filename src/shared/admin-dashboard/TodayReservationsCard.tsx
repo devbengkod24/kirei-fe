@@ -4,15 +4,20 @@ import { Card } from "@/components/ui/Card";
 import { TABLE, TABLE_CELL, TABLE_HEAD_CELL, TABLE_ROW } from "@/components/ui/table";
 import { formatTimeWIB } from "@/lib/date";
 import { ReservationStatusBadge } from "@/shared/reservation/ReservationStatusBadge";
+import { RESERVATION_TYPE_LABEL } from "@/shared/reservation/reservationTypes";
 import type { ReservationRequest } from "@/types/reservation";
 
 export interface TodayReservationsCardProps {
   reservations: ReservationRequest[];
   allHref: string;
+  /** Adds a Tipe column, for a dashboard that mixes rooms, GOR, and vehicles. */
+  showType?: boolean;
   className?: string;
 }
 
-export function TodayReservationsCard({ reservations, allHref, className = "" }: TodayReservationsCardProps) {
+export function TodayReservationsCard({ reservations, allHref, showType = false, className = "" }: TodayReservationsCardProps) {
+  const unitLabel = showType ? "Unit" : "Ruangan";
+
   return (
     <Card as="section" aria-labelledby="today-reservations-title" className={`flex flex-col gap-3 p-3 ${className}`}>
       <div className="flex items-center justify-between gap-2">
@@ -40,7 +45,8 @@ export function TodayReservationsCard({ reservations, allHref, className = "" }:
             <thead>
               <tr className={TABLE_ROW}>
                 <th scope="col" className={`${TABLE_HEAD_CELL} text-left`}>Pemesan</th>
-                <th scope="col" className={`${TABLE_HEAD_CELL} text-left`}>Ruangan</th>
+                {showType && <th scope="col" className={`${TABLE_HEAD_CELL} text-left`}>Tipe</th>}
+                <th scope="col" className={`${TABLE_HEAD_CELL} text-left`}>{unitLabel}</th>
                 <th scope="col" className={`${TABLE_HEAD_CELL} text-left`}>Keperluan</th>
                 <th scope="col" className={`${TABLE_HEAD_CELL} text-center`}>Status</th>
               </tr>
@@ -51,6 +57,7 @@ export function TodayReservationsCard({ reservations, allHref, className = "" }:
                   <td className={`${TABLE_CELL} max-w-[180px] truncate`} title={reservation.borrowerName}>
                     {reservation.borrowerName}
                   </td>
+                  {showType && <td className={`${TABLE_CELL} whitespace-nowrap`}>{RESERVATION_TYPE_LABEL[reservation.type]}</td>}
                   <td className={`${TABLE_CELL} whitespace-nowrap`}>
                     {reservation.roomName}
                     <span className="ml-1 text-muted">{formatTimeWIB(reservation.startsAt)}</span>
@@ -73,7 +80,13 @@ export function TodayReservationsCard({ reservations, allHref, className = "" }:
                   <ReservationStatusBadge status={reservation.status} size="sm" />
                 </div>
                 <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
-                  <dt className="text-primary">Ruangan</dt>
+                  {showType && (
+                    <>
+                      <dt className="text-primary">Tipe</dt>
+                      <dd>{RESERVATION_TYPE_LABEL[reservation.type]}</dd>
+                    </>
+                  )}
+                  <dt className="text-primary">{unitLabel}</dt>
                   <dd>
                     {reservation.roomName} <span className="text-muted">{formatTimeWIB(reservation.startsAt)} WIB</span>
                   </dd>
