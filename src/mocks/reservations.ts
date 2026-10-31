@@ -4,7 +4,10 @@ import { wibDateTime } from "./time";
 
 /* ---------- Borrower: own reservations and history ---------- */
 
-const BOOKER = { bookerName: "Dian Nuswantoro Computer Club", bookerEmail: "nurudin911@gmail.com" };
+/** One sample PDF stands in for every uploaded letter. */
+const SAMPLE_LETTER_URL = "/samples/surat-peminjaman.pdf";
+
+const BOOKER ={ bookerName: "Dian Nuswantoro Computer Club", bookerEmail: "nurudin911@gmail.com" };
 
 const UNITS: Record<ReservationType, string[]> = {
   ruangan: ["H.5.2", "H.4.6", "H.2.12", "H.6.7", "H.3.7"],
@@ -119,6 +122,7 @@ export function buildReservationsMock(now: Date): ReservationRequest[] {
     borrowerDetail: row.borrowerDetail,
     purpose: row.purpose,
     letterFileName: index % 4 === 3 ? null : `Surat Peminjaman Ruang ${row.roomName}.pdf`,
+    letterUrl: index % 4 === 3 ? null : SAMPLE_LETTER_URL,
   }));
 }
 
@@ -160,6 +164,7 @@ export function buildFacilityRequestsMock(now: Date): ReservationRequest[] {
     borrowerDetail: row.borrowerDetail,
     purpose: row.purpose,
     letterFileName: `Surat Peminjaman ${row.type === "gor" ? row.roomName : "Kendaraan"}.pdf`,
+    letterUrl: SAMPLE_LETTER_URL,
     activity: row.activity,
     trip: row.trip,
   }));

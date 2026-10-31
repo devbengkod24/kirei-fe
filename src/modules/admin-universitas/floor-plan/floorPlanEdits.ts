@@ -30,6 +30,28 @@ export function fitRoom(rect: RoomRect, floor: PlanSize): RoomRect {
   };
 }
 
+/** Allowed floor size, in cells, for both columns and rows. */
+export const FLOOR_CELLS = { min: 4, max: 60 };
+
+/**
+ * Sets the floor to whole cells. Growing always works; shrinking is refused while a room would be
+ * cut off, naming those rooms, so the plan never changes behind the admin's back.
+ */
+export function resizeFloor(floor: Floor, columns: number, rows: number): { floor: Floor } | { error: string } {
+  const { min, max } = FLOOR_CELLS;
+  if (![columns, rows].every((value) => Number.isInteger(value) && value >= min && value <= max)) {
+    return { error: `Ukuran lantai harus bilangan bulat ${min}–${max} kotak.` };
+  }
+  const planWidth = columns * GRID;
+  const planHeight = rows * GRID;
+  const cut = floor.rooms.filter((room) => room.x + room.width > planWidth || room.y + room.height > planHeight);
+  if (cut.length > 0) {
+    const codes = cut.map((room) => room.code.trim() || "tanpa kode").join(", ");
+    return { error: `Ruangan ${codes} berada di luar ukuran baru. Pindahkan atau kecilkan dulu.` };
+  }
+  return { floor: { ...floor, planWidth, planHeight } };
+}
+
 /** Next code on the floor from its existing pattern, e.g. "H.5.14" → "H.5.15". Empty when there is no pattern. */
 export function suggestRoomCode(floor: Floor): string {
   let prefix = "";
@@ -47,6 +69,11 @@ export function suggestRoomCode(floor: Floor): string {
 }
 
 const overlaps = (a: RoomRect, b: RoomRect) => a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+
+/** The first other room on the floor that the rect would cover, if any. Rooms may touch, not overlap. */
+export function collidingRoom(floor: Floor, roomId: string, rect: RoomRect): FloorPlanRoom | undefined {
+  return floor.rooms.find((room) => room.id !== roomId && overlaps(room, rect));
+}
 
 /** A new 2 × 2 room in the first free spot, scanning row by row; the top-left corner when the floor is full. */
 export function newRoom(floor: Floor, id: string, category: RoomCategory = "kelas"): FloorPlanRoom {

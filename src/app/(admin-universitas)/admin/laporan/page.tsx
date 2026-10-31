@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
-import { ComingSoon } from "@/components/feedback/ComingSoon";
-import { ADMIN_UNIVERSITAS_ROUTES } from "@/modules/admin-universitas/routes";
+import { requireRole } from "@/lib/auth/requireRole";
+import { getUserReports } from "@/shared/reports/getUserReports";
+import { UserReportList } from "@/shared/reports/UserReportList";
 
 export const metadata: Metadata = { title: "Laporan Pengguna" };
 
-export default function Page() {
-  return <ComingSoon title="Laporan Pengguna" backHref={ADMIN_UNIVERSITAS_ROUTES.dashboard} backLabel="Kembali ke Dashboard" />;
+export default async function Page() {
+  await requireRole(["admin_universitas"]);
+  // All faculties plus university buildings.
+  const reports = await getUserReports({ fakultasId: null });
+
+  return <UserReportList reports={reports} loadedAt={new Date().toISOString()} />;
 }

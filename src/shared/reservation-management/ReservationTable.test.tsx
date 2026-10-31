@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
-import type { Vehicle } from "@/types/facility";
 import type { ReservationRequest } from "@/types/reservation";
 import { ReservationTable } from "./ReservationTable";
 
@@ -18,13 +17,9 @@ const TRIP: ReservationRequest = {
   borrowerDetail: "Dosen",
   purpose: "Pendampingan lomba",
   letterFileName: null,
+  letterUrl: null,
   trip: { destination: "Salatiga", participants: 6 },
 };
-
-const VEHICLES: Vehicle[] = [
-  { id: "vehicle-innova", name: "Toyota Innova", capacity: 7, unitCount: 4, isActive: true },
-  { id: "vehicle-bus", name: "Bus Udinus", capacity: 40, unitCount: 2, isActive: true },
-];
 
 beforeAll(() => {
   // jsdom has no modal dialog support.
@@ -39,37 +34,21 @@ beforeAll(() => {
 afterEach(cleanup);
 
 describe("ReservationTable for vehicles", () => {
-  it("shows the trip columns and an unassigned vehicle", () => {
-    render(<ReservationTable tipe="kendaraan" tab="persetujuan" reservations={[TRIP]} vehicles={VEHICLES} />);
+  it("shows the trip without a vehicle column", () => {
+    render(<ReservationTable tipe="kendaraan" tab="persetujuan" reservations={[TRIP]} />);
     const table = screen.getByRole("table");
     expect(within(table).getByRole("columnheader", { name: "Tujuan" })).toBeTruthy();
+    expect(within(table).queryByRole("columnheader", { name: "Kendaraan" })).toBeNull();
     expect(within(table).queryByRole("columnheader", { name: "Ruangan" })).toBeNull();
-    expect(within(table).getByText("Belum ditentukan")).toBeTruthy();
     expect(within(table).getByText("6 orang")).toBeTruthy();
-    expect(within(table).queryByRole("columnheader", { name: "Peserta" })).toBeNull();
   });
 
-  it("asks for at least one vehicle, and allows several of the same kind", () => {
-    render(<ReservationTable tipe="kendaraan" tab="persetujuan" reservations={[TRIP]} vehicles={VEHICLES} />);
+  it("asks again before approving a trip", () => {
+    render(<ReservationTable tipe="kendaraan" tab="persetujuan" reservations={[TRIP]} />);
     fireEvent.click(within(screen.getByRole("table")).getByRole("button", { name: `Setujui reservasi ${TRIP.borrowerName}` }));
-
-    const dialog = screen.getByRole("dialog", { name: "Setujui Reservasi Kendaraan" });
-    fireEvent.click(within(dialog).getByRole("button", { name: "Setujui" }));
-    expect(within(dialog).getByText("Tambahkan minimal satu kendaraan untuk perjalanan ini.")).toBeTruthy();
-
-    const addInnova = within(dialog).getByRole("button", { name: "Tambah Toyota Innova" });
-    fireEvent.click(addInnova);
-    fireEvent.click(addInnova);
-    expect(within(dialog).getByText("14 kursi", { exact: false })).toBeTruthy();
-    fireEvent.click(within(dialog).getByRole("button", { name: "Setujui" }));
-    expect(screen.getByRole("status").textContent).toBe(`Reservasi ${TRIP.borrowerName} disetujui dengan 2 Toyota Innova.`);
-  });
-
-  it("approves a room right away", () => {
-    const room: ReservationRequest = { ...TRIP, id: "res-001", type: "ruangan", roomName: "H.5.1", buildingName: "Gedung H", trip: undefined };
-    render(<ReservationTable tipe="ruangan" tab="persetujuan" reservations={[room]} />);
-    fireEvent.click(within(screen.getByRole("table")).getByRole("button", { name: `Setujui reservasi ${room.borrowerName}` }));
-    expect(screen.queryByRole("dialog")).toBeNull();
-    expect(screen.getByRole("status").textContent).toBe(`Reservasi ${room.borrowerName} disetujui.`);
+    const dialog = screen.getByRole("dialog", { name: "Setujui Reservasi" });
+    expect(screen.getByRole("table").textContent).toContain(TRIP.borrowerName);
+    fireEvent.click(within(dialog).getByRole("button", { name: "Setujui reservasi" }));
+    expect(screen.getByRole("status").textContent).toBe(`Reservasi ${TRIP.borrowerName} disetujui.`);
   });
 });

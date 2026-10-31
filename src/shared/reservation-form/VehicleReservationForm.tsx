@@ -6,9 +6,6 @@ import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { Card } from "@/components/ui/Card";
 import { formatFullDateWIB, toWibDateKey, wibToIso } from "@/lib/date";
 import { toVehicleReservationRequest } from "./createReservation";
-import { describeAssignment, summarizeAssignment } from "@/shared/reservation/vehicleAssignment";
-import { VehicleUnitPicker } from "@/shared/reservation/VehicleUnitPicker";
-import type { Vehicle } from "@/types/facility";
 import { BOOKING_MODES, type BookingMode } from "./bookingMode";
 import { LetterPanel, ReviewButton } from "./LetterPanel";
 import { PanelHeading } from "./PanelHeading";
@@ -26,29 +23,25 @@ export interface VehicleReservationFormProps {
   /** ISO 8601 server time */
   now: string;
   requester: { name: string };
-  /** "internal" for an admin's own booking: no phone or letter, and the admin assigns the vehicles. */
+  /** "internal" for an admin's own booking: no phone or letter. */
   mode?: BookingMode;
-  /** Vehicle kinds to assign units of in "internal" mode. Borrowers leave it to the approving admin. */
-  vehicles?: Vehicle[];
   links: ReservationLinks;
 }
 
-const DETAIL_FIELDS = ["phone", "vehicles", "destination", "participants", "activity", "startDate", "endDate"] as const;
+const DETAIL_FIELDS = ["phone", "destination", "participants", "activity", "startDate", "endDate"] as const;
 
 const LABEL = "text-[10px] font-medium tracking-wide text-plan-selected";
 const INPUT = "min-h-11 w-full rounded-md border border-border bg-surface px-2 text-xs aria-invalid:border-danger-strong";
 
 const dayLabel = (dateKey: string) => formatFullDateWIB(wibToIso(dateKey, "12:00"));
 
-export function VehicleReservationForm({ now, requester, mode = "request", vehicles = [], links }: VehicleReservationFormProps) {
+export function VehicleReservationForm({ now, requester, mode = "request", links }: VehicleReservationFormProps) {
   const { askPhone, withLetter, requesterLabel, submittedText } = BOOKING_MODES[mode];
-  const pickVehicle = mode === "internal";
   const todayKey = toWibDateKey(new Date(now));
   const schema = useMemo(() => createVehicleReservationSchema(() => todayKey, mode), [todayKey, mode]);
   const defaults = useMemo(
     (): VehicleReservationInput => ({
       phone: "",
-      vehicles: {},
       destination: "",
       participants: "",
       activity: "",
@@ -67,13 +60,10 @@ export function VehicleReservationForm({ now, requester, mode = "request", vehic
   });
   const { register, setValue, control, formState } = form;
   const { errors } = formState;
-  const [phone, assignment, destination, participants, activity, startDate, endDate, letter] = useWatch({
+  const [phone, destination, participants, activity, startDate, endDate, letter] = useWatch({
     control,
-    name: ["phone", "vehicles", "destination", "participants", "activity", "startDate", "endDate", "letter"],
+    name: ["phone", "destination", "participants", "activity", "startDate", "endDate", "letter"],
   });
-  const assigned = summarizeAssignment(assignment ?? {}, vehicles).items;
-  // `vehicles` is a record, so RHF types its error as a map; the schema reports on the field itself.
-  const vehiclesError = (errors.vehicles as { message?: string } | undefined)?.message;
 
   const flow = useReservationSubmit(form, {
     defaults,
@@ -161,28 +151,7 @@ export function VehicleReservationForm({ now, requester, mode = "request", vehic
               <FieldError id="vehicle-endDate-error" message={errors.endDate?.message} />
             </div>
           </div>
-          {!pickVehicle && <p className="text-[11px] text-muted">Kendaraan yang dipakai ditentukan admin saat menyetujui reservasi.</p>}
         </Card>
-
-        {pickVehicle && (
-          <Card as="section" aria-labelledby="panel-vehicle-choice" className="flex flex-col gap-2 p-3">
-            <PanelHeading id="panel-vehicle-choice" iconSrc="/icons/notes.svg" iconWidth={11} iconHeight={12}>
-              Kendaraan
-            </PanelHeading>
-            {vehicles.length === 0 ? (
-              <p className="text-xs text-muted">Belum ada kendaraan yang aktif.</p>
-            ) : (
-              <VehicleUnitPicker
-                vehicles={vehicles}
-                value={assignment ?? {}}
-                onChange={(next) => setValue("vehicles", next, { shouldValidate: Boolean(errors.vehicles) })}
-                participants={Number(participants) || 0}
-                idPrefix="vehicle-units"
-                error={vehiclesError}
-              />
-            )}
-          </Card>
-        )}
 
         {withLetter ? (
           <LetterPanel
@@ -212,7 +181,6 @@ export function VehicleReservationForm({ now, requester, mode = "request", vehic
           <dl className="flex flex-col gap-3 py-2">
             <SummaryRow label={requesterLabel}>{requester.name}</SummaryRow>
             {askPhone && <SummaryRow label="No HP">{phone}</SummaryRow>}
-            {assigned.length > 0 && <SummaryRow label="Kendaraan">{describeAssignment(assigned)}</SummaryRow>}
             <SummaryRow label="Tujuan">
               {destination}, {String(participants)} peserta
             </SummaryRow>

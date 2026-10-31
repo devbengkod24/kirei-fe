@@ -74,7 +74,7 @@ export const MOCK_BUILDINGS: Building[] = [
           room("E.2.4", "kelas", 25, 175, 150, 100),
         ],
       },
-      { id: "gedung-e-3", number: 3, planWidth: 450, planHeight: 300, rooms: [] },
+      { id: "gedung-e-3", number: 3, planWidth: 600, planHeight: 250, rooms: [] },
     ],
   },
   {

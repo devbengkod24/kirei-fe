@@ -131,15 +131,12 @@ export const SPORTS_HALL_RESERVATION_FIELD_MAP = {
 
 /* ---------- Kendaraan ---------- */
 
-/** In "internal" mode the admin books without phone or letter and assigns the vehicles right away. */
+/** A trip, not a vehicle: which vehicle goes is arranged outside the app. "internal" skips phone and letter. */
 export function createVehicleReservationSchema(today: () => string, mode: BookingMode = "request") {
   const { askPhone, withLetter } = BOOKING_MODES[mode];
-  const pickVehicle = mode === "internal";
   return z
     .object({
       phone: askPhone ? phoneSchema : z.string(),
-      /** Units per vehicle kind, set only by an admin; borrowers leave it to the admin who approves. */
-      vehicles: z.record(z.string(), z.number().int().min(0)).optional(),
       destination: describe("tujuan", 3),
       participants: z.coerce
         .number({ message: "Isi jumlah peserta dengan angka." })
@@ -158,9 +155,6 @@ export function createVehicleReservationSchema(today: () => string, mode: Bookin
       if (DATE.test(values.startDate) && DATE.test(values.endDate) && values.endDate < values.startDate) {
         ctx.addIssue({ code: "custom", path: ["endDate"], message: "Tanggal selesai tidak boleh sebelum tanggal mulai." });
       }
-      if (pickVehicle && Object.values(values.vehicles ?? {}).every((units) => units === 0)) {
-        ctx.addIssue({ code: "custom", path: ["vehicles"], message: "Tambahkan minimal satu kendaraan." });
-      }
       if (withLetter) requireLetterToSubmit(values, ctx);
     }, ALWAYS);
 }
@@ -170,7 +164,6 @@ export type VehicleReservationValues = z.output<ReturnType<typeof createVehicleR
 
 export const VEHICLE_RESERVATION_FIELD_MAP = {
   phone: "phone",
-  vehicles: "vehicles",
   destination: "destination",
   participants: "participants",
   activity: "activity",

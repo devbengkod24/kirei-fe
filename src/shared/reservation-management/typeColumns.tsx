@@ -6,17 +6,11 @@ export interface TypeColumn {
   nowrap?: boolean;
 }
 
-/** A vehicle request has no vehicle until the approving admin assigns one. */
-function vehicleCell(reservation: ReservationRequest) {
-  return reservation.roomName || <span className="text-muted">Belum ditentukan</span>;
-}
-
 /** Columns between "Nama Pemesan" and "Waktu" that depend on what is reserved. */
 export const TYPE_COLUMNS: Record<ReservationType, TypeColumn[]> = {
   ruangan: [{ header: "Ruangan", cell: (reservation) => reservation.roomName }],
   kendaraan: [
-    { header: "Kendaraan", cell: vehicleCell, nowrap: true },
-    // Destination and head count share a column so the table still fits next to the sidebar.
+    // Which vehicle goes is arranged outside the app, so a trip shows only where and how many.
     {
       header: "Tujuan",
       cell: (reservation) =>
@@ -37,6 +31,5 @@ export const TYPE_COLUMNS: Record<ReservationType, TypeColumn[]> = {
 /** What the reservation is for, in a sentence: "H.5.1", "GOR Udinus", "kendaraan ke Kudus". */
 export function describeReservationUnit(reservation: ReservationRequest) {
   if (reservation.type !== "kendaraan") return reservation.roomName;
-  const destination = reservation.trip ? ` ke ${reservation.trip.destination}` : "";
-  return reservation.roomName ? `${reservation.roomName}${destination}` : `kendaraan${destination}`;
+  return reservation.trip ? `kendaraan ke ${reservation.trip.destination}` : "kendaraan";
 }

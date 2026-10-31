@@ -1,5 +1,4 @@
 import {
-  getActiveVehicles,
   getRoomReservationOptions,
   getSportsHallReservationOptions,
   getVehicleReservationOptions,
@@ -15,7 +14,7 @@ export interface InternalReservationFormProps {
   requesterName: string;
 }
 
-/** Admin universitas books for the campus: any building, the GOR, or a vehicle it picks itself. */
+/** Admin universitas books for the campus: any building, the GOR, or a vehicle trip. */
 export async function InternalReservationForm({ tipe, requesterName }: InternalReservationFormProps) {
   // The admin belongs to no faculty, so no cross-faculty approval applies.
   const requester = { name: requesterName, fakultasId: null };
@@ -36,8 +35,8 @@ export async function InternalReservationForm({ tipe, requesterName }: InternalR
       );
     }
     case "kendaraan": {
-      const [options, vehicles] = await Promise.all([getVehicleReservationOptions(), getActiveVehicles()]);
-      return <VehicleReservationForm {...options} requester={requester} mode="internal" vehicles={vehicles} links={links} />;
+      const options = await getVehicleReservationOptions();
+      return <VehicleReservationForm {...options} requester={requester} mode="internal" links={links} />;
     }
     case "gor": {
       const options = await getSportsHallReservationOptions();

@@ -103,7 +103,9 @@ export function FloorPlanCanvas({ floor, selectedId, onSelect, onChange, helpId 
       onPointerMove={moveDrag}
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
-      className="block h-auto w-full touch-none rounded-md border border-ink bg-surface select-none"
+      // On large screens the plan is also capped by the window height (minus header and help text), so it fits without scrolling.
+      style={{ "--plan-ratio": columns / rows } as React.CSSProperties}
+      className="mx-auto block h-auto w-full touch-none rounded-md border border-ink bg-surface select-none lg:w-[min(100%,calc((100dvh-14.5rem)*var(--plan-ratio)))]"
     >
       <defs>
         <pattern id={patternId} width={GRID} height={GRID} patternUnits="userSpaceOnUse">

@@ -1,7 +1,6 @@
 import type { AdminScope } from "@/shared/admin-scope";
 import { FakultasFilter } from "@/shared/fakultas-filter/FakultasFilter";
 import { FAKULTAS_PARAM } from "@/shared/fakultas-filter/fakultasScope";
-import { getActiveVehicles } from "@/shared/reservation-form/getReservationOptions";
 import { getReservationRequests, type ReservationTab } from "@/shared/reservation-management/getReservationRequests";
 import { ReservationManagement } from "@/shared/reservation-management/ReservationManagement";
 import type { Fakultas } from "@/types/fakultas";
@@ -19,10 +18,7 @@ export interface UniversityReservationsProps {
 /** Kelola Reservasi for one type. Rooms get the faculty filter, kept when switching tabs. */
 export async function UniversityReservations({ tipe, tab, scope, fakultasOptions }: UniversityReservationsProps) {
   const isRoom = tipe === "ruangan";
-  const [reservations, vehicles] = await Promise.all([
-    getReservationRequests(isRoom ? scope : { fakultasId: null }, tab, tipe),
-    tipe === "kendaraan" && tab === "persetujuan" ? getActiveVehicles() : [],
-  ]);
+  const reservations = await getReservationRequests(isRoom ? scope : { fakultasId: null }, tab, tipe);
   const query = isRoom && scope.fakultasId ? `?${FAKULTAS_PARAM}=${scope.fakultasId}` : "";
 
   return (
@@ -34,7 +30,8 @@ export async function UniversityReservations({ tipe, tab, scope, fakultasOptions
         riwayat: `${reservationsRoute(tipe, "riwayat")}${query}`,
       }}
       reservations={reservations}
-      vehicles={vehicles}
+      // The layout shows the heading above the type tabs.
+      heading={null}
       toolbar={isRoom ? <FakultasFilter options={fakultasOptions} value={scope.fakultasId} /> : undefined}
     />
   );

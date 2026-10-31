@@ -3,11 +3,10 @@ import {
   MOCK_BUILDINGS,
   MOCK_ROOM_RULES,
   MOCK_SPORTS_HALL,
-  MOCK_VEHICLES,
   buildRoomBookingsMock,
   buildSportsHallBookingsMock,
 } from "@/mocks/facilities";
-import type { Building, SportsHall, UnitBooking, Vehicle } from "@/types/facility";
+import type { Building, SportsHall, UnitBooking } from "@/types/facility";
 
 export interface RoomReservationOptions {
   buildings: Building[];
@@ -43,15 +42,8 @@ export async function getSportsHallReservationOptions(): Promise<SportsHallReser
   return { hall: MOCK_SPORTS_HALL, bookings: buildSportsHallBookingsMock(now), now: now.toISOString() };
 }
 
-/** Vehicles are assigned by the admin, so the form only needs the server time for its defaults. */
+/** Which vehicle goes is arranged outside the app, so the form only needs the server time for its defaults. */
 export async function getVehicleReservationOptions(): Promise<{ now: string }> {
   await connection();
   return { now: new Date().toISOString() };
-}
-
-/** Active vehicles, for an admin who assigns one while booking (Reservasi Internal). */
-export async function getActiveVehicles(): Promise<Vehicle[]> {
-  await connection();
-  // TODO: replace with the orval client for vehicles, filtered to active ones and free on the chosen dates.
-  return MOCK_VEHICLES.filter((vehicle) => vehicle.isActive);
 }

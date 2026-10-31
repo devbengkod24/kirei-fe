@@ -10,6 +10,12 @@ import { CAPS_LABEL_CLASS } from "@/components/form/Field";
 export interface ReservationDetailDialogProps {
   reservation: ReservationRequest;
   onClose: () => void;
+  /** Defaults to "Detail Reservasi". */
+  title?: string;
+  /** Replaces the "Kembali" button, e.g. with approve actions. */
+  footer?: React.ReactNode;
+  /** Shown above the details, e.g. a confirmation question. */
+  intro?: React.ReactNode;
 }
 
 const READONLY_BOX = "flex min-h-10 items-center rounded-md border border-border px-2 py-2 text-xs tracking-[0.05em]";
@@ -18,7 +24,6 @@ const READONLY_BOX = "flex min-h-10 items-center rounded-md border border-border
 const TYPE_DETAILS: Record<ReservationType, (reservation: ReservationRequest) => { label: string; value: string }[]> = {
   ruangan: () => [],
   kendaraan: (reservation) => [
-    { label: "Kendaraan", value: reservation.roomName || "Belum ditentukan" },
     { label: "Tujuan", value: reservation.trip?.destination ?? "-" },
     { label: "Jumlah peserta", value: reservation.trip ? `${reservation.trip.participants} orang` : "-" },
   ],
@@ -28,20 +33,23 @@ const TYPE_DETAILS: Record<ReservationType, (reservation: ReservationRequest) =>
   ],
 };
 
-export function ReservationDetailDialog({ reservation, onClose }: ReservationDetailDialogProps) {
+export function ReservationDetailDialog({ reservation, onClose, title = "Detail Reservasi", footer, intro }: ReservationDetailDialogProps) {
   const details = TYPE_DETAILS[reservation.type](reservation);
 
   return (
     <Modal
       open
       onClose={onClose}
-      title="Detail Reservasi"
+      title={title}
       footer={
-        <Button variant="danger-outline" onClick={onClose}>
-          Kembali
-        </Button>
+        footer ?? (
+          <Button variant="danger-outline" onClick={onClose}>
+            Kembali
+          </Button>
+        )
       }
     >
+      {intro}
       <dl className="flex flex-col gap-3">
         <div className="flex flex-col gap-2">
           <dt className={CAPS_LABEL_CLASS}>Nama pemesan</dt>
@@ -100,14 +108,23 @@ export function ReservationDetailDialog({ reservation, onClose }: ReservationDet
         <div className="flex flex-col gap-1">
           <dt className={CAPS_LABEL_CLASS}>Surat peminjaman</dt>
           <dd className={READONLY_BOX}>
-            {/* TODO: link to the signed file URL from the API once uploads exist. */}
-            {reservation.letterFileName ?? <span className="text-muted">Belum ada surat yang diunggah.</span>}
+            {/* TODO: letterUrl becomes a short-lived signed URL from the API. */}
+            {reservation.letterFileName && reservation.letterUrl ? (
+              <span className="flex w-full flex-wrap items-center justify-between gap-2">
+                <span className="break-all">{reservation.letterFileName}</span>
+                <a
+                  href={reservation.letterUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-primary underline-offset-2 hover:underline"
+                >
+                  Lihat surat<span className="sr-only"> (membuka tab baru)</span>
+                </a>
+              </span>
+            ) : (
+              <span className="text-muted">Belum ada surat yang diunggah.</span>
+            )}
           </dd>
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <dt className={CAPS_LABEL_CLASS}>Kode tiket</dt>
-          <dd className="text-xs">{reservation.ticketCode}</dd>
         </div>
       </dl>
     </Modal>

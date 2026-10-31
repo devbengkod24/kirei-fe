@@ -10,20 +10,16 @@ import { formatDateShortWIB, formatTimeWIB } from "@/lib/date";
 import { ReservationDetailDialog } from "@/shared/reservation/ReservationDetailDialog";
 import { ReservationStatusBadge } from "@/shared/reservation/ReservationStatusBadge";
 import { RESERVATION_TYPE_LABEL } from "@/shared/reservation/reservationTypes";
-import type { Vehicle } from "@/types/facility";
 import type { ReservationRequest, ReservationType } from "@/types/reservation";
-import { ApproveVehicleDialog } from "./ApproveVehicleDialog";
 import type { ReservationTab } from "./getReservationRequests";
+import { ApproveReservationDialog } from "./ApproveReservationDialog";
 import { RejectReservationDialog } from "./RejectReservationDialog";
 import { TYPE_COLUMNS } from "./typeColumns";
-import { describeAssignment } from "@/shared/reservation/vehicleAssignment";
 
 export interface ReservationTableProps {
   tipe: ReservationType;
   tab: ReservationTab;
   reservations: ReservationRequest[];
-  /** Vehicles to assign when approving a vehicle request. */
-  vehicles?: Vehicle[];
 }
 
 const TH = `${TABLE_HEAD_CELL} text-left`;
@@ -39,19 +35,17 @@ const EMPTY_TEXT: Record<ReservationTab, string> = {
 };
 
 /** Reservations table for both tabs: approval actions on "persetujuan", status on "riwayat". */
-export function ReservationTable({ tipe, tab, reservations: initial, vehicles = [] }: ReservationTableProps) {
+export function ReservationTable({ tipe, tab, reservations: initial }: ReservationTableProps) {
   const [reservations, setReservations] = useState(initial);
   const [viewing, setViewing] = useState<ReservationRequest | null>(null);
+  const [approving, setApproving] = useState<ReservationRequest | null>(null);
   const [rejecting, setRejecting] = useState<ReservationRequest | null>(null);
-  const [assigning, setAssigning] = useState<ReservationRequest | null>(null);
   const [notice, setNotice] = useState("");
   const paging = usePagination(reservations, 10);
   const isApproval = tab === "persetujuan";
   const columns = TYPE_COLUMNS[tipe];
-  // Extra type columns (vehicles) need more room, so the card list stays on until xl.
+  // Extra type columns need more room, so the card list stays on until xl.
   const layout = columns.length > 1 ? WIDE_LAYOUT : DEFAULT_LAYOUT;
-  // A vehicle request only names a trip; approving it means assigning a vehicle.
-  const approveNeedsVehicle = tipe === "kendaraan";
 
   const resolve = (reservation: ReservationRequest, message: string) => {
     // TODO: POST approve/reject through the orval client, then refetch; this only updates the local list.
@@ -59,10 +53,6 @@ export function ReservationTable({ tipe, tab, reservations: initial, vehicles = 
     setNotice(message);
   };
 
-  const approve = (reservation: ReservationRequest) => {
-    if (approveNeedsVehicle) setAssigning(reservation);
-    else resolve(reservation, `Reservasi ${reservation.borrowerName} disetujui.`);
-  };
 
   const renderActions = (reservation: ReservationRequest) => (
     <div className="flex items-center gap-2">
@@ -70,7 +60,7 @@ export function ReservationTable({ tipe, tab, reservations: initial, vehicles = 
         <>
           <button
             type="button"
-            onClick={() => approve(reservation)}
+            onClick={() => setApproving(reservation)}
             aria-label={`Setujui reservasi ${reservation.borrowerName}`}
             className={`${ICON_BUTTON} border-transparent bg-success-soft hover:border-success`}
           >
@@ -99,7 +89,8 @@ export function ReservationTable({ tipe, tab, reservations: initial, vehicles = 
 
   return (
     <Card className="flex flex-col gap-6 p-4">
-      <p role="status" className={notice ? "text-sm text-success" : "sr-only"}>
+      {/* Read out to screen readers only; the row leaving the list shows the result. */}
+      <p role="status" className="sr-only">
         {notice}
       </p>
 
@@ -195,6 +186,16 @@ export function ReservationTable({ tipe, tab, reservations: initial, vehicles = 
       />
 
       {viewing && <ReservationDetailDialog reservation={viewing} onClose={() => setViewing(null)} />}
+      {approving && (
+        <ApproveReservationDialog
+          reservation={approving}
+          onClose={() => setApproving(null)}
+          onApprove={() => {
+            resolve(approving, `Reservasi ${approving.borrowerName} disetujui.`);
+            setApproving(null);
+          }}
+        />
+      )}
       {rejecting && (
         <RejectReservationDialog
           reservation={rejecting}
@@ -202,17 +203,6 @@ export function ReservationTable({ tipe, tab, reservations: initial, vehicles = 
           onReject={() => {
             resolve(rejecting, `Reservasi ${rejecting.borrowerName} ditolak. Alasan dikirim ke pemesan.`);
             setRejecting(null);
-          }}
-        />
-      )}
-      {assigning && (
-        <ApproveVehicleDialog
-          reservation={assigning}
-          vehicles={vehicles}
-          onClose={() => setAssigning(null)}
-          onApprove={(assigned) => {
-            resolve(assigning, `Reservasi ${assigning.borrowerName} disetujui dengan ${describeAssignment(assigned)}.`);
-            setAssigning(null);
           }}
         />
       )}

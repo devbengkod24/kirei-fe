@@ -179,11 +179,10 @@ describe("internal bookings by an admin", () => {
     expect(issues(gorSchema.safeParse(booking))).toEqual({});
   });
 
-  it("books vehicles without phone or letter, but needs at least one unit", () => {
+  it("books a trip without phone or letter", () => {
     const vehicleSchema = createVehicleReservationSchema(() => "2026-10-30", "internal");
     const trip: VehicleReservationInput = {
       phone: "",
-      vehicles: { "vehicle-hiace": 2 },
       destination: "Yogyakarta",
       participants: "30",
       activity: "Studi banding pimpinan",
@@ -193,11 +192,9 @@ describe("internal bookings by an admin", () => {
       intent: "submit",
     };
     expect(issues(vehicleSchema.safeParse(trip))).toEqual({});
-    expect(issues(vehicleSchema.safeParse({ ...trip, vehicles: {} }))).toEqual({ vehicles: "Tambahkan minimal satu kendaraan." });
-    expect(issues(vehicleSchema.safeParse({ ...trip, vehicles: { "vehicle-hiace": 0 } }))).toHaveProperty("vehicles");
   });
 
-  it("leaves the vehicle to the approving admin for a borrower's request", () => {
+  it("asks a borrower for a trip, not a vehicle", () => {
     const requestSchema = createVehicleReservationSchema(() => "2026-10-30");
     const result = requestSchema.safeParse({
       phone: "081234567890",

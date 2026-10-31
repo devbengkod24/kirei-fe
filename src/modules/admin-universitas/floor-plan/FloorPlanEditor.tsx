@@ -8,7 +8,7 @@ import { ROOM_CATEGORY_LABEL } from "@/shared/reservation-form/labels";
 import { PanelHeading } from "@/shared/reservation-form/PanelHeading";
 import type { Building, Floor, FloorPlanRoom, RoomCategory } from "@/types/facility";
 import { FloorPlanCanvas } from "./FloorPlanCanvas";
-import { GRID, fitRoom, gridSize, newRoom, roomCodeErrors, type RoomRect } from "./floorPlanEdits";
+import { FLOOR_CELLS, GRID, collidingRoom, fitRoom, gridSize, newRoom, resizeFloor, roomCodeErrors, type RoomRect } from "./floorPlanEdits";
 
 export interface FloorPlanEditorProps {
   buildings: Building[];
@@ -81,7 +81,13 @@ export function FloorPlanEditor({ buildings: initial }: FloorPlanEditorProps) {
   const updateRoom = (roomId: string, change: Partial<FloorPlanRoom>) =>
     updateFloor((level) => ({ ...level, rooms: level.rooms.map((item) => (item.id === roomId ? { ...item, ...change } : item)) }));
 
-  const chooseBuilding = (id: string) => {
+  // A move or resize that would cover another room is dropped, so a dragged room stops at its neighbour.
+  const placeRoom = (roomId: string, rect: RoomRect) => {
+    if (!floor || collidingRoom(floor, roomId, rect)) return;
+    updateRoom(roomId, rect);
+  };
+
+  const chooseBuilding =(id: string) => {
     setBuildingId(id);
     setFloorId(draft.find((item) => item.id === id)?.floors[0]?.id ?? "");
     setSelectedId(null);
@@ -91,8 +97,22 @@ export function FloorPlanEditor({ buildings: initial }: FloorPlanEditorProps) {
     if (!floor) return;
     newRoomCount.current += 1;
     const added = newRoom(floor, `room-new-${newRoomCount.current}`);
+    if (collidingRoom(floor, added.id, added)) {
+      setNotice({ tone: "danger", text: "Tidak ada tempat kosong 2 × 2 kotak. Perbesar lantai atau kecilkan ruangan lain." });
+      return;
+    }
     updateFloor((level) => ({ ...level, rooms: [...level.rooms, added] }));
     setSelectedId(added.id);
+  };
+
+  const resize = (columns: number, rows: number) => {
+    if (!floor) return;
+    const result = resizeFloor(floor, columns, rows);
+    if ("error" in result) {
+      setNotice({ tone: "danger", text: result.error });
+      return;
+    }
+    updateFloor(() => result.floor);
   };
 
   const deleteRoom = () => {
@@ -137,24 +157,19 @@ export function FloorPlanEditor({ buildings: initial }: FloorPlanEditorProps) {
   }
 
   return (
-    <div className="flex flex-col gap-2 lg:grid lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
-      <Card className="flex flex-col gap-3 p-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <p id={helpId} className="text-xs text-muted">
-            Ruangan selalu menempel pada grid. Seret ruangan untuk memindahkan, tarik kotak di pojok kanan bawah untuk mengubah
-            ukuran. Dengan keyboard, panah menggeser 1 kotak dan Shift + panah mengubah ukuran 1 kotak.
-          </p>
-          <Button variant="primary-outline" onClick={addRoom} disabled={!floor}>
-            Tambah ruangan
-          </Button>
-        </div>
+    <div className="flex flex-col gap-2 lg:grid lg:h-[calc(100dvh-9rem)] lg:grid-cols-[minmax(0,1fr)_18rem]">
+      <Card className="flex flex-col gap-3 p-3 lg:min-h-0">
+        <p id={helpId} className="text-xs text-muted">
+          Ruangan selalu menempel pada grid. Seret ruangan untuk memindahkan, tarik kotak di pojok kanan bawah untuk mengubah ukuran.
+          Dengan keyboard, panah menggeser 1 kotak dan Shift + panah mengubah ukuran 1 kotak.
+        </p>
 
         {floor ? (
           <FloorPlanCanvas
             floor={floor}
             selectedId={selectedId}
             onSelect={setSelectedId}
-            onChange={(roomId, rect) => updateRoom(roomId, rect)}
+            onChange={placeRoom}
             helpId={helpId}
           />
         ) : (
@@ -165,7 +180,8 @@ export function FloorPlanEditor({ buildings: initial }: FloorPlanEditorProps) {
         )}
       </Card>
 
-      <div className="flex flex-col gap-2">
+      {/* The side panel scrolls on its own on large screens, so the page itself does not. */}
+      <div className="flex flex-col gap-2 lg:min-h-0 lg:overflow-y-auto">
         <Card as="section" aria-labelledby="plan-location" className="flex flex-col gap-3 p-3">
           <PanelHeading id="plan-location" iconSrc="/icons/building-solid.svg" iconWidth={13} iconHeight={15}>
             Gedung &amp; Lantai
@@ -197,6 +213,28 @@ export function FloorPlanEditor({ buildings: initial }: FloorPlanEditorProps) {
               ))}
             </SelectInput>
           </Field>
+          {floor && (
+            <>
+              <div className="grid grid-cols-2 gap-2">
+                <RectInput
+                  id="plan-floor-columns"
+                  label="Kolom lantai"
+                  value={gridSize(floor).columns}
+                  onCommit={(columns) => resize(columns, gridSize(floor).rows)}
+                />
+                <RectInput
+                  id="plan-floor-rows"
+                  label="Baris lantai"
+                  value={gridSize(floor).rows}
+                  onCommit={(rows) => resize(gridSize(floor).columns, rows)}
+                />
+              </div>
+              <p className="text-[11px] text-muted">
+                Ukuran lantai {FLOOR_CELLS.min}–{FLOOR_CELLS.max} kotak. Lantai tidak bisa dikecilkan selama ada ruangan di
+                luar ukuran baru.
+              </p>
+            </>
+          )}
         </Card>
 
         <Card as="section" aria-labelledby="plan-room" className="flex flex-col gap-3 p-3">
@@ -236,13 +274,10 @@ export function FloorPlanEditor({ buildings: initial }: FloorPlanEditorProps) {
                     id={`plan-room-${field.key}`}
                     label={field.label}
                     value={field.toCells(room[field.key])}
-                    onCommit={(cells) => updateRoom(room.id, fitRoom({ ...room, [field.key]: field.toUnits(cells) }, floor))}
+                    onCommit={(cells) => placeRoom(room.id, fitRoom({ ...room, [field.key]: field.toUnits(cells) }, floor))}
                   />
                 ))}
               </div>
-              <p className="text-[11px] text-muted">
-                Grid lantai ini {gridSize(floor).columns} kolom × {gridSize(floor).rows} baris.
-              </p>
               <Button variant="danger-outline" onClick={deleteRoom}>
                 Hapus ruangan
               </Button>
@@ -250,6 +285,9 @@ export function FloorPlanEditor({ buildings: initial }: FloorPlanEditorProps) {
           ) : (
             <p className="text-xs text-muted">Pilih ruangan pada denah, dengan klik atau Tab lalu Enter.</p>
           )}
+          <Button variant="primary-outline" onClick={addRoom} disabled={!floor}>
+            Tambah ruangan
+          </Button>
         </Card>
 
         <p role="status" className={notice ? `text-xs ${notice.tone === "danger" ? "text-danger" : "text-success"}` : "sr-only"}>
