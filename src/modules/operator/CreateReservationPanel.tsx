@@ -25,7 +25,8 @@ export interface CreateReservationPanelProps {
   /** Prefilled times, e.g. from a free slot the operator clicked. */
   startTime: string;
   endTime: string;
-  reservations: ReservationRecord[];
+  /** Everything already holding rooms today: reservations and Siadin classes. */
+  busy: Pick<ReservationRecord, "unitName" | "startsAt" | "endsAt">[];
   onCreated: (reservation: ReservationRecord) => void;
   onCollapse: () => void;
 }
@@ -38,7 +39,7 @@ export function CreateReservationPanel({
   dateKey,
   startTime,
   endTime,
-  reservations,
+  busy,
   onCreated,
   onCollapse,
 }: CreateReservationPanelProps) {
@@ -55,11 +56,11 @@ export function CreateReservationPanel({
   const submit = form.handleSubmit(async (values) => {
     const startsAt = wibToIso(dateKey, values.startTime);
     const endsAt = wibToIso(dateKey, values.endTime);
-    const clash = reservations.some(
-      (reservation) => reservation.unitName === room.code && rangesOverlap(reservation.startsAt, reservation.endsAt, startsAt, endsAt),
+    const clash = busy.some(
+      (item) => item.unitName === room.code && rangesOverlap(item.startsAt, item.endsAt, startsAt, endsAt),
     );
     if (clash) {
-      form.setError("endTime", { message: `${room.code} sudah dipesan pada sebagian jam itu. Pilih jam lain.` });
+      form.setError("endTime", { message: `${room.code} sudah terpakai (kuliah atau reservasi) pada sebagian jam itu. Pilih jam lain.` });
       return;
     }
 

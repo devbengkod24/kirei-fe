@@ -100,11 +100,13 @@ Satu lantai di satu gedung. Satu halaman, tanpa sidebar. Menu avatar di header b
 
 | Halaman | URL | Isi | Komponen |
 |---|---|---|---|
-| Ketersediaan lantai | `/operator` | Grid semua ruangan di lantainya; status ketersediaan hari ini per slot 10 menit (07.00 sampai 21.00 WIB) dengan filter jam; panel detail reservasi; form Buat Reservasi untuk hari ini; tombol hapus dengan dialog konfirmasi. | `modules/operator` (`OperatorFloorPage`) |
+| Ketersediaan lantai | `/operator` | Tanggal hari ini (WIB); grid semua ruangan di lantainya; jadwal satu ruangan hari ini sebagai timeline dengan filter jam; panel detail reservasi; form Buat Reservasi untuk hari ini; tombol hapus dengan dialog konfirmasi. | `modules/operator` (`OperatorFloorPage`, `RoomTimeline`) |
 
 Tombol tambah dan hapus hanya ditampilkan bila API mengizinkan (`canCreate`, `canDelete` dari data lantai). Aturannya ditetapkan Laravel.
 
-- Slot terpesan membuka detail reservasi. Slot tersedia membuka form Buat Reservasi dengan jam slot itu.
+- **Timeline.** Sumbu waktu 07.00 sampai 21.00 WIB, 10 menit setinggi 44px. Tiga jenis blok dibedakan warna dan label teks: Jadwal Siadin (jadwal kuliah dari Siadin), Reservasi (dibuat lewat KIREI), dan Kosong.
+- **Jadwal Siadin hanya dibaca.** Tidak ada tombol, tidak bisa diubah atau dihapus di KIREI, tetapi tetap menutup ruangan. Mata kuliah dan dosen ditampilkan di bloknya.
+- Blok Reservasi membuka panel detail. Blok Kosong membuka form Buat Reservasi dengan jam kosong itu. Form menolak jam yang bentrok dengan kuliah atau reservasi lain.
 - Form operator hanya meminta nama peminjam, keperluan, dan jam. Tanpa No HP dan surat, karena operator mencatat peminjaman di tempat.
 
 ## Memakai slot yang sudah dipesan
@@ -149,6 +151,8 @@ Bagian ini juga menjadi daftar yang perlu diperbarui di Figma.
 | Kelola Pengguna hanya Ormawa dan Dosen | Belum ada desain untuk akun admin fakultas dan operator | Perlu dikonfirmasi ke desainer |
 | Merek "Bengkel Koding / Coworking Space" | Belum diputuskan; aset sementara dipakai | Perlu dikonfirmasi |
 | Salah satu frame Profil di section Admin Fakultas memakai sidebar ormawa | Profil admin memakai sidebar admin | Salah salin di Figma |
+| Status Ketersediaan operator berupa daftar slot 10 menit berlabel Tersedia atau Dipesan | Timeline dengan blok Jadwal Siadin, Reservasi, dan Kosong | Revisi dari pembimbing: daftar slot terlalu ramai, jadwal Siadin dan reservasi harus dibedakan |
+| Tanggal hari ini tidak ada di halaman operator | Tanggal hari ini (WIB) di sebelah judul halaman | Revisi dari pembimbing |
 | Menu avatar operator berisi NIM dan tautan "Profile" | Berisi peran, nama, dan Logout | Operator tidak punya halaman profil |
 | Judul kartu ruangan operator "Semua Kelas" | "Semua Ruangan" | Satu lantai berisi kelas, meeting room, dan galeri |
 | Form Buat Reservasi operator: kartu jam berlabel "Keperluan", urutan "Selesai" lalu "Mulai" | Berlabel "Waktu (WIB)", urutan Mulai lalu Selesai | Salah label di Figma |

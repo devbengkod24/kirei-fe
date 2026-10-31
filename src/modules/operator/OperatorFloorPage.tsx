@@ -3,17 +3,17 @@
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { SelectInput } from "@/components/form/Field";
-import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { MaskIcon } from "@/components/ui/MaskIcon";
-import { formatTimeRangeWIB, toWibDateKey } from "@/lib/date";
+import { formatDateLongWIB, formatTimeRangeWIB, toWibDateKey } from "@/lib/date";
 import type { TimeSlot } from "@/shared/reservation-form/sportsHallSlots";
 import type { ReservationRecord } from "@/types/reservation";
 import { CreateReservationPanel } from "./CreateReservationPanel";
 import type { OperatorFloorData } from "./getOperatorFloor";
 import { deleteReservation } from "./operatorReservations";
 import { ReservationDetailPanel } from "./ReservationDetailPanel";
-import { defaultHourFilter, FILTER_HOURS, filterSlots, slotReservation } from "./slots";
+import { RoomTimeline } from "./RoomTimeline";
+import { buildTimeline, defaultHourFilter, FILTER_HOURS } from "./slots";
 
 const displayTime = (time: string) => time.replace(":", ".");
 
@@ -21,7 +21,7 @@ function EmptyState({ children }: { children: React.ReactNode }) {
   return <Card className="px-6 py-16 text-center text-sm text-muted">{children}</Card>;
 }
 
-/** Availability of every room on the operator's floor today, in 10-minute slots. */
+/** Today's schedule of every room on the operator's floor: Siadin classes, reservations, and free gaps. */
 export function OperatorFloorPage({ data }: { data: OperatorFloorData | null }) {
   if (!data) {
     return <EmptyState>Akun Anda belum ditugaskan ke lantai mana pun. Hubungi Admin Universitas untuk penugasan lantai.</EmptyState>;
@@ -55,18 +55,18 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
   };
 
   const room = floor.rooms.find((item) => item.id === roomId) ?? floor.rooms[0];
-  const slots = filterSlots(hours.from, hours.to);
+  const validRange = hours.from < hours.to;
+  const timeline = validRange ? buildTimeline(dateKey, room.code, hours.from, hours.to, reservations, data.classSchedules) : [];
   const detail = reservations.find((reservation) => reservation.id === detailId) ?? null;
 
-  const openSlot = (slot: TimeSlot, reservation: ReservationRecord | null) => {
+  const openReservation = (reservation: ReservationRecord) => {
     setNotice("");
-    if (reservation) setDetailId(reservation.id);
-    else setDraft(slot);
+    setDetailId(reservation.id);
   };
 
-  const openCreate = () => {
+  const openCreate = (range?: TimeSlot) => {
     setNotice("");
-    setDraft(slots.find((slot) => !slotReservation(dateKey, slot, room.code, reservations)) ?? { start: hours.from, end: hours.to });
+    setDraft(range ?? timeline.find((segment) => segment.kind === "free") ?? { start: hours.from, end: hours.to });
   };
 
   const remove = async (reservation: ReservationRecord) => {
@@ -80,9 +80,16 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <h1 className="text-xs font-medium text-primary">
-        Ketersediaan {data.buildingName} lantai {floor.number}
-      </h1>
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+        <h1 className="text-xs font-medium text-primary">
+          Ketersediaan {data.buildingName} lantai {floor.number}
+        </h1>
+        <p className="flex items-center gap-1.5 text-xs">
+          <MaskIcon src="/icons/calendar-outline.svg" size={14} className="text-muted" />
+          <span className="sr-only">Hari ini:</span>
+          <time dateTime={dateKey}>{formatDateLongWIB(data.now)}</time>
+        </p>
+      </div>
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
         <div className="flex min-w-0 flex-1 flex-col gap-4">
           <Card as="section" aria-labelledby="operator-rooms-title" className="flex flex-col gap-2 p-4">
@@ -175,49 +182,21 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
                 </div>
               )}
 
-              {slots.length === 0 ? (
-                <p className="flex-1 px-4 py-10 text-center text-sm text-muted">Jam akhir harus setelah jam awal. Ubah Filter Jam.</p>
+              {validRange ? (
+                <div className="min-w-0 flex-1">
+                  <RoomTimeline
+                    roomCode={room.code}
+                    segments={timeline}
+                    from={hours.from}
+                    to={hours.to}
+                    canCreate={canCreate}
+                    activeReservationId={detailId}
+                    onOpenReservation={openReservation}
+                    onCreate={openCreate}
+                  />
+                </div>
               ) : (
-                <ul
-                  aria-label={`Slot ${room.code}, ${displayTime(hours.from)} - ${displayTime(hours.to)} WIB`}
-                  className="min-w-0 flex-1 gap-0 border-t border-border [column-rule:1px_solid_var(--color-border)] sm:columns-2 xl:columns-3"
-                >
-                  {slots.map((slot) => {
-                    const reservation = slotReservation(dateKey, slot, room.code, reservations);
-                    const label = `${displayTime(slot.start)} - ${displayTime(slot.end)} WIB`;
-                    const content = (
-                      <>
-                        <span className="flex-1 text-left text-xs">{label}</span>
-                        <Badge tone={reservation ? "primary" : "success"} size="md">
-                          {reservation ? "Dipesan" : "Tersedia"}
-                        </Badge>
-                      </>
-                    );
-                    return (
-                      <li key={slot.start} className="break-inside-avoid border-b border-border">
-                        {reservation || canCreate ? (
-                          <button
-                            type="button"
-                            onClick={() => openSlot(slot, reservation)}
-                            aria-label={
-                              reservation
-                                ? `${label}, dipesan oleh ${reservation.bookerName}. Lihat detail`
-                                : `${label}, tersedia. Buat reservasi`
-                            }
-                            className={`flex min-h-11 w-full items-center gap-3 py-2 pr-2 pl-4 transition-colors ${
-                              reservation && reservation.id === detailId ? "bg-info-soft" : "hover:bg-page"
-                            }`}
-                          >
-                            {content}
-                            <MaskIcon src="/icons/chevron-right-detail.svg" size={16} />
-                          </button>
-                        ) : (
-                          <div className="flex min-h-11 items-center gap-3 py-2 pr-10 pl-4">{content}</div>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
+                <p className="flex-1 px-4 py-10 text-center text-sm text-muted">Jam akhir harus setelah jam awal. Ubah Filter Jam.</p>
               )}
             </div>
           </Card>
@@ -233,7 +212,7 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
                   dateKey={dateKey}
                   startTime={draft.start}
                   endTime={draft.end}
-                  reservations={reservations}
+                  busy={[...reservations, ...data.classSchedules]}
                   onCollapse={() => {
                     setDraft(null);
                     statusHeadingRef.current?.focus();
@@ -250,7 +229,7 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
               <Card className="p-2 lg:min-h-[580px]">
                 <button
                   type="button"
-                  onClick={openCreate}
+                  onClick={() => openCreate()}
                   aria-label={`Buat reservasi ${room.code}`}
                   className="flex min-h-11 w-full items-center justify-center gap-2 rounded-md px-2 text-sm font-medium text-primary hover:bg-primary-soft"
                 >
