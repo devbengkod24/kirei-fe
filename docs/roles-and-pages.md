@@ -93,9 +93,15 @@ Satu lantai di satu gedung. Satu halaman, tanpa sidebar. Menu avatar di header b
 
 | Halaman | URL | Isi | Komponen |
 |---|---|---|---|
-| Ketersediaan lantai | `/operator` | Grid semua ruangan di lantainya; status ketersediaan per slot waktu dengan filter jam; panel detail reservasi; tombol tambah reservasi; tombol hapus. | `modules/operator` |
+| Ketersediaan lantai | `/operator` | Tanggal hari ini (WIB); grid "Semua Ruangan" sebagai pemilih ruangan yang tampil di timeline; timeline ala editor video dengan filter jam; panel detail reservasi; form Buat Reservasi untuk hari ini; tombol hapus dengan dialog konfirmasi. | `modules/operator` (`OperatorFloorPage`, `FloorTimeline`) |
 
-Tombol tambah dan hapus hanya ditampilkan bila API mengizinkan. Aturannya ditetapkan Laravel.
+Tombol tambah dan hapus hanya ditampilkan bila API mengizinkan (`canCreate`, `canDelete` dari data lantai). Aturannya ditetapkan Laravel.
+
+- **Grid Semua Ruangan.** Tiap tombol menyalakan atau mematikan track ruangan itu di timeline (bisa banyak sekaligus). Bawaan semua menyala; minimal satu ruangan tetap tampil.
+- **Timeline.** Penggaris waktu horizontal di atas (penanda tiap 10 menit, label jam berbentuk chip tiap 30 menit, 07.00 sampai 21.00 WIB sesuai Filter Jam). Satu track per ruangan yang menyala, kode ruangan (chip) menempel di kolom kiri saat di-scroll ke samping. 10 menit selebar 44px. Di layar sempit timeline di-scroll ke samping di dalam kartu, halaman tidak.
+- **Clip.** Jadwal Siadin (jadwal kuliah dari Siadin, oranye) hanya dibaca: tidak bisa diklik, diubah, atau dihapus di KIREI, tetapi tetap menutup ruangan. Reservasi (dibuat lewat KIREI, biru) membuka panel detail di bawah timeline. Area Kosong adalah tombol yang membuka form Buat Reservasi dengan ruangan dan jam gap itu. Tiap clip punya label teks, tidak hanya warna.
+- **Penanda "Sekarang".** Garis biru dengan kepala di penggaris (playhead), hanya bila jam sekarang ada di rentang filter. Posisinya diperbarui tiap menit tanpa animasi, dan timeline di-scroll ke penanda ini saat rentang berubah.
+- Form operator meminta ruangan, nama peminjam, keperluan, dan jam. Tanpa No HP dan surat, karena operator mencatat peminjaman di tempat. Form menolak jam yang bentrok dengan kuliah atau reservasi lain.
 
 ## Memakai slot yang sudah dipesan
 
@@ -140,3 +146,8 @@ Bagian ini juga menjadi daftar yang perlu diperbarui di Figma.
 | Kelola Pengguna hanya Ormawa dan Dosen | Ditambah tab Admin Fakultas dan Operator dengan pola tab Dosen | Akun dibuat Admin Universitas; desain Figma belum ada |
 | Merek "Bengkel Koding / Coworking Space" | Belum diputuskan; aset sementara dipakai | Perlu dikonfirmasi |
 | Salah satu frame Profil di section Admin Fakultas memakai sidebar ormawa | Profil admin memakai sidebar admin | Salah salin di Figma |
+| Status Ketersediaan berupa daftar slot 10 menit berlabel Tersedia atau Dipesan untuk satu ruangan | Timeline ala editor video: track per ruangan, clip Jadwal Siadin, Reservasi, dan Kosong, serta penanda "Sekarang" | Revisi dari pembimbing (daftar slot terlalu ramai, Siadin dan reservasi harus dibedakan), bentuk timeline mengikuti referensi editor video dari pengguna. Belum ada frame Figma untuk bentuk ini |
+| Grid ruangan operator berjudul "Semua Kelas" dan memilih satu ruangan | Berjudul "Semua Ruangan" dan memilih banyak ruangan sekaligus (track yang tampil di timeline) | Satu lantai berisi kelas, meeting room, dan galeri; timeline menampilkan beberapa ruangan seperti referensi editor video |
+| Tanggal hari ini tidak ada di halaman operator | Tanggal hari ini (WIB) di sebelah judul halaman | Revisi dari pembimbing |
+| Menu avatar operator berisi NIM dan tautan "Profile" | Berisi peran, nama, dan Logout | Operator tidak punya halaman profil |
+| Form Buat Reservasi operator: kartu jam berlabel "Keperluan", urutan "Selesai" lalu "Mulai" | Berlabel "Waktu (WIB)", urutan Mulai lalu Selesai | Salah label di Figma |
