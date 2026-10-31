@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import { FormProvider, useForm, useWatch } from "react-hook-form";
+import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
 import { Card } from "@/components/ui/Card";
 import { formatDateLongWIB, toWibDateKey, wibToIso } from "@/lib/date";
 import type { Building, FloorPlanRoom, RoomCategory, UnitBooking } from "@/types/facility";
@@ -17,6 +17,7 @@ import { PanelHeading } from "./PanelHeading";
 import { ReservationSteps, STEPS_BY_TYPE } from "./ReservationSteps";
 import { ReservationSubmitDialog, type ReservationLinks } from "./ReservationSubmitDialog";
 import { RoomPreview } from "./RoomPreview";
+import { TimeWheel } from "./TimeWheel";
 import {
   ROOM_RESERVATION_FIELD_MAP,
   SCHEDULE_FIELDS,
@@ -318,35 +319,53 @@ export function RoomReservationForm({
             <PanelHeading id="panel-time" iconSrc="/icons/clock-outline.svg">
               Pemilihan Jam Reservasi
             </PanelHeading>
-            <div className="flex items-end gap-2 rounded-md border border-border p-2">
-              <span className="pb-3 text-xs">Pukul :</span>
+            <div className="flex items-center gap-2 rounded-md border border-border p-2">
+              <span className="text-xs">Pukul :</span>
               <div className="flex min-w-0 flex-1 flex-col items-center gap-0.5">
                 <label htmlFor="reservation-start" className="text-[9px] font-semibold tracking-wide text-plan-selected">
                   Mulai
                 </label>
-                <input
-                  id="reservation-start"
-                  type="time"
-                  step={600}
-                  aria-invalid={errors.startTime ? true : undefined}
-                  className="min-h-11 w-full rounded-inner bg-primary-tint px-1 text-center text-xs text-primary aria-invalid:outline aria-invalid:outline-danger-strong"
-                  {...register("startTime", { deps: ["endTime"] })}
+                <Controller
+                  control={control}
+                  name="startTime"
+                  render={({ field }) => (
+                    <TimeWheel
+                      id="reservation-start"
+                      label="mulai"
+                      value={field.value}
+                      onChange={(next) => {
+                        field.onChange(next);
+                        if (formState.touchedFields.endTime) void form.trigger("endTime");
+                      }}
+                      onBlur={field.onBlur}
+                      invalid={Boolean(errors.startTime)}
+                    />
+                  )}
                 />
               </div>
-              <span aria-hidden="true" className="pb-3 text-xs">
+              <span aria-hidden="true" className="pt-4 text-xs">
                 -
               </span>
               <div className="flex min-w-0 flex-1 flex-col items-center gap-0.5">
                 <label htmlFor="reservation-end" className="text-[9px] font-semibold tracking-wide text-plan-selected">
                   Selesai
                 </label>
-                <input
-                  id="reservation-end"
-                  type="time"
-                  step={600}
-                  aria-invalid={errors.endTime ? true : undefined}
-                  className="min-h-11 w-full rounded-inner bg-primary-tint px-1 text-center text-xs text-primary aria-invalid:outline aria-invalid:outline-danger-strong"
-                  {...register("endTime", { deps: ["startTime"] })}
+                <Controller
+                  control={control}
+                  name="endTime"
+                  render={({ field }) => (
+                    <TimeWheel
+                      id="reservation-end"
+                      label="selesai"
+                      value={field.value}
+                      onChange={(next) => {
+                        field.onChange(next);
+                        if (formState.touchedFields.startTime) void form.trigger("startTime");
+                      }}
+                      onBlur={field.onBlur}
+                      invalid={Boolean(errors.endTime)}
+                    />
+                  )}
                 />
               </div>
             </div>
