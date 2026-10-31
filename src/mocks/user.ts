@@ -38,6 +38,13 @@ export const MOCK_ACCOUNTS: CurrentUser[] = [
     fakultasId: "fik",
   },
   MOCK_ADMIN_FAKULTAS,
+  {
+    id: "usr-700512",
+    name: "Budi Hartono",
+    email: "operator.h5@dinus.ac.id",
+    role: "operator",
+    fakultasId: "fik",
+  },
 ];
 
 export function findMockAccount(email: string, password: string): CurrentUser | null {

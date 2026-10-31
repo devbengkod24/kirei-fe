@@ -15,6 +15,7 @@ const ROLE_HOME: Partial<Record<UserRole, string>> = {
   ormawa: "/dashboard",
   dosen: "/dashboard",
   admin_fakultas: "/fakultas/dashboard",
+  operator: "/operator",
 };
 
 /** First page after login, or null for roles without screens yet. */
