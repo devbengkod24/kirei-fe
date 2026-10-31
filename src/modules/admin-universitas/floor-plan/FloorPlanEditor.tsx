@@ -267,6 +267,23 @@ export function FloorPlanEditor({ buildings: initial }: FloorPlanEditorProps) {
                   ))}
                 </SelectInput>
               </Field>
+              <Field label="Kapasitas (orang)" htmlFor="plan-room-capacity">
+                <input
+                  id="plan-room-capacity"
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  step={1}
+                  placeholder="Contoh: 40"
+                  value={room.capacity ?? ""}
+                  onChange={(event) => {
+                    // Whole positive numbers only; clearing the box leaves the capacity unset.
+                    const seats = Math.floor(Number(event.target.value));
+                    updateRoom(room.id, { capacity: event.target.value === "" || seats < 1 ? null : seats });
+                  }}
+                  className={INPUT_CLASS}
+                />
+              </Field>
               <div className="grid grid-cols-2 gap-2">
                 {RECT_FIELDS.map((field) => (
                   <RectInput

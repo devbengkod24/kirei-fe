@@ -22,7 +22,11 @@ export function RoomPreview({ room, approver }: RoomPreviewProps) {
       </div>
       <div className="flex flex-col gap-1 px-3 py-3">
         <p className="text-[13px] font-semibold tracking-wide">Ruang: {room ? room.code : "belum dipilih"}</p>
-        {room && <p className="text-[11px] text-muted">{ROOM_CATEGORY_LABEL[room.category]}</p>}
+        {room && (
+          <p className="text-[11px] text-muted">
+            {ROOM_CATEGORY_LABEL[room.category]} · {room.capacity ? `Kapasitas ${room.capacity} orang` : "Kapasitas belum diisi"}
+          </p>
+        )}
         {room && approver && (
           <p className="text-[11px] text-primary">
             Ruangan ini milik {approver}. Reservasi akan disetujui admin {approver}.

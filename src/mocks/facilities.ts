@@ -4,8 +4,10 @@ import { wibDateTime } from "./time";
 
 const SAMPLE_PHOTO = "/images/sample-room.jpg";
 
+const SAMPLE_CAPACITY: Record<FloorPlanRoom["category"], number> = { kelas: 40, meeting: 16, auditorium: 150, galeri: 30 };
+
 function room(code: string, category: FloorPlanRoom["category"], x: number, y: number, width: number, height: number) {
-  return { id: `room-${code}`, code, category, photoUrl: category === "kelas" ? SAMPLE_PHOTO : null, x, y, width, height };
+  return { id: `room-${code}`, code, category, photoUrl: category === "kelas" ? SAMPLE_PHOTO : null, capacity: SAMPLE_CAPACITY[category], x, y, width, height };
 }
 
 // Floor plans after the Figma V3 "buat pesan" frames, laid on the Kelola Denah grid: 25 plan units

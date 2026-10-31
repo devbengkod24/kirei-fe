@@ -8,6 +8,8 @@ export interface FloorPlanRoom {
   code: string;
   category: RoomCategory;
   photoUrl: string | null;
+  /** Seats, set by admin universitas in Kelola Denah; null until filled in. */
+  capacity: number | null;
   /** Position and size on the floor plan, in the floor's plan units. */
   x: number;
   y: number;

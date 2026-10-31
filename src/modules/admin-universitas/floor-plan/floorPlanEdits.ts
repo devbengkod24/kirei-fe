@@ -89,7 +89,7 @@ export function newRoom(floor: Floor, id: string, category: RoomCategory = "kela
       }
     }
   }
-  return { id, code: suggestRoomCode(floor), category, photoUrl: null, ...fitRoom({ ...spot, ...size }, floor) };
+  return { id, code: suggestRoomCode(floor), category, photoUrl: null, capacity: null, ...fitRoom({ ...spot, ...size }, floor) };
 }
 
 /** Problems that block saving, per room id. Codes must be filled in and unique on the floor. */

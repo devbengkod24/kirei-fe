@@ -7,6 +7,7 @@ const room = (id: string, category: FloorPlanRoom["category"] = "kelas"): FloorP
   code: id,
   category,
   photoUrl: null,
+  capacity: null,
   x: 0,
   y: 0,
   width: 10,

@@ -8,6 +8,7 @@ const room = (code: string, x = 0, y = 0, width = 50, height = 50): FloorPlanRoo
   code,
   category: "kelas",
   photoUrl: null,
+  capacity: null,
   x,
   y,
   width,

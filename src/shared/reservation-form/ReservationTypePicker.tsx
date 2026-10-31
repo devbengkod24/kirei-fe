@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { RESERVATION_TYPES, type ReservationType } from "@/types/reservation";
 import { RESERVATION_TYPE_LABEL } from "@/shared/reservation/reservationTypes";
+import { ReservationTypeIllustration } from "./ReservationTypeIllustration";
 
 const DESCRIPTION: Record<ReservationType, string> = {
   ruangan: "Ruang kelas, ruang rapat, aula, dan galeri di gedung fakultas maupun gedung universitas.",
@@ -31,6 +32,7 @@ export function ReservationTypePicker({ hrefs }: ReservationTypePickerProps) {
           const label = RESERVATION_TYPE_LABEL[type];
           return (
             <li key={type} className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-5">
+              <ReservationTypeIllustration type={type} />
               <h3 className="text-lg font-semibold">{label}</h3>
               <p className="flex-1 text-sm text-muted">{DESCRIPTION[type]}</p>
               {href ? (
