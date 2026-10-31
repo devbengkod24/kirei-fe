@@ -1,5 +1,5 @@
 import { toWibDateKey } from "@/lib/date";
-import type { Building, FloorPlanRoom, SportsHall, UnitBooking } from "@/types/facility";
+import type { Building, FloorPlanRoom, SportsHall, UnitBooking, Vehicle } from "@/types/facility";
 import { wibDateTime } from "./time";
 
 const SAMPLE_PHOTO = "/images/sample-room.jpg";
@@ -8,7 +8,8 @@ function room(code: string, category: FloorPlanRoom["category"], x: number, y: n
   return { id: `room-${code}`, code, category, photoUrl: category === "kelas" ? SAMPLE_PHOTO : null, x, y, width, height };
 }
 
-// Floor plans traced from the Figma V3 "buat pesan" frames (plan units are Figma pixels).
+// Floor plans after the Figma V3 "buat pesan" frames, laid on the Kelola Denah grid: 25 plan units
+// per cell, 18 × 12 cells per floor, so every room starts on a grid line and spans whole cells.
 // Gedung E belongs to another faculty and Gedung Rektorat to the university, to exercise the
 // cross-faculty approval notice. Lantai 3 of Gedung E has no plan yet, to show the empty state.
 export const MOCK_BUILDINGS: Building[] = [
@@ -21,36 +22,36 @@ export const MOCK_BUILDINGS: Building[] = [
       {
         id: "gedung-h-5",
         number: 5,
-        planWidth: 467,
+        planWidth: 450,
         planHeight: 300,
         rooms: [
-          room("H.5.1", "kelas", 20, 13, 101, 49),
-          room("H.5.2", "kelas", 121, 13, 100, 49),
-          room("H.5.3", "kelas", 221, 13, 48, 49),
-          room("H.5.4", "kelas", 269, 13, 50, 49),
-          room("H.5.5", "kelas", 319, 13, 50, 49),
-          room("H.5.6", "kelas", 369, 13, 50, 49),
-          room("H.5.11", "meeting", 170, 82, 49, 73),
-          room("H.5.10", "meeting", 219, 82, 49, 73),
-          room("H.5.9", "meeting", 268, 82, 49, 73),
-          room("H.5.8", "meeting", 317, 82, 50, 73),
-          room("H.5.7", "galeri", 367, 82, 80, 73),
-          room("H.5.12", "kelas", 50, 153, 72, 48),
-          room("H.5.13", "kelas", 50, 201, 72, 48),
-          room("H.5.14", "kelas", 50, 249, 72, 48),
+          room("H.5.1", "kelas", 25, 25, 100, 50),
+          room("H.5.2", "kelas", 125, 25, 100, 50),
+          room("H.5.3", "kelas", 225, 25, 50, 50),
+          room("H.5.4", "kelas", 275, 25, 50, 50),
+          room("H.5.5", "kelas", 325, 25, 50, 50),
+          room("H.5.6", "kelas", 375, 25, 50, 50),
+          room("H.5.11", "meeting", 175, 75, 50, 75),
+          room("H.5.10", "meeting", 225, 75, 50, 75),
+          room("H.5.9", "meeting", 275, 75, 50, 75),
+          room("H.5.8", "meeting", 325, 75, 50, 75),
+          room("H.5.7", "galeri", 375, 75, 75, 75),
+          room("H.5.12", "kelas", 50, 150, 75, 50),
+          room("H.5.13", "kelas", 50, 200, 75, 50),
+          room("H.5.14", "kelas", 50, 250, 75, 50),
         ],
       },
       {
         id: "gedung-h-7",
         number: 7,
-        planWidth: 467,
+        planWidth: 450,
         planHeight: 300,
         rooms: [
-          room("H.7.1", "kelas", 22, 22, 51, 66),
-          room("H.7.2", "kelas", 73, 22, 51, 66),
-          room("H.7.3", "kelas", 124, 22, 51, 66),
-          room("H.7.4", "kelas", 175, 22, 51, 66),
-          room("H.7", "auditorium", 226, 22, 220, 170),
+          room("H.7.1", "kelas", 25, 25, 50, 75),
+          room("H.7.2", "kelas", 75, 25, 50, 75),
+          room("H.7.3", "kelas", 125, 25, 50, 75),
+          room("H.7.4", "kelas", 175, 25, 50, 75),
+          room("H.7", "auditorium", 225, 25, 225, 175),
         ],
       },
     ],
@@ -64,16 +65,16 @@ export const MOCK_BUILDINGS: Building[] = [
       {
         id: "gedung-e-2",
         number: 2,
-        planWidth: 467,
+        planWidth: 450,
         planHeight: 300,
         rooms: [
-          room("E.2.1", "kelas", 30, 30, 120, 80),
-          room("E.2.2", "kelas", 150, 30, 120, 80),
-          room("E.2.3", "meeting", 270, 30, 90, 80),
-          room("E.2.4", "kelas", 30, 180, 160, 90),
+          room("E.2.1", "kelas", 25, 25, 125, 75),
+          room("E.2.2", "kelas", 150, 25, 125, 75),
+          room("E.2.3", "meeting", 275, 25, 100, 75),
+          room("E.2.4", "kelas", 25, 175, 150, 100),
         ],
       },
-      { id: "gedung-e-3", number: 3, planWidth: 467, planHeight: 300, rooms: [] },
+      { id: "gedung-e-3", number: 3, planWidth: 450, planHeight: 300, rooms: [] },
     ],
   },
   {
@@ -85,9 +86,9 @@ export const MOCK_BUILDINGS: Building[] = [
       {
         id: "gedung-rektorat-1",
         number: 1,
-        planWidth: 467,
+        planWidth: 450,
         planHeight: 300,
-        rooms: [room("R.1.1", "auditorium", 40, 40, 260, 200), room("R.1.2", "meeting", 320, 40, 110, 100)],
+        rooms: [room("R.1.1", "auditorium", 50, 50, 250, 200), room("R.1.2", "meeting", 325, 50, 100, 100)],
       },
     ],
   },
@@ -142,3 +143,10 @@ export function buildSportsHallBookingsMock(now: Date): UnitBooking[] {
     ...[0, 2, 3, 4, 5, 6].flatMap((days) => [booking(days, "08:00", "09:00"), booking(days, "16:00", "18:00")]),
   ];
 }
+
+export const MOCK_VEHICLES: Vehicle[] = [
+  { id: "vehicle-hiace", name: "Toyota Hiace", capacity: 15, unitCount: 3, isActive: true },
+  { id: "vehicle-bus", name: "Bus Udinus", capacity: 40, unitCount: 2, isActive: true },
+  { id: "vehicle-innova", name: "Toyota Innova", capacity: 7, unitCount: 4, isActive: true },
+  { id: "vehicle-elf", name: "Isuzu Elf", capacity: 19, unitCount: 1, isActive: false },
+];

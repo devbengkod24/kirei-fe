@@ -29,7 +29,7 @@ export const FAQ_ITEMS: FaqItem[] = [
   {
     question: "Bolehkah saya meminjam ruangan di fakultas lain?",
     answer:
-      "Boleh. Reservasinya akan diperiksa oleh admin fakultas pemilik ruangan, tanpa surat tambahan. Ormawa tingkat universitas seperti BEM dan UKM selalu memakai jalur ini.",
+      "Boleh. Ruangan di fakultas mana pun bisa dipesan. Reservasinya diperiksa admin fakultas pemilik ruangan, dan tetap memakai surat peminjaman seperti biasa. Ormawa tidak terikat fakultas, jadi semua ormawa memakai jalur ini.",
   },
   {
     question: "Bagaimana cara mengetahui reservasi saya sudah disetujui?",

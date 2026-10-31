@@ -8,10 +8,11 @@ import { Card } from "@/components/ui/Card";
 import { formatDateLongWIB, toWibDateKey, wibToIso } from "@/lib/date";
 import type { SportsHall, UnitBooking } from "@/types/facility";
 import { toSportsHallReservationRequest } from "./createReservation";
-import { LetterPanel } from "./LetterPanel";
+import { BOOKING_MODES, type BookingMode } from "./bookingMode";
+import { LetterPanel, ReviewButton } from "./LetterPanel";
 import { PanelHeading } from "./PanelHeading";
 import { ReservationSteps, STEPS_BY_TYPE } from "./ReservationSteps";
-import { ReservationSubmitDialog } from "./ReservationSubmitDialog";
+import { ReservationSubmitDialog, type ReservationLinks } from "./ReservationSubmitDialog";
 import {
   SPORTS_HALL_RESERVATION_FIELD_MAP,
   SPORTS_HALL_SCHEDULE_FIELDS,
@@ -29,7 +30,9 @@ export interface SportsHallReservationFormProps {
   /** ISO 8601 server time */
   now: string;
   requester: { name: string };
-  links: { history: string; drafts: string };
+  /** "internal" for an admin's own booking: no letter, draft, or approval. */
+  mode?: BookingMode;
+  links: ReservationLinks;
 }
 
 const DAYS_SHOWN = 7;
@@ -57,13 +60,14 @@ const LEGEND = [
 
 const ERROR = "text-[11px] text-danger";
 
-export function SportsHallReservationForm({ hall, bookings, now, requester, links }: SportsHallReservationFormProps) {
+export function SportsHallReservationForm({ hall, bookings, now, requester, mode = "request", links }: SportsHallReservationFormProps) {
+  const { withLetter, requesterLabel, submittedText } = BOOKING_MODES[mode];
   const nowDate = useMemo(() => new Date(now), [now]);
   const todayKey = toWibDateKey(nowDate);
   const days = useMemo(() => upcomingDays(todayKey, DAYS_SHOWN), [todayKey]);
   const slots = useMemo(() => buildSlots(hall.openTime, hall.closeTime, hall.slotMinutes), [hall]);
 
-  const schema = useMemo(() => createSportsHallReservationSchema(), []);
+  const schema = useMemo(() => createSportsHallReservationSchema(undefined, mode), [mode]);
   const defaults = useMemo(
     (): SportsHallReservationInput => ({
       date: todayKey,
@@ -122,7 +126,7 @@ export function SportsHallReservationForm({ hall, bookings, now, requester, link
         className="flex flex-col gap-2 lg:grid lg:grid-cols-[minmax(0,1fr)_16rem] lg:items-start"
       >
         <Card className="flex flex-col gap-3 p-3 lg:col-start-1 lg:row-start-1">
-          <ReservationSteps steps={STEPS_BY_TYPE.gor} />
+          <ReservationSteps steps={withLetter ? STEPS_BY_TYPE.gor : STEPS_BY_TYPE.gor.slice(0, 3)} />
           <hr className="border-border" />
 
           <fieldset>
@@ -204,7 +208,7 @@ export function SportsHallReservationForm({ hall, bookings, now, requester, link
         <div className="flex flex-col gap-2 lg:col-start-2 lg:row-start-1">
           <Card as="section" aria-labelledby="panel-borrower" className="flex flex-col gap-2 p-3">
             <PanelHeading id="panel-borrower" iconSrc="/icons/person-circle.svg" iconWidth={17} iconHeight={17}>
-              Nama Peminjam
+              Nama {requesterLabel}
             </PanelHeading>
             <p className="flex min-h-10 items-center justify-center rounded-md border border-border px-2 text-xs">{requester.name}</p>
           </Card>
@@ -251,12 +255,16 @@ export function SportsHallReservationForm({ hall, bookings, now, requester, link
             {errors.notes && <p className={ERROR}>{errors.notes.message}</p>}
           </Card>
 
-          <LetterPanel
-            file={letter ?? null}
-            onChange={(file) => setValue("letter", file, { shouldValidate: true })}
-            error={errors.letter?.message}
-            onReview={() => void flow.openSummary([...SPORTS_HALL_SCHEDULE_FIELDS])}
-          />
+          {withLetter ? (
+            <LetterPanel
+              file={letter ?? null}
+              onChange={(file) => setValue("letter", file, { shouldValidate: true })}
+              error={errors.letter?.message}
+              onReview={() => void flow.openSummary([...SPORTS_HALL_SCHEDULE_FIELDS])}
+            />
+          ) : (
+            <ReviewButton onReview={() => void flow.openSummary([...SPORTS_HALL_SCHEDULE_FIELDS])} />
+          )}
         </div>
 
         {selection && (
@@ -271,8 +279,10 @@ export function SportsHallReservationForm({ hall, bookings, now, requester, link
             result={flow.result}
             links={links}
             onCreateAnother={flow.createAnother}
+            withLetter={withLetter}
+            submittedText={submittedText}
           >
-            <SummaryValue label="Peminjam">{requester.name}</SummaryValue>
+            <SummaryValue label={requesterLabel}>{requester.name}</SummaryValue>
             <SummaryWhen
               date={formatDateLongWIB(wibToIso(date, startTime))}
               startTime={startTime}

@@ -53,3 +53,17 @@ export interface UnitBooking {
   /** ISO 8601 (UTC) */
   endsAt: string;
 }
+
+/**
+ * A kind of campus vehicle and how many units the campus has of it. Borrowers ask for a trip;
+ * the admin assigns one or more units, possibly several of the same kind.
+ */
+export interface Vehicle {
+  id: string;
+  name: string;
+  /** Seats per unit, driver included. */
+  capacity: number;
+  /** Units the campus owns of this kind. */
+  unitCount: number;
+  isActive: boolean;
+}

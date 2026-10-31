@@ -6,9 +6,13 @@ import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { Card } from "@/components/ui/Card";
 import { formatFullDateWIB, toWibDateKey, wibToIso } from "@/lib/date";
 import { toVehicleReservationRequest } from "./createReservation";
-import { LetterPanel } from "./LetterPanel";
+import { describeAssignment, summarizeAssignment } from "@/shared/reservation/vehicleAssignment";
+import { VehicleUnitPicker } from "@/shared/reservation/VehicleUnitPicker";
+import type { Vehicle } from "@/types/facility";
+import { BOOKING_MODES, type BookingMode } from "./bookingMode";
+import { LetterPanel, ReviewButton } from "./LetterPanel";
 import { PanelHeading } from "./PanelHeading";
-import { ReservationSubmitDialog } from "./ReservationSubmitDialog";
+import { ReservationSubmitDialog, type ReservationLinks } from "./ReservationSubmitDialog";
 import {
   VEHICLE_RESERVATION_FIELD_MAP,
   createVehicleReservationSchema,
@@ -22,22 +26,29 @@ export interface VehicleReservationFormProps {
   /** ISO 8601 server time */
   now: string;
   requester: { name: string };
-  links: { history: string; drafts: string };
+  /** "internal" for an admin's own booking: no phone or letter, and the admin assigns the vehicles. */
+  mode?: BookingMode;
+  /** Vehicle kinds to assign units of in "internal" mode. Borrowers leave it to the approving admin. */
+  vehicles?: Vehicle[];
+  links: ReservationLinks;
 }
 
-const DETAIL_FIELDS = ["phone", "destination", "participants", "activity", "startDate", "endDate"] as const;
+const DETAIL_FIELDS = ["phone", "vehicles", "destination", "participants", "activity", "startDate", "endDate"] as const;
 
 const LABEL = "text-[10px] font-medium tracking-wide text-plan-selected";
 const INPUT = "min-h-11 w-full rounded-md border border-border bg-surface px-2 text-xs aria-invalid:border-danger-strong";
 
 const dayLabel = (dateKey: string) => formatFullDateWIB(wibToIso(dateKey, "12:00"));
 
-export function VehicleReservationForm({ now, requester, links }: VehicleReservationFormProps) {
+export function VehicleReservationForm({ now, requester, mode = "request", vehicles = [], links }: VehicleReservationFormProps) {
+  const { askPhone, withLetter, requesterLabel, submittedText } = BOOKING_MODES[mode];
+  const pickVehicle = mode === "internal";
   const todayKey = toWibDateKey(new Date(now));
-  const schema = useMemo(() => createVehicleReservationSchema(() => todayKey), [todayKey]);
+  const schema = useMemo(() => createVehicleReservationSchema(() => todayKey, mode), [todayKey, mode]);
   const defaults = useMemo(
     (): VehicleReservationInput => ({
       phone: "",
+      vehicles: {},
       destination: "",
       participants: "",
       activity: "",
@@ -56,10 +67,13 @@ export function VehicleReservationForm({ now, requester, links }: VehicleReserva
   });
   const { register, setValue, control, formState } = form;
   const { errors } = formState;
-  const [phone, destination, participants, activity, startDate, endDate, letter] = useWatch({
+  const [phone, assignment, destination, participants, activity, startDate, endDate, letter] = useWatch({
     control,
-    name: ["phone", "destination", "participants", "activity", "startDate", "endDate", "letter"],
+    name: ["phone", "vehicles", "destination", "participants", "activity", "startDate", "endDate", "letter"],
   });
+  const assigned = summarizeAssignment(assignment ?? {}, vehicles).items;
+  // `vehicles` is a record, so RHF types its error as a map; the schema reports on the field itself.
+  const vehiclesError = (errors.vehicles as { message?: string } | undefined)?.message;
 
   const flow = useReservationSubmit(form, {
     defaults,
@@ -79,20 +93,22 @@ export function VehicleReservationForm({ now, requester, links }: VehicleReserva
       <form noValidate onSubmit={(event) => event.preventDefault()} className="mx-auto flex w-full max-w-[34rem] flex-col gap-2">
         <Card as="section" aria-labelledby="panel-borrower-data" className="flex flex-col gap-3 p-3">
           <PanelHeading id="panel-borrower-data" iconSrc="/icons/notes.svg" iconWidth={11} iconHeight={12}>
-            Data Peminjam
+            Data {requesterLabel}
           </PanelHeading>
           <div className="grid gap-x-3 gap-y-3 sm:grid-cols-2">
-            <div className="flex flex-col gap-1">
-              <p className={LABEL}>Nama Peminjam</p>
+            <div className={`flex flex-col gap-1 ${askPhone ? "" : "sm:col-span-2"}`}>
+              <p className={LABEL}>Nama {requesterLabel}</p>
               <p className="flex min-h-11 items-center rounded-md border border-border bg-page px-2 text-xs">{requester.name}</p>
             </div>
-            <div className="flex flex-col gap-1">
-              <label htmlFor="vehicle-phone" className={LABEL}>
-                No HP
-              </label>
-              <input type="tel" inputMode="tel" autoComplete="tel" placeholder="081234567890" {...field("phone", errors.phone?.message)} {...register("phone")} />
-              <FieldError id="vehicle-phone-error" message={errors.phone?.message} />
-            </div>
+            {askPhone && (
+              <div className="flex flex-col gap-1">
+                <label htmlFor="vehicle-phone" className={LABEL}>
+                  No HP
+                </label>
+                <input type="tel" inputMode="tel" autoComplete="tel" placeholder="081234567890" {...field("phone", errors.phone?.message)} {...register("phone")} />
+                <FieldError id="vehicle-phone-error" message={errors.phone?.message} />
+              </div>
+            )}
             <div className="flex flex-col gap-1">
               <label htmlFor="vehicle-destination" className={LABEL}>
                 Tujuan
@@ -145,15 +161,39 @@ export function VehicleReservationForm({ now, requester, links }: VehicleReserva
               <FieldError id="vehicle-endDate-error" message={errors.endDate?.message} />
             </div>
           </div>
-          <p className="text-[11px] text-muted">Kendaraan yang dipakai ditentukan admin saat menyetujui reservasi.</p>
+          {!pickVehicle && <p className="text-[11px] text-muted">Kendaraan yang dipakai ditentukan admin saat menyetujui reservasi.</p>}
         </Card>
 
-        <LetterPanel
-          file={letter ?? null}
-          onChange={(file) => setValue("letter", file, { shouldValidate: true })}
-          error={errors.letter?.message}
-          onReview={() => void flow.openSummary([...DETAIL_FIELDS])}
-        />
+        {pickVehicle && (
+          <Card as="section" aria-labelledby="panel-vehicle-choice" className="flex flex-col gap-2 p-3">
+            <PanelHeading id="panel-vehicle-choice" iconSrc="/icons/notes.svg" iconWidth={11} iconHeight={12}>
+              Kendaraan
+            </PanelHeading>
+            {vehicles.length === 0 ? (
+              <p className="text-xs text-muted">Belum ada kendaraan yang aktif.</p>
+            ) : (
+              <VehicleUnitPicker
+                vehicles={vehicles}
+                value={assignment ?? {}}
+                onChange={(next) => setValue("vehicles", next, { shouldValidate: Boolean(errors.vehicles) })}
+                participants={Number(participants) || 0}
+                idPrefix="vehicle-units"
+                error={vehiclesError}
+              />
+            )}
+          </Card>
+        )}
+
+        {withLetter ? (
+          <LetterPanel
+            file={letter ?? null}
+            onChange={(file) => setValue("letter", file, { shouldValidate: true })}
+            error={errors.letter?.message}
+            onReview={() => void flow.openSummary([...DETAIL_FIELDS])}
+          />
+        ) : (
+          <ReviewButton onReview={() => void flow.openSummary([...DETAIL_FIELDS])} />
+        )}
 
         <ReservationSubmitDialog
           open={flow.dialogOpen}
@@ -166,10 +206,13 @@ export function VehicleReservationForm({ now, requester, links }: VehicleReserva
           result={flow.result}
           links={links}
           onCreateAnother={flow.createAnother}
+          withLetter={withLetter}
+          submittedText={submittedText}
         >
           <dl className="flex flex-col gap-3 py-2">
-            <SummaryRow label="Peminjam">{requester.name}</SummaryRow>
-            <SummaryRow label="No HP">{phone}</SummaryRow>
+            <SummaryRow label={requesterLabel}>{requester.name}</SummaryRow>
+            {askPhone && <SummaryRow label="No HP">{phone}</SummaryRow>}
+            {assigned.length > 0 && <SummaryRow label="Kendaraan">{describeAssignment(assigned)}</SummaryRow>}
             <SummaryRow label="Tujuan">
               {destination}, {String(participants)} peserta
             </SummaryRow>

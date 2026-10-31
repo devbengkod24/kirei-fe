@@ -6,7 +6,8 @@ export const MOCK_CURRENT_USER: CurrentUser = {
   name: "Nurudin Wafiq Mustaqim",
   email: "111202214797@mhs.dinus.ac.id",
   role: "ormawa",
-  fakultasId: "fik",
+  // Ormawa belong to no faculty; they may book rooms in any of them.
+  fakultasId: null,
 };
 
 export const MOCK_ADMIN_FAKULTAS: CurrentUser = {
@@ -17,6 +18,14 @@ export const MOCK_ADMIN_FAKULTAS: CurrentUser = {
   fakultasId: "fik",
 };
 
+export const MOCK_ADMIN_UNIVERSITAS: CurrentUser = {
+  id: "usr-100001",
+  name: "Rahmat Hidayat, S.Kom., M.Kom.",
+  email: "admin.univ@dinus.ac.id",
+  role: "admin_universitas",
+  fakultasId: null,
+};
+
 /** Demo password for every mock account. Local development only. */
 export const MOCK_PASSWORD = "kirei123";
 
@@ -24,20 +33,14 @@ export const MOCK_PASSWORD = "kirei123";
 export const MOCK_ACCOUNTS: CurrentUser[] = [
   MOCK_CURRENT_USER,
   {
-    id: "usr-830001",
-    name: "BEM Universitas",
-    email: "bem@dinus.ac.id",
-    role: "ormawa",
-    fakultasId: null,
-  },
-  {
     id: "usr-512044",
     name: "Dr. Maria Lestari, M.Pd.",
     email: "maria.lestari@dsn.dinus.ac.id",
     role: "dosen",
     fakultasId: "fik",
   },
-  MOCK_ADMIN_FAKULTAS,
+    MOCK_ADMIN_FAKULTAS,
+  MOCK_ADMIN_UNIVERSITAS,
   {
     id: "usr-700512",
     name: "Budi Hartono",

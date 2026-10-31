@@ -5,7 +5,7 @@ export interface CurrentUser {
   name: string;
   email: string;
   role: UserRole;
-  /** null for university-level ormawa (BEM, UKM) and admin_universitas */
+  /** null for ormawa (they belong to no faculty) and admin_universitas */
   fakultasId: string | null;
   avatarUrl?: string;
 }

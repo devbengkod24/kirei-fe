@@ -10,8 +10,7 @@ const ROLE_LABEL: Partial<Record<UserRole, string>> = {
 };
 
 function roleLabel(user: CurrentUser) {
-  const label = ROLE_LABEL[user.role] ?? user.role;
-  return user.role === "ormawa" && user.fakultasId === null ? `${label} Universitas` : label;
+  return ROLE_LABEL[user.role] ?? user.role;
 }
 
 export interface QuickLoginProps {
