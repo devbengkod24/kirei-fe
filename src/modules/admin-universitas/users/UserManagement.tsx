@@ -11,22 +11,24 @@ import { SegmentedNav } from "@/components/ui/SegmentedNav";
 import { TABLE, TABLE_CELL, TABLE_HEAD_CELL, TABLE_ROW } from "@/components/ui/table";
 import { usePagination } from "@/hooks/usePagination";
 import type { Fakultas } from "@/types/fakultas";
+import type { Building } from "@/types/facility";
 import type { ManagedRole, ManagedUser } from "@/types/managedUser";
 import { ADMIN_UNIVERSITAS_ROUTES } from "../routes";
 import { AddUserDialog } from "./AddUserDialog";
 import { UserDetailDialog } from "./UserDetailDialog";
 import { searchUsers, toManagedUser } from "./userSchema";
-import { USER_TAB_PARAM, USER_TABS } from "./userTabs";
+import { USER_ROLES, USER_TAB_PARAM, USER_TABS } from "./userTabs";
 
 export interface UserManagementProps {
   role: ManagedRole;
   users: ManagedUser[];
   fakultasOptions: Fakultas[];
+  /** Buildings and floors, to show and pick where an operator works. */
+  buildings: Building[];
 }
 
 const TH = `${TABLE_HEAD_CELL} text-left`;
 const TD = TABLE_CELL;
-const ROLES = Object.keys(USER_TABS) as ManagedRole[];
 
 /** Long addresses may only wrap before the "@", never in the middle of a name or domain. */
 function Email({ address }: { address: string }) {
@@ -49,8 +51,8 @@ function StatusBadge({ isActive, size = "md" }: { isActive: boolean; size?: "sm"
   );
 }
 
-/** Ormawa and dosen accounts: search, add, and switch an account on or off. */
-export function UserManagement({ role, users: initial, fakultasOptions }: UserManagementProps) {
+/** Accounts of one kind: search, add, switch on or off, and set a new password. Columns follow USER_TABS. */
+export function UserManagement({ role, users: initial, fakultasOptions, buildings }: UserManagementProps) {
   const [users, setUsers] = useState(initial);
   const [query, setQuery] = useState("");
   const [viewing, setViewing] = useState<ManagedUser | null>(null);
@@ -60,12 +62,18 @@ export function UserManagement({ role, users: initial, fakultasOptions }: UserMa
   const searchId = useId();
   const visible = searchUsers(users, query);
   const paging = usePagination(visible, 10);
-  const label = USER_TABS[role].label;
-  const isDosen = role === "dosen";
+  const { label, fields } = USER_TABS[role];
 
-  // Only dosen belong to a faculty; ormawa may book rooms in any of them.
+  // Ormawa belong to no faculty; dosen and admin fakultas do, operators work on one floor.
   const fakultasById = new Map(fakultasOptions.map((fakultas) => [fakultas.id, fakultas]));
   const fakultasOf = (user: ManagedUser) => (user.fakultasId ? fakultasById.get(user.fakultasId) : undefined);
+  const floorOf = (user: ManagedUser) => {
+    if (!user.floor) return undefined;
+    const building = buildings.find((item) => item.id === user.floor?.buildingId);
+    const floor = building?.floors.find((item) => item.id === user.floor?.floorId);
+    return building && floor ? `${building.name} · Lantai ${floor.number}` : undefined;
+  };
+  const placementOf = (user: ManagedUser) => (fields.floor ? floorOf(user) : fakultasOf(user)?.name);
 
   const viewButton = (user: ManagedUser) => (
     <button
@@ -82,7 +90,7 @@ export function UserManagement({ role, users: initial, fakultasOptions }: UserMa
     <div className="flex flex-col gap-4">
       <SegmentedNav
         label="Jenis pengguna"
-        items={ROLES.map((item) => ({
+        items={USER_ROLES.map((item) => ({
           label: USER_TABS[item].label,
           href: `${ADMIN_UNIVERSITAS_ROUTES.users}?${USER_TAB_PARAM}=${item}`,
           active: item === role,
@@ -106,7 +114,7 @@ export function UserManagement({ role, users: initial, fakultasOptions }: UserMa
                 setQuery(event.target.value);
                 paging.setPage(1);
               }}
-              placeholder={isDosen ? "Cari nama, email, atau NPP" : "Cari nama atau email"}
+              placeholder={fields.npp ? "Cari nama, email, atau NPP" : "Cari nama atau email"}
               className={`${INPUT_CLASS} min-w-0 flex-1 sm:w-64`}
             />
             <Button onClick={() => setAdding(true)}>+ {label}</Button>
@@ -129,9 +137,10 @@ export function UserManagement({ role, users: initial, fakultasOptions }: UserMa
                 <tr className={TABLE_ROW}>
                   <th scope="col" className={TH}>No</th>
                   <th scope="col" className={TH}>Nama</th>
-                  {isDosen && <th scope="col" className={TH}>NPP</th>}
+                  {fields.npp && <th scope="col" className={TH}>NPP</th>}
                   <th scope="col" className={TH}>Email</th>
-                  {isDosen && <th scope="col" className={TH}>Fakultas</th>}
+                  {fields.fakultas && <th scope="col" className={TH}>Fakultas</th>}
+                  {fields.floor && <th scope="col" className={TH}>Tempat tugas</th>}
                   <th scope="col" className={TH}>Status</th>
                   <th scope="col" className={TH}>Aksi</th>
                 </tr>
@@ -141,15 +150,16 @@ export function UserManagement({ role, users: initial, fakultasOptions }: UserMa
                   <tr key={user.id} className={TABLE_ROW}>
                     <td className={TD}>{(paging.page - 1) * paging.pageSize + index + 1}</td>
                     <td className={TD}>{user.name}</td>
-                    {isDosen && <td className={`${TD} tabular-nums`}>{user.npp}</td>}
+                    {fields.npp && <td className={`${TD} tabular-nums`}>{user.npp}</td>}
                     <td className={TD}>
                       <Email address={user.email} />
                     </td>
-                    {isDosen && (
+                    {fields.fakultas && (
                       <td className={`${TD} whitespace-nowrap`} title={fakultasOf(user)?.name}>
                         {fakultasOf(user)?.shortName ?? "-"}
                       </td>
                     )}
+                    {fields.floor && <td className={TD}>{floorOf(user) ?? "-"}</td>}
                     <td className={TD}>
                       <StatusBadge isActive={user.isActive} />
                     </td>
@@ -168,9 +178,9 @@ export function UserManagement({ role, users: initial, fakultasOptions }: UserMa
                     <span className="text-xs text-muted">
                       <Email address={user.email} />
                     </span>
-                    {isDosen && (
+                    {(fields.npp || placementOf(user)) && (
                       <span className="text-xs text-muted">
-                        NPP {user.npp} · {fakultasOf(user)?.name ?? "-"}
+                        {[fields.npp && user.npp && `NPP ${user.npp}`, placementOf(user)].filter(Boolean).join(" · ")}
                       </span>
                     )}
                     <StatusBadge isActive={user.isActive} size="sm" />
@@ -194,7 +204,7 @@ export function UserManagement({ role, users: initial, fakultasOptions }: UserMa
       {viewing && (
         <UserDetailDialog
           user={viewing}
-          fakultasName={fakultasOf(viewing)?.name}
+          placement={placementOf(viewing)}
           onClose={() => setViewing(null)}
           onSave={({ isActive, newPassword }) => {
             // TODO: PATCH the status and PUT the new password through the orval client; the password never enters state.
@@ -213,10 +223,12 @@ export function UserManagement({ role, users: initial, fakultasOptions }: UserMa
           role={role}
           existing={users}
           fakultasOptions={fakultasOptions}
+          buildings={buildings}
           onClose={() => setAdding(false)}
           onAdd={(values) => {
             added.current += 1;
             const user = toManagedUser(values, role, `${role}-new-${added.current}`);
+            // TODO: POST the account (with its password) through the orval client; the password never enters state.
             setUsers((current) => [user, ...current]);
             setQuery("");
             paging.setPage(1);

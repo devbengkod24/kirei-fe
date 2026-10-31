@@ -19,8 +19,8 @@ export interface UserDetailChanges {
 
 export interface UserDetailDialogProps {
   user: ManagedUser;
-  /** The dosen's faculty, e.g. "Fakultas Ilmu Komputer". Ormawa have none. */
-  fakultasName?: string;
+  /** Where the account belongs: a faculty name, or "Gedung H · Lantai 5" for an operator. Ormawa have none. */
+  placement?: string;
   onClose: () => void;
   onSave: (changes: UserDetailChanges) => void;
 }
@@ -34,7 +34,7 @@ const STATUS_OPTIONS = [
  * Account details, the active switch, and an optional new password for an owner who lost theirs.
  * An inactive account cannot sign in; it is not a penalty.
  */
-export function UserDetailDialog({ user, fakultasName, onClose, onSave }: UserDetailDialogProps) {
+export function UserDetailDialog({ user, placement, onClose, onSave }: UserDetailDialogProps) {
   const [isActive, setIsActive] = useState(user.isActive);
   const passwordForm = useForm<PasswordResetValues>({
     resolver: zodResolver(passwordResetSchema),
@@ -76,10 +76,10 @@ export function UserDetailDialog({ user, fakultasName, onClose, onSave }: UserDe
                 <dd className="text-xs text-muted">NPP: {user.npp}</dd>
               </>
             )}
-            {fakultasName && (
+            {placement && (
               <>
-                <dt className="sr-only">Fakultas</dt>
-                <dd className="text-xs text-muted">{fakultasName}</dd>
+                <dt className="sr-only">{user.floor ? "Tempat tugas" : "Fakultas"}</dt>
+                <dd className="text-xs text-muted">{placement}</dd>
               </>
             )}
             <dt className="sr-only">Email</dt>

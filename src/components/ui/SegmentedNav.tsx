@@ -23,7 +23,7 @@ export function SegmentedNav({ label, items }: SegmentedNavProps) {
               href={item.href}
               scroll={false}
               aria-current={item.active ? "page" : undefined}
-              className={`flex min-h-11 items-center justify-center rounded-inner px-4 text-xs whitespace-nowrap transition-colors sm:min-w-32 ${
+              className={`flex min-h-11 items-center justify-center rounded-inner px-2 text-center text-xs transition-colors sm:min-w-32 sm:px-4 sm:whitespace-nowrap ${
                 item.active ? "bg-primary font-medium text-on-primary" : "text-ink hover:bg-primary-soft hover:text-primary"
               }`}
             >
