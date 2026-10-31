@@ -73,4 +73,8 @@ export interface ReservationRequest extends ReservationSummary {
   borrowerDetail: string;
   purpose: string;
   letterFileName: string | null;
+  /** Kendaraan only: where the trip goes and how many people ride. */
+  trip?: { destination: string; participants: number };
+  /** GOR only: the sport or event, e.g. "Badminton". */
+  activity?: string;
 }

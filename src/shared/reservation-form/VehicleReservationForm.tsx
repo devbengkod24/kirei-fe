@@ -6,6 +6,8 @@ import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { Card } from "@/components/ui/Card";
 import { formatFullDateWIB, toWibDateKey, wibToIso } from "@/lib/date";
 import { toVehicleReservationRequest } from "./createReservation";
+import { describeAssignment, summarizeAssignment } from "@/shared/reservation/vehicleAssignment";
+import { VehicleUnitPicker } from "@/shared/reservation/VehicleUnitPicker";
 import type { Vehicle } from "@/types/facility";
 import { BOOKING_MODES, type BookingMode } from "./bookingMode";
 import { LetterPanel, ReviewButton } from "./LetterPanel";
@@ -24,14 +26,14 @@ export interface VehicleReservationFormProps {
   /** ISO 8601 server time */
   now: string;
   requester: { name: string };
-  /** "internal" for an admin's own booking: no phone or letter, and the admin picks the vehicle. */
+  /** "internal" for an admin's own booking: no phone or letter, and the admin assigns the vehicles. */
   mode?: BookingMode;
-  /** Vehicles to pick from in "internal" mode. Borrowers leave the choice to the approving admin. */
+  /** Vehicle kinds to assign units of in "internal" mode. Borrowers leave it to the approving admin. */
   vehicles?: Vehicle[];
   links: ReservationLinks;
 }
 
-const DETAIL_FIELDS = ["phone", "vehicleId", "destination", "participants", "activity", "startDate", "endDate"] as const;
+const DETAIL_FIELDS = ["phone", "vehicles", "destination", "participants", "activity", "startDate", "endDate"] as const;
 
 const LABEL = "text-[10px] font-medium tracking-wide text-plan-selected";
 const INPUT = "min-h-11 w-full rounded-md border border-border bg-surface px-2 text-xs aria-invalid:border-danger-strong";
@@ -46,7 +48,7 @@ export function VehicleReservationForm({ now, requester, mode = "request", vehic
   const defaults = useMemo(
     (): VehicleReservationInput => ({
       phone: "",
-      vehicleId: "",
+      vehicles: {},
       destination: "",
       participants: "",
       activity: "",
@@ -65,11 +67,13 @@ export function VehicleReservationForm({ now, requester, mode = "request", vehic
   });
   const { register, setValue, control, formState } = form;
   const { errors } = formState;
-  const [phone, vehicleId, destination, participants, activity, startDate, endDate, letter] = useWatch({
+  const [phone, assignment, destination, participants, activity, startDate, endDate, letter] = useWatch({
     control,
-    name: ["phone", "vehicleId", "destination", "participants", "activity", "startDate", "endDate", "letter"],
+    name: ["phone", "vehicles", "destination", "participants", "activity", "startDate", "endDate", "letter"],
   });
-  const vehicle = vehicles.find((item) => item.id === vehicleId);
+  const assigned = summarizeAssignment(assignment ?? {}, vehicles).items;
+  // `vehicles` is a record, so RHF types its error as a map; the schema reports on the field itself.
+  const vehiclesError = (errors.vehicles as { message?: string } | undefined)?.message;
 
   const flow = useReservationSubmit(form, {
     defaults,
@@ -168,27 +172,15 @@ export function VehicleReservationForm({ now, requester, mode = "request", vehic
             {vehicles.length === 0 ? (
               <p className="text-xs text-muted">Belum ada kendaraan yang aktif.</p>
             ) : (
-              <fieldset aria-describedby={errors.vehicleId ? "vehicle-vehicleId-error" : undefined}>
-                <legend className="sr-only">Pilih kendaraan</legend>
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {vehicles.map((item) => (
-                    <label
-                      key={item.id}
-                      className="flex min-h-11 cursor-pointer items-center gap-2 rounded-md border border-border px-3 py-2 text-xs hover:bg-primary-soft has-[:checked]:border-primary has-[:checked]:bg-primary-soft has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-border-focus"
-                    >
-                      <input type="radio" value={item.id} className="accent-primary" {...register("vehicleId")} />
-                      <span className="flex flex-col">
-                        <span className="font-medium">{item.name}</span>
-                        <span className="text-[11px] text-muted">
-                          {item.plateNumber} · {item.capacity} kursi
-                        </span>
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
+              <VehicleUnitPicker
+                vehicles={vehicles}
+                value={assignment ?? {}}
+                onChange={(next) => setValue("vehicles", next, { shouldValidate: Boolean(errors.vehicles) })}
+                participants={Number(participants) || 0}
+                idPrefix="vehicle-units"
+                error={vehiclesError}
+              />
             )}
-            <FieldError id="vehicle-vehicleId-error" message={errors.vehicleId?.message} />
           </Card>
         )}
 
@@ -220,11 +212,7 @@ export function VehicleReservationForm({ now, requester, mode = "request", vehic
           <dl className="flex flex-col gap-3 py-2">
             <SummaryRow label={requesterLabel}>{requester.name}</SummaryRow>
             {askPhone && <SummaryRow label="No HP">{phone}</SummaryRow>}
-            {vehicle && (
-              <SummaryRow label="Kendaraan">
-                {vehicle.name} ({vehicle.plateNumber})
-              </SummaryRow>
-            )}
+            {assigned.length > 0 && <SummaryRow label="Kendaraan">{describeAssignment(assigned)}</SummaryRow>}
             <SummaryRow label="Tujuan">
               {destination}, {String(participants)} peserta
             </SummaryRow>

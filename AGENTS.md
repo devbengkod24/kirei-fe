@@ -12,7 +12,7 @@ Baca file ini di awal setiap sesi. Untuk detail, lihat `docs/`.
 - TanStack Query (data client), `fetch` di Server Component (data server)
 - React Hook Form + Zod (form dan validasi)
 - Client API dihasilkan **orval** dari OpenAPI Laravel
-- react-konva (editor denah, hanya Admin Universitas), Recharts (grafik dashboard)
+- Editor denah (hanya Admin Universitas) memakai SVG + pointer events, tanpa library kanvas; Recharts (grafik dashboard)
 - Autentikasi: Laravel Sanctum mode SPA (cookie httpOnly), bukan token di localStorage
 
 ## Perintah
@@ -39,14 +39,14 @@ Ormawa dan dosen memakai layar yang sama. Pemetaan halaman: `docs/roles-and-page
 | `admin_universitas` | Semua fakultas, gedung universitas, GOR, kendaraan, pengguna, denah. Mengambil alih peran superadmin lama. |
 | `admin_fakultas` | Ruangan dan reservasi di gedung milik fakultasnya, termasuk menyetujui peminjam dari luar fakultas. |
 | `operator` | Satu lantai di satu gedung. |
-| `ormawa`, `dosen` | Peminjam. Punya fakultas asal, kecuali ormawa tingkat universitas (BEM, UKM) yang tanpa fakultas. |
+| `ormawa`, `dosen` | Peminjam. Dosen punya fakultas asal. Ormawa tidak terikat fakultas (`fakultasId: null`); semua ormawa setara. |
 
 ## Model fakultas
 
 - Data dipisah per fakultas (`fakultas_id`): gedung, ruangan, denah, reservasi ruangan, persetujuan, laporan, pengumuman fakultas. Pemisahan ditegakkan Laravel; frontend hanya mengirim `scope` dan menampilkan hasilnya.
 - Satu gedung milik satu fakultas, atau milik universitas. GOR, kendaraan, dan gedung universitas tidak punya fakultas dan dikelola Admin Universitas.
 - Reservasi ruangan tercatat di fakultas pemilik ruangan, bukan fakultas peminjam.
-- Pengguna (`fakultasId: string | null`) boleh meminjam ruangan fakultas lain dengan persetujuan admin fakultas pemilik, tanpa surat tambahan. Ormawa tanpa fakultas selalu lewat jalur ini.
+- Peminjam boleh meminjam ruangan di fakultas mana pun. Reservasi ruangan milik fakultas disetujui admin fakultas pemilik ruangan, dan tetap memakai surat peminjaman. Ormawa tidak punya fakultas, jadi reservasi ruangan fakultas oleh ormawa selalu lewat admin fakultas pemilik.
 - Halaman Admin Universitas yang memuat data fakultas punya filter fakultas.
 
 ## Struktur (ringkas)

@@ -6,7 +6,8 @@ export const MOCK_CURRENT_USER: CurrentUser = {
   name: "Nurudin Wafiq Mustaqim",
   email: "111202214797@mhs.dinus.ac.id",
   role: "ormawa",
-  fakultasId: "fik",
+  // Ormawa belong to no faculty; they may book rooms in any of them.
+  fakultasId: null,
 };
 
 export const MOCK_ADMIN_FAKULTAS: CurrentUser = {
@@ -31,13 +32,6 @@ export const MOCK_PASSWORD = "kirei123";
 /** Accounts the mock login accepts, one per role that has screens so far. */
 export const MOCK_ACCOUNTS: CurrentUser[] = [
   MOCK_CURRENT_USER,
-  {
-    id: "usr-830001",
-    name: "BEM Universitas",
-    email: "bem@dinus.ac.id",
-    role: "ormawa",
-    fakultasId: null,
-  },
   {
     id: "usr-512044",
     name: "Dr. Maria Lestari, M.Pd.",

@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
-import { ComingSoon } from "@/components/feedback/ComingSoon";
-import { ADMIN_UNIVERSITAS_ROUTES } from "@/modules/admin-universitas/routes";
+import { requireRole } from "@/lib/auth/requireRole";
+import { FloorPlanEditor } from "@/modules/admin-universitas/floor-plan/FloorPlanEditor";
+import { getFloorPlanBuildings } from "@/modules/admin-universitas/floor-plan/getFloorPlanBuildings";
 
 export const metadata: Metadata = { title: "Kelola Denah" };
 
-export default function Page() {
-  return <ComingSoon title="Kelola Denah" backHref={ADMIN_UNIVERSITAS_ROUTES.dashboard} backLabel="Kembali ke Dashboard" />;
+export default async function Page() {
+  await requireRole(["admin_universitas"]);
+  const buildings = await getFloorPlanBuildings();
+
+  return <FloorPlanEditor buildings={buildings} />;
 }

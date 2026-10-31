@@ -131,15 +131,15 @@ export const SPORTS_HALL_RESERVATION_FIELD_MAP = {
 
 /* ---------- Kendaraan ---------- */
 
-/** In "internal" mode the admin books without phone or letter and picks the vehicle right away. */
+/** In "internal" mode the admin books without phone or letter and assigns the vehicles right away. */
 export function createVehicleReservationSchema(today: () => string, mode: BookingMode = "request") {
   const { askPhone, withLetter } = BOOKING_MODES[mode];
   const pickVehicle = mode === "internal";
   return z
     .object({
       phone: askPhone ? phoneSchema : z.string(),
-      /** Only set by an admin; borrowers leave the choice to the admin who approves. */
-      vehicleId: z.string().optional(),
+      /** Units per vehicle kind, set only by an admin; borrowers leave it to the admin who approves. */
+      vehicles: z.record(z.string(), z.number().int().min(0)).optional(),
       destination: describe("tujuan", 3),
       participants: z.coerce
         .number({ message: "Isi jumlah peserta dengan angka." })
@@ -158,8 +158,8 @@ export function createVehicleReservationSchema(today: () => string, mode: Bookin
       if (DATE.test(values.startDate) && DATE.test(values.endDate) && values.endDate < values.startDate) {
         ctx.addIssue({ code: "custom", path: ["endDate"], message: "Tanggal selesai tidak boleh sebelum tanggal mulai." });
       }
-      if (pickVehicle && !values.vehicleId) {
-        ctx.addIssue({ code: "custom", path: ["vehicleId"], message: "Pilih kendaraan." });
+      if (pickVehicle && Object.values(values.vehicles ?? {}).every((units) => units === 0)) {
+        ctx.addIssue({ code: "custom", path: ["vehicles"], message: "Tambahkan minimal satu kendaraan." });
       }
       if (withLetter) requireLetterToSubmit(values, ctx);
     }, ALWAYS);
@@ -170,7 +170,7 @@ export type VehicleReservationValues = z.output<ReturnType<typeof createVehicleR
 
 export const VEHICLE_RESERVATION_FIELD_MAP = {
   phone: "phone",
-  vehicle_id: "vehicleId",
+  vehicles: "vehicles",
   destination: "destination",
   participants: "participants",
   activity: "activity",

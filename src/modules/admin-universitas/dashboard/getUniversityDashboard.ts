@@ -54,7 +54,10 @@ export async function getUniversityDashboard(scope: AdminScope): Promise<Univers
   const units: Record<ReservationType, { active: number; total: number }> = {
     ruangan: { active: rooms.filter((room) => room.isActive).length, total: rooms.length },
     gor: { active: 1, total: 1 },
-    kendaraan: { active: MOCK_VEHICLES.filter((vehicle) => vehicle.isActive).length, total: MOCK_VEHICLES.length },
+    kendaraan: {
+      active: MOCK_VEHICLES.filter((vehicle) => vehicle.isActive).reduce((sum, vehicle) => sum + vehicle.unitCount, 0),
+      total: MOCK_VEHICLES.reduce((sum, vehicle) => sum + vehicle.unitCount, 0),
+    },
   };
 
   // The mock has one trend for all rooms; a faculty without rooms gets none.

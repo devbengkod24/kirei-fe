@@ -1,9 +1,17 @@
 import type { Metadata } from "next";
-import { ComingSoon } from "@/components/feedback/ComingSoon";
-import { ADMIN_UNIVERSITAS_ROUTES } from "@/modules/admin-universitas/routes";
+import { requireRole } from "@/lib/auth/requireRole";
+import { getManagedUsers } from "@/modules/admin-universitas/users/getManagedUsers";
+import { UserManagement } from "@/modules/admin-universitas/users/UserManagement";
+import { USER_TAB_PARAM, parseUserTab } from "@/modules/admin-universitas/users/userTabs";
+import { getFakultasOptions } from "@/shared/fakultas-filter/getFakultasOptions";
 
 export const metadata: Metadata = { title: "Kelola Pengguna" };
 
-export default function Page() {
-  return <ComingSoon title="Kelola Pengguna" backHref={ADMIN_UNIVERSITAS_ROUTES.dashboard} backLabel="Kembali ke Dashboard" />;
+export default async function Page({ searchParams }: PageProps<"/admin/pengguna">) {
+  await requireRole(["admin_universitas"]);
+  const role = parseUserTab((await searchParams)[USER_TAB_PARAM]);
+  const [users, fakultasOptions] = await Promise.all([getManagedUsers(role), getFakultasOptions()]);
+
+  // Remount per tab, so search and paging start over.
+  return <UserManagement key={role} role={role} users={users} fakultasOptions={fakultasOptions} />;
 }

@@ -112,7 +112,7 @@ export function ReservationSubmitDialog({
 
         {approver && (
           <p className="rounded-md bg-primary-soft px-3 py-2 text-xs text-primary">
-            Ruangan ini milik {approver}. Reservasi akan disetujui admin {approver}, tanpa surat tambahan.
+            Ruangan ini milik {approver}. Reservasi akan disetujui admin {approver}.
           </p>
         )}
 

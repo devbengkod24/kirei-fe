@@ -166,7 +166,7 @@ export function RoomReservationForm({
                 {floor && floor.rooms.length > 0 ? (
                   <FloorPlan floor={floor} statuses={statuses} onSelect={selectRoom} legendId="floor-plan-legend" />
                 ) : (
-                  <p className="flex aspect-[467/300] items-center justify-center px-6 text-center text-xs text-muted">
+                  <p className="flex aspect-[3/2] items-center justify-center px-6 text-center text-xs text-muted">
                     Denah untuk lantai ini belum tersedia. Pilih lantai atau gedung lain.
                   </p>
                 )}

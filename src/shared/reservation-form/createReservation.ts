@@ -54,7 +54,7 @@ export function toVehicleReservationRequest(values: VehicleReservationValues) {
     starts_at: wibToIso(values.startDate, "00:00"),
     ends_at: end.toISOString(),
     phone: values.phone,
-    vehicle_id: values.vehicleId || null,
+    vehicles: Object.entries(values.vehicles ?? {}).map(([vehicle_id, units]) => ({ vehicle_id, units })),
     destination: values.destination,
     participants: values.participants,
     activity: values.activity,
