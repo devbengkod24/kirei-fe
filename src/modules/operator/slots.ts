@@ -58,11 +58,41 @@ export function buildTimeline(
   return segments;
 }
 
+/** Where a segment sits on the time axis: minutes from `from`, and its length in minutes. */
+export function segmentSpan(segment: TimeSlot, from: string) {
+  return { offset: toMinutes(segment.start) - toMinutes(from), length: toMinutes(segment.end) - toMinutes(segment.start) };
+}
+
+const pad = (value: number) => String(value).padStart(2, "0");
+
+/** Ruler marks every 10 minutes; every half hour also carries a label such as "07.30". */
+export function rulerTicks(from: string, to: string) {
+  const start = toMinutes(from);
+  const ticks: { offset: number; label: string | null }[] = [];
+  for (let minute = start; minute <= toMinutes(to); minute += STEP_MINUTES) {
+    ticks.push({ offset: minute - start, label: minute % 30 === 0 ? `${pad(Math.floor(minute / 60))}.${pad(minute % 60)}` : null });
+  }
+  return ticks;
+}
+
+/** Minutes from `from` to the current WIB time, or null on another day or outside the range. */
+export function nowOffset(now: Date, dateKey: string, from: string, to: string) {
+  if (toWibDateKey(now) !== dateKey) return null;
+  const minute = toMinutes(toWibTimeKey(now));
+  return minute >= toMinutes(from) && minute <= toMinutes(to) ? minute - toMinutes(from) : null;
+}
+
+/** Shows or hides a room's track. The last visible room stays, so the timeline is never empty. */
+export function toggleRoom(visibleIds: string[], roomId: string): string[] {
+  if (!visibleIds.includes(roomId)) return [...visibleIds, roomId];
+  return visibleIds.length === 1 ? visibleIds : visibleIds.filter((id) => id !== roomId);
+}
+
 /** Two hours from the current hour, kept inside opening hours. */
 export function defaultHourFilter(now: Date) {
-  const pad = (hour: number) => `${String(hour).padStart(2, "0")}:00`;
+  const hour = (value: number) => `${pad(value)}:00`;
   const open = Number(OPEN_TIME.slice(0, 2));
   const close = Number(CLOSE_TIME.slice(0, 2));
   const from = Math.min(Math.max(Number(toWibTimeKey(now).slice(0, 2)), open), close - 2);
-  return { from: pad(from), to: pad(from + 2) };
+  return { from: hour(from), to: hour(from + 2) };
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SelectInput } from "@/components/form/Field";
 import { Card } from "@/components/ui/Card";
 import { MaskIcon } from "@/components/ui/MaskIcon";
@@ -9,11 +9,11 @@ import { formatDateLongWIB, formatTimeRangeWIB, toWibDateKey } from "@/lib/date"
 import type { TimeSlot } from "@/shared/reservation-form/sportsHallSlots";
 import type { ReservationRecord } from "@/types/reservation";
 import { CreateReservationPanel } from "./CreateReservationPanel";
+import { FloorTimeline } from "./FloorTimeline";
 import type { OperatorFloorData } from "./getOperatorFloor";
 import { deleteReservation } from "./operatorReservations";
 import { ReservationDetailPanel } from "./ReservationDetailPanel";
-import { RoomTimeline } from "./RoomTimeline";
-import { buildTimeline, defaultHourFilter, FILTER_HOURS } from "./slots";
+import { buildTimeline, defaultHourFilter, FILTER_HOURS, toggleRoom } from "./slots";
 
 const displayTime = (time: string) => time.replace(":", ".");
 
@@ -40,40 +40,68 @@ export function OperatorFloorPage({ data }: { data: OperatorFloorData | null }) 
 function FloorAvailability({ data }: { data: OperatorFloorData }) {
   const { floor, canCreate, canDelete } = data;
   const dateKey = toWibDateKey(data.now);
-  const [roomId, setRoomId] = useState(floor.rooms[0].id);
+  const [now, setNow] = useState(() => new Date(data.now));
   const [hours, setHours] = useState(() => defaultHourFilter(new Date(data.now)));
   const [reservations, setReservations] = useState(data.reservations);
+  // Every room starts visible so the operator sees the whole floor at once.
+  const [visibleIds, setVisibleIds] = useState(() => floor.rooms.map((room) => room.id));
   const [detailId, setDetailId] = useState<string | null>(null);
-  // Times prefilled in the create form; null while the form is collapsed.
-  const [draft, setDraft] = useState<TimeSlot | null>(null);
+  // Room and times prefilled in the create form; null while the form is collapsed.
+  const [draft, setDraft] = useState<({ roomId: string } & TimeSlot) | null>(null);
   const [notice, setNotice] = useState("");
-  // Closing or deleting removes the focused panel, so focus returns to the slot section.
+  // Closing or deleting removes the focused panel, so focus returns to the timeline section.
   const statusHeadingRef = useRef<HTMLHeadingElement>(null);
+  // The confirm dialog hands focus back to the deleted reservation's Hapus button as it unmounts,
+  // so focus moves after that commit instead of inside the delete handler.
+  const focusAfterDelete = useRef(false);
+
+  useEffect(() => {
+    if (!focusAfterDelete.current || detailId !== null) return;
+    focusAfterDelete.current = false;
+    statusHeadingRef.current?.focus();
+  }, [detailId]);
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const validRange = hours.from < hours.to;
+  const visibleRooms = floor.rooms.filter((room) => visibleIds.includes(room.id));
+  const detail = reservations.find((reservation) => reservation.id === detailId) ?? null;
+
   const closeDetail = () => {
     setDetailId(null);
     statusHeadingRef.current?.focus();
   };
-
-  const room = floor.rooms.find((item) => item.id === roomId) ?? floor.rooms[0];
-  const validRange = hours.from < hours.to;
-  const timeline = validRange ? buildTimeline(dateKey, room.code, hours.from, hours.to, reservations, data.classSchedules) : [];
-  const detail = reservations.find((reservation) => reservation.id === detailId) ?? null;
 
   const openReservation = (reservation: ReservationRecord) => {
     setNotice("");
     setDetailId(reservation.id);
   };
 
-  const openCreate = (range?: TimeSlot) => {
+  const openCreate = (roomId: string, range: TimeSlot) => {
     setNotice("");
-    setDraft(range ?? timeline.find((segment) => segment.kind === "free") ?? { start: hours.from, end: hours.to });
+    setDraft({ roomId, ...range });
+  };
+
+  // The "+" button starts from the first free gap on the floor within the filtered hours.
+  const openCreateAnywhere = () => {
+    for (const room of visibleRooms) {
+      const gap =
+        validRange &&
+        buildTimeline(dateKey, room.code, hours.from, hours.to, reservations, data.classSchedules).find((segment) => segment.kind === "free");
+      if (gap) return openCreate(room.id, gap);
+    }
+    openCreate(visibleRooms[0].id, { start: hours.from, end: hours.to });
   };
 
   const remove = async (reservation: ReservationRecord) => {
     const result = await deleteReservation(reservation.id);
     if (!result.ok) return result.message;
     setReservations((current) => current.filter((item) => item.id !== reservation.id));
-    closeDetail();
+    focusAfterDelete.current = true;
+    setDetailId(null);
     setNotice(`Reservasi ${reservation.unitName}, ${formatTimeRangeWIB(reservation.startsAt, reservation.endsAt)}, dihapus.`);
     return null;
   };
@@ -97,28 +125,38 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
               <Image src="/icons/classroom.svg" alt="" width={16} height={16} />
               Semua Ruangan
             </h2>
-            <div role="group" aria-label="Pilih ruangan" className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-5">
-              {floor.rooms.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  aria-pressed={item.id === room.id}
-                  onClick={() => {
-                    setRoomId(item.id);
-                    setDetailId(null);
-                    setNotice("");
-                  }}
-                  className={`min-h-11 rounded-md border text-xs transition-colors ${
-                    item.id === room.id ? "border-primary bg-primary text-on-primary" : "border-border bg-surface hover:bg-primary-soft"
-                  }`}
-                >
-                  {item.code}
-                </button>
-              ))}
+            <p id="operator-rooms-hint" className="text-[11px] text-muted">
+              Pilih ruangan yang jadwalnya ditampilkan di timeline. Minimal satu ruangan tetap tampil.
+            </p>
+            <div
+              role="group"
+              aria-label="Ruangan yang ditampilkan"
+              aria-describedby="operator-rooms-hint"
+              className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-5"
+            >
+              {floor.rooms.map((item) => {
+                const visible = visibleIds.includes(item.id);
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    aria-pressed={visible}
+                    onClick={() => {
+                      setVisibleIds((current) => toggleRoom(current, item.id));
+                      setNotice("");
+                    }}
+                    className={`min-h-11 rounded-md border text-xs transition-colors ${
+                      visible ? "border-primary bg-primary text-on-primary hover:bg-primary-hover" : "border-border bg-surface hover:bg-primary-soft"
+                    }`}
+                  >
+                    {item.code}
+                  </button>
+                );
+              })}
             </div>
           </Card>
 
-          <Card as="section" aria-labelledby="operator-status-title" className="flex flex-col gap-3 py-4">
+          <Card as="section" aria-labelledby="operator-status-title" className="flex min-w-0 flex-col gap-3 py-4">
             <div className="flex flex-wrap items-center justify-between gap-3 px-4">
               <h2
                 id="operator-status-title"
@@ -127,7 +165,7 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
                 className="flex items-center gap-1.5 text-xs font-medium text-primary"
               >
                 <MaskIcon src="/icons/calendar-clock.svg" size={18} />
-                Status Ketersediaan {room.code}
+                Status Ketersediaan
               </h2>
               <fieldset className="flex items-center gap-2 text-xs">
                 <legend className="sr-only">Filter jam</legend>
@@ -170,35 +208,29 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
               {notice}
             </p>
 
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-stretch lg:pr-4">
-              {detail && (
-                <div className="px-4 lg:order-last lg:w-[234px] lg:shrink-0 lg:px-0">
-                  <ReservationDetailPanel
-                    reservation={detail}
-                    canDelete={canDelete}
-                    onClose={closeDetail}
-                    onDelete={remove}
-                  />
-                </div>
-              )}
+            {validRange ? (
+              <FloorTimeline
+                rooms={visibleRooms}
+                dateKey={dateKey}
+                from={hours.from}
+                to={hours.to}
+                now={now}
+                reservations={reservations}
+                schedules={data.classSchedules}
+                canCreate={canCreate}
+                activeReservationId={detailId}
+                onOpenReservation={openReservation}
+                onCreate={openCreate}
+              />
+            ) : (
+              <p className="px-4 py-10 text-center text-sm text-muted">Jam akhir harus setelah jam awal. Ubah Filter Jam.</p>
+            )}
 
-              {validRange ? (
-                <div className="min-w-0 flex-1">
-                  <RoomTimeline
-                    roomCode={room.code}
-                    segments={timeline}
-                    from={hours.from}
-                    to={hours.to}
-                    canCreate={canCreate}
-                    activeReservationId={detailId}
-                    onOpenReservation={openReservation}
-                    onCreate={openCreate}
-                  />
-                </div>
-              ) : (
-                <p className="flex-1 px-4 py-10 text-center text-sm text-muted">Jam akhir harus setelah jam awal. Ubah Filter Jam.</p>
-              )}
-            </div>
+            {detail && (
+              <div className="px-4 sm:max-w-sm">
+                <ReservationDetailPanel reservation={detail} canDelete={canDelete} onClose={closeDetail} onDelete={remove} />
+              </div>
+            )}
           </Card>
         </div>
 
@@ -207,8 +239,9 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
             {draft ? (
               <div className="lg:w-64">
                 <CreateReservationPanel
-                  key={`${room.id}-${draft.start}-${draft.end}`}
-                  room={room}
+                  key={`${draft.roomId}-${draft.start}-${draft.end}`}
+                  rooms={floor.rooms}
+                  roomId={draft.roomId}
                   dateKey={dateKey}
                   startTime={draft.start}
                   endTime={draft.end}
@@ -226,11 +259,11 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
                 />
               </div>
             ) : (
-              <Card className="p-2 lg:min-h-[580px]">
+              <Card className="p-2 lg:min-h-[420px]">
                 <button
                   type="button"
-                  onClick={() => openCreate()}
-                  aria-label={`Buat reservasi ${room.code}`}
+                  onClick={openCreateAnywhere}
+                  aria-label="Buat reservasi"
                   className="flex min-h-11 w-full items-center justify-center gap-2 rounded-md px-2 text-sm font-medium text-primary hover:bg-primary-soft"
                 >
                   <span className="flex size-7 items-center justify-center rounded-sm bg-primary text-on-primary">

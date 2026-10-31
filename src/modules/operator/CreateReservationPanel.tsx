@@ -20,7 +20,9 @@ import { createOperatorReservation } from "./operatorReservations";
 import { SLOT_TIMES } from "./slots";
 
 export interface CreateReservationPanelProps {
-  room: FloorPlanRoom;
+  rooms: FloorPlanRoom[];
+  /** Prefilled room, e.g. the track of the free gap the operator clicked. */
+  roomId: string;
   dateKey: string;
   /** Prefilled times, e.g. from a free slot the operator clicked. */
   startTime: string;
@@ -33,9 +35,10 @@ export interface CreateReservationPanelProps {
 
 const displayTime = (time: string) => time.replace(":", ".");
 
-/** Books the selected room for today on behalf of a borrower at the desk. */
+/** Books a room for today on behalf of a borrower at the desk. */
 export function CreateReservationPanel({
-  room,
+  rooms,
+  roomId,
   dateKey,
   startTime,
   endTime,
@@ -45,7 +48,7 @@ export function CreateReservationPanel({
 }: CreateReservationPanelProps) {
   const form = useForm<OperatorReservationValues>({
     resolver: zodResolver(operatorReservationSchema),
-    defaultValues: { bookerName: "", purpose: "", startTime, endTime },
+    defaultValues: { roomId, bookerName: "", purpose: "", startTime, endTime },
   });
   const { errors, isSubmitting } = form.formState;
   // The panel may open far from the slot that was clicked (above the list on phones).
@@ -54,6 +57,8 @@ export function CreateReservationPanel({
     errors[field] ? { "aria-invalid": true, "aria-describedby": `operator-${field}-error` } : {};
 
   const submit = form.handleSubmit(async (values) => {
+    const room = rooms.find((item) => item.id === values.roomId);
+    if (!room) return;
     const startsAt = wibToIso(dateKey, values.startTime);
     const endsAt = wibToIso(dateKey, values.endTime);
     const clash = busy.some(
@@ -98,9 +103,15 @@ export function CreateReservationPanel({
             </div>
           </div>
 
-          <p className="text-xs">
-            Ruangan: <span className="font-semibold text-primary">{room.code}</span>
-          </p>
+          <Field label="Ruangan" htmlFor="operator-roomId" error={errors.roomId?.message}>
+            <SelectInput id="operator-roomId" {...form.register("roomId")} {...invalid("roomId")}>
+              {rooms.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.code}
+                </option>
+              ))}
+            </SelectInput>
+          </Field>
 
           <Field label="Nama Peminjam" htmlFor="operator-bookerName" error={errors.bookerName?.message}>
             <input id="operator-bookerName" {...form.register("bookerName")} {...invalid("bookerName")} className={INPUT_CLASS} />
