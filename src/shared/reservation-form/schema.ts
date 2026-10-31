@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { letterFileSchema } from "@/shared/reservation/letter";
 import { toIsoRange } from "./availability";
+import { BOOKING_MODES, type BookingMode } from "./bookingMode";
 
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -57,17 +58,8 @@ const ALWAYS = { when: () => true };
 /** Fields checked before the summary dialog opens. */
 export const SCHEDULE_FIELDS = ["buildingId", "floorId", "date", "startTime", "endTime", "roomId"] as const;
 
-export interface RoomReservationSchemaOptions {
-  /** Borrowers give a phone number; admins booking for themselves do not. */
-  askPhone?: boolean;
-  /** Borrowers need a letter to send (or save a draft); admins book without one. */
-  withLetter?: boolean;
-}
-
-export function createRoomReservationSchema(
-  now: () => Date = () => new Date(),
-  { askPhone = true, withLetter = true }: RoomReservationSchemaOptions = {},
-) {
+export function createRoomReservationSchema(now: () => Date = () => new Date(), mode: BookingMode = "request") {
+  const { askPhone, withLetter } = BOOKING_MODES[mode];
   return z
     .object({
       buildingId: z.string().min(1, "Pilih gedung."),
@@ -108,7 +100,8 @@ export const ROOM_RESERVATION_FIELD_MAP = {
 
 export const SPORTS_HALL_SCHEDULE_FIELDS = ["date", "startTime", "endTime", "activity", "notes"] as const;
 
-export function createSportsHallReservationSchema(now: () => Date = () => new Date()) {
+export function createSportsHallReservationSchema(now: () => Date = () => new Date(), mode: BookingMode = "request") {
+  const { withLetter } = BOOKING_MODES[mode];
   return z
     .object({
       date: z.string().regex(DATE, "Pilih tanggal reservasi."),
@@ -121,7 +114,7 @@ export function createSportsHallReservationSchema(now: () => Date = () => new Da
     })
     .superRefine((values, ctx) => {
       requireFutureStart(values.date, values.startTime, values.endTime, now(), "startTime", ctx);
-      requireLetterToSubmit(values, ctx);
+      if (withLetter) requireLetterToSubmit(values, ctx);
     }, ALWAYS);
 }
 
@@ -138,10 +131,15 @@ export const SPORTS_HALL_RESERVATION_FIELD_MAP = {
 
 /* ---------- Kendaraan ---------- */
 
-export function createVehicleReservationSchema(today: () => string) {
+/** In "internal" mode the admin books without phone or letter and picks the vehicle right away. */
+export function createVehicleReservationSchema(today: () => string, mode: BookingMode = "request") {
+  const { askPhone, withLetter } = BOOKING_MODES[mode];
+  const pickVehicle = mode === "internal";
   return z
     .object({
-      phone: phoneSchema,
+      phone: askPhone ? phoneSchema : z.string(),
+      /** Only set by an admin; borrowers leave the choice to the admin who approves. */
+      vehicleId: z.string().optional(),
       destination: describe("tujuan", 3),
       participants: z.coerce
         .number({ message: "Isi jumlah peserta dengan angka." })
@@ -160,7 +158,10 @@ export function createVehicleReservationSchema(today: () => string) {
       if (DATE.test(values.startDate) && DATE.test(values.endDate) && values.endDate < values.startDate) {
         ctx.addIssue({ code: "custom", path: ["endDate"], message: "Tanggal selesai tidak boleh sebelum tanggal mulai." });
       }
-      requireLetterToSubmit(values, ctx);
+      if (pickVehicle && !values.vehicleId) {
+        ctx.addIssue({ code: "custom", path: ["vehicleId"], message: "Pilih kendaraan." });
+      }
+      if (withLetter) requireLetterToSubmit(values, ctx);
     }, ALWAYS);
 }
 
@@ -169,6 +170,7 @@ export type VehicleReservationValues = z.output<ReturnType<typeof createVehicleR
 
 export const VEHICLE_RESERVATION_FIELD_MAP = {
   phone: "phone",
+  vehicle_id: "vehicleId",
   destination: "destination",
   participants: "participants",
   activity: "activity",

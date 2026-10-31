@@ -71,7 +71,7 @@ describe("room reservation schema", () => {
 
 describe("room reservation schema for an admin booking", () => {
   // admins book for the faculty: no phone and no loan letter
-  const adminSchema = createRoomReservationSchema(() => new Date("2026-10-30T01:00:00Z"), { askPhone: false, withLetter: false });
+  const adminSchema = createRoomReservationSchema(() => new Date("2026-10-30T01:00:00Z"), "internal");
 
   it("accepts a booking without phone or letter", () => {
     expect(adminSchema.safeParse({ ...valid, phone: "", letter: null }).success).toBe(true);
@@ -158,5 +158,56 @@ describe("vehicle reservation schema", () => {
   it("checks the destination and activity text", () => {
     expect(vehicleIssues({ ...validVehicle, destination: "  " })).toHaveProperty("destination");
     expect(vehicleIssues({ ...validVehicle, activity: "Tur" })).toHaveProperty("activity");
+  });
+});
+
+describe("internal bookings by an admin", () => {
+  const issues = (result: { success: boolean; error?: { issues: { path: PropertyKey[]; message: string }[] } }) =>
+    result.success ? {} : Object.fromEntries(result.error!.issues.map((issue) => [issue.path.join("."), issue.message]));
+
+  it("books the GOR without a letter", () => {
+    const gorSchema = createSportsHallReservationSchema(() => new Date("2026-10-30T01:00:00Z"), "internal");
+    const booking: SportsHallReservationInput = {
+      date: "2026-10-30",
+      startTime: "10:00",
+      endTime: "12:00",
+      activity: "Futsal",
+      notes: "",
+      letter: null,
+      intent: "submit",
+    };
+    expect(issues(gorSchema.safeParse(booking))).toEqual({});
+  });
+
+  it("books a vehicle without phone or letter, but needs the vehicle", () => {
+    const vehicleSchema = createVehicleReservationSchema(() => "2026-10-30", "internal");
+    const trip: VehicleReservationInput = {
+      phone: "",
+      vehicleId: "vehicle-bus",
+      destination: "Yogyakarta",
+      participants: "30",
+      activity: "Studi banding pimpinan",
+      startDate: "2026-10-31",
+      endDate: "2026-11-01",
+      letter: null,
+      intent: "submit",
+    };
+    expect(issues(vehicleSchema.safeParse(trip))).toEqual({});
+    expect(issues(vehicleSchema.safeParse({ ...trip, vehicleId: "" }))).toEqual({ vehicleId: "Pilih kendaraan." });
+  });
+
+  it("leaves the vehicle to the approving admin for a borrower's request", () => {
+    const requestSchema = createVehicleReservationSchema(() => "2026-10-30");
+    const result = requestSchema.safeParse({
+      phone: "081234567890",
+      destination: "Yogyakarta",
+      participants: "30",
+      activity: "Studi banding himpunan",
+      startDate: "2026-10-31",
+      endDate: "2026-11-01",
+      letter,
+      intent: "submit",
+    });
+    expect(issues(result)).toEqual({});
   });
 });

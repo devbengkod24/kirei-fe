@@ -7,6 +7,7 @@ import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { Card } from "@/components/ui/Card";
 import { formatDateLongWIB, toWibDateKey, wibToIso } from "@/lib/date";
 import type { Building, FloorPlanRoom, RoomCategory, UnitBooking } from "@/types/facility";
+import { BOOKING_MODES, type BookingMode } from "./bookingMode";
 import { crossFacultyApprover, defaultSchedule, roomStatus, toIsoRange } from "./availability";
 import { toRoomReservationRequest } from "./createReservation";
 import { FloorPlan } from "./FloorPlan";
@@ -32,19 +33,13 @@ export interface RoomReservationFormProps {
   /** ISO 8601 server time, for the default date and time */
   now: string;
   requester: { name: string; fakultasId: string | null };
-  /** Label for the requester in the summary: "Peminjam" for borrowers, "Pemesan" for admins. */
-  requesterLabel?: string;
-  /** Borrowers give a phone number in the summary. */
-  askPhone?: boolean;
-  /** Borrowers upload a loan letter (or save a draft without one). */
-  withLetter?: boolean;
+  /** "internal" for an admin's own booking: no phone, letter, draft, or approval. */
+  mode?: BookingMode;
   /** Lets admins pick a booked room; the replacement-schedule flow is not built yet. */
   canUseBookedSlot?: boolean;
   /** Reservation rules shown under the floor plan, from the API. */
   rules?: string[];
   purposePlaceholder?: string;
-  /** Replaces the default "waiting for approval" text after sending, e.g. "sudah dibuat." */
-  submittedText?: string;
   links: ReservationLinks;
 }
 
@@ -70,16 +65,14 @@ export function RoomReservationForm({
   bookings,
   now,
   requester,
-  requesterLabel = "Peminjam",
-  askPhone = true,
-  withLetter = true,
+  mode = "request",
   canUseBookedSlot = false,
   rules = [],
   purposePlaceholder = "Contoh: Rapat pengurus bulanan",
-  submittedText,
   links,
 }: RoomReservationFormProps) {
-  const schema = useMemo(() => createRoomReservationSchema(undefined, { askPhone, withLetter }), [askPhone, withLetter]);
+  const { askPhone, withLetter, needsApproval, requesterLabel, submittedText } = BOOKING_MODES[mode];
+  const schema = useMemo(() => createRoomReservationSchema(undefined, mode), [mode]);
   const defaults = useMemo((): RoomReservationInput => {
     const building = buildings.find((b) => b.floors.length > 0) ?? buildings[0];
     return {
@@ -140,7 +133,7 @@ export function RoomReservationForm({
   }, [selectionLost, setValue]);
 
   const selectedRoom = floor?.rooms.find((room) => room.id === roomId) ?? null;
-  const approver = building ? crossFacultyApprover(requester.fakultasId, building) : null;
+  const approver = building && needsApproval ? crossFacultyApprover(requester.fakultasId, building) : null;
   const selectableRooms = (floor?.rooms ?? []).filter((room) => statuses.get(room.id)?.selectable);
 
   const selectRoom = (room: FloorPlanRoom) => {

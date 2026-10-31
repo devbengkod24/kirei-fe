@@ -4,7 +4,6 @@ import type { ReservationType } from "@/types/reservation";
 export const ADMIN_UNIVERSITAS_ROUTES = {
   dashboard: "/admin/dashboard",
   /** Base paths of the pages with a [tipe] segment; each opens Ruangan. */
-  facilities: "/admin/fasilitas",
   internalReservation: "/admin/reservasi-internal",
   reservations: "/admin/reservasi",
   floorPlans: "/admin/denah",
@@ -13,10 +12,6 @@ export const ADMIN_UNIVERSITAS_ROUTES = {
   announcements: "/admin/pengumuman",
   profile: "/admin/profil",
 } as const;
-
-export function facilitiesRoute(tipe: ReservationType) {
-  return `${ADMIN_UNIVERSITAS_ROUTES.facilities}/${tipe}`;
-}
 
 export function internalReservationRoute(tipe: ReservationType) {
   return `${ADMIN_UNIVERSITAS_ROUTES.internalReservation}/${tipe}`;

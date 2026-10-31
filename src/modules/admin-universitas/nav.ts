@@ -5,7 +5,6 @@ import { ADMIN_UNIVERSITAS_ROUTES } from "./routes";
 export const ADMIN_UNIVERSITAS_NAV: NavLinkConfig[][] = [
   [
     { label: "Dashboard", href: ADMIN_UNIVERSITAS_ROUTES.dashboard, iconSrc: "/icons/nav/dashboard.svg" },
-    { label: "Kelola Fasilitas", href: ADMIN_UNIVERSITAS_ROUTES.facilities, iconSrc: "/icons/nav/manage-rooms.svg" },
     {
       label: "Reservasi Internal",
       href: ADMIN_UNIVERSITAS_ROUTES.internalReservation,

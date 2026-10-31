@@ -59,7 +59,7 @@ Semua data terkunci ke fakultas admin (`scope={{ fakultasId: user.fakultasId }}`
 |---|---|---|---|
 | Dashboard | `/fakultas/dashboard` | Kartu Total Reservasi Hari Ini, Check-in Hari Ini, Ruangan Tersedia; grafik distribusi reservasi; tabel reservasi hari ini; laporan pengguna terbaru | `shared/dashboard` (`AdminDashboard`) |
 | Kelola Ruangan | `/fakultas/ruangan` | Daftar ruangan di gedung milik fakultas, ubah detail dan status ruangan. Tidak termasuk edit denah. | `shared/unit-management` (`tipe="ruangan"`) |
-| Reservasi Internal | `/fakultas/reservasi-internal` | Admin memesan ruangan di gedung fakultasnya. Komponen sama dengan Buat Reservasi: Ruangan milik peminjam, tetapi tanpa No HP, surat, dan draft. Memakai slot yang sudah dipesan belum dibangun. | `shared/reservation-form` (`RoomReservationForm` dengan `askPhone={false}`, `withLetter={false}`) |
+| Reservasi Internal | `/fakultas/reservasi-internal` | Admin memesan ruangan di gedung fakultasnya. Komponen sama dengan Buat Reservasi: Ruangan milik peminjam, tetapi tanpa No HP, surat, dan draft. Memakai slot yang sudah dipesan belum dibangun. | `shared/reservation-form` (`RoomReservationForm` dengan `mode="internal"`) |
 | Kelola Reservasi: Persetujuan | `/fakultas/persetujuan` | Reservasi ruangan fakultas yang menunggu keputusan, termasuk dari peminjam luar fakultas. | `shared/reservation-approval` |
 | Kelola Reservasi: Riwayat | `/fakultas/riwayat` | | `shared/reservation-history` |
 | Laporan Pengguna | `/fakultas/laporan` | Pengaduan pengguna, dengan filter status, kategori, dan tanggal. | `shared/user-reports` |
@@ -75,8 +75,7 @@ Mengambil alih semua menu SuperAdmin lama. Satu sidebar untuk semua tipe. Menu y
 | Menu | Tab tipe | URL | Isi | Komponen |
 |---|---|---|---|---|
 | Dashboard | | `/admin/dashboard` | Satu dashboard gabungan semua tipe: ringkasan per tipe (hari ini, menunggu, unit tersedia), grafik mingguan dengan pilihan tipe, reservasi hari ini (dengan kolom tipe), laporan terbaru | `modules/admin-universitas/dashboard`, memakai potongan `shared/admin-dashboard` |
-| Kelola Fasilitas | Ruangan, Kendaraan, GOR | `/admin/fasilitas/[tipe]` | Daftar dan ubah unit per tipe | `shared/rooms` (ruangan), komponen setara untuk GOR dan kendaraan |
-| Reservasi Internal | Ruangan, Kendaraan, GOR | `/admin/reservasi-internal/[tipe]` | Admin memesan atas nama kampus. Ruangan boleh memakai slot yang sudah dipesan di semua gedung. | `shared/reservation-form` |
+| Reservasi Internal | Ruangan, Kendaraan, GOR | `/admin/reservasi-internal/[tipe]` | Admin memesan atas nama kampus, tanpa No HP, surat, draft, dan persetujuan. Ruangan: semua gedung, dipilih lewat pilihan gedung di form, tanpa filter fakultas (memakai slot yang sudah dipesan belum dibangun). Kendaraan: admin langsung memilih kendaraan. GOR: jadwal slot seperti peminjam. | `shared/reservation-form` (form per tipe dengan `mode="internal"`), dirakit di `modules/admin-universitas/internal-reservation` |
 | Kelola Reservasi | Ruangan, Kendaraan, GOR | `/admin/reservasi/[tipe]/persetujuan`, `/admin/reservasi/[tipe]/riwayat` | Tab Persetujuan dan Riwayat, masing-masing ber-URL | `shared/reservation-management` |
 | Kelola Denah | | `/admin/denah` | Editor denah lantai (react-konva). Hanya Admin Universitas. | `modules/admin-universitas` |
 | Kelola Pengguna | | `/admin/pengguna` | Tab Ormawa dan Dosen: daftar, detail, tambah, status akun. | `modules/admin-universitas` |
@@ -86,7 +85,7 @@ Mengambil alih semua menu SuperAdmin lama. Satu sidebar untuk semua tipe. Menu y
 
 Berpindah tab di Kelola Reservasi mempertahankan tab Persetujuan atau Riwayat yang sedang dibuka.
 
-**Filter fakultas.** Ditampilkan di halaman yang memuat data fakultas: halaman ber-`[tipe]` dengan tipe `ruangan`, Dashboard (hanya memengaruhi angka ruangan), Kelola Denah, Laporan Pengguna, dan Pengumuman. Nilainya dibawa di URL (`?fakultas=<id>`), kosong berarti semua fakultas. Tidak ditampilkan untuk GOR dan kendaraan. Contoh kode ada di `docs/architecture.md` bagian "Scope fakultas".
+**Filter fakultas.** Ditampilkan di halaman yang memuat data fakultas: Kelola Reservasi tipe `ruangan`, Dashboard (hanya memengaruhi angka ruangan), Kelola Denah, Laporan Pengguna, dan Pengumuman. Nilainya dibawa di URL (`?fakultas=<id>`), kosong berarti semua fakultas. Tidak ditampilkan untuk GOR dan kendaraan. Contoh kode ada di `docs/architecture.md` bagian "Scope fakultas".
 
 ## Operator
 
