@@ -125,13 +125,13 @@ export const MOCK_ROOM_RULES = [
 export const MOCK_SPORTS_HALL: SportsHall = {
   id: "gor-udinus",
   name: "GOR Udinus",
-  openTime: "08:00",
+  openTime: "07:00",
   closeTime: "22:00",
   slotMinutes: 60,
   activities: ["Badminton", "Futsal", "Basket", "Voli"],
 };
 
-/** GOR bookings over the next week; tomorrow is fully booked to show a day with no free slot. */
+/** GOR bookings over the next two weeks; tomorrow is fully booked to show a day with no free slot. */
 export function buildSportsHallBookingsMock(now: Date): UnitBooking[] {
   const todayKey = toWibDateKey(now);
   const booking = (days: number, start: string, end: string): UnitBooking => ({
@@ -141,8 +141,8 @@ export function buildSportsHallBookingsMock(now: Date): UnitBooking[] {
   });
 
   return [
-    booking(1, "08:00", "22:00"),
-    ...[0, 2, 3, 4, 5, 6].flatMap((days) => [booking(days, "08:00", "09:00"), booking(days, "16:00", "18:00")]),
+    booking(1, "07:00", "22:00"),
+    ...[0, 2, 3, 4, 5, 6, 8, 10, 12].flatMap((days) => [booking(days, "08:00", "09:00"), booking(days, "16:00", "18:00")]),
   ];
 }
 

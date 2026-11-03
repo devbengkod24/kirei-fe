@@ -38,8 +38,9 @@ export async function ReservationHistoryPage({
   const href = (next: Partial<HistoryQuery>) => historyHref(basePath, { ...query, ...next }, showTypeTabs);
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-3.5">
+    <div className="flex flex-1 flex-col gap-4">
+      {/* type on the left, view on the right; stacked on narrow screens with the type first */}
+      <div className="flex flex-col gap-3.5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         {showTypeTabs && (
           <SegmentedNav
             label="Jenis reservasi"

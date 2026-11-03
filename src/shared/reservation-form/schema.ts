@@ -1,4 +1,9 @@
 import { z } from "zod";
+import {
+  SPORTS_HALL_BOOKING_DAYS,
+  SPORTS_HALL_MAX_MINUTES,
+} from "@/config/reservation";
+import { toWibDateKey } from "@/lib/date";
 import { letterFileSchema } from "@/shared/reservation/letter";
 import { toIsoRange } from "./availability";
 import { BOOKING_MODES, type BookingMode } from "./bookingMode";
@@ -21,7 +26,14 @@ const phoneSchema = z
   .pipe(z.string().regex(PHONE, "Nomor HP tidak valid. Contoh: 081234567890."));
 
 const describe = (what: string, min: number) =>
-  z.string().trim().min(min, `Tulis ${what} minimal ${min} karakter.`).max(255, `${what[0].toUpperCase()}${what.slice(1)} maksimal 255 karakter.`);
+  z
+    .string()
+    .trim()
+    .min(min, `Tulis ${what} minimal ${min} karakter.`)
+    .max(
+      255,
+      `${what[0].toUpperCase()}${what.slice(1)} maksimal 255 karakter.`,
+    );
 
 /** Fields every reservation type shares: the optional letter and whether it is sent or saved as a draft. */
 const submissionShape = {
@@ -29,23 +41,44 @@ const submissionShape = {
   intent: z.enum(["draft", "submit"]),
 };
 
-type IssueSink = { addIssue: (issue: { code: "custom"; path: string[]; message: string }) => void };
+type IssueSink = {
+  addIssue: (issue: {
+    code: "custom";
+    path: string[];
+    message: string;
+  }) => void;
+};
 
 /** Sending needs the letter; a draft can be saved without it and completed before the deadline. */
-function requireLetterToSubmit(values: { intent?: string; letter?: File | null }, ctx: IssueSink) {
+function requireLetterToSubmit(
+  values: { intent?: string; letter?: File | null },
+  ctx: IssueSink,
+) {
   if (values.intent === "submit" && !values.letter) {
     ctx.addIssue({
       code: "custom",
       path: ["letter"],
-      message: "Unggah surat peminjaman untuk memesan, atau simpan sebagai draft dan unggah nanti.",
+      message:
+        "Unggah surat peminjaman untuk memesan, atau simpan sebagai draft dan unggah nanti.",
     });
   }
 }
 
-function requireFutureStart(dateKey: string, startTime: string, endTime: string, now: Date, path: string, ctx: IssueSink) {
+function requireFutureStart(
+  dateKey: string,
+  startTime: string,
+  endTime: string,
+  now: Date,
+  path: string,
+  ctx: IssueSink,
+) {
   const range = toIsoRange(dateKey, startTime, endTime);
   if (range && Date.parse(range.startsAt) <= now.getTime()) {
-    ctx.addIssue({ code: "custom", path: [path], message: "Jam mulai sudah lewat. Pilih waktu yang akan datang." });
+    ctx.addIssue({
+      code: "custom",
+      path: [path],
+      message: "Jam mulai sudah lewat. Pilih waktu yang akan datang.",
+    });
   }
 }
 
@@ -56,9 +89,19 @@ const ALWAYS = { when: () => true };
 /* ---------- Ruangan ---------- */
 
 /** Fields checked before the summary dialog opens. */
-export const SCHEDULE_FIELDS = ["buildingId", "floorId", "date", "startTime", "endTime", "roomId"] as const;
+export const SCHEDULE_FIELDS = [
+  "buildingId",
+  "floorId",
+  "date",
+  "startTime",
+  "endTime",
+  "roomId",
+] as const;
 
-export function createRoomReservationSchema(now: () => Date = () => new Date(), mode: BookingMode = "request") {
+export function createRoomReservationSchema(
+  now: () => Date = () => new Date(),
+  mode: BookingMode = "request",
+) {
   const { askPhone, withLetter } = BOOKING_MODES[mode];
   return z
     .object({
@@ -73,16 +116,35 @@ export function createRoomReservationSchema(now: () => Date = () => new Date(), 
       ...submissionShape,
     })
     .superRefine((values, ctx) => {
-      if (TIME.test(values.startTime) && TIME.test(values.endTime) && values.endTime <= values.startTime) {
-        ctx.addIssue({ code: "custom", path: ["endTime"], message: "Jam selesai harus setelah jam mulai." });
+      if (
+        TIME.test(values.startTime) &&
+        TIME.test(values.endTime) &&
+        values.endTime <= values.startTime
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["endTime"],
+          message: "Jam selesai harus setelah jam mulai.",
+        });
       }
-      requireFutureStart(values.date, values.startTime, values.endTime, now(), "startTime", ctx);
+      requireFutureStart(
+        values.date,
+        values.startTime,
+        values.endTime,
+        now(),
+        "startTime",
+        ctx,
+      );
       if (withLetter) requireLetterToSubmit(values, ctx);
     }, ALWAYS);
 }
 
-export type RoomReservationInput = z.input<ReturnType<typeof createRoomReservationSchema>>;
-export type RoomReservationValues = z.output<ReturnType<typeof createRoomReservationSchema>>;
+export type RoomReservationInput = z.input<
+  ReturnType<typeof createRoomReservationSchema>
+>;
+export type RoomReservationValues = z.output<
+  ReturnType<typeof createRoomReservationSchema>
+>;
 
 /** Laravel field names to form fields. TODO: match the request keys in the OpenAPI spec. */
 export const ROOM_RESERVATION_FIELD_MAP = {
@@ -98,9 +160,18 @@ export const ROOM_RESERVATION_FIELD_MAP = {
 
 /* ---------- GOR ---------- */
 
-export const SPORTS_HALL_SCHEDULE_FIELDS = ["date", "startTime", "endTime", "activity", "notes"] as const;
+export const SPORTS_HALL_SCHEDULE_FIELDS = [
+  "date",
+  "startTime",
+  "endTime",
+  "activity",
+  "notes",
+] as const;
 
-export function createSportsHallReservationSchema(now: () => Date = () => new Date(), mode: BookingMode = "request") {
+export function createSportsHallReservationSchema(
+  now: () => Date = () => new Date(),
+  mode: BookingMode = "request",
+) {
   const { withLetter } = BOOKING_MODES[mode];
   return z
     .object({
@@ -113,13 +184,56 @@ export function createSportsHallReservationSchema(now: () => Date = () => new Da
       ...submissionShape,
     })
     .superRefine((values, ctx) => {
-      requireFutureStart(values.date, values.startTime, values.endTime, now(), "startTime", ctx);
+      const current = now();
+      requireFutureStart(
+        values.date,
+        values.startTime,
+        values.endTime,
+        current,
+        "startTime",
+        ctx,
+      );
+      // "YYYY-MM-DD" strings compare in calendar order
+      if (DATE.test(values.date) && values.date > lastBookableDay(current)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["date"],
+          message: `GOR hanya bisa dipesan sampai ${SPORTS_HALL_BOOKING_DAYS} hari ke depan.`,
+        });
+      }
+      if (
+        TIME.test(values.startTime) &&
+        TIME.test(values.endTime) &&
+        minutesBetween(values.startTime, values.endTime) >
+          SPORTS_HALL_MAX_MINUTES
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["endTime"],
+          message: `Satu reservasi GOR maksimal ${SPORTS_HALL_MAX_MINUTES / 60} jam.`,
+        });
+      }
       if (withLetter) requireLetterToSubmit(values, ctx);
     }, ALWAYS);
 }
 
-export type SportsHallReservationInput = z.input<ReturnType<typeof createSportsHallReservationSchema>>;
-export type SportsHallReservationValues = z.output<ReturnType<typeof createSportsHallReservationSchema>>;
+const minutesBetween = (start: string, end: string) =>
+  Number(end.slice(0, 2)) * 60 +
+  Number(end.slice(3, 5)) -
+  (Number(start.slice(0, 2)) * 60 + Number(start.slice(3, 5)));
+
+function lastBookableDay(now: Date) {
+  return toWibDateKey(
+    now.getTime() + (SPORTS_HALL_BOOKING_DAYS - 1) * 24 * 60 * 60 * 1000,
+  );
+}
+
+export type SportsHallReservationInput = z.input<
+  ReturnType<typeof createSportsHallReservationSchema>
+>;
+export type SportsHallReservationValues = z.output<
+  ReturnType<typeof createSportsHallReservationSchema>
+>;
 
 export const SPORTS_HALL_RESERVATION_FIELD_MAP = {
   starts_at: "startTime",
@@ -132,7 +246,10 @@ export const SPORTS_HALL_RESERVATION_FIELD_MAP = {
 /* ---------- Kendaraan ---------- */
 
 /** A trip, not a vehicle: which vehicle goes is arranged outside the app. "internal" skips phone and letter. */
-export function createVehicleReservationSchema(today: () => string, mode: BookingMode = "request") {
+export function createVehicleReservationSchema(
+  today: () => string,
+  mode: BookingMode = "request",
+) {
   const { askPhone, withLetter } = BOOKING_MODES[mode];
   return z
     .object({
@@ -150,17 +267,33 @@ export function createVehicleReservationSchema(today: () => string, mode: Bookin
     .superRefine((values, ctx) => {
       // "YYYY-MM-DD" strings compare in calendar order
       if (DATE.test(values.startDate) && values.startDate < today()) {
-        ctx.addIssue({ code: "custom", path: ["startDate"], message: "Tanggal mulai sudah lewat." });
+        ctx.addIssue({
+          code: "custom",
+          path: ["startDate"],
+          message: "Tanggal mulai sudah lewat.",
+        });
       }
-      if (DATE.test(values.startDate) && DATE.test(values.endDate) && values.endDate < values.startDate) {
-        ctx.addIssue({ code: "custom", path: ["endDate"], message: "Tanggal selesai tidak boleh sebelum tanggal mulai." });
+      if (
+        DATE.test(values.startDate) &&
+        DATE.test(values.endDate) &&
+        values.endDate < values.startDate
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["endDate"],
+          message: "Tanggal selesai tidak boleh sebelum tanggal mulai.",
+        });
       }
       if (withLetter) requireLetterToSubmit(values, ctx);
     }, ALWAYS);
 }
 
-export type VehicleReservationInput = z.input<ReturnType<typeof createVehicleReservationSchema>>;
-export type VehicleReservationValues = z.output<ReturnType<typeof createVehicleReservationSchema>>;
+export type VehicleReservationInput = z.input<
+  ReturnType<typeof createVehicleReservationSchema>
+>;
+export type VehicleReservationValues = z.output<
+  ReturnType<typeof createVehicleReservationSchema>
+>;
 
 export const VEHICLE_RESERVATION_FIELD_MAP = {
   phone: "phone",

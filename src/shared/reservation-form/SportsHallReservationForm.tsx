@@ -5,6 +5,10 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { Card } from "@/components/ui/Card";
+import {
+  SPORTS_HALL_BOOKING_DAYS,
+  SPORTS_HALL_MAX_MINUTES,
+} from "@/config/reservation";
 import { formatDateLongWIB, toWibDateKey, wibToIso } from "@/lib/date";
 import type { SportsHall, UnitBooking } from "@/types/facility";
 import { toSportsHallReservationRequest } from "./createReservation";
@@ -12,7 +16,10 @@ import { BOOKING_MODES, type BookingMode } from "./bookingMode";
 import { LetterPanel, ReviewButton } from "./LetterPanel";
 import { PanelHeading } from "./PanelHeading";
 import { ReservationSteps, STEPS_BY_TYPE } from "./ReservationSteps";
-import { ReservationSubmitDialog, type ReservationLinks } from "./ReservationSubmitDialog";
+import {
+  ReservationSubmitDialog,
+  type ReservationLinks,
+} from "./ReservationSubmitDialog";
 import {
   SPORTS_HALL_RESERVATION_FIELD_MAP,
   SPORTS_HALL_SCHEDULE_FIELDS,
@@ -20,7 +27,14 @@ import {
   type SportsHallReservationInput,
   type SportsHallReservationValues,
 } from "./schema";
-import { buildSlots, slotStatus, toggleSlot, upcomingDays, type SlotSelection, type SlotStatus } from "./sportsHallSlots";
+import {
+  buildSlots,
+  slotStatus,
+  toggleSlot,
+  upcomingDays,
+  type SlotSelection,
+  type SlotStatus,
+} from "./sportsHallSlots";
 import { SummaryValue, SummaryWhen } from "./summaryParts";
 import { useReservationSubmit } from "./useReservationSubmit";
 
@@ -35,7 +49,7 @@ export interface SportsHallReservationFormProps {
   links: ReservationLinks;
 }
 
-const DAYS_SHOWN = 7;
+const MAX_HOURS = SPORTS_HALL_MAX_MINUTES / 60;
 
 const SLOT_STYLES: Record<SlotStatus | "selected", string> = {
   available: "border-border bg-surface text-ink hover:bg-primary-soft",
@@ -60,14 +74,34 @@ const LEGEND = [
 
 const ERROR = "text-[11px] text-danger";
 
-export function SportsHallReservationForm({ hall, bookings, now, requester, mode = "request", links }: SportsHallReservationFormProps) {
+export function SportsHallReservationForm({
+  hall,
+  bookings,
+  now,
+  requester,
+  mode = "request",
+  links,
+}: SportsHallReservationFormProps) {
   const { withLetter, requesterLabel, submittedText } = BOOKING_MODES[mode];
   const nowDate = useMemo(() => new Date(now), [now]);
   const todayKey = toWibDateKey(nowDate);
-  const days = useMemo(() => upcomingDays(todayKey, DAYS_SHOWN), [todayKey]);
-  const slots = useMemo(() => buildSlots(hall.openTime, hall.closeTime, hall.slotMinutes), [hall]);
+  const days = useMemo(
+    () => upcomingDays(todayKey, SPORTS_HALL_BOOKING_DAYS),
+    [todayKey],
+  );
+  const slots = useMemo(
+    () => buildSlots(hall.openTime, hall.closeTime, hall.slotMinutes),
+    [hall],
+  );
+  const maxSlots = Math.max(
+    1,
+    Math.floor(SPORTS_HALL_MAX_MINUTES / hall.slotMinutes),
+  );
 
-  const schema = useMemo(() => createSportsHallReservationSchema(undefined, mode), [mode]);
+  const schema = useMemo(
+    () => createSportsHallReservationSchema(undefined, mode),
+    [mode],
+  );
   const defaults = useMemo(
     (): SportsHallReservationInput => ({
       date: todayKey,
@@ -81,7 +115,11 @@ export function SportsHallReservationForm({ hall, bookings, now, requester, mode
     [todayKey, hall.activities],
   );
 
-  const form = useForm<SportsHallReservationInput, unknown, SportsHallReservationValues>({
+  const form = useForm<
+    SportsHallReservationInput,
+    unknown,
+    SportsHallReservationValues
+  >({
     resolver: zodResolver(schema),
     defaultValues: defaults,
     mode: "onTouched",
@@ -101,12 +139,16 @@ export function SportsHallReservationForm({ hall, bookings, now, requester, mode
     onReset: () => setSelection(null),
   });
 
-  const statuses = slots.map((slot) => slotStatus(date, slot, bookings, nowDate));
+  const statuses = slots.map((slot) =>
+    slotStatus(date, slot, bookings, nowDate),
+  );
   const hasFreeSlot = statuses.includes("available");
 
   const applySelection = (next: SlotSelection | null) => {
     setSelection(next);
-    const validate = { shouldValidate: Boolean(errors.startTime || errors.endTime) };
+    const validate = {
+      shouldValidate: Boolean(errors.startTime || errors.endTime),
+    };
     setValue("startTime", next ? slots[next.from].start : "", validate);
     setValue("endTime", next ? slots[next.to].end : "", validate);
   };
@@ -116,7 +158,8 @@ export function SportsHallReservationForm({ hall, bookings, now, requester, mode
     applySelection(null);
   };
 
-  const isSelected = (index: number) => selection !== null && index >= selection.from && index <= selection.to;
+  const isSelected = (index: number) =>
+    selection !== null && index >= selection.from && index <= selection.to;
 
   return (
     <FormProvider {...form}>
@@ -126,7 +169,11 @@ export function SportsHallReservationForm({ hall, bookings, now, requester, mode
         className="flex flex-col gap-2 lg:grid lg:grid-cols-[minmax(0,1fr)_16rem] lg:items-start"
       >
         <Card className="flex flex-col gap-3 p-3 lg:col-start-1 lg:row-start-1">
-          <ReservationSteps steps={withLetter ? STEPS_BY_TYPE.gor : STEPS_BY_TYPE.gor.slice(0, 3)} />
+          <ReservationSteps
+            steps={
+              withLetter ? STEPS_BY_TYPE.gor : STEPS_BY_TYPE.gor.slice(0, 3)
+            }
+          />
           <hr className="border-border" />
 
           <fieldset>
@@ -139,14 +186,24 @@ export function SportsHallReservationForm({ hall, bookings, now, requester, mode
                     key={day.dateKey}
                     type="button"
                     aria-pressed={active}
-                    aria-label={formatDateLongWIB(wibToIso(day.dateKey, "12:00"))}
+                    aria-label={formatDateLongWIB(
+                      wibToIso(day.dateKey, "12:00"),
+                    )}
                     onClick={() => chooseDay(day.dateKey)}
                     className={`flex min-h-16 flex-col items-center justify-center rounded-md py-2 ${
-                      active ? "bg-primary text-on-primary" : "text-ink hover:bg-primary-soft"
+                      active
+                        ? "bg-primary text-on-primary"
+                        : "text-ink hover:bg-primary-soft"
                     }`}
                   >
-                    <span className={`text-[11px] font-semibold uppercase ${active ? "" : "text-muted"}`}>{day.weekday}</span>
-                    <span className="text-xl leading-7 font-extrabold">{day.day}</span>
+                    <span
+                      className={`text-[11px] font-semibold uppercase ${active ? "" : "text-muted"}`}
+                    >
+                      {day.weekday}
+                    </span>
+                    <span className="text-xl leading-7 font-extrabold">
+                      {day.day}
+                    </span>
                   </button>
                 );
               })}
@@ -154,7 +211,9 @@ export function SportsHallReservationForm({ hall, bookings, now, requester, mode
           </fieldset>
 
           <fieldset aria-describedby="slot-legend">
-            <legend className="sr-only">Jam reservasi pada {formatDateLongWIB(wibToIso(date, "12:00"))}</legend>
+            <legend className="sr-only">
+              Jam reservasi pada {formatDateLongWIB(wibToIso(date, "12:00"))}
+            </legend>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
               {slots.map((slot, index) => {
                 const state = isSelected(index) ? "selected" : statuses[index];
@@ -165,10 +224,15 @@ export function SportsHallReservationForm({ hall, bookings, now, requester, mode
                     disabled={statuses[index] !== "available"}
                     aria-pressed={state === "selected"}
                     aria-label={`${slot.start.replace(":", ".")} sampai ${slot.end.replace(":", ".")}, ${SLOT_LABEL[state]}`}
-                    onClick={() => applySelection(toggleSlot(selection, index, statuses))}
+                    onClick={() =>
+                      applySelection(
+                        toggleSlot(selection, index, statuses, maxSlots),
+                      )
+                    }
                     className={`relative flex min-h-14 items-start overflow-hidden rounded-sm border p-4 text-left text-sm font-bold tabular-nums transition-colors disabled:cursor-not-allowed sm:min-h-20 lg:min-h-[6.5rem] lg:p-6 ${SLOT_STYLES[state]}`}
                   >
-                    {slot.start.replace(":", ".")} - {slot.end.replace(":", ".")}
+                    {slot.start.replace(":", ".")} -{" "}
+                    {slot.end.replace(":", ".")}
                     {state === "selected" && (
                       <Image
                         src="/icons/slot-check.svg"
@@ -184,41 +248,83 @@ export function SportsHallReservationForm({ hall, bookings, now, requester, mode
             </div>
           </fieldset>
 
-          <ul id="slot-legend" className="flex flex-wrap gap-x-4 gap-y-1 text-[11px]">
+          <ul
+            id="slot-legend"
+            className="flex flex-wrap gap-x-4 gap-y-1 text-[11px]"
+          >
             {LEGEND.map((item) => (
               <li key={item.status} className="flex items-center gap-2">
-                <span aria-hidden="true" className={`size-3 rounded-full ${item.dot}`} />
+                <span
+                  aria-hidden="true"
+                  className={`size-3 rounded-full ${item.dot}`}
+                />
                 {SLOT_LABEL[item.status]}
               </li>
             ))}
           </ul>
-          {!hasFreeSlot && <p className="text-[11px] text-muted">Tidak ada jam yang tersedia pada tanggal ini. Pilih tanggal lain.</p>}
+          {!hasFreeSlot && (
+            <p className="text-[11px] text-muted">
+              Tidak ada jam yang tersedia pada tanggal ini. Pilih tanggal lain.
+            </p>
+          )}
           {(errors.startTime || errors.endTime) && (
             <p role="alert" className={ERROR}>
               {errors.startTime?.message ?? errors.endTime?.message}
             </p>
           )}
-          {selection && (
+          {selection ? (
             <p aria-live="polite" className="text-xs text-primary">
-              Dipilih: {startTime.replace(":", ".")} - {endTime.replace(":", ".")} WIB. Klik jam di sebelahnya untuk menambah, atau ujung pilihan untuk mengurangi.
+              Dipilih: {startTime.replace(":", ".")} -{" "}
+              {endTime.replace(":", ".")} WIB.{" "}
+              {selection.to - selection.from + 1 >= maxSlots
+                ? `Sudah mencapai batas ${MAX_HOURS} jam. Klik ujung pilihan untuk mengurangi.`
+                : "Klik jam di sebelahnya untuk menambah, atau ujung pilihan untuk mengurangi."}
+            </p>
+          ) : (
+            <p className="text-[11px] text-muted">
+              Reservasi untuk satu lapangan penuh, maksimal {MAX_HOURS} jam,
+              paling lambat {SPORTS_HALL_BOOKING_DAYS} hari ke depan.
             </p>
           )}
         </Card>
 
         <div className="flex flex-col gap-2 lg:col-start-2 lg:row-start-1">
-          <Card as="section" aria-labelledby="panel-borrower" className="flex flex-col gap-2 p-3">
-            <PanelHeading id="panel-borrower" iconSrc="/icons/person-circle.svg" iconWidth={17} iconHeight={17}>
+          <Card
+            as="section"
+            aria-labelledby="panel-borrower"
+            className="flex flex-col gap-2 p-3"
+          >
+            <PanelHeading
+              id="panel-borrower"
+              iconSrc="/icons/person-circle.svg"
+              iconWidth={17}
+              iconHeight={17}
+            >
               Nama {requesterLabel}
             </PanelHeading>
-            <p className="flex min-h-10 items-center justify-center rounded-md border border-border px-2 text-xs">{requester.name}</p>
+            <p className="flex min-h-10 items-center justify-center rounded-md border border-border px-2 text-xs">
+              {requester.name}
+            </p>
           </Card>
 
-          <Card as="section" aria-labelledby="panel-activity" className="flex flex-col gap-3 p-3">
-            <PanelHeading id="panel-activity" iconSrc="/icons/running.svg" iconWidth={10} iconHeight={13}>
+          <Card
+            as="section"
+            aria-labelledby="panel-activity"
+            className="flex flex-col gap-3 p-3"
+          >
+            <PanelHeading
+              id="panel-activity"
+              iconSrc="/icons/running.svg"
+              iconWidth={10}
+              iconHeight={13}
+            >
               Jenis Kegiatan
             </PanelHeading>
             <div className="flex min-h-11 items-center gap-2 rounded-md border border-border px-2.5">
-              <label htmlFor="reservation-activity" className="shrink-0 text-xs">
+              <label
+                htmlFor="reservation-activity"
+                className="shrink-0 text-xs"
+              >
                 Kegiatan :
               </label>
               <div className="relative flex-1">
@@ -234,14 +340,31 @@ export function SportsHallReservationForm({ hall, bookings, now, requester, mode
                     </option>
                   ))}
                 </select>
-                <Image src="/icons/caret-down.svg" alt="" width={16} height={16} className="pointer-events-none absolute top-1/2 right-1.5 -translate-y-1/2" />
+                <Image
+                  src="/icons/caret-down.svg"
+                  alt=""
+                  width={16}
+                  height={16}
+                  className="pointer-events-none absolute top-1/2 right-1.5 -translate-y-1/2"
+                />
               </div>
             </div>
-            {errors.activity && <p className={ERROR}>{errors.activity.message}</p>}
+            {errors.activity && (
+              <p className={ERROR}>{errors.activity.message}</p>
+            )}
           </Card>
 
-          <Card as="section" aria-labelledby="panel-notes" className="flex flex-col gap-3 p-3">
-            <PanelHeading id="panel-notes" iconSrc="/icons/notes.svg" iconWidth={11} iconHeight={12}>
+          <Card
+            as="section"
+            aria-labelledby="panel-notes"
+            className="flex flex-col gap-3 p-3"
+          >
+            <PanelHeading
+              id="panel-notes"
+              iconSrc="/icons/notes.svg"
+              iconWidth={11}
+              iconHeight={12}
+            >
               <label htmlFor="reservation-notes">Keterangan</label>
             </PanelHeading>
             <textarea
@@ -258,12 +381,20 @@ export function SportsHallReservationForm({ hall, bookings, now, requester, mode
           {withLetter ? (
             <LetterPanel
               file={letter ?? null}
-              onChange={(file) => setValue("letter", file, { shouldValidate: true })}
+              onChange={(file) =>
+                setValue("letter", file, { shouldValidate: true })
+              }
               error={errors.letter?.message}
-              onReview={() => void flow.openSummary([...SPORTS_HALL_SCHEDULE_FIELDS])}
+              onReview={() =>
+                void flow.openSummary([...SPORTS_HALL_SCHEDULE_FIELDS])
+              }
             />
           ) : (
-            <ReviewButton onReview={() => void flow.openSummary([...SPORTS_HALL_SCHEDULE_FIELDS])} />
+            <ReviewButton
+              onReview={() =>
+                void flow.openSummary([...SPORTS_HALL_SCHEDULE_FIELDS])
+              }
+            />
           )}
         </div>
 
@@ -287,10 +418,20 @@ export function SportsHallReservationForm({ hall, bookings, now, requester, mode
               date={formatDateLongWIB(wibToIso(date, startTime))}
               startTime={startTime}
               endTime={endTime}
-              places={[{ iconSrc: "/icons/building-solid.svg", iconWidth: 13, iconHeight: 15, label: hall.name }]}
+              places={[
+                {
+                  iconSrc: "/icons/building-solid.svg",
+                  iconWidth: 13,
+                  iconHeight: 15,
+                  label: hall.name,
+                },
+              ]}
             />
+            <SummaryValue label="Lapangan">Satu lapangan penuh</SummaryValue>
             <SummaryValue label="Jenis Kegiatan">{activity}</SummaryValue>
-            {notes.trim() && <SummaryValue label="Keterangan">{notes}</SummaryValue>}
+            {notes.trim() && (
+              <SummaryValue label="Keterangan">{notes}</SummaryValue>
+            )}
           </ReservationSubmitDialog>
         )}
       </form>

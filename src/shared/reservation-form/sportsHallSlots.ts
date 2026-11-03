@@ -38,18 +38,24 @@ export function slotStatus(dateKey: string, slot: TimeSlot, bookings: UnitBookin
 /**
  * Clicking a slot next to the selection extends it, clicking either end shrinks it, and
  * clicking anywhere else starts a new selection there. The selection stays one unbroken run,
- * so it never spans a booked slot.
+ * so it never spans a booked slot. A click that would make it longer than `maxSlots` is ignored.
  */
-export function toggleSlot(selection: SlotSelection | null, index: number, statuses: SlotStatus[]): SlotSelection | null {
+export function toggleSlot(
+  selection: SlotSelection | null,
+  index: number,
+  statuses: SlotStatus[],
+  maxSlots = Infinity,
+): SlotSelection | null {
   if (statuses[index] !== "available") return selection;
   if (!selection) return { from: index, to: index };
 
   const { from, to } = selection;
+  const full = to - from + 1 >= maxSlots;
   if (index === from && index === to) return null;
   if (index === from) return { from: from + 1, to };
   if (index === to) return { from, to: to - 1 };
-  if (index === from - 1) return { from: index, to };
-  if (index === to + 1) return { from, to: index };
+  if (index === from - 1) return full ? selection : { from: index, to };
+  if (index === to + 1) return full ? selection : { from, to: index };
   return { from: index, to: index };
 }
 

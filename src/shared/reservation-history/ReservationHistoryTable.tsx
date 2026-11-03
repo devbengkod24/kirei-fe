@@ -48,13 +48,13 @@ export function ReservationHistoryTable({
   const title = `Riwayat Reservasi ${RESERVATION_TYPE_LABEL[tipe]}`;
 
   return (
-    <Card as="section" aria-labelledby="history-title" className="flex flex-col gap-6 p-4">
+    <Card as="section" aria-labelledby="history-title" className="flex flex-1 flex-col gap-6 p-4">
       <h2 id="history-title" className="text-base font-semibold tracking-wide">
         {title}
       </h2>
 
       {items.length === 0 ? (
-        <p className="py-8 text-center text-sm text-muted">Belum ada riwayat reservasi {RESERVATION_TYPE_LABEL[tipe]}.</p>
+        <p className="flex flex-1 items-center justify-center py-8 text-center text-sm text-muted">Belum ada riwayat reservasi {RESERVATION_TYPE_LABEL[tipe]}.</p>
       ) : (
         <>
           <table className={`hidden ${TABLE} lg:table`}>
@@ -118,7 +118,7 @@ export function ReservationHistoryTable({
       )}
 
       {items.length > 0 && (
-        <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="mt-auto flex flex-wrap items-center justify-between gap-2">
           <PerPageSelect value={perPage} options={PER_PAGE_OPTIONS} baseParams={baseParams} paramName={HISTORY_PARAMS.perPage} />
           <LinkPagination page={page} totalPages={totalPages} prevHref={prevHref} nextHref={nextHref} />
         </div>

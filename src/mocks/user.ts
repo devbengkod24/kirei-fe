@@ -3,8 +3,9 @@ import type { CurrentUser } from "@/types/user";
 // Sample data from the Figma V3 mockup, used until the Laravel API is connected.
 export const MOCK_CURRENT_USER: CurrentUser = {
   id: "usr-829102",
-  name: "Nurudin Wafiq Mustaqim",
-  email: "111202214797@mhs.dinus.ac.id",
+  // An ormawa account belongs to the organisation, so it carries the ormawa name.
+  name: "Dian Nuswantoro Computer Club",
+  email: "dncc@dinus.ac.id",
   role: "ormawa",
   // Ormawa belong to no faculty; they may book rooms in any of them.
   fakultasId: null,

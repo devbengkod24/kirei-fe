@@ -90,7 +90,7 @@ export function Shell({ brand, navGroups, sidebarFooter, headerEnd, children }: 
   const closeDrawer = () => setDrawerOpen(false);
 
   return (
-    <div className="min-h-screen md:flex">
+    <div className="flex min-h-screen flex-col md:flex-row">
       <aside
         aria-label="Navigasi samping"
         className="sticky top-0 hidden h-screen w-[250px] shrink-0 flex-col justify-between border-r border-border bg-surface pb-8 md:flex"
@@ -152,7 +152,7 @@ export function Shell({ brand, navGroups, sidebarFooter, headerEnd, children }: 
           {headerEnd}
         </header>
 
-        <main className="flex-1 px-4 pt-5 pb-6 md:px-6">{children}</main>
+        <main className="flex flex-1 flex-col px-4 pt-5 pb-6 md:px-6">{children}</main>
       </div>
     </div>
   );

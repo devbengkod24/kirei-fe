@@ -25,6 +25,13 @@ export function isRoomBooked(roomId: string, bookings: UnitBooking[], startsAt: 
   );
 }
 
+/** A room's bookings on one WIB day, earliest first, to explain why it is taken. */
+export function roomBookingsOnDay(roomId: string, bookings: UnitBooking[], dateKey: string) {
+  return bookings
+    .filter((booking) => booking.unitId === roomId && toWibDateKey(booking.startsAt) === dateKey)
+    .sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt));
+}
+
 export function roomStatus(room: FloorPlanRoom, input: RoomStatusInput): { status: RoomStatus; selectable: boolean } {
   if (input.category && room.category !== input.category) return { status: "filtered", selectable: false };
 

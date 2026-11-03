@@ -96,15 +96,16 @@ const ROWS: Row[] = [
   { days: 3, start: "15:30", end: "17:30", borrowerName: "Dr. Siti Nurhaliza, M.A.", borrowerDetail: "Dosen • NPP: 19850217", roomName: "H.5.4", purpose: "Presentasi proyek", status: "menunggu_konfirmasi" },
   { days: 3, start: "10:20", end: "12:00", borrowerName: "Dian Nuswantoro Computer Club", borrowerDetail: "Ormawa", roomName: "H.7", purpose: "Rapat kerja", status: "menunggu_konfirmasi" },
   { days: 4, start: "09:00", end: "11:00", borrowerName: "Dr. Hendra Gunawan, S.Kom", borrowerDetail: "Dosen Pembimbing BEM • NPP: 19820411", roomName: "H.6.1", purpose: "Rapat kerja", status: "menunggu_konfirmasi" },
-  { days: 0, start: "07:00", end: "09:00", borrowerName: "Erdin Purwa Putra", borrowerDetail: "Ormawa • HMTI", roomName: "H.5.3", purpose: "Belajar kelompok", status: "selesai" },
-  { days: 0, start: "09:30", end: "11:30", borrowerName: "Juan Stevenson", borrowerDetail: "Ormawa • HMTI", roomName: "H.5.3", purpose: "Kegiatan organisasi", status: "disetujui" },
-  { days: 0, start: "13:00", end: "15:00", borrowerName: "Mochamad Farhan Abdullah", borrowerDetail: "Ormawa • BEM", roomName: "H.5.6", purpose: "Belajar mandiri", status: "disetujui" },
-  { days: 0, start: "15:00", end: "17:00", borrowerName: "Juan Stevenson", borrowerDetail: "Ormawa • HMTI", roomName: "H.7.2", purpose: "Penelitian", status: "disetujui" },
+  // Ormawa book as the organisation, so the borrower is the ormawa name, never a member's.
+  { days: 0, start: "07:00", end: "09:00", borrowerName: "HMTI", borrowerDetail: "Ormawa", roomName: "H.5.3", purpose: "Belajar kelompok", status: "selesai" },
+  { days: 0, start: "09:30", end: "11:30", borrowerName: "HMTI", borrowerDetail: "Ormawa", roomName: "H.5.3", purpose: "Kegiatan organisasi", status: "disetujui" },
+  { days: 0, start: "13:00", end: "15:00", borrowerName: "BEM Universitas", borrowerDetail: "Ormawa", roomName: "H.5.6", purpose: "Belajar mandiri", status: "disetujui" },
+  { days: 0, start: "15:00", end: "17:00", borrowerName: "Himpunan Mahasiswa Sistem Informasi", borrowerDetail: "Ormawa", roomName: "H.7.2", purpose: "Penelitian", status: "disetujui" },
   { days: -2, start: "08:00", end: "10:00", borrowerName: "Prof. Dr. Aris Marjuni, S.Si., M.Kom.", borrowerDetail: "Dosen • NPP: 19750312", roomName: "H.5.1", purpose: "Belajar mandiri", status: "selesai" },
   { days: -3, start: "10:30", end: "12:30", borrowerName: "Dr. Rina Sari, M.Pd.", borrowerDetail: "Dosen • NPP: 19830704", roomName: "H.5.2", purpose: "Diskusi kelompok", status: "ditolak" },
   { days: -5, start: "13:00", end: "15:00", borrowerName: "Mr. Budi Santoso, S.T.", borrowerDetail: "Dosen • NPP: 19790123", roomName: "H.5.3", purpose: "Praktikum", status: "ditolak" },
   { days: -6, start: "09:00", end: "11:00", borrowerName: "Dr. Lisa Ananda, M.A.", borrowerDetail: "Dosen • NPP: 19870915", roomName: "H.5.4", purpose: "Presentasi proyek", status: "selesai" },
-  { days: -8, start: "13:00", end: "14:00", borrowerName: "Erdin Purwa Putra", borrowerDetail: "Ormawa • HMTI", roomName: "H.6.1", purpose: "Rapat pengurus", status: "dibatalkan" },
+  { days: -8, start: "13:00", end: "14:00", borrowerName: "HMTI", borrowerDetail: "Ormawa", roomName: "H.6.1", purpose: "Rapat pengurus", status: "dibatalkan" },
 ];
 
 export function buildReservationsMock(now: Date): ReservationRequest[] {
@@ -138,15 +139,15 @@ type FacilityRow = Row & {
 const FACILITY_ROWS: FacilityRow[] = [
   { type: "gor", buildingName: "GOR Udinus", roomName: "GOR Udinus", days: 0, start: "16:00", end: "18:00", borrowerName: "UKM Bulu Tangkis", borrowerDetail: "Ormawa", purpose: "Latihan rutin badminton", activity: "Badminton", status: "disetujui" },
   { type: "gor", buildingName: "GOR Udinus", roomName: "GOR Udinus", days: 0, start: "08:00", end: "09:00", borrowerName: "UKM Futsal", borrowerDetail: "Ormawa", purpose: "Latihan futsal", activity: "Futsal", status: "selesai" },
-  { type: "gor", buildingName: "GOR Udinus", roomName: "GOR Udinus", days: 2, start: "15:00", end: "17:00", borrowerName: "HMTI", borrowerDetail: "Ormawa • HMTI", purpose: "Turnamen voli antar angkatan", activity: "Voli", status: "menunggu_konfirmasi" },
+  { type: "gor", buildingName: "GOR Udinus", roomName: "GOR Udinus", days: 2, start: "15:00", end: "17:00", borrowerName: "HMTI", borrowerDetail: "Ormawa", purpose: "Turnamen voli antar angkatan", activity: "Voli", status: "menunggu_konfirmasi" },
   { type: "gor", buildingName: "GOR Udinus", roomName: "GOR Udinus", days: 4, start: "19:00", end: "21:00", borrowerName: "UKM Basket", borrowerDetail: "Ormawa", purpose: "Persiapan liga mahasiswa", activity: "Basket", status: "menunggu_konfirmasi" },
   { type: "gor", buildingName: "GOR Udinus", roomName: "GOR Udinus", days: -3, start: "16:00", end: "18:00", borrowerName: "UKM Bulu Tangkis", borrowerDetail: "Ormawa", purpose: "Latihan rutin badminton", activity: "Badminton", status: "selesai" },
   { type: "kendaraan", buildingName: "Kendaraan", roomName: "Toyota Hiace", days: 0, start: "06:00", end: "18:00", borrowerName: "BEM Universitas", borrowerDetail: "Ormawa", purpose: "Kunjungan industri ke Kudus", trip: { destination: "Kudus", participants: 14 }, status: "disetujui" },
   { type: "kendaraan", buildingName: "Kendaraan", roomName: "", days: 3, start: "05:00", end: "20:00", borrowerName: "Dr. Hendra Gunawan, S.Kom", borrowerDetail: "Dosen Pembimbing BEM • NPP: 19820411", purpose: "Studi banding ke Yogyakarta", trip: { destination: "Yogyakarta", participants: 35 }, status: "menunggu_konfirmasi" },
   { type: "kendaraan", buildingName: "Kendaraan", roomName: "", days: 1, start: "08:00", end: "15:00", borrowerName: "Dr. Maria Lestari, M.Pd.", borrowerDetail: "Dosen • NPP: 19800521", purpose: "Pendampingan lomba", trip: { destination: "Salatiga", participants: 6 }, status: "menunggu_konfirmasi" },
-  { type: "kendaraan", buildingName: "Kendaraan", roomName: "Toyota Hiace", days: -6, start: "07:00", end: "17:00", borrowerName: "HMTI", borrowerDetail: "Ormawa • HMTI", purpose: "Bakti sosial", trip: { destination: "Demak", participants: 12 }, status: "selesai" },
-  { type: "gor", buildingName: "GOR Udinus", roomName: "GOR Udinus", days: -7, start: "19:00", end: "21:00", borrowerName: "HMTI", borrowerDetail: "Ormawa • HMTI", purpose: "Futsal antar angkatan", activity: "Futsal", status: "ditolak" },
-  { type: "kendaraan", buildingName: "Kendaraan", roomName: "", days: -10, start: "06:00", end: "19:00", borrowerName: "Erdin Purwa Putra", borrowerDetail: "Ormawa • HMTI", purpose: "Rekreasi pengurus", trip: { destination: "Bandungan", participants: 20 }, status: "ditolak" },
+  { type: "kendaraan", buildingName: "Kendaraan", roomName: "Toyota Hiace", days: -6, start: "07:00", end: "17:00", borrowerName: "HMTI", borrowerDetail: "Ormawa", purpose: "Bakti sosial", trip: { destination: "Demak", participants: 12 }, status: "selesai" },
+  { type: "gor", buildingName: "GOR Udinus", roomName: "GOR Udinus", days: -7, start: "19:00", end: "21:00", borrowerName: "HMTI", borrowerDetail: "Ormawa", purpose: "Futsal antar angkatan", activity: "Futsal", status: "ditolak" },
+  { type: "kendaraan", buildingName: "Kendaraan", roomName: "", days: -10, start: "06:00", end: "19:00", borrowerName: "HMTI", borrowerDetail: "Ormawa", purpose: "Rekreasi pengurus", trip: { destination: "Bandungan", participants: 20 }, status: "ditolak" },
 ];
 
 export function buildFacilityRequestsMock(now: Date): ReservationRequest[] {

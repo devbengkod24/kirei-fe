@@ -61,6 +61,13 @@ describe("toggleSlot", () => {
     // 0 and 3 are not adjacent, so the selection does not cross the booked slot 2
     expect(toggleSlot({ from: 0, to: 1 }, 3, statuses)).toEqual({ from: 3, to: 3 });
   });
+
+  it("stops growing at the maximum length but can still shrink", () => {
+    const free: SlotStatus[] = ["available", "available", "available", "available"];
+    expect(toggleSlot({ from: 1, to: 2 }, 3, free, 2)).toEqual({ from: 1, to: 2 });
+    expect(toggleSlot({ from: 1, to: 2 }, 0, free, 2)).toEqual({ from: 1, to: 2 });
+    expect(toggleSlot({ from: 1, to: 2 }, 2, free, 2)).toEqual({ from: 1, to: 1 });
+  });
 });
 
 describe("upcomingDays", () => {

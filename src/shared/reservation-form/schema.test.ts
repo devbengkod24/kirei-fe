@@ -116,6 +116,15 @@ describe("GOR reservation schema", () => {
     expect(gorIssues({ ...validGor, letter: null })).toHaveProperty("letter");
     expect(gorIssues({ ...validGor, letter: null, intent: "draft" })).toEqual({});
   });
+
+  it("caps a booking at 2 hours and 14 days ahead", () => {
+    expect(gorIssues({ ...validGor, startTime: "10:00", endTime: "13:00" })).toMatchObject({
+      endTime: "Satu reservasi GOR maksimal 2 jam.",
+    });
+    // 30 Oct is day 1, so 12 Nov is the last day that can be booked
+    expect(gorIssues({ ...validGor, date: "2026-11-12" })).toEqual({});
+    expect(gorIssues({ ...validGor, date: "2026-11-13" })).toHaveProperty("date");
+  });
 });
 
 describe("vehicle reservation schema", () => {

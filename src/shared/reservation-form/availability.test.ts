@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Building, FloorPlanRoom, UnitBooking } from "@/types/facility";
-import { crossFacultyApprover, defaultSchedule, rangesOverlap, roomStatus, toIsoRange } from "./availability";
+import { crossFacultyApprover, defaultSchedule, rangesOverlap, roomBookingsOnDay, roomStatus, toIsoRange } from "./availability";
 
 const room = (id: string, category: FloorPlanRoom["category"] = "kelas"): FloorPlanRoom => ({
   id,
@@ -27,6 +27,20 @@ const base = {
 };
 
 describe("rangesOverlap", () => {
+  it("lists one room's bookings on a WIB day in time order", () => {
+    const bookings = [
+      { unitId: "a", startsAt: "2026-10-30T06:00:00Z", endsAt: "2026-10-30T08:00:00Z" },
+      { unitId: "a", startsAt: "2026-10-30T01:00:00Z", endsAt: "2026-10-30T03:00:00Z" },
+      { unitId: "b", startsAt: "2026-10-30T01:00:00Z", endsAt: "2026-10-30T03:00:00Z" },
+      // 31 Oct 06:00 WIB
+      { unitId: "a", startsAt: "2026-10-30T23:00:00Z", endsAt: "2026-10-31T01:00:00Z" },
+    ];
+    expect(roomBookingsOnDay("a", bookings, "2026-10-30").map((booking) => booking.startsAt)).toEqual([
+      "2026-10-30T01:00:00Z",
+      "2026-10-30T06:00:00Z",
+    ]);
+  });
+
   it("treats ranges as half-open", () => {
     expect(rangesOverlap("2026-10-30T02:00:00Z", "2026-10-30T04:00:00Z", "2026-10-30T04:00:00Z", "2026-10-30T05:00:00Z")).toBe(false);
     expect(rangesOverlap("2026-10-30T02:00:00Z", "2026-10-30T04:00:00Z", "2026-10-30T03:59:00Z", "2026-10-30T05:00:00Z")).toBe(true);

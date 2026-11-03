@@ -6,6 +6,10 @@ export interface FloorPlanProps {
   floor: Floor;
   statuses: Map<string, { status: RoomStatus; selectable: boolean }>;
   onSelect: (room: FloorPlanRoom) => void;
+  /** Called for a room that cannot be picked, so the form can say why. */
+  onInspect: (room: FloorPlanRoom) => void;
+  /** Room whose reason is currently shown, outlined on the plan. */
+  inspectedRoomId?: string | null;
   /** id of the element that describes the room states (the legend) */
   legendId: string;
 }
@@ -17,11 +21,18 @@ const STATUS_STYLES: Record<RoomStatus, string> = {
   filtered: "bg-plan-filtered text-on-primary",
 };
 
+/** Short state printed inside a room that cannot be picked, so the plan does not rely on colour alone. */
+const BLOCKED_MARK: Partial<Record<RoomStatus, string>> = {
+  booked: "Dipesan",
+  filtered: "Difilter",
+};
+
 /**
  * Read-only floor plan. Rooms are placed by percentage so the plan scales with its container,
  * and label sizes follow the container width (cqw) to stay inside the rooms.
+ * Rooms that cannot be picked stay focusable and clickable: they open the reason instead.
  */
-export function FloorPlan({ floor, statuses, onSelect, legendId }: FloorPlanProps) {
+export function FloorPlan({ floor, statuses, onSelect, onInspect, inspectedRoomId = null, legendId }: FloorPlanProps) {
   return (
     <div className="@container w-full">
       <div
@@ -33,15 +44,20 @@ export function FloorPlan({ floor, statuses, onSelect, legendId }: FloorPlanProp
       >
         {floor.rooms.map((room) => {
           const { status, selectable } = statuses.get(room.id) ?? { status: "available" as const, selectable: true };
+          const mark = selectable ? undefined : BLOCKED_MARK[status];
+          const inspected = room.id === inspectedRoomId;
           return (
             <button
               key={room.id}
               type="button"
-              disabled={!selectable}
-              aria-pressed={status === "selected"}
-              aria-label={`${room.code}, ${ROOM_CATEGORY_SHORT[room.category]}, ${ROOM_STATUS_LABEL[status]}`}
-              onClick={() => onSelect(room)}
-              className={`absolute flex flex-col items-center justify-center overflow-hidden rounded-inner border border-ink leading-tight transition-colors disabled:cursor-not-allowed ${STATUS_STYLES[status]}`}
+              aria-disabled={selectable ? undefined : true}
+              aria-pressed={selectable ? status === "selected" : undefined}
+              aria-expanded={selectable ? undefined : inspected}
+              aria-label={`${room.code}, ${ROOM_CATEGORY_SHORT[room.category]}, ${ROOM_STATUS_LABEL[status]}${selectable ? "" : ". Lihat alasan"}`}
+              onClick={() => (selectable ? onSelect(room) : onInspect(room))}
+              className={`absolute flex flex-col items-center justify-center overflow-hidden rounded-inner border leading-tight transition-colors ${
+                inspected ? "z-10 border-2 border-ink ring-2 ring-primary" : "border-ink"
+              } ${selectable ? "" : "cursor-help"} ${STATUS_STYLES[status]}`}
               style={{
                 left: `${(room.x / floor.planWidth) * 100}%`,
                 top: `${(room.y / floor.planHeight) * 100}%`,
@@ -50,7 +66,7 @@ export function FloorPlan({ floor, statuses, onSelect, legendId }: FloorPlanProp
               }}
             >
               <span className="text-[max(9px,2.8cqw)] whitespace-nowrap">{room.code}</span>
-              <span className="text-[max(7px,1.9cqw)] whitespace-nowrap">{ROOM_CATEGORY_SHORT[room.category]}</span>
+              <span className="text-[max(7px,1.9cqw)] whitespace-nowrap">{mark ?? ROOM_CATEGORY_SHORT[room.category]}</span>
             </button>
           );
         })}

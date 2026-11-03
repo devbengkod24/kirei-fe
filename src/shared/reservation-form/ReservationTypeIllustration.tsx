@@ -59,10 +59,13 @@ const DRAWINGS: Record<ReservationType, () => React.JSX.Element> = {
 export function ReservationTypeIllustration({ type }: { type: ReservationType }) {
   const Drawing = DRAWINGS[type];
   return (
-    <div aria-hidden="true" className="flex h-32 items-center justify-center rounded-md bg-primary-soft">
+    <div
+      aria-hidden="true"
+      className="flex min-h-[160px] flex-1 items-center justify-center rounded-lg bg-primary-soft p-6 transition-colors"
+    >
       <svg
         viewBox="0 0 160 96"
-        className="h-24 w-auto fill-none stroke-primary"
+        className="h-28 w-auto md:h-36 lg:h-40 fill-none stroke-primary"
         strokeWidth={2.5}
         strokeLinecap="round"
         strokeLinejoin="round"

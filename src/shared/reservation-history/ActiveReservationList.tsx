@@ -32,7 +32,7 @@ function Group({ id, title, reservations }: { id: string; title: string; reserva
 export function ActiveReservationList({ tipe, today, upcoming, createHref }: ActiveReservationListProps) {
   if (today.length === 0 && upcoming.length === 0) {
     return (
-      <Card className="flex flex-col items-center gap-1 px-6 py-12 text-center">
+      <Card className="flex flex-1 flex-col items-center justify-center gap-1 px-6 py-12 text-center">
         <p className="text-sm font-medium">Tidak ada reservasi aktif untuk {RESERVATION_TYPE_LABEL[tipe]}.</p>
         <p className="text-xs text-muted">Reservasi yang sudah selesai, ditolak, atau dibatalkan ada di tab Riwayat.</p>
         {createHref && (
