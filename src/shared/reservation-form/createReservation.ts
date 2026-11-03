@@ -62,7 +62,13 @@ export function toVehicleReservationRequest(values: VehicleReservationValues) {
   };
 }
 
-type ReservationRequest = { type: ReservationType; status: string; letter: File | null };
+type ReservationRequest = {
+  type: ReservationType;
+  starts_at: string;
+  ends_at: string;
+  status: string;
+  letter: File | null;
+};
 
 export async function createReservation(request: ReservationRequest): Promise<CreateReservationResult> {
   // TODO: send `request` with the orval client (POST, multipart). Map 422 bodies to { validation }

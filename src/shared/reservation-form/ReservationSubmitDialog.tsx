@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useFormContext, useWatch } from "react-hook-form";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
+import { DRAFT_LETTER_HOURS } from "@/config/reservation";
 import { LetterField } from "./LetterField";
 import type { ReservationIntent } from "./schema";
 import { SUMMARY_LABEL } from "./summaryParts";
@@ -74,7 +75,7 @@ export function ReservationSubmitDialog({
         <p role="status" className="text-sm">
           {submitted
             ? `${subject} ${submittedText ?? `sedang menunggu konfirmasi admin${approver ? ` ${approver}` : ""}. Statusnya bisa dipantau di Reservasi & Riwayat.`}`
-            : `${subject} disimpan sebagai draft. Unggah surat peminjaman di Draft Reservasi sebelum tenggatnya berakhir.`}
+            : `${subject} disimpan sebagai draft di browser ini. Slotnya belum dipesan, jadi unggah surat dan kirim dari Draft Reservasi dalam ${DRAFT_LETTER_HOURS} jam.`}
         </p>
         <div className="flex flex-wrap justify-end gap-2">
           <Button variant="outline" onClick={onCreateAnother}>

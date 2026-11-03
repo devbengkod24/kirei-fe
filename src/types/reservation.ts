@@ -56,13 +56,8 @@ export interface ReservationRecord {
   reschedule: ReservationReschedule | null;
   /** Filled when the reservation was cancelled, e.g. no replacement slot was available. */
   cancellationReason: string | null;
-}
-
-/** A saved reservation still waiting for its loan letter. */
-export interface ReservationDraft extends ReservationRecord {
-  status: "draft";
-  /** ISO 8601 (UTC), set by the API. The letter must be uploaded before this moment. */
-  letterDeadline: string;
+  /** Filled by the approving admin when the reservation was rejected. */
+  rejectionReason: string | null;
 }
 
 /** A reservation as an admin sees it: who booked, for what, and the uploaded letter. */

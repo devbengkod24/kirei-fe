@@ -17,6 +17,11 @@ const UNITS: Record<ReservationType, string[]> = {
 
 const PURPOSES = ["Rapat Pengurus", "Seminar", "Latihan Rutin", "Workshop", "Kunjungan Industri"];
 const PAST_STATUSES: ReservationStatus[] = ["selesai", "selesai", "ditolak", "selesai", "dibatalkan"];
+const REJECTION_REASONS = [
+  "Surat peminjaman belum ditandatangani pembina ormawa.",
+  "Jadwal bentrok dengan kegiatan fakultas yang sudah terjadwal.",
+  "Keperluan kurang jelas. Lengkapi rincian kegiatan lalu ajukan ulang.",
+];
 
 let sequence = 0;
 
@@ -40,6 +45,7 @@ function record(
     purpose: PURPOSES[sequence % PURPOSES.length],
     reschedule: null,
     cancellationReason: status === "dibatalkan" ? "Tidak ada slot pengganti saat ruangan dipakai ujian susulan." : null,
+    rejectionReason: status === "ditolak" ? REJECTION_REASONS[sequence % REJECTION_REASONS.length] : null,
     ...extra,
   };
 }

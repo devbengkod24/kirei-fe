@@ -32,7 +32,7 @@ export async function createOperatorReservation(
       unitName: room.code,
       purpose: values.purpose,
       reschedule: null,
-      cancellationReason: null,
+      cancellationReason: null, rejectionReason: null,
     },
   };
 }

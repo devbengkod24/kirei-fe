@@ -24,7 +24,7 @@ export const FAQ_ITEMS: FaqItem[] = [
   {
     question: "Saya belum punya suratnya. Apa yang harus saya lakukan?",
     answer:
-      "Tekan Simpan Draft di langkah terakhir. Draft muncul di menu Draft Reservasi lengkap dengan hitung mundur tenggat unggah surat. Unggah surat sebelum waktunya habis. Setelah tenggat lewat, draft tidak bisa dilanjutkan dan Anda perlu membuat reservasi baru.",
+      "Tekan Simpan Draft di langkah terakhir. Draft muncul di menu Draft Reservasi, tetapi hanya tersimpan di browser yang Anda pakai dan slotnya belum dipesan. Unggah surat lalu tekan Pesan dalam 24 jam setelah draft disimpan, atau sebelum jadwal reservasi dimulai bila lebih dulu. Setelah tenggat lewat, draft tidak bisa dikirim dan Anda perlu membuat reservasi baru.",
   },
   {
     question: "Bolehkah saya meminjam ruangan di fakultas lain?",

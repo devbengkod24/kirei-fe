@@ -110,6 +110,10 @@ export function VehicleReservationForm({
     defaults,
     toRequest: toVehicleReservationRequest,
     fieldMap: VEHICLE_RESERVATION_FIELD_MAP,
+    toDraft: (values) => ({
+      unitName: `Kendaraan ke ${values.destination}`,
+      purpose: values.activity,
+    }),
   });
 
   const field = (id: string, error?: string) => ({

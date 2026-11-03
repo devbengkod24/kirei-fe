@@ -145,6 +145,14 @@ export function RoomReservationForm({
     toRequest: toRoomReservationRequest,
     fieldMap: ROOM_RESERVATION_FIELD_MAP,
     onReset: () => setCategory(null),
+    toDraft: (values) => ({
+      unitName:
+        buildings
+          .find((b) => b.id === values.buildingId)
+          ?.floors.find((f) => f.id === values.floorId)
+          ?.rooms.find((room) => room.id === values.roomId)?.code ?? values.roomId,
+      purpose: values.purpose,
+    }),
   });
 
   const todayKey = toWibDateKey(new Date(now));

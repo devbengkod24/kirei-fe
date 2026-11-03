@@ -11,7 +11,7 @@ import { useCountdown } from "@/hooks/useCountdown";
 import { formatDateLongWIB, formatTimeRangeWIB } from "@/lib/date";
 import { letterFileSchema } from "@/shared/reservation/letter";
 import { RESERVATION_TYPE_LABEL } from "@/shared/reservation/reservationTypes";
-import type { ReservationDraft } from "@/types/reservation";
+import { letterDeadline, type StoredDraft } from "@/shared/reservation-draft/draftStorage";
 import { submitDraft, type DraftActionResult } from "./draftActions";
 import { DeadlineTimer } from "./DeadlineTimer";
 import { CAPS_LABEL_CLASS } from "@/components/form/Field";
@@ -23,9 +23,10 @@ type LetterInput = z.input<typeof schema>;
 type LetterValues = z.output<typeof schema>;
 
 export interface DraftCardProps {
-  draft: ReservationDraft;
-  onSubmitted: (draft: ReservationDraft, result: DraftActionResult) => void;
-  onRequestCancel: (draft: ReservationDraft) => void;
+  draft: StoredDraft;
+  booker: { name: string; email: string };
+  onSubmitted: (draft: StoredDraft, result: DraftActionResult) => void;
+  onRequestCancel: (draft: StoredDraft) => void;
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
@@ -37,8 +38,9 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-export function DraftCard({ draft, onSubmitted, onRequestCancel }: DraftCardProps) {
-  const countdown = useCountdown(draft.letterDeadline);
+export function DraftCard({ draft, booker, onSubmitted, onRequestCancel }: DraftCardProps) {
+  const deadline = letterDeadline(draft);
+  const countdown = useCountdown(deadline);
   const expired = countdown?.expired ?? false;
   const id = useId();
   const fileId = `${id}-letter`;
@@ -53,7 +55,7 @@ export function DraftCard({ draft, onSubmitted, onRequestCancel }: DraftCardProp
   const letter = useWatch({ control, name: "letter" });
 
   const submit = handleSubmit(async (values) => {
-    onSubmitted(draft, await submitDraft(draft.id, values.letter));
+    onSubmitted(draft, await submitDraft(draft, values.letter));
   });
 
   return (
@@ -75,8 +77,8 @@ export function DraftCard({ draft, onSubmitted, onRequestCancel }: DraftCardProp
           <div className="flex items-center gap-3 rounded-md bg-primary-soft px-4 py-3.5">
             <Image src="/icons/calendar-clock.svg" alt="" width={20} height={20} />
             <p className="text-xs leading-5 font-semibold tracking-wide text-primary">
-              Email konfirmasi telah dikirim!
-              <span className="block font-medium text-muted">Pastikan membaca peraturan dan mengecek kembali reservasi anda.</span>
+              Tersimpan di browser ini, slot belum dipesan
+              <span className="block font-medium text-muted">Unggah surat lalu tekan Pesan agar reservasi diajukan ke admin.</span>
             </p>
           </div>
         )}
@@ -91,8 +93,8 @@ export function DraftCard({ draft, onSubmitted, onRequestCancel }: DraftCardProp
         >
           <dl className="grid grid-cols-1 gap-x-6 gap-y-4 text-xs sm:grid-cols-3 sm:gap-x-10">
             <div className="flex flex-col gap-4">
-              <Field label="Email">{draft.bookerEmail}</Field>
-              <Field label="Nama Pemesan">{draft.bookerName}</Field>
+              <Field label="Email">{booker.email}</Field>
+              <Field label="Nama Pemesan">{booker.name}</Field>
             </div>
             <div className="flex flex-col gap-4">
               <Field label="Waktu Reservasi">
@@ -149,7 +151,7 @@ export function DraftCard({ draft, onSubmitted, onRequestCancel }: DraftCardProp
         </form>
       </Card>
 
-      <DeadlineTimer id={`${id}-deadline`} deadline={draft.letterDeadline} countdown={countdown} />
+      <DeadlineTimer id={`${id}-deadline`} deadline={deadline} countdown={countdown} />
     </article>
   );
 }

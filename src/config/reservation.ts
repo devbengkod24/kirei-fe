@@ -7,3 +7,6 @@ export const LETTER_MAX_SIZE_MB = 5;
  */
 export const SPORTS_HALL_BOOKING_DAYS = 14;
 export const SPORTS_HALL_MAX_MINUTES = 120;
+
+/** A draft's loan letter is due this many hours after the draft was saved. TODO: confirm with kirei-api. */
+export const DRAFT_LETTER_HOURS = 24;

@@ -137,6 +137,10 @@ export function SportsHallReservationForm({
     toRequest: (values) => toSportsHallReservationRequest(values, hall.id),
     fieldMap: SPORTS_HALL_RESERVATION_FIELD_MAP,
     onReset: () => setSelection(null),
+    toDraft: (values) => ({
+      unitName: hall.name,
+      purpose: values.notes ? `${values.activity}: ${values.notes}` : values.activity,
+    }),
   });
 
   const statuses = slots.map((slot) =>

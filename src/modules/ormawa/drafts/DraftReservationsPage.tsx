@@ -1,12 +1,12 @@
+import { getCurrentUser } from "@/lib/auth/getCurrentUser";
 import { ORMAWA_ROUTES } from "../routes";
 import { DraftList } from "./DraftList";
-import { getDraftReservations } from "./getDraftReservations";
 
 export async function DraftReservationsPage() {
-  const drafts = await getDraftReservations();
+  const user = await getCurrentUser();
   return (
     <DraftList
-      drafts={drafts}
+      booker={{ name: user.name, email: user.email }}
       links={{ history: ORMAWA_ROUTES.reservationHistory, create: ORMAWA_ROUTES.createReservation }}
     />
   );

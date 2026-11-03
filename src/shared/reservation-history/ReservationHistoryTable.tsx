@@ -24,11 +24,15 @@ const TH = `${TABLE_HEAD_CELL} text-left`;
 const TD = TABLE_CELL;
 
 function Purpose({ reservation }: { reservation: ReservationRecord }) {
+  const rejected = reservation.status === "ditolak";
+  const reason = rejected ? reservation.rejectionReason : reservation.cancellationReason;
   return (
     <>
       {reservation.purpose}
-      {reservation.cancellationReason && (
-        <span className="mt-0.5 block text-[11px] text-danger">Alasan: {reservation.cancellationReason}</span>
+      {reason && (
+        <span className="mt-1 block rounded-inner bg-danger-soft px-2 py-1 text-[11px] text-danger">
+          <span className="font-semibold">{rejected ? "Alasan ditolak" : "Alasan dibatalkan"}:</span> {reason}
+        </span>
       )}
     </>
   );
