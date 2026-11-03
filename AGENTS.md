@@ -46,7 +46,7 @@ Ormawa dan dosen memakai layar yang sama. Pemetaan halaman: `docs/roles-and-page
 - Data dipisah per fakultas (`fakultas_id`): gedung, ruangan, denah, reservasi ruangan, persetujuan, laporan, pengumuman fakultas. Pemisahan ditegakkan Laravel; frontend hanya mengirim `scope` dan menampilkan hasilnya.
 - Satu gedung milik satu fakultas, atau milik universitas. GOR, kendaraan, dan gedung universitas tidak punya fakultas dan dikelola Admin Universitas.
 - Reservasi ruangan tercatat di fakultas pemilik ruangan, bukan fakultas peminjam.
-- Peminjam boleh meminjam ruangan di fakultas mana pun. Reservasi ruangan milik fakultas disetujui admin fakultas pemilik ruangan, dan tetap memakai surat peminjaman. Ormawa tidak punya fakultas, jadi reservasi ruangan fakultas oleh ormawa selalu lewat admin fakultas pemilik.
+- Peminjam boleh meminjam ruangan di fakultas mana pun. Reservasi ruangan milik fakultas disetujui admin fakultas pemilik ruangan, dan tetap memakai surat peminjaman (kecuali dosen: dosen tidak memakai surat sehingga juga tanpa draft). Ormawa tidak punya fakultas, jadi reservasi ruangan fakultas oleh ormawa selalu lewat admin fakultas pemilik.
 - Halaman Admin Universitas yang memuat data fakultas punya filter fakultas.
 
 ## Struktur (ringkas)

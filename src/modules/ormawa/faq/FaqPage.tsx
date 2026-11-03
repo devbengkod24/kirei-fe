@@ -1,12 +1,16 @@
 import { Card } from "@/components/ui/Card";
-import { FAQ_ITEMS } from "./faq-items";
+import { requireRole } from "@/lib/auth/requireRole";
+import { hasDrafts } from "../borrowerBooking";
+import { DOSEN_FAQ_ITEMS, FAQ_ITEMS } from "./faq-items";
 
 /** Questions as native disclosure widgets, so they open with keyboard and without JS. */
-export function FaqPage() {
+export async function FaqPage() {
+  const user = await requireRole(["ormawa", "dosen"]);
+  const items = hasDrafts(user.role) ? FAQ_ITEMS : DOSEN_FAQ_ITEMS;
   return (
     <Card as="section" aria-label="Pertanyaan yang sering diajukan" className="p-4 md:p-6">
       <ul className="flex flex-col divide-y divide-border">
-        {FAQ_ITEMS.map((item) => (
+        {items.map((item) => (
           <li key={item.question}>
             <details className="group">
               <summary className="flex min-h-11 cursor-pointer list-none items-center gap-4 rounded-md p-4 text-sm leading-[1.2] font-bold text-primary hover:bg-page [&::-webkit-details-marker]:hidden">

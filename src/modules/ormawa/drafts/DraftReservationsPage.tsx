@@ -1,9 +1,10 @@
-import { getCurrentUser } from "@/lib/auth/getCurrentUser";
+import { requireRole } from "@/lib/auth/requireRole";
 import { ORMAWA_ROUTES } from "../routes";
 import { DraftList } from "./DraftList";
 
 export async function DraftReservationsPage() {
-  const user = await getCurrentUser();
+  // Only ormawa have drafts; dosen book without a loan letter and are sent to their dashboard.
+  const user = await requireRole(["ormawa"]);
   return (
     <DraftList
       booker={{ name: user.name, email: user.email }}

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth/getCurrentUser";
-import { ORMAWA_ROUTES } from "@/modules/ormawa/routes";
+import { borrowerBooking } from "@/modules/ormawa/borrowerBooking";
 import { ReservationFormPage } from "@/shared/reservation-form/ReservationFormPage";
 
 export const metadata: Metadata = { title: "Buat Reservasi Ruangan" };
@@ -12,7 +12,7 @@ export default async function Page() {
     <ReservationFormPage
       tipe="ruangan"
       requester={{ name: user.name, fakultasId: user.fakultasId }}
-      links={{ history: ORMAWA_ROUTES.reservationHistory, drafts: ORMAWA_ROUTES.draftReservation }}
+      {...borrowerBooking(user.role)}
     />
   );
 }

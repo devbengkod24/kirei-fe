@@ -2,10 +2,12 @@
  * Who a booking form is for:
  * - "request": a borrower asks; needs a phone number and loan letter (or a draft), then waits
  *   for the admin of the building's faculty.
+ * - "request_without_letter": a borrower who needs no loan letter; still waits for approval, and
+ *   has no draft, since a draft only waits for the letter.
  * - "internal": an admin books for the campus (Reservasi Internal); no phone, letter, draft, or
  *   approval, the reservation is created right away.
  */
-export type BookingMode = "request" | "internal";
+export type BookingMode = "request" | "request_without_letter" | "internal";
 
 export interface BookingModeSettings {
   askPhone: boolean;
@@ -19,6 +21,7 @@ export interface BookingModeSettings {
 
 export const BOOKING_MODES: Record<BookingMode, BookingModeSettings> = {
   request: { askPhone: true, withLetter: true, needsApproval: true, requesterLabel: "Peminjam" },
+  request_without_letter: { askPhone: true, withLetter: false, needsApproval: true, requesterLabel: "Peminjam" },
   internal: {
     askPhone: false,
     withLetter: false,

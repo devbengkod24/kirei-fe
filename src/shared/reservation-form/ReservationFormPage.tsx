@@ -1,4 +1,5 @@
 import type { ReservationType } from "@/types/reservation";
+import type { BookingMode } from "./bookingMode";
 import { getRoomReservationOptions, getSportsHallReservationOptions, getVehicleReservationOptions } from "./getReservationOptions";
 import { RoomReservationForm } from "./RoomReservationForm";
 import { SportsHallReservationForm } from "./SportsHallReservationForm";
@@ -9,26 +10,28 @@ export interface ReservationFormPageProps {
   requester: { name: string; fakultasId: string | null };
   /** For admins later: allows picking a booked room. Only applies to `ruangan`. */
   canUseBookedSlot?: boolean;
-  links: { history: string; drafts: string };
+  /** "request_without_letter" for borrowers who send no loan letter: no letter step and no drafts. */
+  mode?: BookingMode;
+  links: { history: string; drafts?: string };
 }
 
 /**
  * Booking form for one reservation type. Each type has its own layout from Figma; they share
  * the summary dialog, letter upload, validation pieces, and submit flow.
  */
-export async function ReservationFormPage({ tipe, requester, canUseBookedSlot = false, links }: ReservationFormPageProps) {
+export async function ReservationFormPage({ tipe, requester, canUseBookedSlot = false, mode, links }: ReservationFormPageProps) {
   switch (tipe) {
     case "ruangan": {
       const options = await getRoomReservationOptions();
-      return <RoomReservationForm {...options} requester={requester} canUseBookedSlot={canUseBookedSlot} links={links} />;
+      return <RoomReservationForm {...options} requester={requester} canUseBookedSlot={canUseBookedSlot} mode={mode} links={links} />;
     }
     case "gor": {
       const options = await getSportsHallReservationOptions();
-      return <SportsHallReservationForm {...options} requester={requester} links={links} />;
+      return <SportsHallReservationForm {...options} requester={requester} mode={mode} links={links} />;
     }
     case "kendaraan": {
       const options = await getVehicleReservationOptions();
-      return <VehicleReservationForm {...options} requester={requester} links={links} />;
+      return <VehicleReservationForm {...options} requester={requester} mode={mode} links={links} />;
     }
   }
 }

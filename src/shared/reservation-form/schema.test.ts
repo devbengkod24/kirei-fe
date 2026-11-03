@@ -69,6 +69,22 @@ describe("room reservation schema", () => {
   });
 });
 
+describe("room reservation schema without a loan letter", () => {
+  // borrowers such as dosen send the request without a letter, but it still goes to the admin
+  const letterlessSchema = createRoomReservationSchema(() => new Date("2026-10-30T01:00:00Z"), "request_without_letter");
+
+  it("sends without a letter", () => {
+    expect(letterlessSchema.safeParse({ ...valid, letter: null }).success).toBe(true);
+  });
+
+  it("still needs a phone number", () => {
+    const result = letterlessSchema.safeParse({ ...valid, phone: "", letter: null });
+    const paths = result.success ? [] : result.error.issues.map((issue) => issue.path.join("."));
+    expect(paths).toContain("phone");
+    expect(paths).not.toContain("letter");
+  });
+});
+
 describe("room reservation schema for an admin booking", () => {
   // admins book for the faculty: no phone and no loan letter
   const adminSchema = createRoomReservationSchema(() => new Date("2026-10-30T01:00:00Z"), "internal");

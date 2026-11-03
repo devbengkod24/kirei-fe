@@ -32,14 +32,16 @@ URL di bawah adalah rencana. Yang sudah ada di kode hanya halaman ormawa/dosen; 
 
 Ormawa dan dosen memakai layar dan URL yang sama. Menu dan URL ada di `modules/ormawa/nav.ts` dan `modules/ormawa/routes.ts`.
 
+**Perbedaan dosen.** Dosen tidak memakai surat peminjaman, jadi juga tidak punya draft. Form reservasi dosen memakai `mode="request_without_letter"` (tanpa langkah unggah surat, tanpa validasi surat, tanpa "Simpan Draft", tetap menunggu persetujuan admin). Menu dosen (`DOSEN_NAV`) tidak memuat Draft Reservasi, `/reservasi/draft` mengembalikan dosen ke dashboard, dan FAQ dosen (`DOSEN_FAQ_ITEMS`) tidak membahas surat dan draft. Pilihan per role ada di `modules/ormawa/borrowerBooking.ts`, bukan di `shared/`.
+
 | Menu | URL | Isi | Komponen |
 |---|---|---|---|
 | Dashboard | `/dashboard` | Sapaan, kalender log reservasi, kartu Total Reservasi, reservasi hari ini, pengumuman terbaru | `shared/dashboard` (`UserDashboard`) |
 | Buat Reservasi | `/reservasi/baru` | Pilih jenis (Ruangan, Kendaraan, GOR). | `shared/reservation-form` (`ReservationTypePicker`) |
-| Buat Reservasi: Ruangan | `/reservasi/baru/ruangan` | Gedung dan lantai, tanggal, jam, lalu ruangan dari denah (dengan filter jenis ruangan). Detail pemesanan dibuka di dialog: No HP, keperluan, surat. "Pesan" butuh surat PDF; "Simpan Draft" tidak. | `shared/reservation-form` (`ReservationFormPage tipe="ruangan"`) |
+| Buat Reservasi: Ruangan | `/reservasi/baru/ruangan` | Gedung dan lantai, tanggal, jam, lalu ruangan dari denah (dengan filter jenis ruangan). Detail pemesanan dibuka di dialog: No HP, keperluan, surat. "Pesan" butuh surat PDF; "Simpan Draft" tidak. Dosen: tanpa surat dan tanpa "Simpan Draft". | `shared/reservation-form` (`ReservationFormPage tipe="ruangan"`) |
 | Buat Reservasi: GOR | `/reservasi/baru/gor` | Pilih hari (7 hari ke depan), lalu satu atau beberapa slot jam berurutan; jenis kegiatan, keterangan, surat. Tanpa catatan lintas fakultas. | `shared/reservation-form` (`ReservationFormPage tipe="gor"`) |
 | Buat Reservasi: Kendaraan | `/reservasi/baru/kendaraan` | Data peminjam (No HP, tujuan, jumlah peserta, keterangan kegiatan), tanggal mulai dan selesai, surat. Unit kendaraan diatur di luar aplikasi. Tanpa catatan lintas fakultas. | `shared/reservation-form` (`ReservationFormPage tipe="kendaraan"`) |
-| Draft Reservasi | `/reservasi/draft` | Reservasi yang menunggu surat peminjaman. Tiap draft punya timer hitung mundur ke tenggat dari API (`hooks/useCountdown`) dan batasnya dalam WIB. Unggah PDF lalu "Pesan", atau "Batal". Setelah tenggat lewat, unggah dan "Pesan" dinonaktifkan. | `modules/ormawa/drafts` |
+| Draft Reservasi | `/reservasi/draft` | Hanya ormawa. Reservasi yang menunggu surat peminjaman. Tiap draft punya timer hitung mundur ke tenggat dari API (`hooks/useCountdown`) dan batasnya dalam WIB. Unggah PDF lalu "Pesan", atau "Batal". Setelah tenggat lewat, unggah dan "Pesan" dinonaktifkan. | `modules/ormawa/drafts` |
 | Reservasi & Riwayat | `/reservasi/riwayat` | Tab Ruangan, Kendaraan, GOR, lalu tab Aktif (kartu "Hari ini" dan "Akan datang") dan Riwayat (tabel berhalaman). Pilihan disimpan di URL: `?tipe=gor&tampilan=riwayat&halaman=2&per=25`. | `shared/reservation-history` (`ReservationHistoryPage`, `showTypeTabs`) |
 | Pengumuman | `/pengumuman` | Daftar dan filter sama dengan admin, tanpa Tambah Pengumuman. | `shared/announcements` (tanpa `canManage`) |
 | Profil | `/profil` | Data diri dan ubah kata sandi. | `shared/profile` |
@@ -47,7 +49,7 @@ Ormawa dan dosen memakai layar dan URL yang sama. Menu dan URL ada di `modules/o
 | FAQ | `/bantuan/faq` | | `modules/ormawa` |
 
 Catatan:
-- Peminjam boleh memilih ruangan fakultas mana pun. Reservasi ruangan milik fakultas disetujui admin fakultas pemilik ruangan, dan tetap memakai surat peminjaman.
+- Peminjam boleh memilih ruangan fakultas mana pun. Reservasi ruangan milik fakultas disetujui admin fakultas pemilik ruangan, dan tetap memakai surat peminjaman (kecuali dosen, yang tidak memakai surat).
 - Ormawa tidak terikat fakultas (`fakultasId: null`) dan semuanya setara, jadi reservasi ruangan fakultas oleh ormawa selalu lewat jalur di atas. Dosen punya fakultas asal.
 - Bila reservasi dipindah karena slotnya dipakai admin, peminjam cukup menerima pemberitahuan dan melihat jadwal barunya di Riwayat.
 

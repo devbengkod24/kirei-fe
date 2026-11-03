@@ -15,3 +15,8 @@ export const ORMAWA_NAV: NavLinkConfig[][] = [
     { label: "FAQ", href: ORMAWA_ROUTES.faq, iconSrc: "/icons/nav/faq.svg" },
   ],
 ];
+
+/** Dosen book without a loan letter, so the draft list is left out. */
+export const DOSEN_NAV: NavLinkConfig[][] = ORMAWA_NAV.map((group) =>
+  group.filter((item) => item.href !== ORMAWA_ROUTES.draftReservation),
+);

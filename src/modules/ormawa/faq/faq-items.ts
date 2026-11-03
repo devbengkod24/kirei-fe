@@ -52,3 +52,17 @@ export const FAQ_ITEMS: FaqItem[] = [
       "Buka menu Hubungi Kami, pilih kategori pengaduan, lalu tulis masalahnya. Laporan akan diterima admin. Untuk hal yang mendesak, gunakan WhatsApp atau email yang tercantum di halaman yang sama.",
   },
 ];
+
+const DOSEN_ANSWERS: Record<string, string> = {
+  "Bagaimana cara membuat reservasi?":
+    "Buka Buat Reservasi, pilih ruangan, GOR, atau kendaraan, lalu isi tanggal, waktu, dan keperluan. Periksa ringkasannya, lalu tekan Pesan. Dosen tidak perlu mengunggah surat peminjaman. Reservasi akan berstatus Menunggu sampai admin memeriksanya.",
+  "Bolehkah saya meminjam ruangan di fakultas lain?":
+    "Boleh. Ruangan di fakultas mana pun bisa dipesan. Reservasinya diperiksa admin fakultas pemilik ruangan.",
+  "Apakah akun saya bisa diblokir jika tidak hadir atau terlambat?":
+    "Tidak. KIREI tidak memberi penalti atau memblokir akun. Meski begitu, beri tahu admin bila rencana berubah, agar slotnya bisa dipakai peminjam lain.",
+};
+
+/** Dosen book without a loan letter, so the letter and draft questions are left out and the rest reworded. */
+export const DOSEN_FAQ_ITEMS: FaqItem[] = FAQ_ITEMS.filter(
+  (item) => !/surat/i.test(item.question),
+).map((item) => ({ ...item, answer: DOSEN_ANSWERS[item.question] ?? item.answer }));
