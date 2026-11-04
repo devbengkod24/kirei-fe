@@ -54,6 +54,8 @@ export interface UnitBooking {
   startsAt: string;
   /** ISO 8601 (UTC) */
   endsAt: string;
+  /** Why the unit is taken, when it is not an ordinary reservation, e.g. a lecture from the schedule. */
+  label?: string;
 }
 
 /**

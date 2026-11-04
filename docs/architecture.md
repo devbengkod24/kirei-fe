@@ -96,9 +96,10 @@ src/app/(admin-fakultas)/layout.tsx            → AdminFakultasShell (menu + av
 src/app/(admin-fakultas)/fakultas/*/page.tsx   → requireRole(["admin_fakultas"]) lalu loader shared dengan scope { fakultasId }
 src/app/(admin-fakultas)/fakultas/*/loading.tsx→ satu loading per halaman (cacheComponents butuh Suspense per segmen)
 src/modules/admin-fakultas/                    → routes.ts, nav.ts, shell, link tab reservasi
+src/modules/admin-fakultas/lecturer-schedule/  → Jadwal Dosen: parser CSV (lib/csv.ts + Zod per baris), server action simpan, halaman unggah
 src/shared/layout/RoleShell.tsx                → shell + menu ikon, dipakai semua role
 src/shared/admin-dashboard/                    → dashboard admin (stat, grafik mingguan, reservasi hari ini, laporan)
-src/shared/rooms/                              → Kelola Ruangan + dialog edit
+src/shared/rooms/                              → Kelola Ruangan + dialog edit (termasuk foto ruangan, roomPhoto.ts)
 src/shared/reservation-form/                   → Reservasi Internal memakai RoomReservationForm yang sama dengan peminjam (mode="internal", scope fakultas); mode diatur di bookingMode.ts
 src/shared/reservation-management/             → Kelola Reservasi: tab Persetujuan/Riwayat sebagai URL, prop tipe
 src/shared/reports/, src/shared/announcements/ → daftar + filter (logika filter murni, ada tes)
