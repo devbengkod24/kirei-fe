@@ -321,10 +321,10 @@ export function RoomReservationForm({
                           {inspectedBookings
                             .map(
                               (booking) =>
-                                `${formatTimeSpanWIB(booking.startsAt, booking.endsAt)}`,
+                                `${formatTimeSpanWIB(booking.startsAt, booking.endsAt)} WIB${booking.label ? ` (${booking.label})` : ""}`,
                             )
-                            .join(", ")}{" "}
-                          WIB.
+                            .join(", ")}
+                          .
                         </p>
                       )}
                     </>

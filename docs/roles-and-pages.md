@@ -58,12 +58,13 @@ Semua data terkunci ke fakultas admin (`scope={{ fakultasId: user.fakultasId }}`
 | Menu | URL | Isi | Komponen |
 |---|---|---|---|
 | Dashboard | `/fakultas/dashboard` | Kartu Total Reservasi Hari Ini, Check-in Hari Ini, Ruangan Tersedia; grafik distribusi reservasi; tabel reservasi hari ini; laporan pengguna terbaru | `shared/dashboard` (`AdminDashboard`) |
-| Kelola Ruangan | `/fakultas/ruangan` | Daftar ruangan di gedung milik fakultas, ubah detail dan status ruangan. Tidak termasuk edit denah. | `shared/unit-management` (`tipe="ruangan"`) |
+| Kelola Ruangan | `/fakultas/ruangan` | Daftar ruangan di gedung milik fakultas, ubah detail dan status ruangan, serta unggah, ganti, dan hapus foto ruangan (JPG, PNG, atau WebP, maksimal `ROOM_PHOTO_MAX_SIZE_MB`). Tidak termasuk edit denah. | `shared/rooms` (`RoomManager`, `EditRoomDialog`) |
+| Jadwal Dosen | `/fakultas/jadwal-dosen` | Unggah CSV jadwal kuliah (`hari, jam_mulai, jam_selesai, ruangan, mata_kuliah, dosen`) dan rentang semester. Tiap baris dicek dengan Zod dan kesalahannya ditampilkan per baris; berkas hanya bisa disimpan bila semua baris valid. Unggahan baru menggantikan jadwal sebelumnya. Ruangan pada jam kuliah tampil sebagai tidak tersedia di denah dan form reservasi setiap minggu selama semester. | `modules/admin-fakultas/lecturer-schedule`, booking dibentuk di `shared/reservation-form/lecturerScheduleBookings.ts` |
 | Reservasi Internal | `/fakultas/reservasi-internal` | Admin memesan ruangan di gedung fakultasnya. Komponen sama dengan Buat Reservasi: Ruangan milik peminjam, tetapi tanpa No HP, surat, dan draft. Memakai slot yang sudah dipesan belum dibangun. | `shared/reservation-form` (`RoomReservationForm` dengan `mode="internal"`) |
 | Kelola Reservasi: Persetujuan | `/fakultas/persetujuan` | Reservasi ruangan fakultas yang menunggu keputusan, termasuk dari peminjam luar fakultas. | `shared/reservation-approval` |
 | Kelola Reservasi: Riwayat | `/fakultas/riwayat` | | `shared/reservation-history` |
 | Laporan Pengguna | `/fakultas/laporan` | Pengaduan pengguna, dengan filter status, kategori, dan tanggal. Laporan Pengguna hanya ada di Admin Fakultas; laporan untuk GOR dan kendaraan belum dibuat. | `shared/reports` |
-| Pengumuman | `/fakultas/pengumuman` | Kelola pengumuman fakultas. | `shared/announcements` (`canManage`) |
+| Pengumuman | `/fakultas/pengumuman` | Kelola pengumuman fakultas. Hanya Admin Fakultas dan Admin Universitas yang mendapat `canManage` (tombol Tambah Pengumuman). | `shared/announcements` (`canManage`) |
 | Profil | `/fakultas/profil` | | `shared/profile` |
 
 Persetujuan dan Riwayat tampil sebagai dua tab rata kanan di satu halaman "Kelola Reservasi", tetapi masing-masing punya URL sendiri. Urutan kolom Riwayat sama dengan Admin Universitas: Alasan Ditolak, Status, Aksi.

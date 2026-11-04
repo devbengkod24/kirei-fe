@@ -7,6 +7,14 @@ import { Card } from "@/components/ui/Card";
 import type { Building, Room, RoomType } from "@/types/room";
 import { EditRoomDialog } from "./EditRoomDialog";
 import { ROOM_TYPE_LABEL, roomTitle } from "./room-labels";
+import type { RoomPhotoChange } from "./roomPhoto";
+
+/** Mock only: until the API returns the stored photo URL, a new photo is shown from a local blob URL. */
+function applyPhoto(room: Room, photo: RoomPhotoChange): Room {
+  if (photo.kind === "replace") return { ...room, photoUrl: URL.createObjectURL(photo.file) };
+  if (photo.kind === "remove") return { ...room, photoUrl: null };
+  return room;
+}
 
 export interface RoomManagerProps {
   buildings: Building[];
@@ -133,9 +141,25 @@ export function RoomManager({ buildings, rooms: initialRooms }: RoomManagerProps
             <>
               <div className="relative aspect-[339/189] overflow-hidden rounded-md border border-border bg-page">
                 {selected.photoUrl ? (
-                  <Image src={selected.photoUrl} alt={`Foto ${roomTitle(selected)}`} fill sizes="363px" className="object-cover" />
+                  <Image
+                    src={selected.photoUrl}
+                    alt={`Foto ${roomTitle(selected)}`}
+                    fill
+                    sizes="363px"
+                    unoptimized={selected.photoUrl.startsWith("blob:")}
+                    className="object-cover"
+                  />
                 ) : (
-                  <p className="flex size-full items-center justify-center text-xs text-muted">Belum ada foto ruangan</p>
+                  <div className="flex size-full flex-col items-center justify-center gap-2">
+                    <p className="text-xs text-muted">Belum ada foto ruangan</p>
+                    <button
+                      type="button"
+                      onClick={() => setEditing(true)}
+                      className="inline-flex min-h-11 items-center rounded-md border border-primary bg-surface px-4 text-xs font-medium text-primary hover:bg-primary-soft"
+                    >
+                      Tambah Foto
+                    </button>
+                  </div>
                 )}
               </div>
               <div className="flex items-center justify-between gap-2">
@@ -184,10 +208,11 @@ export function RoomManager({ buildings, rooms: initialRooms }: RoomManagerProps
           buildings={buildings}
           takenCodes={rooms.filter((room) => room.id !== selected.id).map((room) => room.code)}
           onClose={() => setEditing(false)}
-          onSave={(updated) => {
-            setRooms((current) => current.map((room) => (room.id === updated.id ? updated : room)));
+          onSave={(updated, photo) => {
+            const saved = applyPhoto(updated, photo);
+            setRooms((current) => current.map((room) => (room.id === saved.id ? saved : room)));
             setEditing(false);
-            setNotice(`${roomTitle(updated)} disimpan.`);
+            setNotice(`${roomTitle(saved)} disimpan.`);
           }}
         />
       )}

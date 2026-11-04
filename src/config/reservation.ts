@@ -7,3 +7,6 @@ export const LETTER_MAX_SIZE_MB = 5;
  */
 export const SPORTS_HALL_BOOKING_DAYS = 14;
 export const SPORTS_HALL_MAX_MINUTES = 120;
+
+/** Largest room photo accepted. TODO: match the upload rule in kirei-api once it is documented. */
+export const ROOM_PHOTO_MAX_SIZE_MB = 2;

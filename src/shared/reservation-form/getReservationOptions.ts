@@ -6,7 +6,10 @@ import {
   buildRoomBookingsMock,
   buildSportsHallBookingsMock,
 } from "@/mocks/facilities";
+import { getMockLecturerSchedules } from "@/mocks/lecturerSchedules";
+import { toWibDateKey } from "@/lib/date";
 import type { Building, SportsHall, UnitBooking } from "@/types/facility";
+import { lecturerScheduleBookings } from "./lecturerScheduleBookings";
 
 export interface RoomReservationOptions {
   buildings: Building[];
@@ -32,7 +35,14 @@ export async function getRoomReservationOptions(scope?: { fakultasId: string | n
   // TODO: replace with the orval clients for buildings/floor plans, room availability, and rules (no-store).
   // Availability should become a query per date once TanStack Query is set up, instead of a week of bookings.
   const buildings = scope ? MOCK_BUILDINGS.filter((building) => building.fakultasId === scope.fakultasId) : MOCK_BUILDINGS;
-  return { buildings, bookings: buildRoomBookingsMock(now), now: now.toISOString(), rules: MOCK_ROOM_RULES };
+  // The lecture schedule uploaded by each admin fakultas blocks its rooms for the whole semester.
+  const lectures = lecturerScheduleBookings(getMockLecturerSchedules(), MOCK_BUILDINGS, toWibDateKey(now));
+  return {
+    buildings,
+    bookings: [...buildRoomBookingsMock(now), ...lectures],
+    now: now.toISOString(),
+    rules: MOCK_ROOM_RULES,
+  };
 }
 
 export async function getSportsHallReservationOptions(): Promise<SportsHallReservationOptions> {
