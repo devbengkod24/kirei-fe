@@ -16,6 +16,7 @@ const RESERVATION: ReservationRecord = {
   purpose: "Butuh kelas untuk mengajar",
   reschedule: null,
   cancellationReason: null,
+  rejectionReason: null,
 };
 
 const SCHEDULE: ClassSchedule = {
