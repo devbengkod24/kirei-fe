@@ -34,7 +34,8 @@ export function CreateAnnouncementDialog({ onClose, onCreate }: CreateAnnounceme
     if (!body.trim()) next.body = "Isi pengumuman wajib diisi.";
     setErrors(next);
     if (Object.keys(next).length > 0 || !category) return;
-    // TODO: POST through the orval client and map 422 errors with lib/api/form-errors.
+    // TODO: POST through the orval client and map 422 errors with lib/api/form-errors. kirei-api must
+    // allow this only for admin_universitas and admin_fakultas (its own faculty); hiding the button is UX only.
     onCreate({ category, title: title.trim(), body: body.trim() });
   };
 
