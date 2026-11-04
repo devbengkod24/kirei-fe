@@ -70,8 +70,8 @@ export function ReservationHistoryTable({
                 {unitLabel && <th scope="col" className={TH}>{unitLabel}</th>}
                 <th scope="col" className={TH}>Waktu (WIB)</th>
                 <th scope="col" className={TH}>Keperluan</th>
-                <th scope="col" className={`${TABLE_HEAD_CELL} text-center`}>Status</th>
                 <th scope="col" className={TH}>Alasan Ditolak</th>
+                <th scope="col" className={`${TABLE_HEAD_CELL} text-center`}>Status</th>
               </tr>
             </thead>
             <tbody>
@@ -84,11 +84,11 @@ export function ReservationHistoryTable({
                   <td className={TD}>
                     <Purpose reservation={reservation} />
                   </td>
-                  <td className={`${TD} text-center`}>
-                    <ReservationStatusBadge status={reservation.status} />
-                  </td>
                   <td className={`${TD} max-w-56 ${reservation.status === "ditolak" ? "text-danger" : "text-muted"}`}>
                     {rejectionText(reservation)}
+                  </td>
+                  <td className={`${TD} text-center`}>
+                    <ReservationStatusBadge status={reservation.status} />
                   </td>
                 </tr>
               ))}

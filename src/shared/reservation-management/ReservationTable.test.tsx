@@ -63,11 +63,11 @@ describe("ReservationTable history", () => {
   };
   const done: ReservationRequest = { ...TRIP, id: "res-kendaraan-3", status: "selesai" };
 
-  it("shows the rejection reason in its own column next to Status", () => {
+  it("shows the rejection reason in its own column, with Status right before Aksi", () => {
     render(<ReservationTable tipe="kendaraan" tab="riwayat" reservations={[rejected, done]} />);
     const table = screen.getByRole("table");
     const headers = within(table).getAllByRole("columnheader").map((header) => header.textContent);
-    expect(headers.indexOf("Alasan Ditolak")).toBe(headers.indexOf("Status") + 1);
+    expect(headers.slice(-3)).toEqual(["Alasan Ditolak", "Status", "Aksi"]);
 
     const [, rejectedRow, doneRow] = within(table).getAllByRole("row");
     expect(within(rejectedRow).getByText("Jadwal bentrok dengan kegiatan fakultas.")).toBeTruthy();

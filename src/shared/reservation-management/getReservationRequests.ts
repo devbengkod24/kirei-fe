@@ -6,7 +6,7 @@ import type { ReservationRequest, ReservationType } from "@/types/reservation";
 
 export type ReservationTab = "persetujuan" | "riwayat";
 
-const HISTORY_STATUSES = new Set(["selesai", "ditolak", "dibatalkan"]);
+const HISTORY_STATUSES = new Set(["selesai", "ditolak"]);
 
 /** Rooms are narrowed by the faculty scope; GOR and vehicles belong to the university. */
 function requestsOfType(scope: AdminScope, tipe: ReservationType, now: Date) {

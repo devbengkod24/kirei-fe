@@ -35,7 +35,7 @@ const rejectionText = (reservation: ReservationRequest) =>
 
 const EMPTY_TEXT: Record<ReservationTab, string> = {
   persetujuan: "Tidak ada reservasi yang menunggu persetujuan.",
-  riwayat: "Belum ada reservasi yang selesai, ditolak, atau dibatalkan.",
+  riwayat: "Belum ada reservasi yang selesai atau ditolak.",
 };
 
 /** Reservations table for both tabs: approval actions on "persetujuan", status on "riwayat". */
@@ -56,7 +56,6 @@ export function ReservationTable({ tipe, tab, reservations: initial }: Reservati
     setReservations((current) => current.filter((item) => item.id !== reservation.id));
     setNotice(message);
   };
-
 
   const renderActions = (reservation: ReservationRequest) => (
     <div className="flex items-center gap-2">
@@ -115,8 +114,8 @@ export function ReservationTable({ tipe, tab, reservations: initial }: Reservati
                 ))}
                 <th scope="col" className={TH}>Waktu</th>
                 <th scope="col" className={TH}>Keperluan</th>
-                {!isApproval && <th scope="col" className={TH}>Status</th>}
                 {!isApproval && <th scope="col" className={TH}>Alasan Ditolak</th>}
+                {!isApproval && <th scope="col" className={TH}>Status</th>}
                 <th scope="col" className={TH}>Aksi</th>
               </tr>
             </thead>
@@ -135,13 +134,13 @@ export function ReservationTable({ tipe, tab, reservations: initial }: Reservati
                   </td>
                   <td className={TD}>{reservation.purpose}</td>
                   {!isApproval && (
-                    <td className={TD}>
-                      <ReservationStatusBadge status={reservation.status} />
+                    <td className={`${TD} max-w-56 ${reservation.status === "ditolak" ? "text-danger" : "text-muted"}`}>
+                      {rejectionText(reservation)}
                     </td>
                   )}
                   {!isApproval && (
-                    <td className={`${TD} max-w-56 ${reservation.status === "ditolak" ? "text-danger" : "text-muted"}`}>
-                      {rejectionText(reservation)}
+                    <td className={TD}>
+                      <ReservationStatusBadge status={reservation.status} />
                     </td>
                   )}
                   <td className={TD}>

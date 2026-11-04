@@ -31,24 +31,26 @@ export function FakultasFilter({ options, value }: FakultasFilterProps) {
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex w-full items-center gap-2 sm:w-auto">
       <label htmlFor={id} className="text-xs whitespace-nowrap text-primary">
         Fakultas
       </label>
-      <SelectInput
-        id={id}
-        value={value ?? ""}
-        onChange={(event) => change(event.target.value)}
-        aria-busy={pending || undefined}
-        className="min-w-48 text-xs"
-      >
-        <option value="">Semua fakultas</option>
-        {options.map((fakultas) => (
-          <option key={fakultas.id} value={fakultas.id}>
-            {fakultas.name}
-          </option>
-        ))}
-      </SelectInput>
+      <div className="min-w-0 flex-1 sm:flex-none">
+        <SelectInput
+          id={id}
+          value={value ?? ""}
+          onChange={(event) => change(event.target.value)}
+          aria-busy={pending || undefined}
+          className="min-w-48 text-xs"
+        >
+          <option value="">Semua fakultas</option>
+          {options.map((fakultas) => (
+            <option key={fakultas.id} value={fakultas.id}>
+              {fakultas.name}
+            </option>
+          ))}
+        </SelectInput>
+      </div>
     </div>
   );
 }
