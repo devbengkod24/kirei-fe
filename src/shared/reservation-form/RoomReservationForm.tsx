@@ -74,7 +74,7 @@ const LEGEND = [
   { status: "selected", dot: "bg-plan-selected" },
   { status: "booked", dot: "bg-plan-booked" },
   { status: "available", dot: "bg-border" },
-  { status: "filtered", dot: "bg-plan-filtered" },
+  { status: "filtered", dot: "bg-plan-filtered opacity-40" },
 ] as const;
 
 const FIELD_ROW =

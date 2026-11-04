@@ -18,7 +18,7 @@ const STATUS_STYLES: Record<RoomStatus, string> = {
   selected: "bg-plan-selected text-on-primary",
   booked: "bg-plan-booked text-on-primary",
   available: "bg-plan-available text-ink hover:bg-border",
-  filtered: "bg-plan-filtered text-on-primary",
+  filtered: "bg-plan-filtered text-muted",
 };
 
 /** Short state printed inside a room that cannot be picked, so the plan does not rely on colour alone. */
@@ -56,8 +56,11 @@ export function FloorPlan({ floor, statuses, onSelect, onInspect, inspectedRoomI
               aria-label={`${room.code}, ${ROOM_CATEGORY_SHORT[room.category]}, ${ROOM_STATUS_LABEL[status]}${selectable ? "" : ". Lihat alasan"}`}
               onClick={() => (selectable ? onSelect(room) : onInspect(room))}
               className={`absolute flex flex-col items-center justify-center overflow-hidden rounded-inner border leading-tight transition-colors ${
-                inspected ? "z-10 border-2 border-ink ring-2 ring-primary" : "border-ink"
-              } ${selectable ? "" : "cursor-help"} ${STATUS_STYLES[status]}`}
+                inspected ? "z-10 border-2 border-ink ring-2 ring-primary" : status === "filtered" ? "border-muted" : "border-ink"
+              } ${selectable ? "" : "cursor-help"} ${STATUS_STYLES[status]} ${
+                // rooms outside the type filter fade back so the matching rooms stand out; the inspected one stays readable
+                status === "filtered" && !inspected ? "opacity-40" : ""
+              }`}
               style={{
                 left: `${(room.x / floor.planWidth) * 100}%`,
                 top: `${(room.y / floor.planHeight) * 100}%`,
