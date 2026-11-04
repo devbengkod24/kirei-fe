@@ -4,10 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/Button";
 import { MaskIcon } from "@/components/ui/MaskIcon";
-import { Modal } from "@/components/ui/Modal";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { formatTimeRangeWIB } from "@/lib/date";
-import type { ReservationRecord } from "@/types/reservation";
 import { isAnchorVisible, itemKey, placePopover, timelineDetail, type TimelineItem } from "./timelineDetail";
 
 export interface TimelineDetailPopoverProps {
@@ -16,10 +13,7 @@ export interface TimelineDetailPopoverProps {
   anchor: HTMLElement;
   /** The timeline's scroll area; the popover hides while the clip is scrolled out of it. */
   container: HTMLElement;
-  canDelete: boolean;
   onClose: () => void;
-  /** Resolves to an error message, or null once the reservation is deleted. */
-  onDelete: (reservation: ReservationRecord) => Promise<string | null>;
 }
 
 type Position = { left: number; top: number } | "hidden" | null;
@@ -33,25 +27,13 @@ const rectOf = (element: HTMLElement) => {
  * Read-only details of a timeline clip, like the floating card of a week calendar. On tablets and
  * up it floats beside the clip; on phones it is a sheet along the bottom of the screen.
  */
-export function TimelineDetailPopover({ item, anchor, container, canDelete, onClose, onDelete }: TimelineDetailPopoverProps) {
+export function TimelineDetailPopover({ item, anchor, container, onClose }: TimelineDetailPopoverProps) {
   const floating = useMediaQuery("(min-width: 768px)");
   const panelRef = useRef<HTMLElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const [position, setPosition] = useState<Position>(null);
-  const [confirming, setConfirming] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-  const [error, setError] = useState("");
   const detail = timelineDetail(item);
   const key = itemKey(item);
-  const reservation = item.kind === "reservasi" ? item.reservation : null;
-
-  // A newly opened clip starts without a leftover error or confirm dialog.
-  const [shownKey, setShownKey] = useState(key);
-  if (shownKey !== key) {
-    setShownKey(key);
-    setError("");
-    setConfirming(false);
-  }
 
   useEffect(() => headingRef.current?.focus(), [key]);
 
@@ -84,9 +66,8 @@ export function TimelineDetailPopover({ item, anchor, container, canDelete, onCl
     };
   }, [floating, anchor, container, key]);
 
-  // Esc and a click outside close it, except while the delete dialog is up.
+  // Esc and a click outside close it.
   useEffect(() => {
-    if (confirming) return;
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };
@@ -100,18 +81,7 @@ export function TimelineDetailPopover({ item, anchor, container, canDelete, onCl
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("pointerdown", onPointer);
     };
-  }, [confirming, anchor, onClose]);
-
-  const remove = async () => {
-    if (!reservation) return;
-    setDeleting(true);
-    const message = await onDelete(reservation);
-    setDeleting(false);
-    if (message) {
-      setConfirming(false);
-      setError(message);
-    }
-  };
+  }, [anchor, onClose]);
 
   const placement = floating
     ? {
@@ -168,45 +138,11 @@ export function TimelineDetailPopover({ item, anchor, container, canDelete, onCl
           Jadwal dari Siadin, tidak bisa diubah atau dihapus di KIREI.
         </p>
       )}
-      {error && (
-        <p role="alert" className="text-xs text-danger">
-          {error}
-        </p>
-      )}
-
-      <div className="flex justify-end gap-2">
+      <div className="flex justify-end">
         <Button variant="outline" onClick={onClose}>
           Tutup
         </Button>
-        {reservation && canDelete && (
-          <Button variant="danger-outline" onClick={() => setConfirming(true)}>
-            Hapus
-          </Button>
-        )}
       </div>
-
-      {reservation && (
-        <Modal
-          open={confirming}
-          onClose={() => setConfirming(false)}
-          title="Hapus reservasi?"
-          footer={
-            <>
-              <Button variant="outline" onClick={() => setConfirming(false)} disabled={deleting}>
-                Batal
-              </Button>
-              <Button variant="danger" onClick={remove} disabled={deleting}>
-                {deleting ? "Menghapus..." : "Hapus reservasi"}
-              </Button>
-            </>
-          }
-        >
-          <p className="text-sm">
-            Reservasi {reservation.unitName} oleh {reservation.bookerName},{" "}
-            {formatTimeRangeWIB(reservation.startsAt, reservation.endsAt)}, akan dihapus dan slotnya menjadi tersedia.
-          </p>
-        </Modal>
-      )}
     </section>,
     document.body,
   );

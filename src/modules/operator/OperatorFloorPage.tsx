@@ -7,11 +7,9 @@ import { Card } from "@/components/ui/Card";
 import { MaskIcon } from "@/components/ui/MaskIcon";
 import { formatDateLongWIB, formatTimeRangeWIB, toWibDateKey } from "@/lib/date";
 import type { TimeSlot } from "@/shared/reservation-form/sportsHallSlots";
-import type { ReservationRecord } from "@/types/reservation";
 import { CreateReservationPanel } from "./CreateReservationPanel";
 import { FloorTimeline } from "./FloorTimeline";
 import type { OperatorFloorData } from "./getOperatorFloor";
-import { deleteReservation } from "./operatorReservations";
 import { buildTimeline, defaultHourFilter, FILTER_HOURS, toggleRoom } from "./slots";
 import { TimelineDetailPopover } from "./TimelineDetailPopover";
 import { itemKey, type TimelineItem } from "./timelineDetail";
@@ -39,7 +37,7 @@ export function OperatorFloorPage({ data }: { data: OperatorFloorData | null }) 
 }
 
 function FloorAvailability({ data }: { data: OperatorFloorData }) {
-  const { floor, canCreate, canDelete } = data;
+  const { floor, canCreate } = data;
   const dateKey = toWibDateKey(data.now);
   const [now, setNow] = useState(() => new Date(data.now));
   const [hours, setHours] = useState(() => defaultHourFilter(new Date(data.now)));
@@ -51,17 +49,8 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
   // Room and times prefilled in the create form; null while the form is collapsed.
   const [draft, setDraft] = useState<({ roomId: string } & TimeSlot) | null>(null);
   const [notice, setNotice] = useState("");
-  // Closing or deleting removes the focused panel, so focus returns to the timeline section.
+  // Closing a panel removes the focused element, so focus returns to the timeline section.
   const statusHeadingRef = useRef<HTMLHeadingElement>(null);
-  // The confirm dialog hands focus back to the deleted reservation's Hapus button as it unmounts,
-  // so focus moves after that commit instead of inside the delete handler.
-  const focusAfterDelete = useRef(false);
-
-  useEffect(() => {
-    if (!focusAfterDelete.current || detail !== null) return;
-    focusAfterDelete.current = false;
-    statusHeadingRef.current?.focus();
-  }, [detail]);
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 60_000);
@@ -97,16 +86,6 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
       if (gap) return openCreate(room.id, gap);
     }
     openCreate(visibleRooms[0].id, { start: hours.from, end: hours.to });
-  };
-
-  const remove = async (reservation: ReservationRecord) => {
-    const result = await deleteReservation(reservation.id);
-    if (!result.ok) return result.message;
-    setReservations((current) => current.filter((item) => item.id !== reservation.id));
-    focusAfterDelete.current = true;
-    setDetail(null);
-    setNotice(`Reservasi ${reservation.unitName}, ${formatTimeRangeWIB(reservation.startsAt, reservation.endsAt)}, dihapus.`);
-    return null;
   };
 
   return (
@@ -234,9 +213,7 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
                 item={detail.item}
                 anchor={detail.anchor}
                 container={detail.container}
-                canDelete={canDelete}
                 onClose={closeDetail}
-                onDelete={remove}
               />
             )}
           </Card>

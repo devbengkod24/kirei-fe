@@ -2,11 +2,11 @@ import { Suspense } from "react";
 import { AppBrand } from "@/components/brand/AppBrand";
 import { requireRole } from "@/lib/auth/requireRole";
 import { CurrentUserAvatarPlaceholder } from "@/shared/layout/CurrentUserAvatar";
-import { OperatorUserMenu } from "./OperatorUserMenu";
+import { OperatorAccountBar } from "./OperatorAccountBar";
 
 async function OperatorAccount() {
   const user = await requireRole(["operator"]);
-  return <OperatorUserMenu user={user} />;
+  return <OperatorAccountBar user={user} />;
 }
 
 /** Operators have a single page, so the shell is a header without a sidebar. */
