@@ -18,6 +18,15 @@ const UNITS: Record<ReservationType, string[]> = {
 const PURPOSES = ["Rapat Pengurus", "Seminar", "Latihan Rutin", "Workshop", "Kunjungan Industri"];
 const PAST_STATUSES: ReservationStatus[] = ["selesai", "selesai", "ditolak", "selesai", "dibatalkan"];
 
+// TODO: kirei-api stores the reason the admin types when rejecting; these stand in for it.
+const REJECTION_REASONS = [
+  "Surat peminjaman belum ditandatangani pembina.",
+  "Jadwal bentrok dengan kegiatan fakultas yang sudah terjadwal.",
+  "Keperluan kurang jelas. Lengkapi rincian kegiatan lalu ajukan ulang.",
+];
+const rejectionReason = (status: ReservationStatus, index: number) =>
+  status === "ditolak" ? REJECTION_REASONS[index % REJECTION_REASONS.length] : null;
+
 let sequence = 0;
 
 function record(
@@ -40,6 +49,7 @@ function record(
     purpose: PURPOSES[sequence % PURPOSES.length],
     reschedule: null,
     cancellationReason: status === "dibatalkan" ? "Tidak ada slot pengganti saat ruangan dipakai ujian susulan." : null,
+    rejectionReason: rejectionReason(status, sequence),
     ...extra,
   };
 }
@@ -124,6 +134,7 @@ export function buildReservationsMock(now: Date): ReservationRequest[] {
     purpose: row.purpose,
     letterFileName: index % 4 === 3 ? null : `Surat Peminjaman Ruang ${row.roomName}.pdf`,
     letterUrl: index % 4 === 3 ? null : SAMPLE_LETTER_URL,
+    rejectionReason: rejectionReason(row.status, index),
   }));
 }
 
@@ -167,6 +178,7 @@ export function buildFacilityRequestsMock(now: Date): ReservationRequest[] {
     letterFileName: `Surat Peminjaman ${row.type === "gor" ? row.roomName : "Kendaraan"}.pdf`,
     letterUrl: SAMPLE_LETTER_URL,
     activity: row.activity,
+    rejectionReason: rejectionReason(row.status, index),
     trip: row.trip,
   }));
 }

@@ -14,6 +14,7 @@ export function buildDraftsMock(now: Date): ReservationDraft[] {
     bookerEmail: "ukmdncc123@gmail.com",
     reschedule: null,
     cancellationReason: null,
+    rejectionReason: null,
   };
 
   return [

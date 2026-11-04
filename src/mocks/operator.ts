@@ -21,6 +21,7 @@ export function buildOperatorReservationsMock(now: Date): ReservationRecord[] {
     purpose,
     reschedule: null,
     cancellationReason: null,
+    rejectionReason: null,
   });
 
   return [

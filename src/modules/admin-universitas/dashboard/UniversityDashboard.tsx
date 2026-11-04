@@ -1,11 +1,10 @@
-import { LatestReportsCard } from "@/shared/admin-dashboard/LatestReportsCard";
 import type { STAT_TONES } from "@/shared/admin-dashboard/StatTile";
 import { TodayReservationsCard } from "@/shared/admin-dashboard/TodayReservationsCard";
 import { UserActivityCard } from "@/shared/admin-dashboard/UserActivityCard";
 import { FakultasFilter } from "@/shared/fakultas-filter/FakultasFilter";
 import type { Fakultas } from "@/types/fakultas";
 import type { ReservationType } from "@/types/reservation";
-import { ADMIN_UNIVERSITAS_ROUTES, reservationsRoute } from "../routes";
+import { reservationsRoute } from "../routes";
 import type { UniversityDashboardData } from "./getUniversityDashboard";
 import { ReservationTrendCard } from "./ReservationTrendCard";
 import { TypeSummaryCard } from "./TypeSummaryCard";
@@ -72,7 +71,6 @@ export function UniversityDashboard({ data, fakultasOptions, fakultas }: Univers
             totalUsers={data.userActivity.totalUsers}
             description="Pengguna yang memesan ruangan, GOR, atau kendaraan bulan ini"
           />
-          <LatestReportsCard reports={data.latestReports} allHref={ADMIN_UNIVERSITAS_ROUTES.reports} className="flex-1" />
         </div>
       </div>
     </div>

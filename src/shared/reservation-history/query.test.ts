@@ -60,6 +60,7 @@ describe("groupActiveReservations", () => {
     purpose: "",
     reschedule: null,
     cancellationReason: null,
+    rejectionReason: null,
   });
 
   // 30 Oct 2026, 10:00 WIB

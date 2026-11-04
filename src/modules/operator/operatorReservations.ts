@@ -33,6 +33,7 @@ export async function createOperatorReservation(
       purpose: values.purpose,
       reschedule: null,
       cancellationReason: null,
+    rejectionReason: null,
     },
   };
 }

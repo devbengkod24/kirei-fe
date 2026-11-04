@@ -29,6 +29,10 @@ const ICON_BUTTON = "flex h-11 w-11 items-center justify-center rounded-md borde
 const DEFAULT_LAYOUT = { table: "hidden lg:block", list: "flex flex-col lg:hidden" };
 const WIDE_LAYOUT = { table: "hidden overflow-x-auto xl:block", list: "flex flex-col xl:hidden" };
 
+/** Only a rejected reservation has a reason; other rows show "-" so the column stays aligned. */
+const rejectionText = (reservation: ReservationRequest) =>
+  reservation.status === "ditolak" ? (reservation.rejectionReason ?? "Alasan belum dicatat.") : "-";
+
 const EMPTY_TEXT: Record<ReservationTab, string> = {
   persetujuan: "Tidak ada reservasi yang menunggu persetujuan.",
   riwayat: "Belum ada reservasi yang selesai, ditolak, atau dibatalkan.",
@@ -112,6 +116,7 @@ export function ReservationTable({ tipe, tab, reservations: initial }: Reservati
                 <th scope="col" className={TH}>Waktu</th>
                 <th scope="col" className={TH}>Keperluan</th>
                 {!isApproval && <th scope="col" className={TH}>Status</th>}
+                {!isApproval && <th scope="col" className={TH}>Alasan Ditolak</th>}
                 <th scope="col" className={TH}>Aksi</th>
               </tr>
             </thead>
@@ -132,6 +137,11 @@ export function ReservationTable({ tipe, tab, reservations: initial }: Reservati
                   {!isApproval && (
                     <td className={TD}>
                       <ReservationStatusBadge status={reservation.status} />
+                    </td>
+                  )}
+                  {!isApproval && (
+                    <td className={`${TD} max-w-56 ${reservation.status === "ditolak" ? "text-danger" : "text-muted"}`}>
+                      {rejectionText(reservation)}
                     </td>
                   )}
                   <td className={TD}>
@@ -156,6 +166,11 @@ export function ReservationTable({ tipe, tab, reservations: initial }: Reservati
                 </div>
                 {!isApproval && <ReservationStatusBadge status={reservation.status} size="sm" />}
               </div>
+              {!isApproval && reservation.status === "ditolak" && (
+                <p className="mb-2 rounded-md bg-danger-soft px-2 py-1 text-xs text-danger">
+                  <span className="font-semibold">Alasan ditolak:</span> {rejectionText(reservation)}
+                </p>
+              )}
               <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
                 <dt className="text-primary">Pemesan</dt>
                 <dd className="break-words">{reservation.borrowerName}</dd>

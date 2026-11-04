@@ -23,6 +23,10 @@ export interface ReservationHistoryTableProps {
 const TH = `${TABLE_HEAD_CELL} text-left`;
 const TD = TABLE_CELL;
 
+/** Only a rejected reservation has a reason; other rows show "-" so the column stays aligned. */
+const rejectionText = (reservation: ReservationRecord) =>
+  reservation.status === "ditolak" ? (reservation.rejectionReason ?? "Alasan belum dicatat.") : "-";
+
 function Purpose({ reservation }: { reservation: ReservationRecord }) {
   return (
     <>
@@ -67,6 +71,7 @@ export function ReservationHistoryTable({
                 <th scope="col" className={TH}>Waktu (WIB)</th>
                 <th scope="col" className={TH}>Keperluan</th>
                 <th scope="col" className={`${TABLE_HEAD_CELL} text-center`}>Status</th>
+                <th scope="col" className={TH}>Alasan Ditolak</th>
               </tr>
             </thead>
             <tbody>
@@ -81,6 +86,9 @@ export function ReservationHistoryTable({
                   </td>
                   <td className={`${TD} text-center`}>
                     <ReservationStatusBadge status={reservation.status} />
+                  </td>
+                  <td className={`${TD} max-w-56 ${reservation.status === "ditolak" ? "text-danger" : "text-muted"}`}>
+                    {rejectionText(reservation)}
                   </td>
                 </tr>
               ))}
@@ -97,6 +105,11 @@ export function ReservationHistoryTable({
                   </div>
                   <ReservationStatusBadge status={reservation.status} size="sm" />
                 </div>
+                {reservation.status === "ditolak" && (
+                  <p className="mb-2 rounded-md bg-danger-soft px-2 py-1 text-xs text-danger">
+                    <span className="font-semibold">Alasan ditolak:</span> {rejectionText(reservation)}
+                  </p>
+                )}
                 <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
                   <dt className="text-primary">Pemesan</dt>
                   <dd className="break-words">{reservation.bookerName}</dd>

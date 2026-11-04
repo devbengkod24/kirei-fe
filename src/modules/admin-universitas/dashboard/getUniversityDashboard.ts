@@ -2,12 +2,10 @@ import { connection } from "next/server";
 import { toWibDateKey } from "@/lib/date";
 import { MOCK_UNIVERSITY_USER_ACTIVITY, MOCK_WEEKLY_TREND_BY_TYPE } from "@/mocks/admin-dashboard";
 import { MOCK_VEHICLES } from "@/mocks/facilities";
-import { buildReportsMock } from "@/mocks/reports";
 import { buildFacilityRequestsMock, buildReservationsMock } from "@/mocks/reservations";
 import { mockRoomsInScope } from "@/mocks/rooms";
 import type { AdminScope } from "@/shared/admin-scope";
 import { RESERVATION_TYPES, type ReservationRequest, type ReservationType } from "@/types/reservation";
-import type { UserReport } from "@/types/report";
 
 export interface TypeSummary {
   type: ReservationType;
@@ -29,7 +27,6 @@ export interface UniversityDashboardData {
   weeklyTrend: { labels: string[]; byType: Record<ReservationType, WeeklyCounts> };
   todayReservations: ReservationRequest[];
   userActivity: { activeUsers: number; totalUsers: number };
-  latestReports: UserReport[];
 }
 
 /**
@@ -77,8 +74,5 @@ export async function getUniversityDashboard(scope: AdminScope): Promise<Univers
     },
     todayReservations: requests.filter(isToday).sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt)),
     userActivity: MOCK_UNIVERSITY_USER_ACTIVITY,
-    latestReports: buildReportsMock(now)
-      .filter((report) => report.roomCode === null || roomCodes.has(report.roomCode))
-      .slice(0, 4),
   };
 }

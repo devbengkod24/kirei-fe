@@ -56,6 +56,8 @@ export interface ReservationRecord {
   reschedule: ReservationReschedule | null;
   /** Filled when the reservation was cancelled, e.g. no replacement slot was available. */
   cancellationReason: string | null;
+  /** Written by the approving admin when the reservation was rejected; null for other statuses. */
+  rejectionReason: string | null;
 }
 
 /** A saved reservation still waiting for its loan letter. */
@@ -79,4 +81,6 @@ export interface ReservationRequest extends ReservationSummary {
   trip?: { destination: string; participants: number };
   /** GOR only: the sport or event, e.g. "Badminton". */
   activity?: string;
+  /** Written by the approving admin when the reservation was rejected; null for other statuses. */
+  rejectionReason: string | null;
 }
