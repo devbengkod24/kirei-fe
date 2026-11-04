@@ -60,15 +60,16 @@ Semua data terkunci ke fakultas admin (`scope={{ fakultasId: user.fakultasId }}`
 | Menu | URL | Isi | Komponen |
 |---|---|---|---|
 | Dashboard | `/fakultas/dashboard` | Kartu Total Reservasi Hari Ini, Check-in Hari Ini, Ruangan Tersedia; grafik distribusi reservasi; tabel reservasi hari ini; laporan pengguna terbaru | `shared/dashboard` (`AdminDashboard`) |
-| Kelola Ruangan | `/fakultas/ruangan` | Daftar ruangan di gedung milik fakultas, ubah detail dan status ruangan. Tidak termasuk edit denah. | `shared/unit-management` (`tipe="ruangan"`) |
+| Kelola Ruangan | `/fakultas/ruangan` | Daftar ruangan di gedung milik fakultas, ubah detail dan status ruangan, serta unggah, ganti, dan hapus foto ruangan (JPG, PNG, atau WebP, maksimal `ROOM_PHOTO_MAX_SIZE_MB`). Tidak termasuk edit denah. | `shared/rooms` (`RoomManager`, `EditRoomDialog`) |
+| Jadwal Dosen | `/fakultas/jadwal-dosen` | Unggah CSV jadwal kuliah (`hari, jam_mulai, jam_selesai, ruangan, mata_kuliah, dosen`) dan rentang semester. Tiap baris dicek dengan Zod dan kesalahannya ditampilkan per baris; berkas hanya bisa disimpan bila semua baris valid. Unggahan baru menggantikan jadwal sebelumnya. Ruangan pada jam kuliah tampil sebagai tidak tersedia di denah dan form reservasi setiap minggu selama semester. | `modules/admin-fakultas/lecturer-schedule`, booking dibentuk di `shared/reservation-form/lecturerScheduleBookings.ts` |
 | Reservasi Internal | `/fakultas/reservasi-internal` | Admin memesan ruangan di gedung fakultasnya. Komponen sama dengan Buat Reservasi: Ruangan milik peminjam, tetapi tanpa No HP, surat, dan draft. Memakai slot yang sudah dipesan belum dibangun. | `shared/reservation-form` (`RoomReservationForm` dengan `mode="internal"`) |
 | Kelola Reservasi: Persetujuan | `/fakultas/persetujuan` | Reservasi ruangan fakultas yang menunggu keputusan, termasuk dari peminjam luar fakultas. | `shared/reservation-approval` |
 | Kelola Reservasi: Riwayat | `/fakultas/riwayat` | | `shared/reservation-history` |
-| Laporan Pengguna | `/fakultas/laporan` | Pengaduan pengguna, dengan filter status, kategori, dan tanggal. | `shared/user-reports` |
-| Pengumuman | `/fakultas/pengumuman` | Kelola pengumuman fakultas. | `shared/announcements` (`canManage`) |
+| Laporan Pengguna | `/fakultas/laporan` | Pengaduan pengguna, dengan filter status, kategori, dan tanggal. Laporan Pengguna hanya ada di Admin Fakultas; laporan untuk GOR dan kendaraan belum dibuat. | `shared/reports` |
+| Pengumuman | `/fakultas/pengumuman` | Kelola pengumuman fakultas. Hanya Admin Fakultas dan Admin Universitas yang mendapat `canManage` (tombol Tambah Pengumuman). | `shared/announcements` (`canManage`) |
 | Profil | `/fakultas/profil` | | `shared/profile` |
 
-Persetujuan dan Riwayat tampil sebagai dua tab di satu halaman "Kelola Reservasi", tetapi masing-masing punya URL sendiri.
+Persetujuan dan Riwayat tampil sebagai dua tab rata kanan di satu halaman "Kelola Reservasi", tetapi masing-masing punya URL sendiri. Urutan kolom Riwayat sama dengan Admin Universitas: Alasan Ditolak, Status, Aksi.
 
 ## Admin Universitas
 
@@ -76,33 +77,33 @@ Mengambil alih semua menu SuperAdmin lama. Satu sidebar untuk semua tipe. Menu y
 
 | Menu | Tab tipe | URL | Isi | Komponen |
 |---|---|---|---|---|
-| Dashboard | | `/admin/dashboard` | Satu dashboard gabungan semua tipe: ringkasan per tipe (hari ini, menunggu, unit tersedia), grafik mingguan dengan pilihan tipe, reservasi hari ini (dengan kolom tipe), laporan terbaru | `modules/admin-universitas/dashboard`, memakai potongan `shared/admin-dashboard` |
+| Dashboard | | `/admin/dashboard` | Satu dashboard gabungan semua tipe: ringkasan per tipe (hari ini, menunggu, unit tersedia), grafik mingguan dengan pilihan tipe, reservasi hari ini (dengan kolom tipe), aktivitas pengguna | `modules/admin-universitas/dashboard`, memakai potongan `shared/admin-dashboard` |
 | Reservasi Internal | Ruangan, Kendaraan, GOR | `/admin/reservasi-internal/[tipe]` | Admin memesan atas nama kampus, tanpa No HP, surat, draft, dan persetujuan. Ruangan: semua gedung, dipilih lewat pilihan gedung di form, tanpa filter fakultas (memakai slot yang sudah dipesan belum dibangun). Kendaraan: tujuan, peserta, dan tanggal; unit diatur di luar aplikasi. GOR: jadwal slot seperti peminjam. | `shared/reservation-form` (form per tipe dengan `mode="internal"`), dirakit di `modules/admin-universitas/internal-reservation` |
-| Kelola Reservasi | Ruangan, Kendaraan, GOR | `/admin/reservasi/[tipe]/persetujuan`, `/admin/reservasi/[tipe]/riwayat` | Tab Persetujuan dan Riwayat, masing-masing ber-URL. Kolom per tipe (`TYPE_COLUMNS`): Ruangan; Tujuan dan peserta untuk kendaraan; Kegiatan untuk GOR. Unit kendaraan diatur di luar aplikasi, jadi menyetujui kendaraan sama seperti tipe lain. Filter fakultas hanya di tab Ruangan dan ikut saat pindah tab. | `shared/reservation-management`, dirakit di `modules/admin-universitas/reservations` |
+| Kelola Reservasi | Ruangan, Kendaraan, GOR | `/admin/reservasi/[tipe]/persetujuan`, `/admin/reservasi/[tipe]/riwayat` | Tab Persetujuan dan Riwayat, masing-masing ber-URL. Tab tipe ada di kiri; di kanan, filter Fakultas (hanya Ruangan) bertumpuk di atas tab Persetujuan dan Riwayat, dan di layar sempit semuanya bertumpuk satu kolom. Tab Riwayat punya kolom Alasan Ditolak lalu Status tepat sebelum Aksi (alasan dari admin untuk reservasi ditolak, "-" untuk yang lain); di layar sempit alasan tampil di bawah status. Kolom per tipe (`TYPE_COLUMNS`): Ruangan; Tujuan dan peserta untuk kendaraan; Kegiatan untuk GOR. Unit kendaraan diatur di luar aplikasi, jadi menyetujui kendaraan sama seperti tipe lain. Filter fakultas hanya di tab Ruangan dan ikut saat pindah tab. | `shared/reservation-management`, dirakit di `modules/admin-universitas/reservations` |
 | Kelola Denah | | `/admin/denah` | Editor denah lantai dengan SVG: pilih gedung dan lantai, lalu tambah, geser, ubah ukuran, dan hapus ruangan. Bisa lewat mouse/sentuh, tombol panah, atau input angka. Disimpan dalam format `Floor`/`FloorPlanRoom` yang dibaca form reservasi. | `modules/admin-universitas/floor-plan` |
 | Kelola Pengguna | | `/admin/pengguna` | Tab Ormawa, Dosen, Admin Fakultas, Operator di URL (`?tab=ormawa|dosen|admin_fakultas|operator`): tabel berhalaman dengan pencarian, dialog detail (status Aktif/Tidak Aktif dan kata sandi baru opsional), dan tambah akun dengan kata sandi. Ormawa tanpa fakultas; dosen wajib fakultas dan NPP; admin fakultas wajib fakultas (boleh lebih dari satu per fakultas, tanpa NPP); operator wajib gedung dan lantai. Field per tab diatur di `USER_TABS`. | `modules/admin-universitas/users` |
-| Laporan Pengguna | | `/admin/laporan` | | `shared/reports` |
 | Pengumuman | | `/admin/pengumuman` | Pengumuman universitas dan fakultas. | `shared/announcements` (`canManage`) |
 | Profil | | `/admin/profil` | | `shared/profile` |
 
 Berpindah tab di Kelola Reservasi mempertahankan tab Persetujuan atau Riwayat yang sedang dibuka.
 
-**Filter fakultas.** Ditampilkan di halaman yang memuat data fakultas: Kelola Reservasi tipe `ruangan`, Dashboard (hanya memengaruhi angka ruangan), Laporan Pengguna, dan Pengumuman. Nilainya dibawa di URL (`?fakultas=<id>`), kosong berarti semua fakultas. Tidak ditampilkan untuk GOR dan kendaraan. Contoh kode ada di `docs/architecture.md` bagian "Scope fakultas".
+**Filter fakultas.** Ditampilkan di halaman yang memuat data fakultas: Kelola Reservasi tipe `ruangan`, Dashboard (hanya memengaruhi angka ruangan), dan Pengumuman. Nilainya dibawa di URL (`?fakultas=<id>`), kosong berarti semua fakultas. Tidak ditampilkan untuk GOR dan kendaraan. Contoh kode ada di `docs/architecture.md` bagian "Scope fakultas".
 
 ## Operator
 
-Satu lantai di satu gedung. Satu halaman, tanpa sidebar. Menu avatar di header berisi nama, peran, dan Logout.
+Satu lantai di satu gedung. Satu halaman, tanpa sidebar. Header berisi avatar, peran dan nama (disembunyikan di layar sempit), serta tombol Logout yang selalu terlihat, tanpa menu avatar.
 
 | Halaman | URL | Isi | Komponen |
 |---|---|---|---|
-| Ketersediaan lantai | `/operator` | Tanggal hari ini (WIB); grid "Semua Ruangan" sebagai pemilih ruangan yang tampil di timeline; timeline ala editor video dengan filter jam; panel detail reservasi; form Buat Reservasi untuk hari ini; tombol hapus dengan dialog konfirmasi. | `modules/operator` (`OperatorFloorPage`, `FloorTimeline`) |
+| Ketersediaan lantai | `/operator` | Tanggal hari ini (WIB); grid "Semua Ruangan" sebagai pemilih ruangan yang tampil di timeline; timeline ala editor video dengan filter jam; kartu detail mengambang untuk clip yang diklik; form Buat Reservasi untuk hari ini. | `modules/operator` (`OperatorFloorPage`, `FloorTimeline`, `TimelineDetailPopover`) |
 
-Tombol tambah dan hapus hanya ditampilkan bila API mengizinkan (`canCreate`, `canDelete` dari data lantai). Aturannya ditetapkan Laravel.
+Tombol tambah hanya ditampilkan bila API mengizinkan (`canCreate` dari data lantai). Operator tidak bisa menghapus reservasi; Laravel juga harus menolak penghapusan oleh operator. Aturannya ditetapkan Laravel.
 
 - **Grid Semua Ruangan.** Tiap tombol menyalakan atau mematikan track ruangan itu di timeline (bisa banyak sekaligus). Bawaan semua menyala; minimal satu ruangan tetap tampil.
-- **Timeline.** Penggaris waktu horizontal di atas (penanda tiap 10 menit, label jam berbentuk chip tiap 30 menit, 07.00 sampai 21.00 WIB sesuai Filter Jam). Satu track per ruangan yang menyala, kode ruangan (chip) menempel di kolom kiri saat di-scroll ke samping. 10 menit selebar 44px. Di layar sempit timeline di-scroll ke samping di dalam kartu, halaman tidak.
-- **Clip.** Jadwal Siadin (jadwal kuliah dari Siadin, oranye) hanya dibaca: tidak bisa diklik, diubah, atau dihapus di KIREI, tetapi tetap menutup ruangan. Reservasi (dibuat lewat KIREI, biru) membuka panel detail di bawah timeline. Area Kosong adalah tombol yang membuka form Buat Reservasi dengan ruangan dan jam gap itu. Tiap clip punya label teks, tidak hanya warna.
-- **Penanda "Sekarang".** Garis biru dengan kepala di penggaris (playhead), hanya bila jam sekarang ada di rentang filter. Posisinya diperbarui tiap menit tanpa animasi, dan timeline di-scroll ke penanda ini saat rentang berubah.
+- **Timeline.** Penggaris waktu horizontal di atas (garis samar tiap 10 menit, label jam kecil berwarna muted tiap 30 menit, 07.00 sampai 21.00 WIB sesuai Filter Jam). Satu track per ruangan yang menyala dengan latar tenang dan garis vertikal tipis tiap 30 menit; kode ruangan (chip) menempel di kolom kiri saat di-scroll ke samping. 10 menit selebar 44px. Di layar sempit timeline di-scroll ke samping di dalam kartu, halaman tidak. Gaya kartunya mengikuti kalender mingguan (kartu putih, sudut membulat, bayangan halus), susunannya tetap timeline horizontal.
+- **Clip.** Kartu putih berisi ikon, judul tebal, jam, dan label tipe ("Siadin" atau "Reservasi") dengan satu keterangan pendek; di clip sempit ikon dan keterangan disembunyikan. Jadwal Siadin (garis tepi kiri oranye) hanya dibaca: bisa diklik untuk melihat detail, tetapi tidak bisa diubah atau dihapus di KIREI, dan tetap menutup ruangan. Reservasi (garis tepi kiri biru) membuka detail dengan tombol Hapus bila `canDelete`. Clip yang sedang berlangsung berlatar biru lembut dengan label "Berlangsung". Area Kosong adalah kartu putus-putus yang membuka form Buat Reservasi dengan ruangan dan jam gap itu. Tiap clip punya label teks, tidak hanya warna.
+- **Kartu detail.** Klik clip Siadin atau Reservasi membuka kartu detail (judul, subtitle ruangan dan tanggal, baris label dan nilai, lalu tombol Tutup; semuanya hanya-baca) di samping clip: kanan, atau kiri bila tidak muat (`placePopover`). Kartu ikut bergeser saat timeline di-scroll, tersembunyi saat clip keluar dari area terlihat, dan dirender lewat portal agar tidak terpotong. Clip yang dibuka diberi ring biru; hanya satu kartu terbuka. Tutup lewat tombol, Esc, atau klik di luar, lalu fokus kembali ke clip. Di bawah 768px kartu tampil sebagai panel di bawah layar (bottom sheet).
+- **Penanda "Sekarang".** Garis biru tipis melintasi semua track dengan chip bulat berisi jam sekarang (mis. "10.47") di penggaris, hanya bila jam sekarang ada di rentang filter. Posisinya diperbarui tiap menit tanpa animasi, dan timeline di-scroll ke penanda ini saat rentang berubah. Halaman tidak memakai label atau polling "real time"; data dimuat saat halaman dibuka.
 - Form operator meminta ruangan, nama peminjam, keperluan, dan jam. Tanpa No HP dan surat, karena operator mencatat peminjaman di tempat. Form menolak jam yang bentrok dengan kuliah atau reservasi lain.
 
 ## Memakai slot yang sudah dipesan
@@ -127,7 +128,7 @@ Kemampuan ini dikirim ke `shared/reservation-form` lewat prop (mis. `canUseBooke
 | `shared/reservation-history` | Ormawa/dosen, kedua admin | `tipe`, `scope` (`{ mine: true }` untuk peminjam, `{ fakultasId }` untuk admin), `showTypeTabs` (hanya peminjam; admin membawa tipe di URL), `showFakultasFilter` |
 | `shared/reservation` | Semua yang menampilkan reservasi | Badge status dan label tipe |
 | `shared/unit-management` | Kedua admin | `tipe`, `scope` |
-| `shared/user-reports` | Kedua admin | `scope`, `showFakultasFilter` |
+| `shared/reports` | Admin Fakultas | `scope` |
 | `shared/announcements` | Ormawa/dosen, kedua admin | `canManage`, `scope` |
 | `shared/profile` | Ormawa/dosen, kedua admin | |
 | `shared/fakultas-filter` | Admin Universitas | `options`, `value` (`?fakultas=` di URL) |
@@ -148,8 +149,8 @@ Bagian ini juga menjadi daftar yang perlu diperbarui di Figma.
 | Kelola Pengguna hanya Ormawa dan Dosen | Ditambah tab Admin Fakultas dan Operator dengan pola tab Dosen | Akun dibuat Admin Universitas; desain Figma belum ada |
 | Merek "Bengkel Koding / Coworking Space" | Belum diputuskan; aset sementara dipakai | Perlu dikonfirmasi |
 | Salah satu frame Profil di section Admin Fakultas memakai sidebar ormawa | Profil admin memakai sidebar admin | Salah salin di Figma |
-| Status Ketersediaan berupa daftar slot 10 menit berlabel Tersedia atau Dipesan untuk satu ruangan | Timeline ala editor video: track per ruangan, clip Jadwal Siadin, Reservasi, dan Kosong, serta penanda "Sekarang" | Revisi dari pembimbing (daftar slot terlalu ramai, Siadin dan reservasi harus dibedakan), bentuk timeline mengikuti referensi editor video dari pengguna. Belum ada frame Figma untuk bentuk ini |
+| Status Ketersediaan berupa daftar slot 10 menit berlabel Tersedia atau Dipesan untuk satu ruangan | Timeline ala editor video: track per ruangan, clip Jadwal Siadin, Reservasi, dan Kosong bergaya kartu kalender mingguan, serta penanda "Sekarang" | Revisi dari pembimbing (daftar slot terlalu ramai, Siadin dan reservasi harus dibedakan), bentuk timeline mengikuti referensi editor video dari pengguna. Belum ada frame Figma untuk bentuk ini |
 | Grid ruangan operator berjudul "Semua Kelas" dan memilih satu ruangan | Berjudul "Semua Ruangan" dan memilih banyak ruangan sekaligus (track yang tampil di timeline) | Satu lantai berisi kelas, meeting room, dan galeri; timeline menampilkan beberapa ruangan seperti referensi editor video |
 | Tanggal hari ini tidak ada di halaman operator | Tanggal hari ini (WIB) di sebelah judul halaman | Revisi dari pembimbing |
-| Menu avatar operator berisi NIM dan tautan "Profile" | Berisi peran, nama, dan Logout | Operator tidak punya halaman profil |
+| Menu avatar operator berisi NIM dan tautan "Profile" | Tanpa menu: header menampilkan peran, nama, dan tombol Logout langsung | Operator tidak punya halaman profil; Logout harus selalu terlihat |
 | Form Buat Reservasi operator: kartu jam berlabel "Keperluan", urutan "Selesai" lalu "Mulai" | Berlabel "Waktu (WIB)", urutan Mulai lalu Selesai | Salah label di Figma |

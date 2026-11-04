@@ -5,6 +5,7 @@ export const ADMIN_FAKULTAS_NAV: NavLinkConfig[][] = [
   [
     { label: "Dashboard", href: ADMIN_FAKULTAS_ROUTES.dashboard, iconSrc: "/icons/nav/dashboard.svg" },
     { label: "Kelola Ruangan", href: ADMIN_FAKULTAS_ROUTES.rooms, iconSrc: "/icons/nav/manage-rooms.svg" },
+    { label: "Jadwal Dosen", href: ADMIN_FAKULTAS_ROUTES.lecturerSchedule, iconSrc: "/icons/nav/reservation-history.svg" },
     {
       label: "Reservasi Internal",
       href: ADMIN_FAKULTAS_ROUTES.internalReservation,

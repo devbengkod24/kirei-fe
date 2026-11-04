@@ -19,6 +19,7 @@ const TRIP: ReservationRequest = {
   letterFileName: null,
   letterUrl: null,
   trip: { destination: "Salatiga", participants: 6 },
+  rejectionReason: null,
 };
 
 beforeAll(() => {
@@ -50,5 +51,32 @@ describe("ReservationTable for vehicles", () => {
     expect(screen.getByRole("table").textContent).toContain(TRIP.borrowerName);
     fireEvent.click(within(dialog).getByRole("button", { name: "Setujui reservasi" }));
     expect(screen.getByRole("status").textContent).toBe(`Reservasi ${TRIP.borrowerName} disetujui.`);
+  });
+});
+
+describe("ReservationTable history", () => {
+  const rejected: ReservationRequest = {
+    ...TRIP,
+    id: "res-kendaraan-2",
+    status: "ditolak",
+    rejectionReason: "Jadwal bentrok dengan kegiatan fakultas.",
+  };
+  const done: ReservationRequest = { ...TRIP, id: "res-kendaraan-3", status: "selesai" };
+
+  it("shows the rejection reason in its own column, with Status right before Aksi", () => {
+    render(<ReservationTable tipe="kendaraan" tab="riwayat" reservations={[rejected, done]} />);
+    const table = screen.getByRole("table");
+    const headers = within(table).getAllByRole("columnheader").map((header) => header.textContent);
+    expect(headers.slice(-3)).toEqual(["Alasan Ditolak", "Status", "Aksi"]);
+
+    const [, rejectedRow, doneRow] = within(table).getAllByRole("row");
+    expect(within(rejectedRow).getByText("Jadwal bentrok dengan kegiatan fakultas.")).toBeTruthy();
+    expect(within(doneRow).getByText("-")).toBeTruthy();
+    expect(within(table).queryByRole("columnheader", { name: "Keperluan" })?.textContent).toBe("Keperluan");
+  });
+
+  it("has no reason column while approving", () => {
+    render(<ReservationTable tipe="kendaraan" tab="persetujuan" reservations={[TRIP]} />);
+    expect(within(screen.getByRole("table")).queryByRole("columnheader", { name: "Alasan Ditolak" })).toBeNull();
   });
 });

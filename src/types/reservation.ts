@@ -56,8 +56,15 @@ export interface ReservationRecord {
   reschedule: ReservationReschedule | null;
   /** Filled when the reservation was cancelled, e.g. no replacement slot was available. */
   cancellationReason: string | null;
-  /** Filled by the approving admin when the reservation was rejected. */
+  /** Written by the approving admin when the reservation was rejected; null for other statuses. */
   rejectionReason: string | null;
+}
+
+/** A saved reservation still waiting for its loan letter. */
+export interface ReservationDraft extends ReservationRecord {
+  status: "draft";
+  /** ISO 8601 (UTC), set by the API. The letter must be uploaded before this moment. */
+  letterDeadline: string;
 }
 
 /** A reservation as an admin sees it: who booked, for what, and the uploaded letter. */
@@ -74,4 +81,6 @@ export interface ReservationRequest extends ReservationSummary {
   trip?: { destination: string; participants: number };
   /** GOR only: the sport or event, e.g. "Badminton". */
   activity?: string;
+  /** Written by the approving admin when the reservation was rejected; null for other statuses. */
+  rejectionReason: string | null;
 }

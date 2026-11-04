@@ -16,12 +16,16 @@ const UNITS: Record<ReservationType, string[]> = {
 };
 
 const PURPOSES = ["Rapat Pengurus", "Seminar", "Latihan Rutin", "Workshop", "Kunjungan Industri"];
-const PAST_STATUSES: ReservationStatus[] = ["selesai", "selesai", "ditolak", "selesai", "dibatalkan"];
+const PAST_STATUSES: ReservationStatus[] = ["selesai", "selesai", "ditolak", "selesai", "ditolak"];
+
+// TODO: kirei-api stores the reason the admin types when rejecting; these stand in for it.
 const REJECTION_REASONS = [
-  "Surat peminjaman belum ditandatangani pembina ormawa.",
+  "Surat peminjaman belum ditandatangani pembina.",
   "Jadwal bentrok dengan kegiatan fakultas yang sudah terjadwal.",
   "Keperluan kurang jelas. Lengkapi rincian kegiatan lalu ajukan ulang.",
 ];
+const rejectionReason = (status: ReservationStatus, index: number) =>
+  status === "ditolak" ? REJECTION_REASONS[index % REJECTION_REASONS.length] : null;
 
 let sequence = 0;
 
@@ -44,8 +48,8 @@ function record(
     unitName: UNITS[type][sequence % UNITS[type].length],
     purpose: PURPOSES[sequence % PURPOSES.length],
     reschedule: null,
-    cancellationReason: status === "dibatalkan" ? "Tidak ada slot pengganti saat ruangan dipakai ujian susulan." : null,
-    rejectionReason: status === "ditolak" ? REJECTION_REASONS[sequence % REJECTION_REASONS.length] : null,
+    cancellationReason: null,
+    rejectionReason: rejectionReason(status, sequence),
     ...extra,
   };
 }
@@ -111,7 +115,7 @@ const ROWS: Row[] = [
   { days: -3, start: "10:30", end: "12:30", borrowerName: "Dr. Rina Sari, M.Pd.", borrowerDetail: "Dosen • NPP: 19830704", roomName: "H.5.2", purpose: "Diskusi kelompok", status: "ditolak" },
   { days: -5, start: "13:00", end: "15:00", borrowerName: "Mr. Budi Santoso, S.T.", borrowerDetail: "Dosen • NPP: 19790123", roomName: "H.5.3", purpose: "Praktikum", status: "ditolak" },
   { days: -6, start: "09:00", end: "11:00", borrowerName: "Dr. Lisa Ananda, M.A.", borrowerDetail: "Dosen • NPP: 19870915", roomName: "H.5.4", purpose: "Presentasi proyek", status: "selesai" },
-  { days: -8, start: "13:00", end: "14:00", borrowerName: "HMTI", borrowerDetail: "Ormawa", roomName: "H.6.1", purpose: "Rapat pengurus", status: "dibatalkan" },
+  { days: -8, start: "13:00", end: "14:00", borrowerName: "HMTI", borrowerDetail: "Ormawa", roomName: "H.6.1", purpose: "Rapat pengurus", status: "ditolak" },
 ];
 
 export function buildReservationsMock(now: Date): ReservationRequest[] {
@@ -130,6 +134,7 @@ export function buildReservationsMock(now: Date): ReservationRequest[] {
     purpose: row.purpose,
     letterFileName: index % 4 === 3 ? null : `Surat Peminjaman Ruang ${row.roomName}.pdf`,
     letterUrl: index % 4 === 3 ? null : SAMPLE_LETTER_URL,
+    rejectionReason: rejectionReason(row.status, index),
   }));
 }
 
@@ -173,6 +178,7 @@ export function buildFacilityRequestsMock(now: Date): ReservationRequest[] {
     letterFileName: `Surat Peminjaman ${row.type === "gor" ? row.roomName : "Kendaraan"}.pdf`,
     letterUrl: SAMPLE_LETTER_URL,
     activity: row.activity,
+    rejectionReason: rejectionReason(row.status, index),
     trip: row.trip,
   }));
 }

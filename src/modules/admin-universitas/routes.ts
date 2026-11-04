@@ -8,7 +8,6 @@ export const ADMIN_UNIVERSITAS_ROUTES = {
   reservations: "/admin/reservasi",
   floorPlans: "/admin/denah",
   users: "/admin/pengguna",
-  reports: "/admin/laporan",
   announcements: "/admin/pengumuman",
   profile: "/admin/profil",
 } as const;

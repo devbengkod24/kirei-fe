@@ -8,8 +8,6 @@ export type CreateOperatorReservationResult =
   | { ok: false; validation: LaravelValidationError }
   | { ok: false; message: string };
 
-export type DeleteReservationResult = { ok: true } | { ok: false; message: string };
-
 /** Books a room on the operator's floor for today. */
 export async function createOperatorReservation(
   room: { id: string; code: string },
@@ -32,14 +30,8 @@ export async function createOperatorReservation(
       unitName: room.code,
       purpose: values.purpose,
       reschedule: null,
-      cancellationReason: null, rejectionReason: null,
+      cancellationReason: null,
+      rejectionReason: null,
     },
   };
-}
-
-export async function deleteReservation(id: string): Promise<DeleteReservationResult> {
-  // TODO: DELETE with the orval client; the API checks whether this operator may delete it.
-  void id;
-  await new Promise((resolve) => setTimeout(resolve, 400));
-  return { ok: true };
 }
