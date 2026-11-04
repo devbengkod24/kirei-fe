@@ -14,9 +14,8 @@ export interface OperatorFloorData {
   classSchedules: ClassSchedule[];
   /** ISO 8601, server time, so the default hour filter matches on server and client */
   now: string;
-  /** Set by the API; Laravel decides whether this operator may add or delete reservations. */
+  /** Set by the API; Laravel decides whether this operator may add reservations. */
   canCreate: boolean;
-  canDelete: boolean;
 }
 
 /** The operator's floor with today's reservations, or null when no floor is assigned yet. */
@@ -34,7 +33,8 @@ export async function getOperatorFloor(): Promise<OperatorFloorData | null> {
     reservations: buildOperatorReservationsMock(now),
     classSchedules: buildClassSchedulesMock(now),
     now: now.toISOString(),
+    // Operators never delete reservations. TODO: kirei-api must reject a delete from an operator too;
+    // leaving the button out is only the user experience.
     canCreate: true,
-    canDelete: true,
   };
 }
