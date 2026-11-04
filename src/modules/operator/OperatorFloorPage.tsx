@@ -12,8 +12,9 @@ import { CreateReservationPanel } from "./CreateReservationPanel";
 import { FloorTimeline } from "./FloorTimeline";
 import type { OperatorFloorData } from "./getOperatorFloor";
 import { deleteReservation } from "./operatorReservations";
-import { ReservationDetailPanel } from "./ReservationDetailPanel";
 import { buildTimeline, defaultHourFilter, FILTER_HOURS, toggleRoom } from "./slots";
+import { TimelineDetailPopover } from "./TimelineDetailPopover";
+import { itemKey, type TimelineItem } from "./timelineDetail";
 
 const displayTime = (time: string) => time.replace(":", ".");
 
@@ -45,7 +46,8 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
   const [reservations, setReservations] = useState(data.reservations);
   // Every room starts visible so the operator sees the whole floor at once.
   const [visibleIds, setVisibleIds] = useState(() => floor.rooms.map((room) => room.id));
-  const [detailId, setDetailId] = useState<string | null>(null);
+  // The clip whose detail popover is open, with the element it is anchored to.
+  const [detail, setDetail] = useState<{ item: TimelineItem; anchor: HTMLElement; container: HTMLElement } | null>(null);
   // Room and times prefilled in the create form; null while the form is collapsed.
   const [draft, setDraft] = useState<({ roomId: string } & TimeSlot) | null>(null);
   const [notice, setNotice] = useState("");
@@ -56,10 +58,10 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
   const focusAfterDelete = useRef(false);
 
   useEffect(() => {
-    if (!focusAfterDelete.current || detailId !== null) return;
+    if (!focusAfterDelete.current || detail !== null) return;
     focusAfterDelete.current = false;
     statusHeadingRef.current?.focus();
-  }, [detailId]);
+  }, [detail]);
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 60_000);
@@ -68,16 +70,17 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
 
   const validRange = hours.from < hours.to;
   const visibleRooms = floor.rooms.filter((room) => visibleIds.includes(room.id));
-  const detail = reservations.find((reservation) => reservation.id === detailId) ?? null;
-
+  // Focus goes back to the clip that opened the popover, or to the section when that clip is gone.
   const closeDetail = () => {
-    setDetailId(null);
-    statusHeadingRef.current?.focus();
+    const anchor = detail?.anchor;
+    setDetail(null);
+    if (anchor?.isConnected) anchor.focus();
+    else statusHeadingRef.current?.focus();
   };
 
-  const openReservation = (reservation: ReservationRecord) => {
+  const openDetail = (item: TimelineItem, anchor: HTMLElement, container: HTMLElement) => {
     setNotice("");
-    setDetailId(reservation.id);
+    setDetail({ item, anchor, container });
   };
 
   const openCreate = (roomId: string, range: TimeSlot) => {
@@ -101,7 +104,7 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
     if (!result.ok) return result.message;
     setReservations((current) => current.filter((item) => item.id !== reservation.id));
     focusAfterDelete.current = true;
-    setDetailId(null);
+    setDetail(null);
     setNotice(`Reservasi ${reservation.unitName}, ${formatTimeRangeWIB(reservation.startsAt, reservation.endsAt)}, dihapus.`);
     return null;
   };
@@ -218,8 +221,8 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
                 reservations={reservations}
                 schedules={data.classSchedules}
                 canCreate={canCreate}
-                activeReservationId={detailId}
-                onOpenReservation={openReservation}
+                activeKey={detail ? itemKey(detail.item) : null}
+                onOpen={openDetail}
                 onCreate={openCreate}
               />
             ) : (
@@ -227,9 +230,14 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
             )}
 
             {detail && (
-              <div className="px-4 sm:max-w-sm">
-                <ReservationDetailPanel reservation={detail} canDelete={canDelete} onClose={closeDetail} onDelete={remove} />
-              </div>
+              <TimelineDetailPopover
+                item={detail.item}
+                anchor={detail.anchor}
+                container={detail.container}
+                canDelete={canDelete}
+                onClose={closeDetail}
+                onDelete={remove}
+              />
             )}
           </Card>
         </div>
