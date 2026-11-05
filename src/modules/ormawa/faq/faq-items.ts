@@ -55,14 +55,16 @@ export const FAQ_ITEMS: FaqItem[] = [
 
 const DOSEN_ANSWERS: Record<string, string> = {
   "Bagaimana cara membuat reservasi?":
-    "Buka Buat Reservasi, pilih ruangan, GOR, atau kendaraan, lalu isi tanggal, waktu, dan keperluan. Periksa ringkasannya, lalu tekan Pesan. Dosen tidak perlu mengunggah surat peminjaman. Reservasi akan berstatus Menunggu sampai admin memeriksanya.",
+    "Buka Buat Reservasi, pilih ruangan, GOR, atau kendaraan, lalu isi tanggal, waktu, dan keperluan. Periksa ringkasannya, lalu tekan Pesan. Ruangan dan GOR tidak perlu surat peminjaman; kendaraan tetap perlu. Reservasi akan berstatus Menunggu sampai admin memeriksanya.",
+  "Surat peminjaman seperti apa yang harus diunggah?":
+    `Surat hanya diminta untuk reservasi kendaraan, berformat PDF dengan ukuran maksimal ${LETTER_MAX_SIZE_MB} MB. Siapkan suratnya sebelum memesan kendaraan, karena reservasi kendaraan tidak bisa dikirim tanpa surat.`,
   "Bolehkah saya meminjam ruangan di fakultas lain?":
     "Boleh. Ruangan di fakultas mana pun bisa dipesan. Reservasinya diperiksa admin fakultas pemilik ruangan.",
   "Apakah akun saya bisa diblokir jika tidak hadir atau terlambat?":
     "Tidak. KIREI tidak memberi penalti atau memblokir akun. Meski begitu, beri tahu admin bila rencana berubah, agar slotnya bisa dipakai peminjam lain.",
 };
 
-/** Dosen book without a loan letter, so the letter and draft questions are left out and the rest reworded. */
+/** Dosen have no drafts and need a letter only for vehicles, so the draft question is left out and the rest reworded. */
 export const DOSEN_FAQ_ITEMS: FaqItem[] = FAQ_ITEMS.filter(
-  (item) => !/surat/i.test(item.question),
+  (item) => item.question !== "Saya belum punya suratnya. Apa yang harus saya lakukan?",
 ).map((item) => ({ ...item, answer: DOSEN_ANSWERS[item.question] ?? item.answer }));

@@ -82,7 +82,7 @@ export function SportsHallReservationForm({
   mode = "request",
   links,
 }: SportsHallReservationFormProps) {
-  const { withLetter, requesterLabel, submittedText } = BOOKING_MODES[mode];
+  const { withLetter, withDraft, requesterLabel, submittedText } = BOOKING_MODES[mode];
   const nowDate = useMemo(() => new Date(now), [now]);
   const todayKey = toWibDateKey(nowDate);
   const days = useMemo(
@@ -415,6 +415,7 @@ export function SportsHallReservationForm({
             links={links}
             onCreateAnother={flow.createAnother}
             withLetter={withLetter}
+            withDraft={withDraft}
             submittedText={submittedText}
           >
             <SummaryValue label={requesterLabel}>{requester.name}</SummaryValue>

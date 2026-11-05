@@ -53,13 +53,16 @@ type IssueSink = {
 function requireLetterToSubmit(
   values: { intent?: string; letter?: File | null },
   ctx: IssueSink,
+  withDraft: boolean,
 ) {
   if (values.intent === "submit" && !values.letter) {
     ctx.addIssue({
       code: "custom",
       path: ["letter"],
-      message:
-        "Unggah surat peminjaman untuk memesan, atau simpan sebagai draft dan unggah nanti.",
+      // Only borrowers with a draft list can put the letter off.
+      message: withDraft
+        ? "Unggah surat peminjaman untuk memesan, atau simpan sebagai draft dan unggah nanti."
+        : "Unggah surat peminjaman untuk memesan.",
     });
   }
 }
@@ -102,7 +105,7 @@ export function createRoomReservationSchema(
   now: () => Date = () => new Date(),
   mode: BookingMode = "request",
 ) {
-  const { askPhone, withLetter } = BOOKING_MODES[mode];
+  const { askPhone, withLetter, withDraft } = BOOKING_MODES[mode];
   return z
     .object({
       buildingId: z.string().min(1, "Pilih gedung."),
@@ -135,7 +138,7 @@ export function createRoomReservationSchema(
         "startTime",
         ctx,
       );
-      if (withLetter) requireLetterToSubmit(values, ctx);
+      if (withLetter) requireLetterToSubmit(values, ctx, withDraft);
     }, ALWAYS);
 }
 
@@ -172,7 +175,7 @@ export function createSportsHallReservationSchema(
   now: () => Date = () => new Date(),
   mode: BookingMode = "request",
 ) {
-  const { withLetter } = BOOKING_MODES[mode];
+  const { withLetter, withDraft } = BOOKING_MODES[mode];
   return z
     .object({
       date: z.string().regex(DATE, "Pilih tanggal reservasi."),
@@ -213,7 +216,7 @@ export function createSportsHallReservationSchema(
           message: `Satu reservasi GOR maksimal ${SPORTS_HALL_MAX_MINUTES / 60} jam.`,
         });
       }
-      if (withLetter) requireLetterToSubmit(values, ctx);
+      if (withLetter) requireLetterToSubmit(values, ctx, withDraft);
     }, ALWAYS);
 }
 
@@ -250,7 +253,7 @@ export function createVehicleReservationSchema(
   today: () => string,
   mode: BookingMode = "request",
 ) {
-  const { askPhone, withLetter } = BOOKING_MODES[mode];
+  const { askPhone, withLetter, withDraft } = BOOKING_MODES[mode];
   return z
     .object({
       phone: askPhone ? phoneSchema : z.string(),
@@ -284,7 +287,7 @@ export function createVehicleReservationSchema(
           message: "Tanggal selesai tidak boleh sebelum tanggal mulai.",
         });
       }
-      if (withLetter) requireLetterToSubmit(values, ctx);
+      if (withLetter) requireLetterToSubmit(values, ctx, withDraft);
     }, ALWAYS);
 }
 

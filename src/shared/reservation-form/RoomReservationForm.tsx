@@ -98,7 +98,7 @@ export function RoomReservationForm({
   purposePlaceholder = "Contoh: Rapat pengurus bulanan",
   links,
 }: RoomReservationFormProps) {
-  const { askPhone, withLetter, needsApproval, requesterLabel, submittedText } =
+  const { askPhone, withLetter, withDraft, needsApproval, requesterLabel, submittedText } =
     BOOKING_MODES[mode];
   const schema = useMemo(
     () => createRoomReservationSchema(undefined, mode),
@@ -635,6 +635,7 @@ export function RoomReservationForm({
             links={links}
             onCreateAnother={flow.createAnother}
             withLetter={withLetter}
+            withDraft={withDraft}
             submittedText={submittedText}
           >
             <SummaryValue label={requesterLabel}>{requester.name}</SummaryValue>
