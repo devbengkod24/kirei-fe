@@ -13,7 +13,7 @@ async function OperatorAccount() {
 export function OperatorShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-20 flex h-[72px] items-center justify-between gap-3 bg-surface px-4 md:px-10">
+      <header className="sticky top-0 z-30 flex h-[72px] items-center justify-between gap-3 bg-surface px-4 md:px-10">
         <AppBrand />
         <Suspense fallback={<CurrentUserAvatarPlaceholder />}>
           <OperatorAccount />
