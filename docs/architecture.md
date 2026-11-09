@@ -60,6 +60,13 @@ kirei-fe/
 | `types/` | **Tipe TypeScript bersama** yang tidak berasal dari OpenAPI. | Deklarasi tipe global | Tipe hasil generate (ada di `lib/api/generated`) |
 | `proxy.ts` | **Pagar kasar di level request**: mengalihkan ke `/login` bila tidak ada cookie sesi. Di Next.js sebelum v16 bernama `middleware.ts`. | Pengalihan sederhana | Pengecekan peran yang mendalam (itu di layout dan backend) |
 
+### Client API (orval)
+
+- `pnpm api:generate` membaca OpenAPI dari Laravel (`http://localhost:8000/docs/api.json`, atau `OPENAPI_URL`) dan menulis fungsi serta tipe ke `lib/api/generated/`. Folder ini dikosongkan tiap generate; jangan diedit tangan.
+- Semua fungsi hasil generate memanggil `customFetch` di `lib/api/mutator.ts`. Mutator memakai `fetch` bawaan (tanpa Axios), selalu mengirim cookie Sanctum (`credentials: "include"`) dan `Accept: application/json`, menambahkan `X-XSRF-TOKEN` dari cookie `XSRF-TOKEN` untuk POST/PUT/PATCH/DELETE di browser, dan memakai `cache: "no-store"` kecuali pemanggil mengatur `cache` atau `next.revalidate`.
+- Respons berbentuk `{ data, status, headers }`. Status error (mis. 422) dikembalikan, tidak dilempar, jadi periksa `status` dulu. Untuk 422, teruskan `data` ke `applyFormErrors` di `lib/api/form-errors.ts`.
+- Base URL diambil dari `NEXT_PUBLIC_API_URL` (lihat `.env.example`).
+
 ### Cara memilih lokasi sebuah file
 
 1. Apakah hanya dipakai satu role? Taruh di `modules/<role>/`.
