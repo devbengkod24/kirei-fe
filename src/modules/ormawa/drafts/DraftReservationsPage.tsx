@@ -4,7 +4,7 @@ import { DraftList } from "./DraftList";
 
 export async function DraftReservationsPage() {
   // Only ormawa have drafts; dosen book without a loan letter and are sent to their dashboard.
-  const user = await requireRole(["ormawa"]);
+  const user = await requireRole(["organisasi"]);
   return (
     <DraftList
       booker={{ name: user.name, email: user.email }}

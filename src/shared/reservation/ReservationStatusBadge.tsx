@@ -4,11 +4,12 @@ import type { ReservationStatus } from "@/types/reservation";
 /** One label and color per status, shared by borrower and admin screens. */
 export const RESERVATION_STATUS: Record<ReservationStatus, { label: string; tone: BadgeTone }> = {
   draft: { label: "Draft", tone: "neutral" },
-  menunggu_konfirmasi: { label: "Menunggu", tone: "warning" },
+  menunggu_persetujuan: { label: "Menunggu", tone: "warning" },
   disetujui: { label: "Disetujui", tone: "success" },
   ditolak: { label: "Ditolak", tone: "danger" },
   selesai: { label: "Selesai", tone: "primary" },
-  dibatalkan: { label: "Dibatalkan", tone: "danger" },
+  batal: { label: "Dibatalkan", tone: "danger" },
+  override_bium: { label: "Dicabut", tone: "danger" },
 };
 
 export function reservationStatusLabel(status: ReservationStatus) {

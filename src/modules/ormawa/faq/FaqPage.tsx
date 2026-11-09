@@ -5,7 +5,7 @@ import { DOSEN_FAQ_ITEMS, FAQ_ITEMS } from "./faq-items";
 
 /** Questions as native disclosure widgets, so they open with keyboard and without JS. */
 export async function FaqPage() {
-  const user = await requireRole(["ormawa", "dosen"]);
+  const user = await requireRole(["organisasi", "dosen"]);
   const items = hasDrafts(user.role) ? FAQ_ITEMS : DOSEN_FAQ_ITEMS;
   return (
     <Card as="section" aria-label="Pertanyaan yang sering diajukan" className="p-4 md:p-6">

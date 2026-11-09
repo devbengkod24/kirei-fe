@@ -16,7 +16,7 @@ export type CreateReservationResult =
 // Request bodies in API terms; the letter goes as multipart form data.
 // TODO: match the request keys and the status field to the OpenAPI spec.
 
-const status = (intent: ReservationIntent) => (intent === "draft" ? "draft" : "menunggu_konfirmasi");
+const status = (intent: ReservationIntent) => (intent === "draft" ? "draft" : "menunggu_persetujuan");
 
 export function toRoomReservationRequest(values: RoomReservationValues) {
   return {

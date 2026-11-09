@@ -32,7 +32,7 @@ describe("reservation requests", () => {
       hall_id: "gor-udinus",
       starts_at: "2026-10-20T04:00:00.000Z",
       ends_at: "2026-10-20T06:00:00.000Z",
-      status: "menunggu_konfirmasi",
+      status: "menunggu_persetujuan",
     });
   });
 });

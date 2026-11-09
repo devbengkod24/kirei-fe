@@ -3,7 +3,7 @@ import { buildReservationHistoryMock } from "@/mocks/reservations";
 import type { ReservationRecord, ReservationScope } from "@/types/reservation";
 import { groupActiveReservations, type HistoryQuery } from "./query";
 
-const ACTIVE_STATUSES = new Set<ReservationRecord["status"]>(["menunggu_konfirmasi", "disetujui"]);
+const ACTIVE_STATUSES = new Set<ReservationRecord["status"]>(["menunggu_persetujuan", "disetujui"]);
 
 export type ReservationHistoryResult =
   | { view: "aktif"; today: ReservationRecord[]; upcoming: ReservationRecord[] }

@@ -1,11 +1,12 @@
 // TODO: match these values to the Laravel OpenAPI spec once the reservation endpoints exist.
 export type ReservationStatus =
   | "draft"
-  | "menunggu_konfirmasi"
+  | "menunggu_persetujuan"
   | "disetujui"
   | "ditolak"
   | "selesai"
-  | "dibatalkan";
+  | "batal"
+  | "override_bium";
 
 export type ReservationType = "ruangan" | "gor" | "kendaraan";
 
@@ -21,7 +22,6 @@ export type ReservationScope = { mine: true } | { fakultasId: string | null };
 
 export interface ReservationSummary {
   id: string;
-  ticketCode: string;
   /** ISO 8601 (UTC) */
   startsAt: string;
   /** ISO 8601 (UTC) */

@@ -27,7 +27,7 @@ export async function getReservationRequests(
 
   if (tab === "persetujuan") {
     return inScope
-      .filter((reservation) => reservation.status === "menunggu_konfirmasi")
+      .filter((reservation) => reservation.status === "menunggu_persetujuan")
       .sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt));
   }
   return inScope

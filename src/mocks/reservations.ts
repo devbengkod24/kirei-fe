@@ -76,9 +76,9 @@ export function buildReservationHistoryMock(now: Date): ReservationRecord[] {
         reason: "Ruangan dipakai rapat senat fakultas.",
       },
     }),
-    record("ruangan", todayKey, 2, ["09:00", "11:00"], "menunggu_konfirmasi"),
+    record("ruangan", todayKey, 2, ["09:00", "11:00"], "menunggu_persetujuan"),
     record("ruangan", todayKey, 5, ["10:30", "12:30"], "disetujui"),
-    record("gor", todayKey, 3, ["15:00", "17:00"], "menunggu_konfirmasi"),
+    record("gor", todayKey, 3, ["15:00", "17:00"], "menunggu_persetujuan"),
     ...pastRecords("ruangan", todayKey, 23),
     ...pastRecords("kendaraan", todayKey, 4),
     ...pastRecords("gor", todayKey, 6),
@@ -100,12 +100,12 @@ interface Row {
 
 // Names and purposes are the sample rows from the Figma V3 mockup.
 const ROWS: Row[] = [
-  { days: 1, start: "08:00", end: "10:00", borrowerName: "Prof. Dr. Aris Marjuni, S.Si., M.Kom.", borrowerDetail: "Dosen • NPP: 19750312", roomName: "H.5.1", purpose: "Belajar mandiri", status: "menunggu_konfirmasi" },
-  { days: 1, start: "10:30", end: "12:30", borrowerName: "Dr. Maria Lestari, M.Pd.", borrowerDetail: "Dosen • NPP: 19800521", roomName: "H.5.2", purpose: "Diskusi kelompok", status: "menunggu_konfirmasi" },
-  { days: 2, start: "13:00", end: "15:00", borrowerName: "Ir. Budi Santoso, M.T.", borrowerDetail: "Dosen • NPP: 19781109", roomName: "H.5.3", purpose: "Praktikum", status: "menunggu_konfirmasi" },
-  { days: 3, start: "15:30", end: "17:30", borrowerName: "Dr. Siti Nurhaliza, M.A.", borrowerDetail: "Dosen • NPP: 19850217", roomName: "H.5.4", purpose: "Presentasi proyek", status: "menunggu_konfirmasi" },
-  { days: 3, start: "10:20", end: "12:00", borrowerName: "Dian Nuswantoro Computer Club", borrowerDetail: "Ormawa", roomName: "H.7", purpose: "Rapat kerja", status: "menunggu_konfirmasi" },
-  { days: 4, start: "09:00", end: "11:00", borrowerName: "Dr. Hendra Gunawan, S.Kom", borrowerDetail: "Dosen Pembimbing BEM • NPP: 19820411", roomName: "H.6.1", purpose: "Rapat kerja", status: "menunggu_konfirmasi" },
+  { days: 1, start: "08:00", end: "10:00", borrowerName: "Prof. Dr. Aris Marjuni, S.Si., M.Kom.", borrowerDetail: "Dosen • NPP: 19750312", roomName: "H.5.1", purpose: "Belajar mandiri", status: "menunggu_persetujuan" },
+  { days: 1, start: "10:30", end: "12:30", borrowerName: "Dr. Maria Lestari, M.Pd.", borrowerDetail: "Dosen • NPP: 19800521", roomName: "H.5.2", purpose: "Diskusi kelompok", status: "menunggu_persetujuan" },
+  { days: 2, start: "13:00", end: "15:00", borrowerName: "Ir. Budi Santoso, M.T.", borrowerDetail: "Dosen • NPP: 19781109", roomName: "H.5.3", purpose: "Praktikum", status: "menunggu_persetujuan" },
+  { days: 3, start: "15:30", end: "17:30", borrowerName: "Dr. Siti Nurhaliza, M.A.", borrowerDetail: "Dosen • NPP: 19850217", roomName: "H.5.4", purpose: "Presentasi proyek", status: "menunggu_persetujuan" },
+  { days: 3, start: "10:20", end: "12:00", borrowerName: "Dian Nuswantoro Computer Club", borrowerDetail: "Ormawa", roomName: "H.7", purpose: "Rapat kerja", status: "menunggu_persetujuan" },
+  { days: 4, start: "09:00", end: "11:00", borrowerName: "Dr. Hendra Gunawan, S.Kom", borrowerDetail: "Dosen Pembimbing BEM • NPP: 19820411", roomName: "H.6.1", purpose: "Rapat kerja", status: "menunggu_persetujuan" },
   // Ormawa book as the organisation, so the borrower is the ormawa name, never a member's.
   { days: 0, start: "07:00", end: "09:00", borrowerName: "HMTI", borrowerDetail: "Ormawa", roomName: "H.5.3", purpose: "Belajar kelompok", status: "selesai" },
   { days: 0, start: "09:30", end: "11:30", borrowerName: "HMTI", borrowerDetail: "Ormawa", roomName: "H.5.3", purpose: "Kegiatan organisasi", status: "disetujui" },
@@ -122,7 +122,6 @@ export function buildReservationsMock(now: Date): ReservationRequest[] {
   const todayKey = toWibDateKey(now);
   return ROWS.map((row, index) => ({
     id: `res-${String(index + 1).padStart(3, "0")}`,
-    ticketCode: `#${828374 + index * 17}`,
     type: "ruangan",
     startsAt: wibDateTime(todayKey, row.days, row.start),
     endsAt: wibDateTime(todayKey, row.days, row.end),
@@ -150,12 +149,12 @@ type FacilityRow = Row & {
 const FACILITY_ROWS: FacilityRow[] = [
   { type: "gor", buildingName: "GOR Udinus", roomName: "GOR Udinus", days: 0, start: "16:00", end: "18:00", borrowerName: "UKM Bulu Tangkis", borrowerDetail: "Ormawa", purpose: "Latihan rutin badminton", activity: "Badminton", status: "disetujui" },
   { type: "gor", buildingName: "GOR Udinus", roomName: "GOR Udinus", days: 0, start: "08:00", end: "09:00", borrowerName: "UKM Futsal", borrowerDetail: "Ormawa", purpose: "Latihan futsal", activity: "Futsal", status: "selesai" },
-  { type: "gor", buildingName: "GOR Udinus", roomName: "GOR Udinus", days: 2, start: "15:00", end: "17:00", borrowerName: "HMTI", borrowerDetail: "Ormawa", purpose: "Turnamen voli antar angkatan", activity: "Voli", status: "menunggu_konfirmasi" },
-  { type: "gor", buildingName: "GOR Udinus", roomName: "GOR Udinus", days: 4, start: "19:00", end: "21:00", borrowerName: "UKM Basket", borrowerDetail: "Ormawa", purpose: "Persiapan liga mahasiswa", activity: "Basket", status: "menunggu_konfirmasi" },
+  { type: "gor", buildingName: "GOR Udinus", roomName: "GOR Udinus", days: 2, start: "15:00", end: "17:00", borrowerName: "HMTI", borrowerDetail: "Ormawa", purpose: "Turnamen voli antar angkatan", activity: "Voli", status: "menunggu_persetujuan" },
+  { type: "gor", buildingName: "GOR Udinus", roomName: "GOR Udinus", days: 4, start: "19:00", end: "21:00", borrowerName: "UKM Basket", borrowerDetail: "Ormawa", purpose: "Persiapan liga mahasiswa", activity: "Basket", status: "menunggu_persetujuan" },
   { type: "gor", buildingName: "GOR Udinus", roomName: "GOR Udinus", days: -3, start: "16:00", end: "18:00", borrowerName: "UKM Bulu Tangkis", borrowerDetail: "Ormawa", purpose: "Latihan rutin badminton", activity: "Badminton", status: "selesai" },
   { type: "kendaraan", buildingName: "Kendaraan", roomName: "Toyota Hiace", days: 0, start: "06:00", end: "18:00", borrowerName: "BEM Universitas", borrowerDetail: "Ormawa", purpose: "Kunjungan industri ke Kudus", trip: { destination: "Kudus", participants: 14 }, status: "disetujui" },
-  { type: "kendaraan", buildingName: "Kendaraan", roomName: "", days: 3, start: "05:00", end: "20:00", borrowerName: "Dr. Hendra Gunawan, S.Kom", borrowerDetail: "Dosen Pembimbing BEM • NPP: 19820411", purpose: "Studi banding ke Yogyakarta", trip: { destination: "Yogyakarta", participants: 35 }, status: "menunggu_konfirmasi" },
-  { type: "kendaraan", buildingName: "Kendaraan", roomName: "", days: 1, start: "08:00", end: "15:00", borrowerName: "Dr. Maria Lestari, M.Pd.", borrowerDetail: "Dosen • NPP: 19800521", purpose: "Pendampingan lomba", trip: { destination: "Salatiga", participants: 6 }, status: "menunggu_konfirmasi" },
+  { type: "kendaraan", buildingName: "Kendaraan", roomName: "", days: 3, start: "05:00", end: "20:00", borrowerName: "Dr. Hendra Gunawan, S.Kom", borrowerDetail: "Dosen Pembimbing BEM • NPP: 19820411", purpose: "Studi banding ke Yogyakarta", trip: { destination: "Yogyakarta", participants: 35 }, status: "menunggu_persetujuan" },
+  { type: "kendaraan", buildingName: "Kendaraan", roomName: "", days: 1, start: "08:00", end: "15:00", borrowerName: "Dr. Maria Lestari, M.Pd.", borrowerDetail: "Dosen • NPP: 19800521", purpose: "Pendampingan lomba", trip: { destination: "Salatiga", participants: 6 }, status: "menunggu_persetujuan" },
   { type: "kendaraan", buildingName: "Kendaraan", roomName: "Toyota Hiace", days: -6, start: "07:00", end: "17:00", borrowerName: "HMTI", borrowerDetail: "Ormawa", purpose: "Bakti sosial", trip: { destination: "Demak", participants: 12 }, status: "selesai" },
   { type: "gor", buildingName: "GOR Udinus", roomName: "GOR Udinus", days: -7, start: "19:00", end: "21:00", borrowerName: "HMTI", borrowerDetail: "Ormawa", purpose: "Futsal antar angkatan", activity: "Futsal", status: "ditolak" },
   { type: "kendaraan", buildingName: "Kendaraan", roomName: "", days: -10, start: "06:00", end: "19:00", borrowerName: "HMTI", borrowerDetail: "Ormawa", purpose: "Rekreasi pengurus", trip: { destination: "Bandungan", participants: 20 }, status: "ditolak" },
@@ -165,7 +164,6 @@ export function buildFacilityRequestsMock(now: Date): ReservationRequest[] {
   const todayKey = toWibDateKey(now);
   return FACILITY_ROWS.map((row, index) => ({
     id: `res-${row.type}-${String(index + 1).padStart(3, "0")}`,
-    ticketCode: `#${829100 + index * 13}`,
     type: row.type,
     startsAt: wibDateTime(todayKey, row.days, row.start),
     endsAt: wibDateTime(todayKey, row.days, row.end),

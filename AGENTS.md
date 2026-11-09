@@ -29,25 +29,15 @@ pnpm api:generate    # perbarui client dari OpenAPI (hasil: src/lib/api/generate
 
 Sebelum menyatakan pekerjaan selesai, jalankan `pnpm lint && pnpm typecheck && pnpm test`.
 
-## Role
+## Aturan bisnis: sumber di vault Obsidian
 
-`ormawa`, `dosen`, `admin_fakultas`, `admin_universitas`, `operator`.
-Ormawa dan dosen memakai layar yang sama. Pemetaan halaman: `docs/roles-and-pages.md`.
+Aturan bisnis (role dan hak akses, aturan booking, status reservasi, override, pembatalan, notifikasi, scope fakultas) **tidak ditulis di file ini**. Sumber kebenarannya adalah `KONTEKS-DASAR.md` di vault Obsidian (`D:\OBSIDIAN\SecondBrain\kirei`), dibaca lewat skill `kirei-vault`. Vault bersifat read-only; perubahan lewat project leader.
 
-| Role | Cakupan |
-|---|---|
-| `admin_universitas` | Semua fakultas, gedung universitas, GOR, kendaraan, pengguna, denah. Mengambil alih peran superadmin lama. |
-| `admin_fakultas` | Ruangan dan reservasi di gedung milik fakultasnya, termasuk menyetujui peminjam dari luar fakultas. |
-| `operator` | Satu lantai di satu gedung. |
-| `ormawa`, `dosen` | Peminjam. Dosen punya fakultas asal. Ormawa tidak terikat fakultas (`fakultasId: null`); semua ormawa setara. |
-
-## Model fakultas
-
-- Data dipisah per fakultas (`fakultas_id`): gedung, ruangan, denah, reservasi ruangan, persetujuan, laporan, pengumuman fakultas. Pemisahan ditegakkan Laravel; frontend hanya mengirim `scope` dan menampilkan hasilnya.
-- Satu gedung milik satu fakultas, atau milik universitas. GOR, kendaraan, dan gedung universitas tidak punya fakultas dan dikelola Admin Universitas.
-- Reservasi ruangan tercatat di fakultas pemilik ruangan, bukan fakultas peminjam.
-- Peminjam boleh meminjam ruangan di fakultas mana pun. Reservasi ruangan milik fakultas disetujui admin fakultas pemilik ruangan, dan tetap memakai surat peminjaman (kecuali dosen: dosen tidak memakai surat sehingga juga tanpa draft). Ormawa tidak punya fakultas, jadi reservasi ruangan fakultas oleh ormawa selalu lewat admin fakultas pemilik.
-- Halaman Admin Universitas yang memuat data fakultas punya filter fakultas.
+- Baca `KONTEKS-DASAR.md` sebelum mengerjakan fitur yang menyentuh aturan bisnis.
+- Kalau kode, `docs/`, atau instruksi pengguna bertentangan dengan vault, vault yang benar. Berhenti dan tanyakan bila ragu.
+- Frontend hanya menampilkan aturan, bukan menetapkannya. Jangan menambah fitur yang tidak ada di vault.
+- Nama role dan nilai status mengikuti vault dan API (`dosen`, `organisasi`, `operator`, `admin_fakultas`, `admin_universitas`; `organization_type` = `ormawa` | `ukm`). Pemetaan halaman: `docs/roles-and-pages.md`.
+- Pembatasan data per fakultas ditegakkan Laravel lewat `faculty_id`; frontend hanya mengirim `scope` dan menampilkan hasilnya. Halaman Admin Universitas yang memuat data fakultas punya filter fakultas.
 
 ## Struktur (ringkas)
 
@@ -83,7 +73,7 @@ Detail lengkap dan contoh: `docs/architecture.md`.
 
 ### Kode
 11. Variabel, fungsi, tipe, dan nama komponen memakai **bahasa Inggris**. URL dan teks UI memakai **bahasa Indonesia**.
-12. Nilai status dan peran mengikuti API (`snake_case`, mis. `admin_fakultas`, `menunggu_konfirmasi`). Jangan menerjemahkan di tengah.
+12. Nilai status dan peran mengikuti API (`snake_case`, mis. `admin_fakultas`, `menunggu_persetujuan`). Jangan menerjemahkan di tengah.
 13. Waktu dari API berformat UTC/ISO 8601. Tampilkan dalam **WIB** lewat `lib/date.ts`.
 14. Validasi form memakai Zod. Error 422 dari Laravel dipetakan ke form lewat `lib/api/form-errors.ts`.
 15. Data reservasi sering berubah: gunakan `cache: "no-store"` untuk fetch di server dan `staleTime` pendek di TanStack Query.
@@ -104,13 +94,6 @@ Detail lengkap dan contoh: `docs/architecture.md`.
 - Admin Universitas memakai route dinamis `[tipe]` (`ruangan | gor | kendaraan`), bukan tiga folder kembar.
 - Halaman ber-tab Persetujuan dan Riwayat memakai satu komponen dengan prop `tipe`.
 - Aplikasi mobile berupa PWA dari Next.js, bukan aplikasi native.
-
-## Aturan bisnis yang memengaruhi UI
-
-- Surat peminjaman (PDF) diunggah sebelum tenggat. Tampilkan timer hitung mundur.
-- Admin Universitas (semua ruangan) dan admin fakultas (ruangan fakultasnya) boleh memakai slot yang sudah dipesan. Admin memilihkan jadwal pengganti untuk reservasi lama, lalu memesan slot itu. Peminjam cukup diberi tahu lewat pemberitahuan. Bila tidak ada slot pengganti, reservasi dibatalkan dengan alasan.
-- Setiap reservasi punya kode tiket (mis. `#828374`) dan QR.
-- Detail aturan lengkap ada di repo `kirei-api` (`docs/business-rules.md`). Frontend hanya menampilkan, bukan menetapkan aturan.
 
 ## Saat menambah fitur
 

@@ -11,7 +11,6 @@ export function buildDashboardMock(now: Date) {
 
   const todayReservation: ReservationSummary = {
     id: "res-01827",
-    ticketCode: "#828374",
     startsAt: wibDateTime(todayKey, 0, "09:30"),
     endsAt: wibDateTime(todayKey, 0, "10:20"),
     buildingName: "Gedung H",

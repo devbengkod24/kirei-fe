@@ -28,12 +28,12 @@ export async function getAdminDashboard(scope: AdminScope): Promise<AdminDashboa
     (reservation) =>
       roomCodes.has(reservation.roomName) &&
       toWibDateKey(reservation.startsAt) === todayKey &&
-      reservation.status !== "menunggu_konfirmasi",
+      reservation.status !== "menunggu_persetujuan",
   );
 
   return {
     todayReservations,
-    // TODO: check-in comes from the operator's QR scan; the mock counts finished reservations.
+    // The vault has no check-in; the mock counts finished reservations.
     checkedInToday: todayReservations.filter((reservation) => reservation.status === "selesai").length,
     activeRooms: rooms.filter((room) => room.isActive).length,
     weeklyTrend: MOCK_WEEKLY_TREND,

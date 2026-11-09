@@ -10,7 +10,7 @@ URL di bawah adalah rencana. Yang sudah ada di kode hanya halaman ormawa/dosen; 
 
 | Role | Route group | Prefix URL | Navigasi |
 |---|---|---|---|
-| `ormawa`, `dosen` | `(ormawa)` | `/` | Sidebar |
+| `organisasi`, `dosen` | `(ormawa)` | `/` | Sidebar |
 | `admin_fakultas` | `(admin-fakultas)` | `/fakultas` | Sidebar |
 | `admin_universitas` | `(admin-universitas)` | `/admin` | Sidebar + tab tipe (Ruangan, Kendaraan, GOR) di halaman yang sama untuk tiap tipe |
 | `operator` | `(operator)` | `/operator` | Header saja, tanpa sidebar |
@@ -41,7 +41,7 @@ Ormawa dan dosen memakai layar dan URL yang sama. Menu dan URL ada di `modules/o
 | Buat Reservasi: Ruangan | `/reservasi/baru/ruangan` | Gedung dan lantai, tanggal, jam, lalu ruangan dari denah (dengan filter jenis ruangan). Detail pemesanan dibuka di dialog: No HP, keperluan, surat. "Pesan" butuh surat PDF; "Simpan Draft" tidak. Dosen: tanpa surat dan tanpa "Simpan Draft". | `shared/reservation-form` (`ReservationFormPage tipe="ruangan"`) |
 | Buat Reservasi: GOR | `/reservasi/baru/gor` | Pilih hari (7 hari ke depan), lalu satu atau beberapa slot jam berurutan; jenis kegiatan, keterangan, surat. Tanpa catatan lintas fakultas. | `shared/reservation-form` (`ReservationFormPage tipe="gor"`) |
 | Buat Reservasi: Kendaraan | `/reservasi/baru/kendaraan` | Data peminjam (No HP, tujuan, jumlah peserta, keterangan kegiatan), tanggal mulai dan selesai, surat. Unit kendaraan diatur di luar aplikasi. Tanpa catatan lintas fakultas. | `shared/reservation-form` (`ReservationFormPage tipe="kendaraan"`) |
-| Draft Reservasi | `/reservasi/draft` | Hanya ormawa. Reservasi yang menunggu surat peminjaman. Tiap draft punya timer hitung mundur ke tenggat dari API (`hooks/useCountdown`) dan batasnya dalam WIB. Unggah PDF lalu "Pesan", atau "Batal". Setelah tenggat lewat, unggah dan "Pesan" dinonaktifkan. | `modules/ormawa/drafts` |
+| Draft Reservasi | `/reservasi/draft` | Hanya organisasi (ormawa dan UKM). Reservasi yang menunggu surat peminjaman. Tiap draft punya timer hitung mundur ke tenggat dari API (`hooks/useCountdown`) dan batasnya dalam WIB. Unggah PDF lalu "Pesan", atau "Batal". Setelah tenggat lewat, unggah dan "Pesan" dinonaktifkan. | `modules/ormawa/drafts` |
 | Reservasi & Riwayat | `/reservasi/riwayat` | Tab Ruangan, Kendaraan, GOR, lalu tab Aktif (kartu "Hari ini" dan "Akan datang") dan Riwayat (tabel berhalaman). Pilihan disimpan di URL: `?tipe=gor&tampilan=riwayat&halaman=2&per=25`. | `shared/reservation-history` (`ReservationHistoryPage`, `showTypeTabs`) |
 | Pengumuman | `/pengumuman` | Daftar dan filter sama dengan admin, tanpa Tambah Pengumuman. | `shared/announcements` (tanpa `canManage`) |
 | Profil | `/profil` | Data diri dan ubah kata sandi. | `shared/profile` |
@@ -107,6 +107,8 @@ Tombol tambah hanya ditampilkan bila API mengizinkan (`canCreate` dari data lant
 - Form operator meminta ruangan, nama peminjam, keperluan, dan jam. Tanpa No HP dan surat, karena operator mencatat peminjaman di tempat. Form menolak jam yang bentrok dengan kuliah atau reservasi lain.
 
 ## Memakai slot yang sudah dipesan
+
+> **Belum sesuai vault.** `KONTEKS-DASAR.md` (v1.4) hanya mengizinkan override oleh Admin Universitas untuk agenda universitas, dengan mencabut reservasi (status `override_bium`) tanpa ruangan pengganti. Alur di bawah ditulis sebelum aturan itu dan menunggu keputusan project leader.
 
 Berlaku untuk Admin Universitas (semua ruangan) dan Admin Fakultas (ruangan fakultasnya), lewat Reservasi Internal.
 
