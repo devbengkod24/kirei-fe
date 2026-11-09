@@ -12,7 +12,7 @@ export const LOGIN_PATH = "/login";
 
 // Kept in step with modules/<role>/routes.ts; lib may not import from modules.
 const ROLE_HOME: Partial<Record<UserRole, string>> = {
-  ormawa: "/dashboard",
+  organisasi: "/dashboard",
   dosen: "/dashboard",
   admin_fakultas: "/fakultas/dashboard",
   admin_universitas: "/admin/dashboard",

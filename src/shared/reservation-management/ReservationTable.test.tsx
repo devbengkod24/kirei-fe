@@ -7,12 +7,11 @@ import { ReservationTable } from "./ReservationTable";
 const TRIP: ReservationRequest = {
   id: "res-kendaraan-1",
   type: "kendaraan",
-  ticketCode: "#829100",
   startsAt: "2026-11-02T01:00:00Z",
   endsAt: "2026-11-02T08:00:00Z",
   buildingName: "Kendaraan",
   roomName: "",
-  status: "menunggu_konfirmasi",
+  status: "menunggu_persetujuan",
   borrowerName: "Dr. Maria Lestari, M.Pd.",
   borrowerDetail: "Dosen",
   purpose: "Pendampingan lomba",

@@ -19,7 +19,6 @@ export function buildOperatorReservationsMock(now: Date): ReservationRecord[] {
     bookerEmail: "",
     unitName: roomCode,
     purpose,
-    reschedule: null,
     cancellationReason: null,
     rejectionReason: null,
   });

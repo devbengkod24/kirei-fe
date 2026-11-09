@@ -9,7 +9,7 @@ import { DOSEN_NAV, ORMAWA_NAV } from "./nav";
 
 // Ormawa and dosen share these screens; other roles are sent back to their own home.
 async function BorrowerShell({ children }: { children: React.ReactNode }) {
-  const user = await requireRole(["ormawa", "dosen"]);
+  const user = await requireRole(["organisasi", "dosen"]);
   return (
     <RoleShell nav={hasDrafts(user.role) ? ORMAWA_NAV : DOSEN_NAV} headerEnd={<Avatar src={user.avatarUrl} name={user.name} size={48} />}>
       {children}

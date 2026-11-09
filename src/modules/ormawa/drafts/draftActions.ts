@@ -15,7 +15,7 @@ export async function submitDraft(draft: StoredDraft, letter: File): Promise<Dra
     type: draft.type,
     starts_at: draft.startsAt,
     ends_at: draft.endsAt,
-    status: "menunggu_konfirmasi",
+    status: "menunggu_persetujuan",
     letter,
   });
   if (!response.ok) {

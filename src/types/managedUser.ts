@@ -1,5 +1,5 @@
 /** Accounts admin universitas manages in Kelola Pengguna. Values follow the API roles. */
-export type ManagedRole = "ormawa" | "dosen" | "admin_fakultas" | "operator";
+export type ManagedRole = "organisasi" | "dosen" | "admin_fakultas" | "operator";
 
 /** Where an operator works: one floor in one building. */
 export interface FloorAssignment {

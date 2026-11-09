@@ -29,7 +29,6 @@ export async function createOperatorReservation(
       bookerEmail: "",
       unitName: room.code,
       purpose: values.purpose,
-      reschedule: null,
       cancellationReason: null,
       rejectionReason: null,
     },

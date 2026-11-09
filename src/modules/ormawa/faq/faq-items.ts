@@ -37,9 +37,9 @@ export const FAQ_ITEMS: FaqItem[] = [
       "Lihat menu Reservasi & Riwayat. Reservasi yang sedang berjalan ada di tab Reservasi dengan status Menunggu atau Disetujui. Reservasi yang selesai, ditolak, atau dibatalkan pindah ke tab Riwayat beserta alasannya.",
   },
   {
-    question: "Mengapa jadwal reservasi saya dipindah atau dibatalkan oleh admin?",
+    question: "Mengapa reservasi saya yang sudah disetujui dicabut?",
     answer:
-      "Admin boleh memakai slot yang sudah dipesan untuk keperluan kampus. Dalam kasus itu admin memilihkan jadwal pengganti untuk Anda dan Anda akan mendapat pemberitahuan. Bila tidak ada jadwal pengganti, reservasi dibatalkan dan alasannya dicantumkan.",
+      "Admin universitas dapat mencabut reservasi yang sudah disetujui bila slot dibutuhkan untuk agenda universitas. Tidak ada ruangan pengganti, dan Anda mendapat pemberitahuan lewat email. Statusnya tampil sebagai Dicabut.",
   },
   {
     question: "Apakah akun saya bisa diblokir jika tidak hadir atau terlambat?",

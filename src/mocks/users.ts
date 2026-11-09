@@ -50,7 +50,7 @@ const OPERATORS: [string, string, string, string, boolean][] = [
 export const MOCK_MANAGED_USERS: ManagedUser[] = [
   ...ORMAWA.map(([name, email, isActive], index): ManagedUser => ({
     id: `ormawa-${index + 1}`,
-    role: "ormawa",
+    role: "organisasi",
     name,
     email,
     fakultasId: null,

@@ -64,7 +64,7 @@ export async function getUniversityDashboard(scope: AdminScope): Promise<Univers
     summaries: RESERVATION_TYPES.map((type) => ({
       type,
       today: ofType(type).filter(isToday).length,
-      pending: ofType(type).filter((request) => request.status === "menunggu_konfirmasi").length,
+      pending: ofType(type).filter((request) => request.status === "menunggu_persetujuan").length,
       activeUnits: units[type].active,
       totalUnits: units[type].total,
     })),
