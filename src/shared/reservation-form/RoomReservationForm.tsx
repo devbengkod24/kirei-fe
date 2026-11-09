@@ -61,7 +61,7 @@ export interface RoomReservationFormProps {
   requester: { name: string; fakultasId: string | null };
   /** "internal" for an admin's own booking: no phone, letter, draft, or approval. */
   mode?: BookingMode;
-  /** Lets admins pick a booked room; the replacement-schedule flow is not built yet. */
+  /** Lets admin_universitas pick a booked room to override it; the revoke flow (`override_bium`) is not built yet. */
   canUseBookedSlot?: boolean;
   /** Reservation rules shown under the floor plan, from the API. */
   rules?: string[];

@@ -106,19 +106,14 @@ Tombol tambah hanya ditampilkan bila API mengizinkan (`canCreate` dari data lant
 - **Penanda "Sekarang".** Garis biru tipis melintasi semua track dengan chip bulat berisi jam sekarang (mis. "10.47") di penggaris, hanya bila jam sekarang ada di rentang filter. Posisinya diperbarui tiap menit tanpa animasi, dan timeline di-scroll ke penanda ini saat rentang berubah. Halaman tidak memakai label atau polling "real time"; data dimuat saat halaman dibuka.
 - Form operator meminta ruangan, nama peminjam, keperluan, dan jam. Tanpa No HP dan surat, karena operator mencatat peminjaman di tempat. Form menolak jam yang bentrok dengan kuliah atau reservasi lain.
 
-## Memakai slot yang sudah dipesan
+## Override slot oleh Admin Universitas
 
-> **Belum sesuai vault.** `KONTEKS-DASAR.md` (v1.4) hanya mengizinkan override oleh Admin Universitas untuk agenda universitas, dengan mencabut reservasi (status `override_bium`) tanpa ruangan pengganti. Alur di bawah ditulis sebelum aturan itu dan menunggu keputusan project leader.
+Sumber aturan: `KONTEKS-DASAR.md` di vault (§6, §8, §10). Alur ini belum dibangun di FE.
 
-Berlaku untuk Admin Universitas (semua ruangan) dan Admin Fakultas (ruangan fakultasnya), lewat Reservasi Internal.
-
-1. Admin memilih slot. Slot yang sudah dipesan tetap bisa dipilih dan ditandai.
-2. Untuk tiap reservasi yang terdampak, admin memilihkan jadwal pengganti dari slot kosong.
-3. Bila tidak ada slot pengganti, admin membatalkan reservasi itu dan wajib mengisi alasan.
-4. Admin mengonfirmasi, lalu slot dipesan atas nama admin.
-5. Peminjam lama menerima pemberitahuan. Tidak ada persetujuan dari peminjam.
-
-Kemampuan ini dikirim ke `shared/reservation-form` lewat prop (mis. `canUseBookedSlot`), bukan dengan mengecek nama role.
+1. Hanya Admin Universitas yang dapat override, untuk agenda universitas.
+2. Reservasi yang sudah `disetujui` dicabut dan berstatus `override_bium`. Tidak ada ruangan pengganti dan tidak ada persetujuan dari peminjam.
+3. Peminjam menerima pemberitahuan lewat email.
+4. Admin Fakultas tidak dapat override reservasi. Pembatalan setelah `disetujui` juga hanya oleh Admin Universitas.
 
 ## Komponen `shared/` dan pemakainya
 
@@ -147,7 +142,7 @@ Bagian ini juga menjadi daftar yang perlu diperbarui di Figma.
 | Angka "Pengguna terblokir" di Distribusi Pengguna (semua dashboard admin) | Dihapus | Sama |
 | Seri "Reservasi Pelanggaran" di grafik dashboard admin | Dihapus; grafik memuat reservasi berhasil dan dibatalkan | Sama |
 | Admin Universitas memakai pilihan tipe di atas sidebar dan dashboard per tipe | Satu sidebar, tab tipe di halaman per tipe, satu dashboard gabungan, dan filter fakultas di halaman yang memuat data fakultas | Keputusan tim; fakultas adalah batas data |
-| Reservasi Internal belum punya layar jadwal pengganti | Ditambah alur "Memakai slot yang sudah dipesan" | Aturan bisnis di AGENTS.md |
+| Reservasi Internal belum punya layar jadwal pengganti | Ditambah alur override oleh Admin Universitas (status `override_bium`, tanpa ruangan pengganti) | Aturan bisnis di vault (`KONTEKS-DASAR.md`) |
 | Kelola Pengguna hanya Ormawa dan Dosen | Ditambah tab Admin Fakultas dan Operator dengan pola tab Dosen | Akun dibuat Admin Universitas; desain Figma belum ada |
 | Merek "Bengkel Koding / Coworking Space" | Belum diputuskan; aset sementara dipakai | Perlu dikonfirmasi |
 | Salah satu frame Profil di section Admin Fakultas memakai sidebar ormawa | Profil admin memakai sidebar admin | Salah salin di Figma |

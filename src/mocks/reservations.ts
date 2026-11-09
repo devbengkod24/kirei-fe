@@ -47,7 +47,6 @@ function record(
     ...BOOKER,
     unitName: UNITS[type][sequence % UNITS[type].length],
     purpose: PURPOSES[sequence % PURPOSES.length],
-    reschedule: null,
     cancellationReason: null,
     rejectionReason: rejectionReason(status, sequence),
     ...extra,
@@ -69,13 +68,7 @@ export function buildReservationHistoryMock(now: Date): ReservationRecord[] {
 
   return [
     record("ruangan", todayKey, 0, ["08:00", "10:00"], "disetujui"),
-    record("ruangan", todayKey, 1, ["13:00", "15:00"], "disetujui", {
-      reschedule: {
-        previousStartsAt: wibDateTime(todayKey, 1, "08:00"),
-        previousEndsAt: wibDateTime(todayKey, 1, "10:00"),
-        reason: "Ruangan dipakai rapat senat fakultas.",
-      },
-    }),
+    record("ruangan", todayKey, 1, ["13:00", "15:00"], "disetujui"),
     record("ruangan", todayKey, 2, ["09:00", "11:00"], "menunggu_persetujuan"),
     record("ruangan", todayKey, 5, ["10:30", "12:30"], "disetujui"),
     record("gor", todayKey, 3, ["15:00", "17:00"], "menunggu_persetujuan"),

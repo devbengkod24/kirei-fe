@@ -14,7 +14,6 @@ const RESERVATION: ReservationRecord = {
   bookerEmail: "budiono@dinus.ac.id",
   unitName: "H.5.3",
   purpose: "Butuh kelas untuk mengajar",
-  reschedule: null,
   cancellationReason: null,
   rejectionReason: null,
 };

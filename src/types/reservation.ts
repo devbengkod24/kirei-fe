@@ -31,15 +31,6 @@ export interface ReservationSummary {
   status: ReservationStatus;
 }
 
-/** Set when an admin took the original slot and moved this reservation. */
-export interface ReservationReschedule {
-  /** ISO 8601 (UTC) */
-  previousStartsAt: string;
-  /** ISO 8601 (UTC) */
-  previousEndsAt: string;
-  reason: string;
-}
-
 export interface ReservationRecord {
   id: string;
   type: ReservationType;
@@ -53,8 +44,7 @@ export interface ReservationRecord {
   /** Room code, vehicle name, or GOR name. */
   unitName: string;
   purpose: string;
-  reschedule: ReservationReschedule | null;
-  /** Filled when the reservation was cancelled, e.g. no replacement slot was available. */
+  /** Filled when the reservation was cancelled, e.g. by an admin after approval. */
   cancellationReason: string | null;
   /** Written by the approving admin when the reservation was rejected; null for other statuses. */
   rejectionReason: string | null;

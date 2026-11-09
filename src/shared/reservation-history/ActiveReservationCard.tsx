@@ -14,18 +14,10 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 export function ActiveReservationCard({ reservation }: { reservation: ReservationRecord }) {
-  const { reschedule } = reservation;
-
   return (
     <Card as="article" className="flex flex-col gap-2 p-3">
       <div className="flex flex-wrap items-start gap-2">
         <ReservationStatusBadge status={reservation.status} size="sm" />
-        {reschedule && (
-          <p className="rounded-sm bg-primary-soft px-2 py-1 text-[11px] text-primary italic">
-            Jadwal dipindah admin dari {formatDateLongWIB(reschedule.previousStartsAt)},{" "}
-            {formatTimeRangeWIB(reschedule.previousStartsAt, reschedule.previousEndsAt)}. Alasan: {reschedule.reason}
-          </p>
-        )}
       </div>
 
       <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-xs sm:grid-cols-[1fr_1fr_auto]">

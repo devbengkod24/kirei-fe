@@ -58,7 +58,6 @@ describe("groupActiveReservations", () => {
     bookerEmail: "",
     unitName: "",
     purpose: "",
-    reschedule: null,
     cancellationReason: null,
     rejectionReason: null,
   });
