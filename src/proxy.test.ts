@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { MOCK_ADMIN_FAKULTAS, MOCK_CURRENT_USER, MOCK_PASSWORD, findMockAccount } from "@/mocks/user";
 import { SESSION_COOKIE } from "@/lib/auth/session";
 import { proxy } from "./proxy";
@@ -34,6 +34,29 @@ describe("proxy", () => {
 
   it("lets a signed-in user through to other pages", () => {
     expect(location(proxy(request("/pengumuman", MOCK_CURRENT_USER.id)))).toBeNull();
+  });
+});
+
+describe("proxy with AUTH_MODE=api", () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  function apiRequest(path: string, cookie?: string) {
+    vi.stubEnv("AUTH_MODE", "api");
+    const req = new NextRequest(new URL(path, "http://localhost:3000"));
+    if (cookie) req.cookies.set(cookie, "x");
+    return req;
+  }
+
+  it("sends visitors without Laravel's session cookie to the login page", () => {
+    expect(location(proxy(apiRequest("/dashboard")))).toBe("http://localhost:3000/login");
+    // the demo cookie means nothing in this mode
+    expect(location(proxy(apiRequest("/dashboard", SESSION_COOKIE)))).toBe("http://localhost:3000/login");
+  });
+
+  it("lets a visitor open the login page, and a session through to the pages", () => {
+    expect(location(proxy(apiRequest("/login")))).toBeNull();
+    expect(location(proxy(apiRequest("/login", "kirei_session")))).toBeNull();
+    expect(location(proxy(apiRequest("/pengumuman", "kirei_session")))).toBeNull();
   });
 });
 
