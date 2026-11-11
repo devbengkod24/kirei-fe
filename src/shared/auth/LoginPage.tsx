@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { SITE } from "@/config/site";
+import { authMode } from "@/lib/auth/mode";
 import { getDemoAccounts } from "@/lib/auth/session";
 import { LoginForm } from "./LoginForm";
 import { QuickLogin } from "./QuickLogin";
@@ -30,7 +31,7 @@ export function LoginPage() {
             <p className="font-brand font-semibold text-muted">{SITE.tagline}</p>
           </div>
           <LoginForm />
-          <QuickLogin accounts={getDemoAccounts()} />
+          {authMode() === "mock" && <QuickLogin accounts={getDemoAccounts()} />}
         </section>
 
         <div className="hidden flex-col gap-6 text-on-primary lg:flex">
