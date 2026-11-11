@@ -82,7 +82,7 @@ export function SportsHallReservationForm({
   mode = "request",
   links,
 }: SportsHallReservationFormProps) {
-  const { withLetter, requesterLabel, submittedText, minDaysAhead } = BOOKING_MODES[mode];
+  const { withLetter, withDraft, requesterLabel, submittedText, minDaysAhead } = BOOKING_MODES[mode];
   const nowDate = useMemo(() => new Date(now), [now]);
   const todayKey = toWibDateKey(nowDate);
   // Ormawa and UKM skip today and tomorrow; the last bookable day stays the same for everyone.
@@ -417,6 +417,7 @@ export function SportsHallReservationForm({
             links={links}
             onCreateAnother={flow.createAnother}
             withLetter={withLetter}
+            withDraft={withDraft}
             submittedText={submittedText}
           >
             <SummaryValue label={requesterLabel}>{requester.name}</SummaryValue>

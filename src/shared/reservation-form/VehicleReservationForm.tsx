@@ -53,7 +53,7 @@ export function VehicleReservationForm({
   mode = "request",
   links,
 }: VehicleReservationFormProps) {
-  const { askPhone, withLetter, requesterLabel, submittedText } =
+  const { askPhone, withLetter, withDraft, requesterLabel, submittedText } =
     BOOKING_MODES[mode];
   const todayKey = toWibDateKey(new Date(now));
   const schema = useMemo(
@@ -303,6 +303,7 @@ export function VehicleReservationForm({
           links={links}
           onCreateAnother={flow.createAnother}
           withLetter={withLetter}
+          withDraft={withDraft}
           submittedText={submittedText}
         >
           <dl className="flex flex-col gap-3 py-2">

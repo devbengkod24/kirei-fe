@@ -1,10 +1,20 @@
 import type { BookingMode } from "@/shared/reservation-form/bookingMode";
+import type { ReservationType } from "@/types/reservation";
 import type { UserRole } from "@/types/user";
 import { ORMAWA_ROUTES } from "./routes";
 
-/** Dosen book without a loan letter, so they also have no drafts; ormawa send a letter or save a draft. */
-export function borrowerBooking(role: UserRole): { mode: BookingMode; links: { history: string; drafts?: string } } {
-  if (role === "dosen") return { mode: "request_without_letter", links: { history: ORMAWA_ROUTES.reservationHistory } };
+/**
+ * Ormawa send a letter or save a draft. Dosen have no drafts: they book rooms and the GOR without a
+ * letter, but a vehicle still needs one. TODO: kirei-api must require the letter for dosen vehicles too.
+ */
+export function borrowerBooking(
+  role: UserRole,
+  tipe: ReservationType,
+): { mode: BookingMode; links: { history: string; drafts?: string } } {
+  if (role === "dosen") {
+    const mode = tipe === "kendaraan" ? "request_without_draft" : "request_without_letter";
+    return { mode, links: { history: ORMAWA_ROUTES.reservationHistory } };
+  }
   return { mode: "request", links: { history: ORMAWA_ROUTES.reservationHistory, drafts: ORMAWA_ROUTES.draftReservation } };
 }
 

@@ -10,7 +10,7 @@ export interface ReservationFormPageProps {
   requester: { name: string; fakultasId: string | null };
   /** For admins later: allows picking a booked room. Only applies to `ruangan`. */
   canUseBookedSlot?: boolean;
-  /** "request_without_letter" for borrowers who send no loan letter: no letter step and no drafts. */
+  /** "request_without_letter": no letter step and no drafts; "request_without_draft": letter required, no drafts. */
   mode?: BookingMode;
   links: { history: string; drafts?: string };
 }

@@ -196,6 +196,15 @@ describe("vehicle reservation schema", () => {
     expect(vehicleIssues({ ...validVehicle, startDate: "2026-10-29" })).toMatchObject({ startDate: "Tanggal mulai sudah lewat." });
   });
 
+  it("asks a borrower without drafts for the letter without offering a draft", () => {
+    const noDraft = createVehicleReservationSchema(() => "2026-10-30", "request_without_draft");
+    const result = noDraft.safeParse({ ...validVehicle, letter: null });
+    expect(result.error?.issues.map((issue) => issue.message)).toEqual(["Unggah surat peminjaman untuk memesan."]);
+    expect(vehicleIssues({ ...validVehicle, letter: null })).toMatchObject({
+      letter: "Unggah surat peminjaman untuk memesan, atau simpan sebagai draft dan unggah nanti.",
+    });
+  });
+
   it("needs at least one participant as a whole number", () => {
     expect(vehicleIssues({ ...validVehicle, participants: "" })).toMatchObject({ participants: "Jumlah peserta minimal 1." });
     expect(vehicleIssues({ ...validVehicle, participants: "2.5" })).toMatchObject({ participants: "Jumlah peserta harus bilangan bulat." });

@@ -34,7 +34,7 @@ URL di bawah adalah rencana. Yang sudah ada di kode hanya halaman ormawa/dosen; 
 
 Ormawa dan dosen memakai layar dan URL yang sama. Menu dan URL ada di `modules/ormawa/nav.ts` dan `modules/ormawa/routes.ts`.
 
-**Perbedaan dosen.** Dosen tidak memakai surat peminjaman, jadi juga tidak punya draft. Form reservasi dosen memakai `mode="request_without_letter"` (tanpa langkah unggah surat, tanpa validasi surat, tanpa "Simpan Draft", tetap menunggu persetujuan admin). Menu dosen (`DOSEN_NAV`) tidak memuat Draft Reservasi, `/reservasi/draft` mengembalikan dosen ke dashboard, dan FAQ dosen (`DOSEN_FAQ_ITEMS`) tidak membahas surat dan draft. Pilihan per role ada di `modules/ormawa/borrowerBooking.ts`, bukan di `shared/`.
+**Perbedaan dosen.** Dosen tidak punya draft. Untuk ruangan dan GOR dosen tidak memakai surat peminjaman: form memakai `mode="request_without_letter"` (tanpa langkah unggah surat, tanpa validasi surat, tanpa "Simpan Draft", tetap menunggu persetujuan admin). Untuk kendaraan dosen tetap wajib mengunggah surat: form memakai `mode="request_without_draft"` (surat wajib, tanpa "Simpan Draft"). Menu dosen (`DOSEN_NAV`) tidak memuat Draft Reservasi, `/reservasi/draft` mengembalikan dosen ke dashboard, dan FAQ dosen (`DOSEN_FAQ_ITEMS`) tidak membahas draft dan menyebut surat hanya untuk kendaraan. Pilihan per role ada di `modules/ormawa/borrowerBooking.ts`, bukan di `shared/`.
 
 | Menu | URL | Isi | Komponen |
 |---|---|---|---|

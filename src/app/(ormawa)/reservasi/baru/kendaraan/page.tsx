@@ -12,7 +12,7 @@ export default async function Page() {
     <ReservationFormPage
       tipe="kendaraan"
       requester={{ name: user.name, fakultasId: user.fakultasId }}
-      {...borrowerBooking(user.role)}
+      {...borrowerBooking(user.role, "kendaraan")}
     />
   );
 }

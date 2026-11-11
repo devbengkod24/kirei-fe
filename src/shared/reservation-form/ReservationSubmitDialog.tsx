@@ -36,6 +36,8 @@ export interface ReservationSubmitDialogProps {
   onCreateAnother: () => void;
   /** Off for admins: no letter field and no "Simpan Draft". */
   withLetter?: boolean;
+  /** "Simpan Draft" next to "Pesan"; off for borrowers without a draft list. Defaults to `withLetter`. */
+  withDraft?: boolean;
   /** Replaces the default "waiting for approval" text after a successful send; shown after `subject`. */
   submittedText?: string;
   /** Type-specific summary and inputs, shown above the letter field. */
@@ -58,6 +60,7 @@ export function ReservationSubmitDialog({
   links,
   onCreateAnother,
   withLetter = true,
+  withDraft = withLetter,
   submittedText,
   children,
 }: ReservationSubmitDialogProps) {
@@ -128,7 +131,7 @@ export function ReservationSubmitDialog({
         <Button variant="danger-outline" onClick={onClose} disabled={submitting}>
           Kembali
         </Button>
-        {withLetter && (
+        {withDraft && (
           <Button variant="success-outline" onClick={() => onSubmit("draft")} disabled={submitting}>
             Simpan Draft
           </Button>
