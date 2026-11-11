@@ -4,7 +4,7 @@ import { wibDateTime } from "./time";
 
 const SAMPLE_PHOTO = "/images/sample-room.jpg";
 
-const SAMPLE_CAPACITY: Record<FloorPlanRoom["category"], number> = { kelas: 40, meeting: 16, auditorium: 150, galeri: 30 };
+const SAMPLE_CAPACITY: Record<FloorPlanRoom["category"], number> = { kelas: 40, lab: 35, meeting: 16, auditorium: 150, galeri: 30 };
 
 function room(code: string, category: FloorPlanRoom["category"], x: number, y: number, width: number, height: number) {
   return { id: `room-${code}`, code, category, photoUrl: category === "kelas" ? SAMPLE_PHOTO : null, capacity: SAMPLE_CAPACITY[category], x, y, width, height };
@@ -39,7 +39,7 @@ export const MOCK_BUILDINGS: Building[] = [
           room("H.5.8", "meeting", 325, 75, 50, 75),
           room("H.5.7", "galeri", 375, 75, 75, 75),
           room("H.5.12", "kelas", 50, 150, 75, 50),
-          room("H.5.13", "kelas", 50, 200, 75, 50),
+          room("H.5.13", "lab", 50, 200, 75, 50),
           room("H.5.14", "kelas", 50, 250, 75, 50),
         ],
       },

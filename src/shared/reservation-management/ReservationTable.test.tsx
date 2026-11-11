@@ -15,6 +15,7 @@ const TRIP: ReservationRequest = {
   borrowerName: "Dr. Maria Lestari, M.Pd.",
   borrowerDetail: "Dosen",
   purpose: "Pendampingan lomba",
+  phone: "081234567890",
   letterFileName: null,
   letterUrl: null,
   trip: { destination: "Salatiga", participants: 6 },

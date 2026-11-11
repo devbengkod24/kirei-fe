@@ -1,4 +1,4 @@
-export type RoomType = "ruang_kelas" | "meeting_room" | "auditorium" | "gallery";
+export type RoomType = "ruang_kelas" | "lab" | "meeting_room" | "auditorium" | "gallery";
 
 export interface Building {
   id: string;
