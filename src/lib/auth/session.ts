@@ -2,11 +2,12 @@ import { findMockUserById, MOCK_ACCOUNTS } from "@/mocks/user";
 import type { CurrentUser, UserRole } from "@/types/user";
 
 /*
- * Mock session: an httpOnly cookie holding the user id. It only exists so routes and roles can be
- * tried before the API is ready; anyone can forge it. Once Sanctum is wired up, the cookie becomes
- * Laravel's session cookie and the user comes from GET /api/user.
+ * Demo session (AUTH_MODE=mock): an httpOnly cookie holding the user id. It only exists so routes
+ * and roles can be tried without the API; anyone can forge it. With AUTH_MODE=api the session is
+ * Laravel's own cookie and the user comes from GET /api/user (see laravel.ts). The name differs from
+ * Laravel's default "kirei_session" so the two never overwrite each other.
  */
-export const SESSION_COOKIE = "kirei_session";
+export const SESSION_COOKIE = "kirei_demo_session";
 
 export const LOGIN_PATH = "/login";
 
@@ -29,7 +30,7 @@ export function getDemoAccounts(): CurrentUser[] {
   return MOCK_ACCOUNTS.filter((user) => homeFor(user.role) !== null);
 }
 
+/** The demo user a mock-mode cookie value names. */
 export function userFromSession(value: string | undefined): CurrentUser | null {
-  // TODO: replace with GET /api/user through the orval client.
   return findMockUserById(value);
 }

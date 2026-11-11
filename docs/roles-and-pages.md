@@ -20,7 +20,7 @@ URL di bawah adalah rencana. Yang sudah ada di kode hanya halaman ormawa/dosen; 
 
 | Halaman | URL | Catatan |
 |---|---|---|
-| Login | `/login` | Login Sanctum SPA. Satu login untuk semua role, lalu diarahkan ke dashboard role-nya. |
+| Login | `/login` | Login Sanctum SPA. Satu login untuk semua role, lalu diarahkan ke dashboard role-nya. Mode dipilih lewat `AUTH_MODE` (lihat `.env.example`): `mock` (bawaan) memakai akun demo dan Quick Login tanpa backend; `api` login ke Laravel (`/sanctum/csrf-cookie`, `/login`, `/api/user`, `/logout`), error 422 tampil di bawah field, dan Quick Login disembunyikan. Orang yang sudah masuk langsung dialihkan ke dashboard role-nya. |
 | Lupa sandi | `/lupa-sandi` | |
 | Konfirmasi berhasil | `/konfirmasi/berhasil` | Tujuan tautan dari email. |
 | Tautan tidak berlaku | `/konfirmasi/gagal` | |

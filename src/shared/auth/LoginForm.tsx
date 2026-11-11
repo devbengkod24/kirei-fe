@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { Field, INPUT_CLASS } from "@/components/form/Field";
 import { Button } from "@/components/ui/Button";
+import { applyFormErrors } from "@/lib/api/form-errors";
 import { login } from "@/lib/auth/actions";
 import { loginSchema, type LoginValues } from "@/lib/auth/loginSchema";
 import { PasswordField } from "@/shared/profile/PasswordField";
@@ -18,7 +19,8 @@ export function LoginForm() {
   const submit = form.handleSubmit(async (values) => {
     // On success the action redirects, so a result only comes back on failure.
     const result = await login(values);
-    form.setError("root.server", { message: result.error });
+    if (result.validation) applyFormErrors(result.validation, form.setError, { email: "email", password: "password" });
+    else form.setError("root.server", { message: result.error });
   });
 
   return (
