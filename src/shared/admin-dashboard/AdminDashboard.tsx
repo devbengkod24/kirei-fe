@@ -22,7 +22,7 @@ export function AdminDashboard({ data, links }: AdminDashboardProps) {
     <div className="grid gap-2 xl:grid-cols-[750fr_384fr]">
       <div className="flex min-w-0 flex-col gap-2">
         <div className="grid gap-2 sm:grid-cols-3">
-          <StatTile label="Total Reservasi Hari Ini" value={data.todayReservations.length} iconSrc="/icons/admin/stat-today.svg" tone="violet" />
+          <StatTile label="Total Reservasi Hari Ini" value={data.todayReservations.length} iconSrc="/icons/admin/stat-today.svg" tone="accent" />
           <StatTile label="Total Check-in Hari Ini" value={data.checkedInToday} iconSrc="/icons/admin/stat-checkin.svg" tone="teal" />
           <StatTile label="Total Ruangan Aktif" value={data.activeRooms} iconSrc="/icons/admin/stat-rooms.svg" tone="orange" />
         </div>

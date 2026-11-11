@@ -32,24 +32,24 @@
   --color-ink: #000000;
   --color-muted: #5f6368;
 
-  --color-danger: #b91c1c;
-  --color-danger-strong: #dc1f26;
-  --color-danger-soft: rgb(220 31 38 / 0.15);
+  --color-danger: #8e1b2a;
+  --color-danger-strong: #8e1b2a;
+  --color-danger-soft: rgb(142 27 42 / 0.15);
 
   --color-info: #3c82f6;
   --color-info-soft: rgb(60 130 246 / 0.15);
 
-  --color-success: #2f6b1b;
-  --color-success-strong: #15803d;
-  --color-success-soft: rgb(50 123 30 / 0.12);
+  --color-success: #037a3f;
+  --color-success-strong: #037a3f;
+  --color-success-soft: rgb(3 122 63 / 0.12);
 
-  --color-warning: #b03a0a;
-  --color-warning-strong: #ea580c;
-  --color-warning-soft: rgb(249 115 21 / 0.15);
+  --color-warning: #e06902;
+  --color-warning-strong: #e06902;
+  --color-warning-soft: rgb(224 105 2 / 0.15);
 
   /* Admin dashboard stat tiles: one hue per metric, as in Figma. */
-  --color-stat-violet: #680689;
-  --color-stat-violet-soft: rgb(104 6 137 / 0.15);
+  --color-stat-accent: #1462E8;
+  --color-stat-accent-soft: #70ACF8;
   --color-stat-teal: #0f766e;
   --color-stat-teal-soft: rgb(27 167 148 / 0.15);
 
@@ -59,7 +59,7 @@
   /* floor plan room states */
   --color-plan-available: #d9d9d9;
   --color-plan-selected: #2563eb;
-  --color-plan-booked: #dc1f26;
+  --color-plan-booked: #8e1b2a;
   --color-plan-filtered: #c4c7cc;
   --color-calendar-past: #dedfe1;
 

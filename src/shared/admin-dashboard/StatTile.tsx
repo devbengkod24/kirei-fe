@@ -2,7 +2,7 @@ import Image from "next/image";
 
 /** Soft background and text color pairs of the dashboard stat tiles. */
 export const STAT_TONES = {
-  violet: "bg-stat-violet-soft text-stat-violet",
+  accent: "bg-stat-accent-soft text-stat-accent",
   teal: "bg-stat-teal-soft text-stat-teal",
   orange: "bg-warning-soft text-warning",
 } as const;
