@@ -1,4 +1,5 @@
 import { requireRole } from "@/lib/auth/requireRole";
+import { borrowerOwner } from "../borrowerBooking";
 import { ORMAWA_ROUTES } from "../routes";
 import { DraftList } from "./DraftList";
 
@@ -7,7 +8,7 @@ export async function DraftReservationsPage() {
   const user = await requireRole(["organisasi"]);
   return (
     <DraftList
-      booker={{ name: user.name, email: user.email }}
+      booker={borrowerOwner(user)}
       links={{ history: ORMAWA_ROUTES.reservationHistory, create: ORMAWA_ROUTES.createReservation }}
     />
   );

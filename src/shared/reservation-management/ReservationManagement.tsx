@@ -1,13 +1,15 @@
 import { SegmentedNav } from "@/components/ui/SegmentedNav";
 import type { ReservationRequest, ReservationType } from "@/types/reservation";
-import type { ReservationTab } from "./getReservationRequests";
+import type { ReservationTab } from "./requestTabs";
 import { ReservationTable } from "./ReservationTable";
 
 export interface ReservationManagementProps {
   tipe: ReservationType;
   tab: ReservationTab;
   links: Record<ReservationTab, string>;
+  /** Every request in scope for this type; the table shows the tab's rows. See getReservationCandidates. */
   reservations: ReservationRequest[];
+  roomCodes: string[] | null;
   /** Controls on the left of the header row, e.g. the Ruangan / Kendaraan / GOR tabs. */
   leading?: React.ReactNode;
   /** Controls placed under the tabs on the right, e.g. the faculty filter. */
@@ -22,6 +24,7 @@ export function ReservationManagement({
   tab,
   links,
   reservations,
+  roomCodes,
   leading,
   toolbar,
   heading = "Kelola Reservasi",
@@ -43,7 +46,7 @@ export function ReservationManagement({
           {toolbar}
         </div>
       </div>
-      <ReservationTable key={tab} tipe={tipe} tab={tab} reservations={reservations} />
+      <ReservationTable key={tab} tipe={tipe} tab={tab} reservations={reservations} roomCodes={roomCodes} />
     </div>
   );
 }

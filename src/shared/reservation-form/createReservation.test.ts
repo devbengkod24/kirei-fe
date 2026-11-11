@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { toSportsHallReservationRequest, toVehicleReservationRequest } from "./createReservation";
+import { toMockReservation, toSportsHallReservationRequest, toVehicleReservationRequest } from "./createReservation";
 
 describe("reservation requests", () => {
   it("sends a vehicle trip as whole WIB days, ending at midnight after the last day", () => {
@@ -36,3 +36,50 @@ describe("reservation requests", () => {
     });
   });
 });
+
+describe("demo store listing", () => {
+  const owner = { id: "usr-ormawa", name: "HMTI", email: "hmti@example.test", detail: "Organisasi" };
+
+  it("lists a room request by room code and building, keeping only the letter's file name", () => {
+    const letter = new File(["%PDF"], "surat.pdf", { type: "application/pdf" });
+    const request = { ...toVehicleRequestBase(), type: "ruangan" as const, phone: "0812", purpose: "Rapat", letter };
+    const reservation = toMockReservation(request, { owner, unitName: "H.5.2", buildingName: "Gedung H", purpose: "Rapat" }, new Date(0));
+    expect(reservation).toMatchObject({
+      type: "ruangan",
+      status: "menunggu_persetujuan",
+      roomName: "H.5.2",
+      buildingName: "Gedung H",
+      borrowerName: "HMTI",
+      borrowerDetail: "Organisasi",
+      phone: "0812",
+      letterFileName: "surat.pdf",
+      letterUrl: null,
+      ownerId: "usr-ormawa",
+    });
+  });
+
+  it("lists a vehicle trip without a vehicle, like the sample requests", () => {
+    const request = toVehicleReservationRequest({
+      phone: "0857111211",
+      destination: "Kudus",
+      participants: 8,
+      activity: "Kunjungan industri",
+      startDate: "2026-11-20",
+      endDate: "2026-11-20",
+      letter: null,
+      intent: "submit",
+    });
+    const reservation = toMockReservation(request, { owner, unitName: "Kendaraan ke Kudus", purpose: "Kunjungan industri" });
+    expect(reservation).toMatchObject({ roomName: "", buildingName: "Kendaraan", trip: { destination: "Kudus", participants: 8 } });
+  });
+});
+
+function toVehicleRequestBase() {
+  return {
+    type: "kendaraan" as const,
+    starts_at: "2026-11-20T02:00:00.000Z",
+    ends_at: "2026-11-20T04:00:00.000Z",
+    status: "menunggu_persetujuan",
+    letter: null,
+  };
+}

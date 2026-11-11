@@ -21,11 +21,14 @@ import {
 } from "./schema";
 import { FieldError, SummaryRow } from "./summaryParts";
 import { useReservationSubmit } from "./useReservationSubmit";
+import type { ReservationOwner } from "@/shared/reservation-store/reservationStore";
 
 export interface VehicleReservationFormProps {
   /** ISO 8601 server time */
   now: string;
   requester: { name: string };
+  /** The signed-in borrower. When set and the request needs approval, a sent request is kept in the demo store. */
+  owner?: ReservationOwner;
   /** "internal" for an admin's own booking: no phone or letter. */
   mode?: BookingMode;
   links: ReservationLinks;
@@ -50,10 +53,11 @@ const dayLabel = (dateKey: string) =>
 export function VehicleReservationForm({
   now,
   requester,
+  owner,
   mode = "request",
   links,
 }: VehicleReservationFormProps) {
-  const { askPhone, withLetter, withDraft, requesterLabel, submittedText } =
+  const { askPhone, withLetter, withDraft, needsApproval, requesterLabel, submittedText } =
     BOOKING_MODES[mode];
   const todayKey = toWibDateKey(new Date(now));
   const schema = useMemo(
@@ -114,6 +118,7 @@ export function VehicleReservationForm({
       unitName: `Kendaraan ke ${values.destination}`,
       purpose: values.activity,
     }),
+    owner: needsApproval ? owner : undefined,
   });
 
   const field = (id: string, error?: string) => ({

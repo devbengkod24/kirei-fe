@@ -1,10 +1,9 @@
 import { SegmentedNav } from "@/components/ui/SegmentedNav";
 import { RESERVATION_TYPES, type ReservationScope, type ReservationType } from "@/types/reservation";
 import { RESERVATION_TYPE_LABEL } from "@/shared/reservation/reservationTypes";
-import { ActiveReservationList } from "./ActiveReservationList";
-import { getReservationHistory } from "./getReservationHistory";
-import { DEFAULT_HISTORY_QUERY, historyHref, historySearchParams, type HistoryQuery, type HistoryView } from "./query";
-import { ReservationHistoryTable } from "./ReservationHistoryTable";
+import { getHistoryRecords } from "./getReservationHistory";
+import { historyHref, type HistoryQuery, type HistoryView } from "./query";
+import { ReservationHistoryView } from "./ReservationHistoryView";
 
 export interface ReservationHistoryPageProps {
   tipe: ReservationType;
@@ -12,6 +11,8 @@ export interface ReservationHistoryPageProps {
   page: number;
   perPage: number;
   scope: ReservationScope;
+  /** The signed-in borrower, for `{ mine: true }`: their requests from the demo store join the list. */
+  ownerId?: string;
   /** Path of the page itself; tabs and pagination link back to it. */
   basePath: string;
   /** Show the Ruangan/Kendaraan/GOR switch. Off where the type is part of the route. */
@@ -29,12 +30,13 @@ export async function ReservationHistoryPage({
   page,
   perPage,
   scope,
+  ownerId,
   basePath,
   showTypeTabs = false,
   createHref,
 }: ReservationHistoryPageProps) {
   const query: HistoryQuery = { tipe, view, page, perPage };
-  const result = await getReservationHistory(query, scope);
+  const { records, now } = await getHistoryRecords(tipe, scope);
   const href = (next: Partial<HistoryQuery>) => historyHref(basePath, { ...query, ...next }, showTypeTabs);
 
   return (
@@ -62,20 +64,15 @@ export async function ReservationHistoryPage({
         />
       </div>
 
-      {result.view === "aktif" ? (
-        <ActiveReservationList tipe={tipe} today={result.today} upcoming={result.upcoming} createHref={createHref} />
-      ) : (
-        <ReservationHistoryTable
-          tipe={tipe}
-          items={result.items}
-          page={result.page}
-          perPage={perPage}
-          totalPages={result.totalPages}
-          prevHref={result.page > 1 ? href({ page: result.page - 1 }) : null}
-          nextHref={result.page < result.totalPages ? href({ page: result.page + 1 }) : null}
-          baseParams={historySearchParams({ ...query, page: 1, perPage: DEFAULT_HISTORY_QUERY.perPage }, showTypeTabs)}
-        />
-      )}
+      <ReservationHistoryView
+        query={query}
+        records={records}
+        now={now}
+        ownerId={"mine" in scope ? ownerId : undefined}
+        basePath={basePath}
+        showTypeTabs={showTypeTabs}
+        createHref={createHref}
+      />
     </div>
   );
 }

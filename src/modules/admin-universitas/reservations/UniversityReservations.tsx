@@ -1,5 +1,5 @@
 import type { AdminScope } from "@/shared/admin-scope";
-import { getReservationRequests, type ReservationTab } from "@/shared/reservation-management/getReservationRequests";
+import { getReservationCandidates, type ReservationTab } from "@/shared/reservation-management/getReservationRequests";
 import { ReservationManagement } from "@/shared/reservation-management/ReservationManagement";
 import type { Fakultas } from "@/types/fakultas";
 import type { ReservationType } from "@/types/reservation";
@@ -15,7 +15,7 @@ export interface UniversityReservationsProps {
 
 /** Kelola Reservasi for one type. */
 export async function UniversityReservations({ tipe, tab }: UniversityReservationsProps) {
-  const reservations = await getReservationRequests({ fakultasId: null }, tab, tipe);
+  const { reservations, roomCodes } = await getReservationCandidates({ fakultasId: null }, tipe);
 
   return (
     <ReservationManagement
@@ -26,6 +26,7 @@ export async function UniversityReservations({ tipe, tab }: UniversityReservatio
         riwayat: reservationsRoute(tipe, "riwayat"),
       }}
       reservations={reservations}
+      roomCodes={roomCodes}
       heading={null}
       leading={<TypeTabs basePath={ADMIN_UNIVERSITAS_ROUTES.reservations} />}
     />
