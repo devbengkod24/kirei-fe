@@ -14,9 +14,9 @@ describe("borrowerBooking", () => {
     expect(vehicle.links.drafts).toBeUndefined();
   });
 
-  it("gives ormawa the letter and drafts for every type", () => {
+  it("gives organisasi (ormawa and UKM) the letter and drafts for every type", () => {
     for (const tipe of ["ruangan", "gor", "kendaraan"] as const) {
-      const { mode, links } = borrowerBooking("ormawa", tipe);
+      const { mode, links } = borrowerBooking("organisasi", tipe);
       expect(BOOKING_MODES[mode]).toMatchObject({ withLetter: true, withDraft: true });
       expect(links.drafts).toBe("/reservasi/draft");
     }

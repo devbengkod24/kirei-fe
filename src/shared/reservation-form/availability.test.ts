@@ -96,9 +96,20 @@ describe("defaultSchedule", () => {
     expect(defaultSchedule(new Date("2026-10-30T05:23:00Z"))).toEqual({ date: "2026-10-30", startTime: "13:00", endTime: "15:00" });
   });
 
-  it("moves to the next morning late in the evening", () => {
-    // 21:10 WIB
-    expect(defaultSchedule(new Date("2026-10-30T14:10:00Z"))).toEqual({ date: "2026-10-31", startTime: "08:00", endTime: "10:00" });
+  it("moves to the next morning once two hours no longer fit before 20.00", () => {
+    // 18:05 WIB: 19.00-21.00 would pass closing time
+    expect(defaultSchedule(new Date("2026-10-30T11:05:00Z"))).toEqual({ date: "2026-10-31", startTime: "08:00", endTime: "10:00" });
+    // 17:59 WIB: 18.00-20.00 still fits
+    expect(defaultSchedule(new Date("2026-10-30T10:59:00Z"))).toEqual({ date: "2026-10-30", startTime: "18:00", endTime: "20:00" });
+  });
+
+  it("starts at opening time early in the morning", () => {
+    // 05:30 WIB
+    expect(defaultSchedule(new Date("2026-10-29T22:30:00Z"))).toEqual({ date: "2026-10-30", startTime: "07:00", endTime: "09:00" });
+  });
+
+  it("starts on the first allowed day for ormawa and UKM", () => {
+    expect(defaultSchedule(new Date("2026-10-30T05:23:00Z"), 2)).toEqual({ date: "2026-11-01", startTime: "08:00", endTime: "10:00" });
   });
 });
 

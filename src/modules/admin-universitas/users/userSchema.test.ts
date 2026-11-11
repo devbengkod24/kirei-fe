@@ -11,12 +11,12 @@ const PASSWORD = { password: "rahasia123", confirmation: "rahasia123" };
 const NO_FLOOR = { buildingId: "", floorId: "" };
 
 describe("new ormawa", () => {
-  const schema = createUserSchema("ormawa", MOCK_MANAGED_USERS);
+  const schema = createUserSchema("organisasi", MOCK_MANAGED_USERS);
 
   it("stores an ormawa without a faculty, even if one slipped into the form", () => {
     const values = schema.parse({ name: "UKM Paduan Suara", email: " PADUANSUARA@dinus.ac.id ", fakultas: "fik", npp: "", ...NO_FLOOR, ...PASSWORD });
     expect(values.email).toBe("paduansuara@dinus.ac.id");
-    const user = toManagedUser(values, "ormawa", "new-1");
+    const user = toManagedUser(values, "organisasi", "new-1");
     expect(user).toMatchObject({ fakultasId: null, npp: undefined, isActive: true });
     expect(user).not.toHaveProperty("password");
   });
@@ -72,7 +72,7 @@ describe("new operator", () => {
 
 describe("passwords", () => {
   it("need at least 8 characters and a matching confirmation, on create and on reset", () => {
-    const create = createUserSchema("ormawa", []);
+    const create = createUserSchema("organisasi", []);
     const base = { name: "UKM Catur", email: "catur@dinus.ac.id", fakultas: "", npp: "", ...NO_FLOOR };
     expect(issues(create.safeParse({ ...base, password: "pendek", confirmation: "pendek" }))).toEqual({
       password: "Kata sandi minimal 8 karakter.",
@@ -103,9 +103,9 @@ describe("searchUsers", () => {
 describe("parseUserTab", () => {
   it("falls back to Ormawa for anything unknown", () => {
     expect(parseUserTab("dosen")).toBe("dosen");
-    expect(parseUserTab(["dosen", "ormawa"])).toBe("dosen");
+    expect(parseUserTab(["dosen", "organisasi"])).toBe("dosen");
     expect(parseUserTab("operator")).toBe("operator");
-    expect(parseUserTab("admin_universitas")).toBe("ormawa");
-    expect(parseUserTab(undefined)).toBe("ormawa");
+    expect(parseUserTab("admin_universitas")).toBe("organisasi");
+    expect(parseUserTab(undefined)).toBe("organisasi");
   });
 });

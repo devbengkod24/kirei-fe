@@ -18,7 +18,6 @@ const rejected: ReservationRecord = {
   bookerEmail: "dncc@dinus.ac.id",
   unitName: "H.5.2",
   purpose: "Rapat pengurus",
-  reschedule: null,
   cancellationReason: null,
   rejectionReason: "Jadwal bentrok dengan kegiatan fakultas.",
 };

@@ -1,9 +1,11 @@
 import { z } from "zod";
 import {
+  ROOM_CLOSE_TIME,
+  ROOM_OPEN_TIME,
   SPORTS_HALL_BOOKING_DAYS,
   SPORTS_HALL_MAX_MINUTES,
 } from "@/config/reservation";
-import { toWibDateKey } from "@/lib/date";
+import { addDaysToKey, toWibDateKey } from "@/lib/date";
 import { letterFileSchema } from "@/shared/reservation/letter";
 import { toIsoRange } from "./availability";
 import { BOOKING_MODES, type BookingMode } from "./bookingMode";
@@ -85,6 +87,19 @@ function requireFutureStart(
   }
 }
 
+/** Ormawa and UKM book no earlier than H-2; other modes pass 0 and skip the check. */
+function requireMinDaysAhead(dateKey: string, minDaysAhead: number, now: Date, ctx: IssueSink) {
+  if (minDaysAhead === 0 || !DATE.test(dateKey)) return;
+  // "YYYY-MM-DD" strings compare in calendar order
+  if (dateKey < addDaysToKey(toWibDateKey(now), minDaysAhead)) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["date"],
+      message: "Ormawa dan UKM tidak bisa memesan untuk hari ini dan besok. Pilih tanggal lusa atau setelahnya.",
+    });
+  }
+}
+
 // `when` on the refinements below lets cross-field checks run even while other fields are still
 // invalid, so the schedule step can be validated before the rest of the form is filled in.
 const ALWAYS = { when: () => true };
@@ -105,7 +120,7 @@ export function createRoomReservationSchema(
   now: () => Date = () => new Date(),
   mode: BookingMode = "request",
 ) {
-  const { askPhone, withLetter, withDraft } = BOOKING_MODES[mode];
+  const { askPhone, withLetter, withDraft, minDaysAhead } = BOOKING_MODES[mode];
   return z
     .object({
       buildingId: z.string().min(1, "Pilih gedung."),
@@ -130,6 +145,13 @@ export function createRoomReservationSchema(
           message: "Jam selesai harus setelah jam mulai.",
         });
       }
+      const hoursMessage = `Ruangan hanya bisa dipesan pukul ${ROOM_OPEN_TIME.replace(":", ".")} sampai ${ROOM_CLOSE_TIME.replace(":", ".")} WIB.`;
+      // "HH:mm" strings compare in clock order
+      if (TIME.test(values.startTime) && values.startTime < ROOM_OPEN_TIME) {
+        ctx.addIssue({ code: "custom", path: ["startTime"], message: hoursMessage });
+      } else if (TIME.test(values.endTime) && values.endTime > ROOM_CLOSE_TIME) {
+        ctx.addIssue({ code: "custom", path: ["endTime"], message: hoursMessage });
+      }
       requireFutureStart(
         values.date,
         values.startTime,
@@ -138,6 +160,7 @@ export function createRoomReservationSchema(
         "startTime",
         ctx,
       );
+      requireMinDaysAhead(values.date, minDaysAhead, now(), ctx);
       if (withLetter) requireLetterToSubmit(values, ctx, withDraft);
     }, ALWAYS);
 }
@@ -175,7 +198,7 @@ export function createSportsHallReservationSchema(
   now: () => Date = () => new Date(),
   mode: BookingMode = "request",
 ) {
-  const { withLetter, withDraft } = BOOKING_MODES[mode];
+  const { withLetter, withDraft, minDaysAhead } = BOOKING_MODES[mode];
   return z
     .object({
       date: z.string().regex(DATE, "Pilih tanggal reservasi."),
@@ -216,6 +239,7 @@ export function createSportsHallReservationSchema(
           message: `Satu reservasi GOR maksimal ${SPORTS_HALL_MAX_MINUTES / 60} jam.`,
         });
       }
+      requireMinDaysAhead(values.date, minDaysAhead, current, ctx);
       if (withLetter) requireLetterToSubmit(values, ctx, withDraft);
     }, ALWAYS);
 }

@@ -6,7 +6,7 @@ export const MOCK_CURRENT_USER: CurrentUser = {
   // An ormawa account belongs to the organisation, so it carries the ormawa name.
   name: "Dian Nuswantoro Computer Club",
   email: "dncc@dinus.ac.id",
-  role: "ormawa",
+  role: "organisasi",
   // Ormawa belong to no faculty; they may book rooms in any of them.
   fakultasId: null,
 };

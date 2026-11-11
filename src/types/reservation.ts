@@ -1,11 +1,12 @@
 // TODO: match these values to the Laravel OpenAPI spec once the reservation endpoints exist.
 export type ReservationStatus =
   | "draft"
-  | "menunggu_konfirmasi"
+  | "menunggu_persetujuan"
   | "disetujui"
   | "ditolak"
   | "selesai"
-  | "dibatalkan";
+  | "batal"
+  | "override_bium";
 
 export type ReservationType = "ruangan" | "gor" | "kendaraan";
 
@@ -21,7 +22,6 @@ export type ReservationScope = { mine: true } | { fakultasId: string | null };
 
 export interface ReservationSummary {
   id: string;
-  ticketCode: string;
   /** ISO 8601 (UTC) */
   startsAt: string;
   /** ISO 8601 (UTC) */
@@ -29,15 +29,6 @@ export interface ReservationSummary {
   buildingName: string;
   roomName: string;
   status: ReservationStatus;
-}
-
-/** Set when an admin took the original slot and moved this reservation. */
-export interface ReservationReschedule {
-  /** ISO 8601 (UTC) */
-  previousStartsAt: string;
-  /** ISO 8601 (UTC) */
-  previousEndsAt: string;
-  reason: string;
 }
 
 export interface ReservationRecord {
@@ -53,8 +44,7 @@ export interface ReservationRecord {
   /** Room code, vehicle name, or GOR name. */
   unitName: string;
   purpose: string;
-  reschedule: ReservationReschedule | null;
-  /** Filled when the reservation was cancelled, e.g. no replacement slot was available. */
+  /** Filled when the reservation was cancelled, e.g. by an admin after approval. */
   cancellationReason: string | null;
   /** Written by the approving admin when the reservation was rejected; null for other statuses. */
   rejectionReason: string | null;
@@ -73,6 +63,8 @@ export interface ReservationRequest extends ReservationSummary {
   borrowerName: string;
   /** e.g. "Dosen Pembimbing BEM • NPP: 19820411" */
   borrowerDetail: string;
+  /** Contact number the borrower typed in the form, so the admin can reach them (WhatsApp); null when none was given. */
+  phone: string | null;
   purpose: string;
   letterFileName: string | null;
   /** Where the uploaded letter can be opened; null when none was uploaded. */

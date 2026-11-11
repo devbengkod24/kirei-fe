@@ -9,7 +9,7 @@ import {
   SPORTS_HALL_BOOKING_DAYS,
   SPORTS_HALL_MAX_MINUTES,
 } from "@/config/reservation";
-import { formatDateLongWIB, toWibDateKey, wibToIso } from "@/lib/date";
+import { addDaysToKey, formatDateLongWIB, toWibDateKey, wibToIso } from "@/lib/date";
 import type { SportsHall, UnitBooking } from "@/types/facility";
 import { toSportsHallReservationRequest } from "./createReservation";
 import { BOOKING_MODES, type BookingMode } from "./bookingMode";
@@ -82,12 +82,14 @@ export function SportsHallReservationForm({
   mode = "request",
   links,
 }: SportsHallReservationFormProps) {
-  const { withLetter, withDraft, requesterLabel, submittedText } = BOOKING_MODES[mode];
+  const { withLetter, withDraft, requesterLabel, submittedText, minDaysAhead } = BOOKING_MODES[mode];
   const nowDate = useMemo(() => new Date(now), [now]);
   const todayKey = toWibDateKey(nowDate);
+  // Ormawa and UKM skip today and tomorrow; the last bookable day stays the same for everyone.
+  const firstKey = addDaysToKey(todayKey, minDaysAhead);
   const days = useMemo(
-    () => upcomingDays(todayKey, SPORTS_HALL_BOOKING_DAYS),
-    [todayKey],
+    () => upcomingDays(firstKey, SPORTS_HALL_BOOKING_DAYS - minDaysAhead),
+    [firstKey, minDaysAhead],
   );
   const slots = useMemo(
     () => buildSlots(hall.openTime, hall.closeTime, hall.slotMinutes),
@@ -104,7 +106,7 @@ export function SportsHallReservationForm({
   );
   const defaults = useMemo(
     (): SportsHallReservationInput => ({
-      date: todayKey,
+      date: firstKey,
       startTime: "",
       endTime: "",
       activity: hall.activities[0] ?? "",
@@ -112,7 +114,7 @@ export function SportsHallReservationForm({
       letter: null,
       intent: "submit",
     }),
-    [todayKey, hall.activities],
+    [firstKey, hall.activities],
   );
 
   const form = useForm<

@@ -15,7 +15,7 @@ export interface UserTabConfig {
 }
 
 export const USER_TABS: Record<ManagedRole, UserTabConfig> = {
-  ormawa: {
+  organisasi: {
     label: "Ormawa",
     detailTitle: "Detail Ormawa",
     fields: { npp: false, fakultas: false, floor: false },
@@ -52,5 +52,5 @@ export const USER_ROLES = Object.keys(USER_TABS) as ManagedRole[];
 /** The tab in the URL; anything else opens Ormawa. */
 export function parseUserTab(value: string | string[] | undefined): ManagedRole {
   const tab = Array.isArray(value) ? value[0] : value;
-  return USER_ROLES.includes(tab as ManagedRole) ? (tab as ManagedRole) : "ormawa";
+  return USER_ROLES.includes(tab as ManagedRole) ? (tab as ManagedRole) : "organisasi";
 }

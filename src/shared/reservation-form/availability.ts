@@ -1,4 +1,5 @@
-import { toWibDateKey, toWibTimeKey, wibToIso } from "@/lib/date";
+import { ROOM_CLOSE_TIME, ROOM_OPEN_TIME } from "@/config/reservation";
+import { addDaysToKey, toWibDateKey, toWibTimeKey, wibToIso } from "@/lib/date";
 import type { Building, FloorPlanRoom, UnitBooking, RoomCategory } from "@/types/facility";
 
 export type RoomStatus = "selected" | "booked" | "available" | "filtered";
@@ -50,17 +51,23 @@ export function toIsoRange(dateKey: string, startTime: string, endTime: string) 
 }
 
 /**
- * Starting values for the date and time fields: the next full hour for two hours.
- * Late in the evening it moves to 08:00 the next day.
+ * Starting values for the date and time fields: the next full hour for two hours, inside the room
+ * hours. Before opening it starts at opening time; when two hours no longer fit, it moves to 08:00 the
+ * next day. A borrower who must book `minDaysAhead` days ahead starts on that day at 08:00.
  */
-export function defaultSchedule(now: Date) {
-  const hour = Number(toWibTimeKey(now).slice(0, 2));
-  const pad = (value: number) => String(value).padStart(2, "0");
+export function defaultSchedule(now: Date, minDaysAhead = 0) {
+  const todayKey = toWibDateKey(now);
+  const next = { startTime: "08:00", endTime: "10:00" };
+  if (minDaysAhead > 0) return { date: addDaysToKey(todayKey, minDaysAhead), ...next };
 
-  if (hour + 1 > 21) {
-    return { date: toWibDateKey(now.getTime() + 24 * 60 * 60 * 1000), startTime: "08:00", endTime: "10:00" };
-  }
-  return { date: toWibDateKey(now), startTime: `${pad(hour + 1)}:00`, endTime: `${pad(hour + 3)}:00` };
+  const hour = Number(toWibTimeKey(now).slice(0, 2));
+  const open = Number(ROOM_OPEN_TIME.slice(0, 2));
+  const close = Number(ROOM_CLOSE_TIME.slice(0, 2));
+  const pad = (value: number) => String(value).padStart(2, "0");
+  const start = Math.max(hour + 1, open);
+
+  if (start + 2 > close) return { date: addDaysToKey(todayKey, 1), ...next };
+  return { date: todayKey, startTime: `${pad(start)}:00`, endTime: `${pad(start + 2)}:00` };
 }
 
 /**

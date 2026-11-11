@@ -5,7 +5,9 @@ import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
 import { Card } from "@/components/ui/Card";
+import { ROOM_CLOSE_TIME, ROOM_OPEN_TIME } from "@/config/reservation";
 import {
+  addDaysToKey,
   formatDateLongWIB,
   formatTimeSpanWIB,
   toWibDateKey,
@@ -61,7 +63,7 @@ export interface RoomReservationFormProps {
   requester: { name: string; fakultasId: string | null };
   /** "internal" for an admin's own booking: no phone, letter, draft, or approval. */
   mode?: BookingMode;
-  /** Lets admins pick a booked room; the replacement-schedule flow is not built yet. */
+  /** Lets admin_universitas pick a booked room to override it; the revoke flow (`override_bium`) is not built yet. */
   canUseBookedSlot?: boolean;
   /** Reservation rules shown under the floor plan, from the API. */
   rules?: string[];
@@ -98,7 +100,7 @@ export function RoomReservationForm({
   purposePlaceholder = "Contoh: Rapat pengurus bulanan",
   links,
 }: RoomReservationFormProps) {
-  const { askPhone, withLetter, withDraft, needsApproval, requesterLabel, submittedText } =
+  const { askPhone, withLetter, withDraft, needsApproval, requesterLabel, submittedText, minDaysAhead } =
     BOOKING_MODES[mode];
   const schema = useMemo(
     () => createRoomReservationSchema(undefined, mode),
@@ -109,14 +111,14 @@ export function RoomReservationForm({
     return {
       buildingId: building?.id ?? "",
       floorId: firstFloorId(building),
-      ...defaultSchedule(new Date(now)),
+      ...defaultSchedule(new Date(now), minDaysAhead),
       roomId: "",
       phone: "",
       purpose: "",
       letter: null,
       intent: "submit",
     };
-  }, [buildings, now]);
+  }, [buildings, now, minDaysAhead]);
 
   const form = useForm<RoomReservationInput, unknown, RoomReservationValues>({
     resolver: zodResolver(schema),
@@ -523,11 +525,14 @@ export function RoomReservationForm({
             <input
               id="reservation-date"
               type="date"
-              min={todayKey}
+              min={addDaysToKey(todayKey, minDaysAhead)}
               aria-invalid={errors.date ? true : undefined}
               className="min-h-11 w-full rounded-md border border-border px-2 text-xs aria-invalid:border-danger-strong"
               {...register("date")}
             />
+            {minDaysAhead > 0 && (
+              <p className="text-[11px] text-muted">Ormawa dan UKM memesan paling cepat lusa.</p>
+            )}
             {errors.date && <p className={ERROR}>{errors.date.message}</p>}
           </Card>
 
@@ -597,6 +602,9 @@ export function RoomReservationForm({
                 />
               </div>
             </div>
+            <p className="text-[11px] text-muted">
+              Ruangan bisa dipesan pukul {ROOM_OPEN_TIME.replace(":", ".")} sampai {ROOM_CLOSE_TIME.replace(":", ".")} WIB.
+            </p>
             {(errors.startTime || errors.endTime) && (
               <p className={ERROR}>
                 {errors.startTime?.message ?? errors.endTime?.message}

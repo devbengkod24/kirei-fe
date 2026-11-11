@@ -2,6 +2,8 @@
 
 Pemetaan halaman per role, URL, dan komponen `shared/` yang dipakai.
 
+Alur reservasi dari pengajuan pemohon sampai persetujuan admin: [`docs/flow-reservasi.md`](flow-reservasi.md).
+
 Sumber: Figma V3 (page `V3`), **disesuaikan dengan keputusan di AGENTS.md**. Figma belum diperbarui, jadi bila Figma dan dokumen ini berbeda, ikuti dokumen ini. Daftar perbedaannya ada di bagian akhir.
 
 URL di bawah adalah rencana. Yang sudah ada di kode hanya halaman ormawa/dosen; sisanya dibangun mengikuti tabel ini.
@@ -10,7 +12,7 @@ URL di bawah adalah rencana. Yang sudah ada di kode hanya halaman ormawa/dosen; 
 
 | Role | Route group | Prefix URL | Navigasi |
 |---|---|---|---|
-| `ormawa`, `dosen` | `(ormawa)` | `/` | Sidebar |
+| `organisasi`, `dosen` | `(ormawa)` | `/` | Sidebar |
 | `admin_fakultas` | `(admin-fakultas)` | `/fakultas` | Sidebar |
 | `admin_universitas` | `(admin-universitas)` | `/admin` | Sidebar + tab tipe (Ruangan, Kendaraan, GOR) di halaman yang sama untuk tiap tipe |
 | `operator` | `(operator)` | `/operator` | Header saja, tanpa sidebar |
@@ -20,7 +22,7 @@ URL di bawah adalah rencana. Yang sudah ada di kode hanya halaman ormawa/dosen; 
 
 | Halaman | URL | Catatan |
 |---|---|---|
-| Login | `/login` | Login Sanctum SPA. Satu login untuk semua role, lalu diarahkan ke dashboard role-nya. |
+| Login | `/login` | Login Sanctum SPA. Satu login untuk semua role, lalu diarahkan ke dashboard role-nya. Mode dipilih lewat `AUTH_MODE` (lihat `.env.example`): `mock` (bawaan) memakai akun demo dan Quick Login tanpa backend; `api` login ke Laravel (`/sanctum/csrf-cookie`, `/login`, `/api/user`, `/logout`), error 422 tampil di bawah field, dan Quick Login disembunyikan. Orang yang sudah masuk langsung dialihkan ke dashboard role-nya. |
 | Lupa sandi | `/lupa-sandi` | |
 | Konfirmasi berhasil | `/konfirmasi/berhasil` | Tujuan tautan dari email. |
 | Tautan tidak berlaku | `/konfirmasi/gagal` | |
@@ -37,11 +39,11 @@ Ormawa dan dosen memakai layar dan URL yang sama. Menu dan URL ada di `modules/o
 | Menu | URL | Isi | Komponen |
 |---|---|---|---|
 | Dashboard | `/dashboard` | Sapaan, kalender log reservasi, kartu Total Reservasi, reservasi hari ini, pengumuman terbaru | `shared/dashboard` (`UserDashboard`) |
-| Buat Reservasi | `/reservasi/baru` | Pilih jenis (Ruangan, Kendaraan, GOR). | `shared/reservation-form` (`ReservationTypePicker`) |
+| Buat Reservasi | `/reservasi/baru` | Pilih jenis (Ruangan, Kendaraan, GOR). Semua halaman Buat Reservasi memakai breadcrumb Dashboard › Buat Reservasi › tipe (`modules/ormawa/CreateReservationBreadcrumb`, dipasang di `reservasi/baru/layout.tsx`). | `shared/reservation-form` (`ReservationTypePicker`) |
 | Buat Reservasi: Ruangan | `/reservasi/baru/ruangan` | Gedung dan lantai, tanggal, jam, lalu ruangan dari denah (dengan filter jenis ruangan). Detail pemesanan dibuka di dialog: No HP, keperluan, surat. "Pesan" butuh surat PDF; "Simpan Draft" tidak. Dosen: tanpa surat dan tanpa "Simpan Draft". | `shared/reservation-form` (`ReservationFormPage tipe="ruangan"`) |
 | Buat Reservasi: GOR | `/reservasi/baru/gor` | Pilih hari (7 hari ke depan), lalu satu atau beberapa slot jam berurutan; jenis kegiatan, keterangan, surat. Tanpa catatan lintas fakultas. | `shared/reservation-form` (`ReservationFormPage tipe="gor"`) |
 | Buat Reservasi: Kendaraan | `/reservasi/baru/kendaraan` | Data peminjam (No HP, tujuan, jumlah peserta, keterangan kegiatan), tanggal mulai dan selesai, surat. Unit kendaraan diatur di luar aplikasi. Tanpa catatan lintas fakultas. | `shared/reservation-form` (`ReservationFormPage tipe="kendaraan"`) |
-| Draft Reservasi | `/reservasi/draft` | Hanya ormawa. Reservasi yang menunggu surat peminjaman. Tiap draft punya timer hitung mundur ke tenggat dari API (`hooks/useCountdown`) dan batasnya dalam WIB. Unggah PDF lalu "Pesan", atau "Batal". Setelah tenggat lewat, unggah dan "Pesan" dinonaktifkan. | `modules/ormawa/drafts` |
+| Draft Reservasi | `/reservasi/draft` | Hanya organisasi (ormawa dan UKM). Reservasi yang menunggu surat peminjaman. Tiap draft punya timer hitung mundur ke tenggat dari API (`hooks/useCountdown`) dan batasnya dalam WIB. Unggah PDF lalu "Pesan", atau "Batal". Setelah tenggat lewat, unggah dan "Pesan" dinonaktifkan. | `modules/ormawa/drafts` |
 | Reservasi & Riwayat | `/reservasi/riwayat` | Tab Ruangan, Kendaraan, GOR, lalu tab Aktif (kartu "Hari ini" dan "Akan datang") dan Riwayat (tabel berhalaman). Pilihan disimpan di URL: `?tipe=gor&tampilan=riwayat&halaman=2&per=25`. | `shared/reservation-history` (`ReservationHistoryPage`, `showTypeTabs`) |
 | Pengumuman | `/pengumuman` | Daftar dan filter sama dengan admin, tanpa Tambah Pengumuman. | `shared/announcements` (tanpa `canManage`) |
 | Profil | `/profil` | Data diri dan ubah kata sandi. | `shared/profile` |
@@ -106,17 +108,14 @@ Tombol tambah hanya ditampilkan bila API mengizinkan (`canCreate` dari data lant
 - **Penanda "Sekarang".** Garis biru tipis melintasi semua track dengan chip bulat berisi jam sekarang (mis. "10.47") di penggaris, hanya bila jam sekarang ada di rentang filter. Posisinya diperbarui tiap menit tanpa animasi, dan timeline di-scroll ke penanda ini saat rentang berubah. Halaman tidak memakai label atau polling "real time"; data dimuat saat halaman dibuka.
 - Form operator meminta ruangan, nama peminjam, keperluan, dan jam. Tanpa No HP dan surat, karena operator mencatat peminjaman di tempat. Form menolak jam yang bentrok dengan kuliah atau reservasi lain.
 
-## Memakai slot yang sudah dipesan
+## Override slot oleh Admin Universitas
 
-Berlaku untuk Admin Universitas (semua ruangan) dan Admin Fakultas (ruangan fakultasnya), lewat Reservasi Internal.
+Sumber aturan: `KONTEKS-DASAR.md` di vault (§6, §8, §10). Alur ini belum dibangun di FE.
 
-1. Admin memilih slot. Slot yang sudah dipesan tetap bisa dipilih dan ditandai.
-2. Untuk tiap reservasi yang terdampak, admin memilihkan jadwal pengganti dari slot kosong.
-3. Bila tidak ada slot pengganti, admin membatalkan reservasi itu dan wajib mengisi alasan.
-4. Admin mengonfirmasi, lalu slot dipesan atas nama admin.
-5. Peminjam lama menerima pemberitahuan. Tidak ada persetujuan dari peminjam.
-
-Kemampuan ini dikirim ke `shared/reservation-form` lewat prop (mis. `canUseBookedSlot`), bukan dengan mengecek nama role.
+1. Hanya Admin Universitas yang dapat override, untuk agenda universitas.
+2. Reservasi yang sudah `disetujui` dicabut dan berstatus `override_bium`. Tidak ada ruangan pengganti dan tidak ada persetujuan dari peminjam.
+3. Peminjam menerima pemberitahuan lewat email.
+4. Admin Fakultas tidak dapat override reservasi. Pembatalan setelah `disetujui` juga hanya oleh Admin Universitas.
 
 ## Komponen `shared/` dan pemakainya
 
@@ -145,7 +144,7 @@ Bagian ini juga menjadi daftar yang perlu diperbarui di Figma.
 | Angka "Pengguna terblokir" di Distribusi Pengguna (semua dashboard admin) | Dihapus | Sama |
 | Seri "Reservasi Pelanggaran" di grafik dashboard admin | Dihapus; grafik memuat reservasi berhasil dan dibatalkan | Sama |
 | Admin Universitas memakai pilihan tipe di atas sidebar dan dashboard per tipe | Satu sidebar, tab tipe di halaman per tipe, satu dashboard gabungan, dan filter fakultas di halaman yang memuat data fakultas | Keputusan tim; fakultas adalah batas data |
-| Reservasi Internal belum punya layar jadwal pengganti | Ditambah alur "Memakai slot yang sudah dipesan" | Aturan bisnis di AGENTS.md |
+| Reservasi Internal belum punya layar jadwal pengganti | Ditambah alur override oleh Admin Universitas (status `override_bium`, tanpa ruangan pengganti) | Aturan bisnis di vault (`KONTEKS-DASAR.md`) |
 | Kelola Pengguna hanya Ormawa dan Dosen | Ditambah tab Admin Fakultas dan Operator dengan pola tab Dosen | Akun dibuat Admin Universitas; desain Figma belum ada |
 | Merek "Bengkel Koding / Coworking Space" | Belum diputuskan; aset sementara dipakai | Perlu dikonfirmasi |
 | Salah satu frame Profil di section Admin Fakultas memakai sidebar ormawa | Profil admin memakai sidebar admin | Salah salin di Figma |
