@@ -1,6 +1,6 @@
 // TODO: match these shapes to the Laravel OpenAPI spec once the facility endpoints exist.
 
-export type RoomCategory = "kelas" | "meeting" | "auditorium" | "galeri";
+export type RoomCategory = "kelas" | "lab" | "meeting" | "auditorium" | "galeri";
 
 export interface FloorPlanRoom {
   id: string;

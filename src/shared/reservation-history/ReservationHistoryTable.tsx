@@ -27,15 +27,14 @@ const TD = TABLE_CELL;
 const rejectionText = (reservation: ReservationRecord) =>
   reservation.status === "ditolak" ? (reservation.rejectionReason ?? "Alasan belum dicatat.") : "-";
 
+/** The rejection reason has its own column, so only a cancellation reason sits under the purpose. */
 function Purpose({ reservation }: { reservation: ReservationRecord }) {
-  const rejected = reservation.status === "ditolak";
-  const reason = rejected ? reservation.rejectionReason : reservation.cancellationReason;
   return (
     <>
       {reservation.purpose}
-      {reason && (
+      {reservation.cancellationReason && (
         <span className="mt-1 block rounded-inner bg-danger-soft px-2 py-1 text-[11px] text-danger">
-          <span className="font-semibold">{rejected ? "Alasan ditolak" : "Alasan dibatalkan"}:</span> {reason}
+          <span className="font-semibold">Alasan dibatalkan:</span> {reservation.cancellationReason}
         </span>
       )}
     </>

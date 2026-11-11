@@ -63,6 +63,8 @@ export interface ReservationRequest extends ReservationSummary {
   borrowerName: string;
   /** e.g. "Dosen Pembimbing BEM • NPP: 19820411" */
   borrowerDetail: string;
+  /** Contact number the borrower typed in the form, so the admin can reach them (WhatsApp); null when none was given. */
+  phone: string | null;
   purpose: string;
   letterFileName: string | null;
   /** Where the uploaded letter can be opened; null when none was uploaded. */

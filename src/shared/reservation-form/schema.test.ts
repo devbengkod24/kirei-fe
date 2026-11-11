@@ -12,10 +12,11 @@ import {
 const schema = createRoomReservationSchema(() => new Date("2026-10-30T01:00:00Z"));
 const letter = new File(["%PDF-1.7"], "surat.pdf", { type: "application/pdf" });
 
+// Ormawa and UKM ("request" mode) book from H-2, so the base reservation is on 1 Nov.
 const valid: RoomReservationInput = {
   buildingId: "gedung-h",
   floorId: "gedung-h-5",
-  date: "2026-10-30",
+  date: "2026-11-01",
   startTime: "10:00",
   endTime: "12:00",
   roomId: "room-H.5.1",
@@ -43,8 +44,22 @@ describe("room reservation schema", () => {
   });
 
   it("rejects a start time that has passed", () => {
-    expect(issues({ ...valid, startTime: "07:00" })).toMatchObject({ startTime: expect.stringContaining("sudah lewat") });
+    expect(issues({ ...valid, date: "2026-10-30", startTime: "07:00" })).toMatchObject({ startTime: expect.stringContaining("sudah lewat") });
     expect(issues({ ...valid, date: "2026-10-29" })).toHaveProperty("startTime");
+  });
+
+  it("keeps room bookings within 07.00 to 20.00 WIB", () => {
+    const message = "Ruangan hanya bisa dipesan pukul 07.00 sampai 20.00 WIB.";
+    expect(issues({ ...valid, startTime: "06:50", endTime: "08:00" })).toMatchObject({ startTime: message });
+    expect(issues({ ...valid, startTime: "19:00", endTime: "20:10" })).toMatchObject({ endTime: message });
+    expect(issues({ ...valid, startTime: "07:00", endTime: "20:00" })).toEqual({});
+  });
+
+  it("keeps ormawa and UKM off today and tomorrow (H-0, H-1)", () => {
+    const message = "Ormawa dan UKM tidak bisa memesan untuk hari ini dan besok. Pilih tanggal lusa atau setelahnya.";
+    expect(issues({ ...valid, date: "2026-10-30", startTime: "13:00", endTime: "15:00" })).toMatchObject({ date: message });
+    expect(issues({ ...valid, date: "2026-10-31" })).toMatchObject({ date: message });
+    expect(issues({ ...valid, date: "2026-11-01" })).toEqual({});
   });
 
   it("checks the schedule even while phone and purpose are still empty", () => {
@@ -105,7 +120,7 @@ describe("room reservation schema for an admin booking", () => {
 describe("GOR reservation schema", () => {
   const gorSchema = createSportsHallReservationSchema(() => new Date("2026-10-30T01:00:00Z"));
   const validGor: SportsHallReservationInput = {
-    date: "2026-10-30",
+    date: "2026-11-01",
     startTime: "10:00",
     endTime: "12:00",
     activity: "Badminton",
@@ -128,9 +143,16 @@ describe("GOR reservation schema", () => {
   });
 
   it("rejects a slot that has started and keeps the letter rule", () => {
-    expect(gorIssues({ ...validGor, startTime: "07:00", endTime: "09:00" })).toHaveProperty("startTime");
+    expect(gorIssues({ ...validGor, date: "2026-10-30", startTime: "07:00", endTime: "09:00" })).toHaveProperty("startTime");
     expect(gorIssues({ ...validGor, letter: null })).toHaveProperty("letter");
     expect(gorIssues({ ...validGor, letter: null, intent: "draft" })).toEqual({});
+  });
+
+  it("keeps ormawa and UKM off today and tomorrow, but not other borrowers", () => {
+    const message = "Ormawa dan UKM tidak bisa memesan untuk hari ini dan besok. Pilih tanggal lusa atau setelahnya.";
+    expect(gorIssues({ ...validGor, date: "2026-10-31" })).toMatchObject({ date: message });
+    const dosenGor = createSportsHallReservationSchema(() => new Date("2026-10-30T01:00:00Z"), "request_without_letter");
+    expect(dosenGor.safeParse({ ...validGor, date: "2026-10-31", letter: null }).success).toBe(true);
   });
 
   it("caps a booking at 2 hours and 14 days ahead", () => {

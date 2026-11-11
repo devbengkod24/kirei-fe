@@ -2,6 +2,8 @@
 
 Pemetaan halaman per role, URL, dan komponen `shared/` yang dipakai.
 
+Alur reservasi dari pengajuan pemohon sampai persetujuan admin: [`docs/flow-reservasi.md`](flow-reservasi.md).
+
 Sumber: Figma V3 (page `V3`), **disesuaikan dengan keputusan di AGENTS.md**. Figma belum diperbarui, jadi bila Figma dan dokumen ini berbeda, ikuti dokumen ini. Daftar perbedaannya ada di bagian akhir.
 
 URL di bawah adalah rencana. Yang sudah ada di kode hanya halaman ormawa/dosen; sisanya dibangun mengikuti tabel ini.

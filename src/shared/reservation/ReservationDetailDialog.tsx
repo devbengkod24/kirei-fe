@@ -56,6 +56,14 @@ export function ReservationDetailDialog({ reservation, onClose, title = "Detail 
           <dd className="rounded-xl border border-border px-4 py-3">
             <p className="text-xs font-medium">{reservation.borrowerName}</p>
             <p className="text-[11px] text-muted">{reservation.borrowerDetail}</p>
+            {reservation.phone && (
+              <p className="mt-1 text-[11px]">
+                No HP:{" "}
+                <a href={`tel:${reservation.phone}`} className="font-medium text-primary underline-offset-2 hover:underline">
+                  {reservation.phone}
+                </a>
+              </p>
+            )}
           </dd>
         </div>
 

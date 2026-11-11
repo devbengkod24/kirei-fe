@@ -32,6 +32,12 @@ export function wibToIso(dateKey: string, time: string): string {
 }
 
 /** "09:30", the WIB wall-clock time in the format of <input type="time">. */
+/** The calendar day `days` after a "YYYY-MM-DD" key. */
+export function addDaysToKey(dateKey: string, days: number): string {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day + days)).toISOString().slice(0, 10);
+}
+
 export function toWibTimeKey(input: DateInput): string {
   const pick = partsOf(input, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
   return `${pick("hour")}:${pick("minute")}`;

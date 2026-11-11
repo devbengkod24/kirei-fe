@@ -80,6 +80,9 @@ export function buildReservationHistoryMock(now: Date): ReservationRecord[] {
 
 /* ---------- Admin: incoming reservation requests ---------- */
 
+/** Made-up mobile numbers in the 08xx format the form accepts. */
+const samplePhone = (index: number) => `0812${String(3400000 + index * 7919).padStart(8, "0")}`;
+
 interface Row {
   days: number;
   start: string;
@@ -123,6 +126,7 @@ export function buildReservationsMock(now: Date): ReservationRequest[] {
     status: row.status,
     borrowerName: row.borrowerName,
     borrowerDetail: row.borrowerDetail,
+    phone: samplePhone(index),
     purpose: row.purpose,
     letterFileName: index % 4 === 3 ? null : `Surat Peminjaman Ruang ${row.roomName}.pdf`,
     letterUrl: index % 4 === 3 ? null : SAMPLE_LETTER_URL,
@@ -165,6 +169,7 @@ export function buildFacilityRequestsMock(now: Date): ReservationRequest[] {
     status: row.status,
     borrowerName: row.borrowerName,
     borrowerDetail: row.borrowerDetail,
+    phone: samplePhone(index + 40),
     purpose: row.purpose,
     letterFileName: `Surat Peminjaman ${row.type === "gor" ? row.roomName : "Kendaraan"}.pdf`,
     letterUrl: SAMPLE_LETTER_URL,
