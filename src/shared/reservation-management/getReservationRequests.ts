@@ -3,34 +3,43 @@ import { buildFacilityRequestsMock, buildReservationsMock } from "@/mocks/reserv
 import { mockRoomsInScope } from "@/mocks/rooms";
 import type { AdminScope } from "@/shared/admin-scope";
 import type { ReservationRequest, ReservationType } from "@/types/reservation";
+import { requestsForTab, type ReservationTab } from "./requestTabs";
 
-export type ReservationTab = "persetujuan" | "riwayat";
+export type { ReservationTab } from "./requestTabs";
 
-const HISTORY_STATUSES = new Set(["selesai", "ditolak"]);
-
-/** Rooms are narrowed by the faculty scope; GOR and vehicles belong to the university. */
-function requestsOfType(scope: AdminScope, tipe: ReservationType, now: Date) {
-  if (tipe !== "ruangan") return buildFacilityRequestsMock(now).filter((reservation) => reservation.type === tipe);
-  const roomCodes = new Set(mockRoomsInScope(scope.fakultasId).map((room) => room.code));
-  return buildReservationsMock(now).filter((reservation) => roomCodes.has(reservation.roomName));
+export interface ReservationCandidates {
+  /** Every request of this type in the admin's scope, whatever its status. */
+  reservations: ReservationRequest[];
+  /** Room codes in the scope, for requests created later in the browser; null for GOR and vehicles. */
+  roomCodes: string[] | null;
 }
 
-/** Pending requests for "persetujuan", closed ones for "riwayat"; newest first in history. */
+/**
+ * Requests an admin may see, before splitting into tabs. Rooms are narrowed by the faculty scope;
+ * GOR and vehicles belong to the university. The table splits them, so an approval in the demo
+ * store can move a request from "persetujuan" to "riwayat".
+ */
+export async function getReservationCandidates(
+  scope: AdminScope,
+  tipe: ReservationType = "ruangan",
+): Promise<ReservationCandidates> {
+  await connection();
+  // TODO: replace with the orval client (no-store, filtered by scope, type, and tab).
+  const now = new Date();
+  if (tipe !== "ruangan") {
+    return { reservations: buildFacilityRequestsMock(now).filter((reservation) => reservation.type === tipe), roomCodes: null };
+  }
+  const roomCodes = mockRoomsInScope(scope.fakultasId).map((room) => room.code);
+  const inScope = new Set(roomCodes);
+  return { reservations: buildReservationsMock(now).filter((reservation) => inScope.has(reservation.roomName)), roomCodes };
+}
+
+/** Pending requests for "persetujuan", decided ones for "riwayat"; newest first in history. */
 export async function getReservationRequests(
   scope: AdminScope,
   tab: ReservationTab,
   tipe: ReservationType = "ruangan",
 ): Promise<ReservationRequest[]> {
-  await connection();
-  // TODO: replace with the orval client (no-store, filtered by scope, type, and tab).
-  const inScope = requestsOfType(scope, tipe, new Date());
-
-  if (tab === "persetujuan") {
-    return inScope
-      .filter((reservation) => reservation.status === "menunggu_persetujuan")
-      .sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt));
-  }
-  return inScope
-    .filter((reservation) => HISTORY_STATUSES.has(reservation.status))
-    .sort((a, b) => Date.parse(b.startsAt) - Date.parse(a.startsAt));
+  const { reservations } = await getReservationCandidates(scope, tipe);
+  return requestsForTab(reservations, tab);
 }

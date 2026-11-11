@@ -37,6 +37,7 @@ import {
 } from "./sportsHallSlots";
 import { SummaryValue, SummaryWhen } from "./summaryParts";
 import { useReservationSubmit } from "./useReservationSubmit";
+import type { ReservationOwner } from "@/shared/reservation-store/reservationStore";
 
 export interface SportsHallReservationFormProps {
   hall: SportsHall;
@@ -44,6 +45,8 @@ export interface SportsHallReservationFormProps {
   /** ISO 8601 server time */
   now: string;
   requester: { name: string };
+  /** The signed-in borrower. When set and the request needs approval, a sent request is kept in the demo store. */
+  owner?: ReservationOwner;
   /** "internal" for an admin's own booking: no letter, draft, or approval. */
   mode?: BookingMode;
   links: ReservationLinks;
@@ -79,10 +82,11 @@ export function SportsHallReservationForm({
   bookings,
   now,
   requester,
+  owner,
   mode = "request",
   links,
 }: SportsHallReservationFormProps) {
-  const { withLetter, withDraft, requesterLabel, submittedText, minDaysAhead } = BOOKING_MODES[mode];
+  const { withLetter, withDraft, needsApproval, requesterLabel, submittedText, minDaysAhead } = BOOKING_MODES[mode];
   const nowDate = useMemo(() => new Date(now), [now]);
   const todayKey = toWibDateKey(nowDate);
   // Ormawa and UKM skip today and tomorrow; the last bookable day stays the same for everyone.
@@ -143,6 +147,7 @@ export function SportsHallReservationForm({
       unitName: hall.name,
       purpose: values.notes ? `${values.activity}: ${values.notes}` : values.activity,
     }),
+    owner: needsApproval ? owner : undefined,
   });
 
   const statuses = slots.map((slot) =>

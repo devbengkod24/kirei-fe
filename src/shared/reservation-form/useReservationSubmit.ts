@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { FieldPath, FieldValues, UseFormReturn } from "react-hook-form";
 import { applyFormErrors } from "@/lib/api/form-errors";
 import { saveDraft, type DraftDetails } from "@/shared/reservation-draft/draftStorage";
+import type { ReservationOwner } from "@/shared/reservation-store/reservationStore";
 import { createReservation } from "./createReservation";
 import type { ReservationIntent } from "./schema";
 
@@ -14,8 +15,13 @@ export interface UseReservationSubmitOptions<TInput extends FieldValues, TOutput
   fieldMap: Partial<Record<string, FieldPath<TInput>>>;
   /** Extra state to clear when the borrower starts another reservation. */
   onReset?: () => void;
-  /** What the draft list shows for a saved draft. Drafts are kept in this browser only. */
-  toDraft?: (values: TOutput) => Pick<DraftDetails, "unitName" | "purpose">;
+  /**
+   * What the draft list shows for a saved draft (drafts are kept in this browser only), and how a
+   * sent request is listed for the admin in the demo store.
+   */
+  toDraft?: (values: TOutput) => Pick<DraftDetails, "unitName" | "purpose" | "buildingName">;
+  /** The borrower, when the request waits for approval; a sent request is then kept in the demo store. */
+  owner?: ReservationOwner;
 }
 
 /** The request without the letter and status, which are added when the draft is sent. */
@@ -32,7 +38,7 @@ function draftBody(request: Parameters<typeof createReservation>[0]): Record<str
  */
 export function useReservationSubmit<TInput extends FieldValues, TOutput>(
   form: UseFormReturn<TInput, unknown, TOutput>,
-  { defaults, toRequest, fieldMap, onReset, toDraft }: UseReservationSubmitOptions<TInput, TOutput>,
+  { defaults, toRequest, fieldMap, onReset, toDraft, owner }: UseReservationSubmitOptions<TInput, TOutput>,
 ) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [result, setResult] = useState<ReservationIntent | null>(null);
@@ -64,7 +70,8 @@ export function useReservationSubmit<TInput extends FieldValues, TOutput>(
         }
         return;
       }
-      const response = await createReservation(toRequest(values));
+      const listing = owner && toDraft ? { owner, ...toDraft(values) } : undefined;
+      const response = await createReservation(toRequest(values), listing);
       if (response.ok) {
         setResult(response.intent);
       } else if ("validation" in response) {

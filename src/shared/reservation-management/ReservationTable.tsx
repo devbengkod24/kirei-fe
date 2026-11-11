@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Pagination } from "@/components/ui/Pagination";
 import { TABLE, TABLE_CELL, TABLE_HEAD_CELL, TABLE_ROW } from "@/components/ui/table";
@@ -10,8 +10,10 @@ import { formatDateShortWIB, formatTimeWIB } from "@/lib/date";
 import { ReservationDetailDialog } from "@/shared/reservation/ReservationDetailDialog";
 import { ReservationStatusBadge } from "@/shared/reservation/ReservationStatusBadge";
 import { RESERVATION_TYPE_LABEL } from "@/shared/reservation/reservationTypes";
+import { decideMockReservation, mergeAdminRequests, type MockDecision } from "@/shared/reservation-store/reservationStore";
+import { useMockReservations } from "@/shared/reservation-store/useMockReservations";
 import type { ReservationRequest, ReservationType } from "@/types/reservation";
-import type { ReservationTab } from "./getReservationRequests";
+import { requestsForTab, type ReservationTab } from "./requestTabs";
 import { ApproveReservationDialog } from "./ApproveReservationDialog";
 import { RejectReservationDialog } from "./RejectReservationDialog";
 import { TYPE_COLUMNS } from "./typeColumns";
@@ -19,7 +21,10 @@ import { TYPE_COLUMNS } from "./typeColumns";
 export interface ReservationTableProps {
   tipe: ReservationType;
   tab: ReservationTab;
+  /** Every request in the admin's scope for this type, whatever its status; the table picks the tab's rows. */
   reservations: ReservationRequest[];
+  /** Room codes in the admin's scope, for requests created in this browser; null for GOR and vehicles. */
+  roomCodes: string[] | null;
 }
 
 const TH = `${TABLE_HEAD_CELL} text-left`;
@@ -35,12 +40,18 @@ const rejectionText = (reservation: ReservationRequest) =>
 
 const EMPTY_TEXT: Record<ReservationTab, string> = {
   persetujuan: "Tidak ada reservasi yang menunggu persetujuan.",
-  riwayat: "Belum ada reservasi yang selesai atau ditolak.",
+  riwayat: "Belum ada reservasi yang disetujui, selesai, atau ditolak.",
 };
 
 /** Reservations table for both tabs: approval actions on "persetujuan", status on "riwayat". */
-export function ReservationTable({ tipe, tab, reservations: initial }: ReservationTableProps) {
-  const [reservations, setReservations] = useState(initial);
+export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes }: ReservationTableProps) {
+  const store = useMockReservations();
+  // Decisions this browser could not store (e.g. private mode) still apply until the page reloads.
+  const [unsaved, setUnsaved] = useState<Record<string, MockDecision>>({});
+  const reservations = useMemo(
+    () => requestsForTab(mergeAdminRequests(seeded, { ...store, decisions: { ...store.decisions, ...unsaved } }, tipe, roomCodes), tab),
+    [seeded, store, unsaved, tipe, roomCodes, tab],
+  );
   const [viewing, setViewing] = useState<ReservationRequest | null>(null);
   const [approving, setApproving] = useState<ReservationRequest | null>(null);
   const [rejecting, setRejecting] = useState<ReservationRequest | null>(null);
@@ -51,9 +62,11 @@ export function ReservationTable({ tipe, tab, reservations: initial }: Reservati
   // Extra type columns need more room, so the card list stays on until xl.
   const layout = columns.length > 1 ? WIDE_LAYOUT : DEFAULT_LAYOUT;
 
-  const resolve = (reservation: ReservationRequest, message: string) => {
-    // TODO: POST approve/reject through the orval client, then refetch; this only updates the local list.
-    setReservations((current) => current.filter((item) => item.id !== reservation.id));
+  const resolve = (reservation: ReservationRequest, decision: Omit<MockDecision, "decidedAt">, message: string) => {
+    // TODO: POST approve/reject through the orval client, then refetch. Until then the demo store keeps it.
+    if (!decideMockReservation(reservation.id, decision)) {
+      setUnsaved((current) => ({ ...current, [reservation.id]: { ...decision, decidedAt: new Date().toISOString() } }));
+    }
     setNotice(message);
   };
 
@@ -205,7 +218,7 @@ export function ReservationTable({ tipe, tab, reservations: initial }: Reservati
           reservation={approving}
           onClose={() => setApproving(null)}
           onApprove={() => {
-            resolve(approving, `Reservasi ${approving.borrowerName} disetujui.`);
+            resolve(approving, { status: "disetujui", rejectionReason: null }, `Reservasi ${approving.borrowerName} disetujui.`);
             setApproving(null);
           }}
         />
@@ -214,8 +227,12 @@ export function ReservationTable({ tipe, tab, reservations: initial }: Reservati
         <RejectReservationDialog
           reservation={rejecting}
           onClose={() => setRejecting(null)}
-          onReject={() => {
-            resolve(rejecting, `Reservasi ${rejecting.borrowerName} ditolak. Alasan dikirim ke pemesan.`);
+          onReject={(reason) => {
+            resolve(
+              rejecting,
+              { status: "ditolak", rejectionReason: reason },
+              `Reservasi ${rejecting.borrowerName} ditolak. Alasan dikirim ke pemesan.`,
+            );
             setRejecting(null);
           }}
         />

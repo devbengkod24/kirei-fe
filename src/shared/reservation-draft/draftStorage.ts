@@ -18,6 +18,8 @@ const storedDraftSchema = z.object({
   endsAt: z.string(),
   /** Room code, GOR name, or "Kendaraan". */
   unitName: z.string(),
+  /** Rooms only: the building, so the admin sees it once the draft is sent. */
+  buildingName: z.string().optional(),
   purpose: z.string(),
   /** ISO 8601 (UTC) */
   savedAt: z.string(),

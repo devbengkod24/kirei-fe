@@ -1,10 +1,11 @@
 import { removeDraft, type StoredDraft } from "@/shared/reservation-draft/draftStorage";
 import { createReservation } from "@/shared/reservation-form/createReservation";
+import type { ReservationOwner } from "@/shared/reservation-store/reservationStore";
 
 export type DraftActionResult = { ok: true } | { ok: false; message: string };
 
 /** Sends the stored request with the letter, then drops the local draft. */
-export async function submitDraft(draft: StoredDraft, letter: File): Promise<DraftActionResult> {
+export async function submitDraft(draft: StoredDraft, letter: File, owner: ReservationOwner): Promise<DraftActionResult> {
   // Mock only: a file name containing "gagal" simulates a rejected upload, to exercise the failure dialog.
   if (letter.name.toLowerCase().includes("gagal")) {
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -17,7 +18,7 @@ export async function submitDraft(draft: StoredDraft, letter: File): Promise<Dra
     ends_at: draft.endsAt,
     status: "menunggu_persetujuan",
     letter,
-  });
+  }, { owner, unitName: draft.unitName, buildingName: draft.buildingName, purpose: draft.purpose });
   if (!response.ok) {
     return { ok: false, message: "message" in response ? response.message : "Data reservasi tidak lengkap." };
   }

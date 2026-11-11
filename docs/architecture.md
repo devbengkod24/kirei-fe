@@ -67,6 +67,17 @@ kirei-fe/
 - Respons berbentuk `{ data, status, headers }`. Status error (mis. 422) dikembalikan, tidak dilempar, jadi periksa `status` dulu. Untuk 422, teruskan `data` ke `applyFormErrors` di `lib/api/form-errors.ts`.
 - Base URL diambil dari `NEXT_PUBLIC_API_URL` (lihat `.env.example`).
 
+### Simulasi alur reservasi (mock store)
+
+Selama `kirei-api` belum ada, alur pemohon → antrean admin → keputusan → riwayat bisa didemokan lewat `shared/reservation-store/` (issue #14). Hapus folder ini bersama data mock begitu endpoint reservasi tersedia.
+
+- Data disimpan di `localStorage` dengan kunci `kirei:mock-reservations`, terpisah per browser. Penguji memerankan semua peran di browser yang sama lewat login cepat.
+- Isinya dua bagian: `created` (pengajuan yang dikirim dari form, berbentuk `ReservationRequest` ditambah `ownerId`) dan `decisions` (hasil Setujui/Tolak, untuk pengajuan baru maupun data contoh).
+- `createReservation` menyimpan pengajuan bila diberi `listing` dan statusnya bukan `draft`. Form hanya memberi `owner` untuk mode yang butuh persetujuan; reservasi internal tidak masuk store. Surat hanya disimpan nama berkasnya.
+- Loader server tetap mengirim data contoh. Komponen client (`ReservationTable`, `ReservationHistoryView`) menggabungkannya dengan store setelah mount lewat `useMockReservations`, jadi render server dan hydration pertama sama.
+- Admin melihat pengajuan baru sesuai tipe dan, untuk ruangan, sesuai kode ruangan dalam scope-nya (`getReservationCandidates`). Tab Riwayat admin memuat `disetujui`, `selesai`, dan `ditolak`.
+- Tombol "Reset data simulasi reservasi" di bawah login cepat menghapus store. Draft (`kirei:reservation-drafts`) tidak ikut terhapus.
+
 ### Cara memilih lokasi sebuah file
 
 1. Apakah hanya dipakai satu role? Taruh di `modules/<role>/`.

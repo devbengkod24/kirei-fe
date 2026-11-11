@@ -54,6 +54,7 @@ import {
   SummaryWhen,
 } from "./summaryParts";
 import { useReservationSubmit } from "./useReservationSubmit";
+import type { ReservationOwner } from "@/shared/reservation-store/reservationStore";
 
 export interface RoomReservationFormProps {
   buildings: Building[];
@@ -61,6 +62,8 @@ export interface RoomReservationFormProps {
   /** ISO 8601 server time, for the default date and time */
   now: string;
   requester: { name: string; fakultasId: string | null };
+  /** The signed-in borrower. When set and the request needs approval, a sent request is kept in the demo store. */
+  owner?: ReservationOwner;
   /** "internal" for an admin's own booking: no phone, letter, draft, or approval. */
   mode?: BookingMode;
   /** Lets admin_universitas pick a booked room to override it; the revoke flow (`override_bium`) is not built yet. */
@@ -94,6 +97,7 @@ export function RoomReservationForm({
   bookings,
   now,
   requester,
+  owner,
   mode = "request",
   canUseBookedSlot = false,
   rules = [],
@@ -147,14 +151,17 @@ export function RoomReservationForm({
     toRequest: toRoomReservationRequest,
     fieldMap: ROOM_RESERVATION_FIELD_MAP,
     onReset: () => setCategory(null),
-    toDraft: (values) => ({
-      unitName:
-        buildings
-          .find((b) => b.id === values.buildingId)
-          ?.floors.find((f) => f.id === values.floorId)
-          ?.rooms.find((room) => room.id === values.roomId)?.code ?? values.roomId,
-      purpose: values.purpose,
-    }),
+    toDraft: (values) => {
+      const chosen = buildings.find((b) => b.id === values.buildingId);
+      return {
+        unitName:
+          chosen?.floors.find((f) => f.id === values.floorId)?.rooms.find((room) => room.id === values.roomId)?.code ??
+          values.roomId,
+        buildingName: chosen?.name,
+        purpose: values.purpose,
+      };
+    },
+    owner: needsApproval ? owner : undefined,
   });
 
   const todayKey = toWibDateKey(new Date(now));

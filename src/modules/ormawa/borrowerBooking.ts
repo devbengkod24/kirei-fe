@@ -1,6 +1,7 @@
 import type { BookingMode } from "@/shared/reservation-form/bookingMode";
+import type { ReservationOwner } from "@/shared/reservation-store/reservationStore";
 import type { ReservationType } from "@/types/reservation";
-import type { UserRole } from "@/types/user";
+import type { CurrentUser, UserRole } from "@/types/user";
 import { ORMAWA_ROUTES } from "./routes";
 
 /**
@@ -19,3 +20,8 @@ export function borrowerBooking(
 }
 
 export const hasDrafts = (role: UserRole) => role !== "dosen";
+
+/** The borrower as the admin sees them on a request. */
+export function borrowerOwner(user: CurrentUser): ReservationOwner {
+  return { id: user.id, name: user.name, email: user.email, detail: user.role === "dosen" ? "Dosen" : "Organisasi" };
+}

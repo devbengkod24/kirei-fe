@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReservationOwner } from "@/shared/reservation-store/reservationStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { useId } from "react";
@@ -24,7 +25,7 @@ type LetterValues = z.output<typeof schema>;
 
 export interface DraftCardProps {
   draft: StoredDraft;
-  booker: { name: string; email: string };
+  booker: ReservationOwner;
   onSubmitted: (draft: StoredDraft, result: DraftActionResult) => void;
   onRequestCancel: (draft: StoredDraft) => void;
 }
@@ -55,7 +56,7 @@ export function DraftCard({ draft, booker, onSubmitted, onRequestCancel }: Draft
   const letter = useWatch({ control, name: "letter" });
 
   const submit = handleSubmit(async (values) => {
-    onSubmitted(draft, await submitDraft(draft, values.letter));
+    onSubmitted(draft, await submitDraft(draft, values.letter, booker));
   });
 
   return (

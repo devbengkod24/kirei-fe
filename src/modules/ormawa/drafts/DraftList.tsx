@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReservationOwner } from "@/shared/reservation-store/reservationStore";
 import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { ResultDialog } from "@/components/feedback/ResultDialog";
@@ -18,7 +19,7 @@ import { DraftCard } from "./DraftCard";
 import { DraftsSkeleton } from "./DraftsSkeleton";
 
 export interface DraftListProps {
-  booker: { name: string; email: string };
+  booker: ReservationOwner;
   links: { history: string; create: string };
 }
 
