@@ -48,8 +48,8 @@
   --color-warning-soft: rgb(224 105 2 / 0.15);
 
   /* Admin dashboard stat tiles: one hue per metric, as in Figma. */
-  --color-stat-violet: #680689;
-  --color-stat-violet-soft: rgb(104 6 137 / 0.15);
+  --color-stat-accent: #1462E8;
+  --color-stat-accent-soft: #70ACF8;
   --color-stat-teal: #0f766e;
   --color-stat-teal-soft: rgb(27 167 148 / 0.15);
 
