@@ -40,12 +40,12 @@ export const FACILITY_ITEMS: IconItem[] = [
     description: "Untuk rapat, seminar, dan acara organisasi maupun dosen.",
   },
   {
-    iconSrc: "/icons/running.svg",
+    iconSrc: "/landing/stadium.svg",
     title: "GOR",
     description: "Gedung olahraga kampus untuk latihan, pertandingan, dan acara. Maksimal 2 jam per pemesanan.",
   },
   {
-    iconSrc: "/landing/vehicle.svg",
+    iconSrc: "/landing/bus.png",
     title: "Kendaraan Operasional",
     description: "Ajukan tujuan, tanggal, dan jumlah rombongan tanpa perlu memilih unit atau jam.",
   },
