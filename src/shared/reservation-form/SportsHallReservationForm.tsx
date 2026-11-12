@@ -37,7 +37,8 @@ import {
 } from "./sportsHallSlots";
 import { SummaryValue, SummaryWhen } from "./summaryParts";
 import { useReservationSubmit } from "./useReservationSubmit";
-import type { ReservationOwner } from "@/shared/reservation-store/reservationStore";
+import { heldBookings, type ReservationOwner } from "@/shared/reservation-store/reservationStore";
+import { useMockReservations } from "@/shared/reservation-store/useMockReservations";
 
 export interface SportsHallReservationFormProps {
   hall: SportsHall;
@@ -82,7 +83,7 @@ const ERROR = "text-[11px] text-danger";
 
 export function SportsHallReservationForm({
   hall,
-  bookings,
+  bookings: serverBookings,
   now,
   requester,
   owner,
@@ -154,6 +155,12 @@ export function SportsHallReservationForm({
     approvedOnSubmit: !needsApproval,
   });
 
+  // Requests sent in this browser (demo store) take their slots too, until kirei-api serves availability.
+  const store = useMockReservations();
+  const bookings = useMemo(
+    () => [...serverBookings, ...heldBookings(store, "gor", new Map([[hall.name, hall.id]]))],
+    [serverBookings, store, hall.name, hall.id],
+  );
   const statuses = slots.map((slot) =>
     slotStatus(date, slot, bookings, nowDate),
   );

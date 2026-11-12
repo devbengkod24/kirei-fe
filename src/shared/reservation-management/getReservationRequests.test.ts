@@ -2,7 +2,19 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/server", () => ({ connection: async () => {} }));
 
-const { getReservationRequests } = await import("./getReservationRequests");
+const { getReservationCandidates, getReservationRequests } = await import("./getReservationRequests");
+
+describe("getReservationCandidates", () => {
+  it("scopes browser-made requests by every room the booking form offers", async () => {
+    const fik = (await getReservationCandidates({ fakultasId: "fik" })).roomCodes;
+    expect(fik).toEqual(expect.arrayContaining(["H.5.1", "H.5.13", "H.5.14", "H.7"]));
+    expect(fik).not.toContain("E.2.1");
+    expect(fik).not.toContain("R.1.1");
+
+    const university = (await getReservationCandidates({ fakultasId: null })).roomCodes;
+    expect(university).toEqual(expect.arrayContaining(["H.5.13", "E.2.1", "R.1.1"]));
+  });
+});
 
 describe("getReservationRequests", () => {
   it("keeps rooms as the default type, for the admin fakultas pages", async () => {

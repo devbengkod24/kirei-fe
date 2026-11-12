@@ -4,6 +4,7 @@ import {
   addMockReservation,
   approvedRoomBookings,
   decideMockReservation,
+  heldBookings,
   MOCK_RESERVATIONS_KEY,
   mergeAdminRequests,
   mergeOwnHistory,
@@ -149,5 +150,36 @@ describe("operator timeline", () => {
     const bookings = approvedRoomBookings(state, rooms, day);
     expect(bookings.map((booking) => booking.id)).toEqual(["internal", "approved-later"]);
     expect(bookings[0]).toMatchObject({ unitName: "H.5.2", bookerName: "HMTI", purpose: "Rapat pimpinan", status: "disetujui" });
+  });
+});
+
+describe("booking form availability", () => {
+  const roomIds = new Map([
+    ["H.5.2", "room-h52"],
+    ["H.5.3", "room-h53"],
+  ]);
+
+  it("locks the slot of pending and approved requests, not rejected ones", () => {
+    const state = {
+      created: [
+        created({ id: "pending" }),
+        created({ id: "internal", status: "disetujui", roomName: "H.5.2" }),
+        created({ id: "rejected" }),
+        created({ id: "elsewhere", roomName: "D.2.1" }),
+        created({ id: "gor", type: "gor", roomName: "H.5.3" }),
+      ],
+      decisions: { rejected: { status: "ditolak" as const, rejectionReason: "Bentrok", decidedAt: "" } },
+    };
+    expect(heldBookings(state, "ruangan", roomIds)).toEqual([
+      { unitId: "room-h53", startsAt: SEEDED.startsAt, endsAt: SEEDED.endsAt },
+      { unitId: "room-h52", startsAt: SEEDED.startsAt, endsAt: SEEDED.endsAt },
+    ]);
+  });
+
+  it("maps a GOR request by the hall name", () => {
+    const state = { created: [created({ type: "gor", roomName: "GOR Udinus" })], decisions: {} };
+    expect(heldBookings(state, "gor", new Map([["GOR Udinus", "hall-1"]]))).toEqual([
+      { unitId: "hall-1", startsAt: SEEDED.startsAt, endsAt: SEEDED.endsAt },
+    ]);
   });
 });

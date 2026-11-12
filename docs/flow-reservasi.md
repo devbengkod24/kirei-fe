@@ -90,16 +90,12 @@ Tab Persetujuan -> klik ikon silang -> dialog "Tolak Reservasi" -> isi "Alasan p
 Yang sudah ada:
 
 - Draft disimpan dan dibaca dari localStorage (`src/shared/reservation-draft/draftStorage.ts`), lalu dikirim lewat `submitDraft` (`src/modules/ormawa/drafts/draftActions.ts`).
-- Pengiriman reservasi (`createReservation` di `src/shared/reservation-form/createReservation.ts`) masih simulasi: menunggu sebentar lalu selalu dianggap diterima. Datanya tidak disimpan ke mana pun.
+- Pengiriman reservasi (`createReservation` di `src/shared/reservation-form/createReservation.ts`) masih simulasi: menunggu sebentar lalu selalu dianggap diterima, dan reservasinya disimpan ke store simulasi di bawah.
 - Tabel admin membaca data contoh tetap dari `src/mocks/reservations.ts` lewat `getReservationRequests` (`src/shared/reservation-management/getReservationRequests.ts`).
-- Setujui dan Tolak hanya menghapus baris dari state lokal `ReservationTable`. Status dan alasan penolakan tidak disimpan; setelah halaman dimuat ulang data kembali seperti semula.
 - Denah memakai booking contoh (`buildRoomBookingsMock`) dan jadwal kuliah dosen (`src/mocks/lecturerSchedules.ts`).
-
-Yang belum ada (acuan issue simulasi mock store):
-
-- Store bersama di browser antara form pemohon, tabel admin, dan halaman Riwayat, sehingga reservasi yang dikirim pemohon muncul di antrean admin.
-- Mutasi status pada store saat Setujui dan Tolak, termasuk menyimpan alasan penolakan.
-- Denah yang membaca reservasi dari store, sehingga slot `menunggu_persetujuan` dan `disetujui` terkunci.
+- Store simulasi di localStorage browser (`src/shared/reservation-store/reservationStore.ts`) dipakai bersama oleh form pemohon, Reservasi Internal admin, tabel admin, Riwayat pemohon, dan timeline operator. Reservasi yang dikirim pemohon masuk antrean admin; Reservasi Internal langsung tersimpan `disetujui` dan tampil di Riwayat Kelola Reservasi.
+- Setujui dan Tolak menyimpan keputusan dan alasan penolakan ke store (`decideMockReservation`).
+- Denah ruangan dan slot GOR menggabungkan reservasi dari store (`heldBookings`), sehingga slot `menunggu_persetujuan` dan `disetujui` terkunci; `ditolak` dan draft tidak mengunci. Store hanya berlaku di satu browser; data kembali seperti semula lewat "Reset data simulasi reservasi" di halaman login.
 
 ## 4. Perbedaan dengan Vault dan Keputusan
 
