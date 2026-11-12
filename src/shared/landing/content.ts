@@ -149,9 +149,9 @@ export interface FaqItem {
 
 export const FAQ_ITEMS: FaqItem[] = [
   {
-    question: "Bagaimana cara mendapatkan akun?",
+    question: "Siapa yang bisa memesan?",
     answer:
-      "Tidak ada pendaftaran mandiri. Akun dosen, ormawa, dan UKM disinkronkan dari FIK Apps. Akun ormawa dan UKM dipegang ketua organisasi. Akun operator dan admin dibuat oleh admin universitas.",
+      "Hanya Ormawa, UKM, dan Dosen yang terdaftar yang bisa memesan fasilitas.",
   },
   {
     question: "Bisakah saya membatalkan reservasi?",
@@ -164,13 +164,9 @@ export const FAQ_ITEMS: FaqItem[] = [
       "Admin universitas dapat mengambil alih slot untuk agenda universitas (override BIUM). Reservasi dicabut tanpa ruangan pengganti, dan kamu menerima notifikasi email.",
   },
   {
-    question: "Apakah ada kode booking atau QR untuk check-in?",
-    answer: "Tidak ada. Status reservasi dapat dilihat di akunmu dan setiap perubahan dikirim lewat email.",
-  },
-  {
     question: "Saya dosen dan kelas saya perlu pindah sementara. Bagaimana?",
     answer:
-      "Dosen dapat memindahkan kelas sementara ke slot yang kosong tanpa persetujuan. Pindah ruang permanen tidak diajukan di sini, melainkan lewat BIUM.",
+      "Dosen dapat memindahkan kelas sementara ke slot yang kosong melalui Operator. Pindah ruang permanen tidak diajukan di sini, melainkan lewat BIUM.",
   },
 ];
 
