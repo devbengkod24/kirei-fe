@@ -54,7 +54,8 @@ import {
   SummaryWhen,
 } from "./summaryParts";
 import { useReservationSubmit } from "./useReservationSubmit";
-import type { ReservationOwner } from "@/shared/reservation-store/reservationStore";
+import { heldBookings, type ReservationOwner } from "@/shared/reservation-store/reservationStore";
+import { useMockReservations } from "@/shared/reservation-store/useMockReservations";
 
 export interface RoomReservationFormProps {
   buildings: Building[];
@@ -97,7 +98,7 @@ function firstFloorId(building: Building | undefined) {
 
 export function RoomReservationForm({
   buildings,
-  bookings,
+  bookings: serverBookings,
   now,
   requester,
   owner,
@@ -173,6 +174,15 @@ export function RoomReservationForm({
   const floor = building?.floors.find((f) => f.id === floorId);
   const range = toIsoRange(date, startTime, endTime);
 
+  // Requests sent in this browser (demo store) take their room too, until kirei-api serves availability.
+  const store = useMockReservations();
+  const bookings = useMemo(() => {
+    const roomIds = new Map(
+      buildings.flatMap((b) => b.floors.flatMap((f) => f.rooms.map((room) => [room.code, room.id] as const))),
+    );
+    return [...serverBookings, ...heldBookings(store, "ruangan", roomIds)];
+  }, [serverBookings, store, buildings]);
+
   const statuses = new Map(
     (floor?.rooms ?? []).map((room) => [
       room.id,
@@ -187,8 +197,9 @@ export function RoomReservationForm({
     ]),
   );
 
-  // Drop the chosen room once a new date, time, or filter makes it unavailable.
-  const selectionLost = Boolean(roomId) && !statuses.get(roomId)?.selectable;
+  // Drop the chosen room once a new date, time, or filter makes it unavailable. Not after sending:
+  // the sent request now holds the room, and the result dialog still needs it.
+  const selectionLost = Boolean(roomId) && !flow.result && !statuses.get(roomId)?.selectable;
   useEffect(() => {
     if (selectionLost) setValue("roomId", "");
   }, [selectionLost, setValue]);

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { toWibDateKey } from "@/lib/date";
-import type { ReservationRecord, ReservationRequest, ReservationType } from "@/types/reservation";
+import type { UnitBooking } from "@/types/facility";
+import type { ReservationRecord, ReservationRequest, ReservationStatus, ReservationType } from "@/types/reservation";
 
 /*
  * Demo-only reservation store for running the whole flow without kirei-api: a borrower's request,
@@ -221,6 +222,28 @@ export function mergeOwnHistory(
     .filter((reservation) => reservation.ownerId === ownerId && reservation.type === tipe)
     .map((reservation) => toHistoryRecord(withDecision(reservation, state.decisions)));
   return [...seeded, ...own];
+}
+
+/** A request waiting for approval already holds its slot, like an approved one (KONTEKS-DASAR §7). */
+const SLOT_HOLDING_STATUSES = new Set<ReservationStatus>(["menunggu_persetujuan", "disetujui"]);
+
+/**
+ * Requests made in this browser that still hold their slot, as bookings for the booking forms.
+ * `unitIds` maps the stored unit name (room code or GOR name) to the form's unit id; units the
+ * form does not show are left out.
+ */
+export function heldBookings(
+  state: MockReservationState,
+  tipe: Exclude<ReservationType, "kendaraan">,
+  unitIds: ReadonlyMap<string, string>,
+): UnitBooking[] {
+  return state.created.flatMap((created) => {
+    const reservation = withDecision(created, state.decisions);
+    const unitId = unitIds.get(reservation.roomName);
+    return reservation.type === tipe && unitId && SLOT_HOLDING_STATUSES.has(reservation.status)
+      ? [{ unitId, startsAt: reservation.startsAt, endsAt: reservation.endsAt }]
+      : [];
+  });
 }
 
 /**
