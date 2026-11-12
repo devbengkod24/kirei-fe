@@ -32,7 +32,7 @@ describe("LandingPage", () => {
       .getAllByRole("link")
       .map((link) => link.getAttribute("href"));
 
-    expect(targets).toEqual(["#beranda", "#fasilitas", "#peraturan", "#panduan", "#faq"]);
+    expect(targets).toEqual(["#beranda", "#fasilitas", "#peraturan", "#faq"]);
     for (const target of targets) {
       expect(container.querySelector(target!)).not.toBeNull();
     }
@@ -44,19 +44,8 @@ describe("LandingPage", () => {
     const signInLinks = [
       ...screen.getAllByRole("link", { name: "Masuk" }),
       screen.getByRole("link", { name: "Reservasi Sekarang" }),
-      screen.getByRole("link", { name: "Mulai Reservasi Sekarang" }),
     ];
     expect(signInLinks.map((link) => link.getAttribute("href"))).toEqual(signInLinks.map(() => "/login"));
-  });
-
-  it("switches the tutorial between organisations and lecturers", () => {
-    render(<LandingPage />);
-    expect(screen.getByText("Masuk ke Akun Organisasi")).toBeTruthy();
-
-    fireEvent.click(screen.getByRole("tab", { name: "Dosen" }));
-    expect(screen.getByRole("tab", { name: "Dosen" }).getAttribute("aria-selected")).toBe("true");
-    expect(screen.getByText("Masuk ke Akun Dosen")).toBeTruthy();
-    expect(screen.queryByText("Unggah Surat Peminjaman")).toBeNull();
   });
 
   it("shows the rules of the chosen facility type", () => {

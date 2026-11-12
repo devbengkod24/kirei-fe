@@ -10,7 +10,6 @@ export const SECTION_IDS = {
   home: "beranda",
   facilities: "fasilitas",
   rules: "peraturan",
-  tutorial: "panduan",
   faq: "faq",
 } as const;
 
@@ -18,7 +17,6 @@ export const NAV_ITEMS = [
   { id: SECTION_IDS.home, label: "Beranda" },
   { id: SECTION_IDS.facilities, label: "Fasilitas" },
   { id: SECTION_IDS.rules, label: "Peraturan" },
-  { id: SECTION_IDS.tutorial, label: "Panduan" },
   { id: SECTION_IDS.faq, label: "FAQ" },
 ] as const;
 
@@ -143,103 +141,6 @@ export const RULE_TABS: RuleTab[] = [
     ],
   },
 ];
-
-export interface TutorialStep {
-  iconSrc: string;
-  title: string;
-  description: string;
-}
-
-const CREATE_RESERVATION: TutorialStep = {
-  iconSrc: "/icons/nav/create-reservation.svg",
-  title: "Buka Menu Buat Reservasi",
-  description: "Pilih kategori fasilitas yang ingin dipesan: Ruangan, GOR, atau Kendaraan.",
-};
-
-const PICK_TIME: TutorialStep = {
-  iconSrc: "/icons/clock-outline.svg",
-  title: "Pilih Waktu Reservasi",
-  description: "Pilih jam mulai dan selesai antara 07.00 dan 20.00 WIB, dalam kelipatan 10 menit.",
-};
-
-const PICK_ROOM: TutorialStep = {
-  iconSrc: "/icons/classroom.svg",
-  title: "Pilih Ruangan pada Denah",
-  description: "Denah menandai ruangan yang masih tersedia. Klik ruangan yang ingin kamu pakai.",
-};
-
-const TRACK_STATUS: TutorialStep = {
-  iconSrc: "/icons/nav/reservation-history.svg",
-  title: "Pantau Status Reservasi",
-  description: "Cek menu Reservasi & Riwayat. Setiap perubahan status juga dikirim ke email.",
-};
-
-export const TUTORIALS = [
-  {
-    id: "organisasi",
-    label: "Ormawa & UKM",
-    heading: "Panduan Reservasi Ormawa dan UKM",
-    intro: "Ikuti langkah berikut untuk memesan ruangan atau GOR atas nama organisasi.",
-    steps: [
-      {
-        iconSrc: "/icons/person-circle.svg",
-        title: "Masuk ke Akun Organisasi",
-        description: "Gunakan akun ormawa atau UKM yang dipegang ketua organisasi. Akun berasal dari FIK Apps, tidak perlu mendaftar.",
-      },
-      CREATE_RESERVATION,
-      {
-        iconSrc: "/icons/calendar-outline.svg",
-        title: "Pilih Lokasi dan Tanggal",
-        description: "Tentukan gedung dan tanggal kegiatan. Tanggal besok dan hari ini tidak dapat dipesan.",
-      },
-      PICK_TIME,
-      PICK_ROOM,
-      {
-        iconSrc: "/icons/upload.svg",
-        title: "Unggah Surat Peminjaman",
-        description: "Unggah surat PDF lalu kirim. Kalau belum siap, simpan sebagai draft dan unggah paling lambat 1 hari kerja.",
-      },
-      {
-        iconSrc: "/icons/slot-check.svg",
-        title: "Tunggu Persetujuan Admin",
-        description: "Setelah dikirim, slot terkunci untukmu. Admin menyetujui atau menolak permohonan disertai catatan.",
-      },
-      TRACK_STATUS,
-    ],
-  },
-  {
-    id: "dosen",
-    label: "Dosen",
-    heading: "Panduan Reservasi Dosen",
-    intro: "Ikuti langkah berikut untuk memesan ruangan atau GOR sebagai dosen.",
-    steps: [
-      {
-        iconSrc: "/icons/person-circle.svg",
-        title: "Masuk ke Akun Dosen",
-        description: "Akun dosen disinkronkan dari FIK Apps, jadi kamu tidak perlu mendaftar.",
-      },
-      CREATE_RESERVATION,
-      {
-        iconSrc: "/icons/calendar-outline.svg",
-        title: "Pilih Lokasi dan Tanggal",
-        description: "Tentukan gedung dan tanggal kegiatan yang kamu butuhkan.",
-      },
-      PICK_TIME,
-      PICK_ROOM,
-      {
-        iconSrc: "/icons/sticky-note.svg",
-        title: "Kirim Permohonan",
-        description: "Reservasi ruangan dan GOR oleh dosen tidak memerlukan surat. Periksa detailnya, lalu kirim.",
-      },
-      {
-        iconSrc: "/icons/slot-check.svg",
-        title: "Tunggu Persetujuan Admin",
-        description: "Permohonan masuk antrean admin fakultas pemilik ruangan, atau admin universitas untuk ruangan bersama dan GOR.",
-      },
-      TRACK_STATUS,
-    ],
-  },
-] as const satisfies readonly { id: string; label: string; heading: string; intro: string; steps: TutorialStep[] }[];
 
 export interface FaqItem {
   question: string;
