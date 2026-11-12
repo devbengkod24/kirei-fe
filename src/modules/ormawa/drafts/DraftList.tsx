@@ -7,7 +7,8 @@ import { ResultDialog } from "@/components/feedback/ResultDialog";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Modal } from "@/components/ui/Modal";
-import { formatDateLongWIB, formatTimeRangeWIB } from "@/lib/date";
+import { formatTimeRangeWIB } from "@/lib/date";
+import { isWholeDayType, reservationDateLong } from "@/shared/reservation/reservationTime";
 import {
   draftsSnapshot,
   parseDrafts,
@@ -91,8 +92,8 @@ export function DraftList({ booker, links }: DraftListProps) {
       <Modal open={cancelTarget !== null} onClose={() => setCancelTarget(null)} title="Batalkan draft?">
         {cancelTarget && (
           <p className="text-sm">
-            Draft reservasi {cancelTarget.unitName} pada {formatDateLongWIB(cancelTarget.startsAt)},{" "}
-            {formatTimeRangeWIB(cancelTarget.startsAt, cancelTarget.endsAt)} akan dihapus.
+            Draft reservasi {cancelTarget.unitName} pada {reservationDateLong(cancelTarget)}
+            {!isWholeDayType(cancelTarget.type) && `, ${formatTimeRangeWIB(cancelTarget.startsAt, cancelTarget.endsAt)}`} akan dihapus.
           </p>
         )}
         <div className="flex flex-wrap justify-end gap-2">

@@ -108,3 +108,15 @@ describe("ReservationTable with the demo store", () => {
     expect(within(screen.getByRole("table")).getByText("Kendaraan sudah terpakai.")).toBeTruthy();
   });
 });
+
+describe("ReservationTable dates for vehicles", () => {
+  it("shows the trip's days without a time column", () => {
+    // 00.00 WIB on 13 Nov to 00.00 WIB on 15 Nov: two whole days
+    const trip = { ...TRIP, startsAt: "2026-11-12T17:00:00.000Z", endsAt: "2026-11-14T17:00:00.000Z" };
+    render(<ReservationTable tipe="kendaraan" tab="persetujuan" reservations={[trip]} roomCodes={null} />);
+    const table = screen.getByRole("table");
+    expect(within(table).queryByRole("columnheader", { name: "Waktu" })).toBeNull();
+    expect(within(table).getByText("13 – 14 Nov 2026")).toBeTruthy();
+    expect(table.textContent).not.toContain("00.00");
+  });
+});

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { ReservationRecord, ReservationRequest } from "@/types/reservation";
 import {
   addMockReservation,
+  approvedRoomBookings,
   decideMockReservation,
   MOCK_RESERVATIONS_KEY,
   mergeAdminRequests,
@@ -121,5 +122,32 @@ describe("borrower history", () => {
     const trip = created({ id: "mock-trip", type: "kendaraan", roomName: "", trip: { destination: "Kudus", participants: 8 } });
     const [record] = mergeOwnHistory([], { created: [trip], decisions: {} }, "kendaraan", "usr-ormawa");
     expect(record.unitName).toBe("Kendaraan ke Kudus");
+  });
+});
+
+describe("operator timeline", () => {
+  // SEEDED starts on 20 Nov 2026, 09.00 WIB
+  const day = "2026-11-20";
+  const rooms = ["H.5.2", "H.5.3"];
+
+  it("shows approved room bookings on the floor for that day", () => {
+    const state = {
+      created: [
+        created({ id: "internal", status: "disetujui", roomName: "H.5.2", purpose: "Rapat pimpinan" }),
+        created({ id: "approved-later" }),
+        created({ id: "pending", roomName: "H.5.2" }),
+        created({ id: "rejected" }),
+        created({ id: "other-floor", status: "disetujui", roomName: "H.6.1" }),
+        created({ id: "other-day", status: "disetujui", startsAt: "2026-11-21T02:00:00.000Z" }),
+        created({ id: "gor", status: "disetujui", type: "gor", roomName: "H.5.3" }),
+      ],
+      decisions: {
+        "approved-later": { status: "disetujui" as const, rejectionReason: null, decidedAt: "" },
+        rejected: { status: "ditolak" as const, rejectionReason: "Bentrok", decidedAt: "" },
+      },
+    };
+    const bookings = approvedRoomBookings(state, rooms, day);
+    expect(bookings.map((booking) => booking.id)).toEqual(["internal", "approved-later"]);
+    expect(bookings[0]).toMatchObject({ unitName: "H.5.2", bookerName: "HMTI", purpose: "Rapat pimpinan", status: "disetujui" });
   });
 });

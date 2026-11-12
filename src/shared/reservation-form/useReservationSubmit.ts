@@ -20,8 +20,10 @@ export interface UseReservationSubmitOptions<TInput extends FieldValues, TOutput
    * sent request is listed for the admin in the demo store.
    */
   toDraft?: (values: TOutput) => Pick<DraftDetails, "unitName" | "purpose" | "buildingName">;
-  /** The borrower, when the request waits for approval; a sent request is then kept in the demo store. */
+  /** The signed-in user; a sent request is then kept in the demo store. */
   owner?: ReservationOwner;
+  /** True for a booking that needs no approval (Reservasi Internal): it is stored as approved. */
+  approvedOnSubmit?: boolean;
 }
 
 /** The request without the letter and status, which are added when the draft is sent. */
@@ -38,7 +40,7 @@ function draftBody(request: Parameters<typeof createReservation>[0]): Record<str
  */
 export function useReservationSubmit<TInput extends FieldValues, TOutput>(
   form: UseFormReturn<TInput, unknown, TOutput>,
-  { defaults, toRequest, fieldMap, onReset, toDraft, owner }: UseReservationSubmitOptions<TInput, TOutput>,
+  { defaults, toRequest, fieldMap, onReset, toDraft, owner, approvedOnSubmit = false }: UseReservationSubmitOptions<TInput, TOutput>,
 ) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [result, setResult] = useState<ReservationIntent | null>(null);
@@ -70,7 +72,7 @@ export function useReservationSubmit<TInput extends FieldValues, TOutput>(
         }
         return;
       }
-      const listing = owner && toDraft ? { owner, ...toDraft(values) } : undefined;
+      const listing = owner && toDraft ? { owner, approved: approvedOnSubmit, ...toDraft(values) } : undefined;
       const response = await createReservation(toRequest(values), listing);
       if (response.ok) {
         setResult(response.intent);

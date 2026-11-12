@@ -3,7 +3,8 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
-import { formatDateLongWIB, formatTimeWIB } from "@/lib/date";
+import { formatTimeWIB } from "@/lib/date";
+import { isWholeDayType, reservationDateLong } from "@/shared/reservation/reservationTime";
 import type { ReservationRequest, ReservationType } from "@/types/reservation";
 import { CAPS_LABEL_CLASS } from "@/components/form/Field";
 
@@ -72,28 +73,31 @@ export function ReservationDetailDialog({ reservation, onClose, title = "Detail 
           <dd className="flex flex-col text-xs">
             <span className="flex min-h-[30px] items-center gap-2">
               <Image src="/icons/admin/detail-date.svg" alt="" width={16} height={16} />
-              {formatDateLongWIB(reservation.startsAt)}
+              {reservationDateLong(reservation)}
             </span>
-            <span className="flex min-h-[30px] flex-wrap items-center justify-between gap-x-4 gap-y-1">
-              <span className="flex items-center gap-2">
-                <Image src="/icons/admin/detail-time.svg" alt="" width={16} height={16} />
-                {formatTimeWIB(reservation.startsAt)} WIB
-                <Image src="/icons/admin/detail-arrow.svg" alt="sampai" width={18} height={18} />
-                {formatTimeWIB(reservation.endsAt)} WIB
-              </span>
-              {reservation.type === "ruangan" && (
-                <span className="flex items-center gap-3 text-[11px]">
-                  <span className="flex items-center gap-1">
-                    <Image src="/icons/admin/detail-building.svg" alt="Gedung" width={13} height={15} />
-                    {reservation.buildingName}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Image src="/icons/admin/detail-room.svg" alt="Ruangan" width={19} height={19} />
-                    {reservation.roomName}
-                  </span>
+            {/* Vehicles are booked by whole days, so they have no time row. */}
+            {!isWholeDayType(reservation.type) && (
+              <span className="flex min-h-[30px] flex-wrap items-center justify-between gap-x-4 gap-y-1">
+                <span className="flex items-center gap-2">
+                  <Image src="/icons/admin/detail-time.svg" alt="" width={16} height={16} />
+                  {formatTimeWIB(reservation.startsAt)} WIB
+                  <Image src="/icons/admin/detail-arrow.svg" alt="sampai" width={18} height={18} />
+                  {formatTimeWIB(reservation.endsAt)} WIB
                 </span>
-              )}
-            </span>
+                {reservation.type === "ruangan" && (
+                  <span className="flex items-center gap-3 text-[11px]">
+                    <span className="flex items-center gap-1">
+                      <Image src="/icons/admin/detail-building.svg" alt="Gedung" width={13} height={15} />
+                      {reservation.buildingName}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Image src="/icons/admin/detail-room.svg" alt="Ruangan" width={19} height={19} />
+                      {reservation.roomName}
+                    </span>
+                  </span>
+                )}
+              </span>
+            )}
           </dd>
         </div>
 

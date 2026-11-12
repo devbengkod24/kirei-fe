@@ -16,6 +16,7 @@ export default async function Page() {
     <RoomReservationForm
       {...options}
       requester={{ name: user.name, fakultasId: user.fakultasId }}
+      owner={{ id: user.id, name: user.name, email: user.email, detail: "Admin Fakultas" }}
       mode="internal"
       purposePlaceholder="Contoh: Rapat dosen prodi"
       links={{ history: ADMIN_FAKULTAS_ROUTES.reservationHistory, historyLabel: "Buka Kelola Reservasi" }}

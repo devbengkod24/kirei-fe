@@ -1,12 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { SelectInput } from "@/components/form/Field";
 import { Card } from "@/components/ui/Card";
 import { MaskIcon } from "@/components/ui/MaskIcon";
 import { formatDateLongWIB, formatTimeRangeWIB, toWibDateKey } from "@/lib/date";
 import type { TimeSlot } from "@/shared/reservation-form/sportsHallSlots";
+import { approvedRoomBookings } from "@/shared/reservation-store/reservationStore";
+import { useMockReservations } from "@/shared/reservation-store/useMockReservations";
 import { CreateReservationPanel } from "./CreateReservationPanel";
 import { FloorTimeline } from "./FloorTimeline";
 import type { OperatorFloorData } from "./getOperatorFloor";
@@ -41,7 +43,13 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
   const dateKey = toWibDateKey(data.now);
   const [now, setNow] = useState(() => new Date(data.now));
   const [hours, setHours] = useState(() => defaultHourFilter(new Date(data.now)));
-  const [reservations, setReservations] = useState(data.reservations);
+  const [created, setCreated] = useState(data.reservations);
+  // Demo store: approved requests and Reservasi Internal made in this browser for today on this floor.
+  const store = useMockReservations();
+  const reservations = useMemo(
+    () => [...created, ...approvedRoomBookings(store, floor.rooms.map((room) => room.code), dateKey)],
+    [created, store, floor.rooms, dateKey],
+  );
   // Every room starts visible so the operator sees the whole floor at once.
   const [visibleIds, setVisibleIds] = useState(() => floor.rooms.map((room) => room.id));
   // The clip whose detail popover is open, with the element it is anchored to.
@@ -236,7 +244,7 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
                     statusHeadingRef.current?.focus();
                   }}
                   onCreated={(reservation) => {
-                    setReservations((current) => [...current, reservation]);
+                    setCreated((current) => [...current, reservation]);
                     setDraft(null);
                     statusHeadingRef.current?.focus();
                     setNotice(`Reservasi ${reservation.unitName}, ${formatTimeRangeWIB(reservation.startsAt, reservation.endsAt)}, dibuat.`);

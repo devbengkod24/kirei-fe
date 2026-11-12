@@ -6,9 +6,10 @@ import { Card } from "@/components/ui/Card";
 import { Pagination } from "@/components/ui/Pagination";
 import { TABLE, TABLE_CELL, TABLE_HEAD_CELL, TABLE_ROW } from "@/components/ui/table";
 import { usePagination } from "@/hooks/usePagination";
-import { formatDateShortWIB, formatTimeWIB } from "@/lib/date";
+import { formatTimeWIB } from "@/lib/date";
 import { ReservationDetailDialog } from "@/shared/reservation/ReservationDetailDialog";
 import { ReservationStatusBadge } from "@/shared/reservation/ReservationStatusBadge";
+import { isWholeDayType, reservationDateShort } from "@/shared/reservation/reservationTime";
 import { RESERVATION_TYPE_LABEL } from "@/shared/reservation/reservationTypes";
 import { decideMockReservation, mergeAdminRequests, type MockDecision } from "@/shared/reservation-store/reservationStore";
 import { useMockReservations } from "@/shared/reservation-store/useMockReservations";
@@ -58,6 +59,8 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes }:
   const [notice, setNotice] = useState("");
   const paging = usePagination(reservations, 10);
   const isApproval = tab === "persetujuan";
+  // Vehicles are booked by whole days: the date column shows the range and there is no time column.
+  const wholeDays = isWholeDayType(tipe);
   const columns = TYPE_COLUMNS[tipe];
   // Extra type columns need more room, so the card list stays on until xl.
   const layout = columns.length > 1 ? WIDE_LAYOUT : DEFAULT_LAYOUT;
@@ -125,7 +128,7 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes }:
                 {columns.map((column) => (
                   <th key={column.header} scope="col" className={TH}>{column.header}</th>
                 ))}
-                <th scope="col" className={TH}>Waktu</th>
+                {!wholeDays && <th scope="col" className={TH}>Waktu</th>}
                 <th scope="col" className={TH}>Keperluan</th>
                 {!isApproval && <th scope="col" className={TH}>Alasan Ditolak</th>}
                 {!isApproval && <th scope="col" className={TH}>Status</th>}
@@ -135,16 +138,18 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes }:
             <tbody>
               {paging.items.map((reservation) => (
                 <tr key={reservation.id} className={TABLE_ROW}>
-                  <td className={`${TD} whitespace-nowrap`}>{formatDateShortWIB(reservation.startsAt)}</td>
+                  <td className={`${TD} whitespace-nowrap`}>{reservationDateShort(reservation)}</td>
                   <td className={TD}>{reservation.borrowerName}</td>
                   {columns.map((column) => (
                     <td key={column.header} className={column.nowrap ? `${TD} whitespace-nowrap` : TD}>
                       {column.cell(reservation)}
                     </td>
                   ))}
-                  <td className={`${TD} whitespace-nowrap`}>
-                    {formatTimeWIB(reservation.startsAt)} - {formatTimeWIB(reservation.endsAt)}
-                  </td>
+                  {!wholeDays && (
+                    <td className={`${TD} whitespace-nowrap`}>
+                      {formatTimeWIB(reservation.startsAt)} - {formatTimeWIB(reservation.endsAt)}
+                    </td>
+                  )}
                   <td className={TD}>{reservation.purpose}</td>
                   {!isApproval && (
                     <td className={`${TD} max-w-56 ${reservation.status === "ditolak" ? "text-danger" : "text-muted"}`}>
@@ -171,10 +176,12 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes }:
             <li key={reservation.id} className="border-b border-border py-3 first:pt-0">
               <div className="mb-2 flex items-start justify-between gap-3">
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium">{formatDateShortWIB(reservation.startsAt)}</span>
-                  <span className="text-xs text-muted">
-                    {formatTimeWIB(reservation.startsAt)} - {formatTimeWIB(reservation.endsAt)} WIB
-                  </span>
+                  <span className="text-sm font-medium">{reservationDateShort(reservation)}</span>
+                  {!wholeDays && (
+                    <span className="text-xs text-muted">
+                      {formatTimeWIB(reservation.startsAt)} - {formatTimeWIB(reservation.endsAt)} WIB
+                    </span>
+                  )}
                 </div>
                 {!isApproval && <ReservationStatusBadge status={reservation.status} size="sm" />}
               </div>

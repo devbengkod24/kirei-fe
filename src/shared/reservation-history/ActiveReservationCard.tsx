@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/Card";
-import { formatDateLongWIB, formatTimeRangeWIB } from "@/lib/date";
+import { formatDateLongWIB, formatDayRangeWIB, formatTimeRangeWIB } from "@/lib/date";
 import type { ReservationRecord } from "@/types/reservation";
 import { ReservationStatusBadge } from "@/shared/reservation/ReservationStatusBadge";
 import { RESERVATION_TYPE_LABEL } from "@/shared/reservation/reservationTypes";
@@ -27,9 +27,16 @@ export function ActiveReservationCard({ reservation }: { reservation: Reservatio
         </div>
         <div className="flex flex-col gap-3">
           <Field label="Waktu Reservasi">
-            {formatDateLongWIB(reservation.startsAt)}
-            <br />
-            {formatTimeRangeWIB(reservation.startsAt, reservation.endsAt)}
+            {/* Vehicles are booked by whole days, so only the dates are shown. */}
+            {reservation.type === "kendaraan" ? (
+              formatDayRangeWIB(reservation.startsAt, reservation.endsAt)
+            ) : (
+              <>
+                {formatDateLongWIB(reservation.startsAt)}
+                <br />
+                {formatTimeRangeWIB(reservation.startsAt, reservation.endsAt)}
+              </>
+            )}
           </Field>
           <Field label="Tipe Reservasi">{RESERVATION_TYPE_LABEL[reservation.type]}</Field>
         </div>

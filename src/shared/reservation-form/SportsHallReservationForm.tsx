@@ -45,7 +45,10 @@ export interface SportsHallReservationFormProps {
   /** ISO 8601 server time */
   now: string;
   requester: { name: string };
-  /** The signed-in borrower. When set and the request needs approval, a sent request is kept in the demo store. */
+  /**
+   * The signed-in user. When set, a sent request is kept in the demo store: waiting for approval,
+   * or approved right away in a mode that needs none (Reservasi Internal).
+   */
   owner?: ReservationOwner;
   /** "internal" for an admin's own booking: no letter, draft, or approval. */
   mode?: BookingMode;
@@ -147,7 +150,8 @@ export function SportsHallReservationForm({
       unitName: hall.name,
       purpose: values.notes ? `${values.activity}: ${values.notes}` : values.activity,
     }),
-    owner: needsApproval ? owner : undefined,
+    owner,
+    approvedOnSubmit: !needsApproval,
   });
 
   const statuses = slots.map((slot) =>

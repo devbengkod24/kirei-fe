@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { toWibDateKey } from "@/lib/date";
 import type { ReservationRecord, ReservationRequest, ReservationType } from "@/types/reservation";
 
 /*
@@ -220,4 +221,22 @@ export function mergeOwnHistory(
     .filter((reservation) => reservation.ownerId === ownerId && reservation.type === tipe)
     .map((reservation) => toHistoryRecord(withDecision(reservation, state.decisions)));
   return [...seeded, ...own];
+}
+
+/**
+ * Approved room bookings made in this browser (borrowers' requests and Reservasi Internal) for the
+ * given rooms on one WIB day, as the operator's timeline shows them.
+ */
+export function approvedRoomBookings(state: MockReservationState, roomCodes: string[], dateKey: string): ReservationRecord[] {
+  const rooms = new Set(roomCodes);
+  return state.created
+    .map((reservation) => withDecision(reservation, state.decisions))
+    .filter(
+      (reservation) =>
+        reservation.type === "ruangan" &&
+        reservation.status === "disetujui" &&
+        rooms.has(reservation.roomName) &&
+        toWibDateKey(reservation.startsAt) === dateKey,
+    )
+    .map(toHistoryRecord);
 }

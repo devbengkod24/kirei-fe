@@ -83,6 +83,37 @@ export function formatDateLongWIB(input: DateInput): string {
   return `${pick("weekday")}, ${pick("day")} ${pick("month")} ${pick("year")}`;
 }
 
+/**
+ * The WIB day a booking ends on. Whole-day bookings (vehicles) end at 00.00 after their last day,
+ * so one millisecond is taken off to land on that last day.
+ */
+function lastWibDay(end: DateInput): Date {
+  return new Date(new Date(end).getTime() - 1);
+}
+
+function formatDayRange(start: DateInput, end: DateInput, month: "long" | "short", withWeekday: boolean): string {
+  const from = partsOf(start, { weekday: "long", day: "numeric", month, year: "numeric" });
+  const to = partsOf(lastWibDay(end), { day: "numeric", month, year: "numeric" });
+  if (toWibDateKey(start) === toWibDateKey(lastWibDay(end))) {
+    const day = `${from("day")} ${from("month")} ${from("year")}`;
+    return withWeekday ? `${from("weekday")}, ${day}` : day;
+  }
+  const last = `${to("day")} ${to("month")} ${to("year")}`;
+  if (from("year") !== to("year")) return `${from("day")} ${from("month")} ${from("year")} – ${last}`;
+  if (from("month") !== to("month")) return `${from("day")} ${from("month")} – ${last}`;
+  return `${from("day")} – ${last}`;
+}
+
+/** Whole-day bookings: "Kamis, 12 November 2026", or "12 – 14 November 2026" over several days. */
+export function formatDayRangeWIB(start: DateInput, end: DateInput): string {
+  return formatDayRange(start, end, "long", true);
+}
+
+/** Whole-day bookings in tables: "12 Nov 2026", or "30 Nov – 2 Des 2026" over several days. */
+export function formatDayRangeShortWIB(start: DateInput, end: DateInput): string {
+  return formatDayRange(start, end, "short", false);
+}
+
 /** "Hari ini", "Kemarin", or "2 Mar 2025", by WIB calendar day. */
 export function formatRelativeDayWIB(input: DateInput, now: DateInput): string {
   const day = toWibDateKey(input);

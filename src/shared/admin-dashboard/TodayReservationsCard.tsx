@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/Card";
 import { TABLE, TABLE_CELL, TABLE_HEAD_CELL, TABLE_ROW } from "@/components/ui/table";
 import { formatTimeWIB } from "@/lib/date";
 import { ReservationStatusBadge } from "@/shared/reservation/ReservationStatusBadge";
+import { isWholeDayType } from "@/shared/reservation/reservationTime";
 import { RESERVATION_TYPE_LABEL } from "@/shared/reservation/reservationTypes";
 import type { ReservationRequest } from "@/types/reservation";
 
@@ -60,7 +61,7 @@ export function TodayReservationsCard({ reservations, allHref, showType = false,
                   {showType && <td className={`${TABLE_CELL} whitespace-nowrap`}>{RESERVATION_TYPE_LABEL[reservation.type]}</td>}
                   <td className={`${TABLE_CELL} whitespace-nowrap`}>
                     {reservation.roomName}
-                    <span className="ml-1 text-muted">{formatTimeWIB(reservation.startsAt)}</span>
+                    {!isWholeDayType(reservation.type) && <span className="ml-1 text-muted">{formatTimeWIB(reservation.startsAt)}</span>}
                   </td>
                   <td className={TABLE_CELL}>{reservation.purpose}</td>
                   <td className={`${TABLE_CELL} text-center`}>
@@ -88,7 +89,8 @@ export function TodayReservationsCard({ reservations, allHref, showType = false,
                   )}
                   <dt className="text-primary">{unitLabel}</dt>
                   <dd>
-                    {reservation.roomName} <span className="text-muted">{formatTimeWIB(reservation.startsAt)} WIB</span>
+                    {reservation.roomName}{" "}
+                    {!isWholeDayType(reservation.type) && <span className="text-muted">{formatTimeWIB(reservation.startsAt)} WIB</span>}
                   </dd>
                   <dt className="text-primary">Keperluan</dt>
                   <dd className="break-words">{reservation.purpose}</dd>

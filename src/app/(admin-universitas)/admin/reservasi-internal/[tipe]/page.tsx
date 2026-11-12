@@ -14,5 +14,10 @@ export default async function Page({ params }: PageProps<"/admin/reservasi-inter
   const user = await requireRole(["admin_universitas"]);
   const tipe = parseReservationTypeParam((await params).tipe);
 
-  return <InternalReservationForm tipe={tipe} requesterName={user.name} />;
+  return (
+    <InternalReservationForm
+      tipe={tipe}
+      owner={{ id: user.id, name: user.name, email: user.email, detail: "Admin Universitas" }}
+    />
+  );
 }

@@ -27,7 +27,10 @@ export interface VehicleReservationFormProps {
   /** ISO 8601 server time */
   now: string;
   requester: { name: string };
-  /** The signed-in borrower. When set and the request needs approval, a sent request is kept in the demo store. */
+  /**
+   * The signed-in user. When set, a sent request is kept in the demo store: waiting for approval,
+   * or approved right away in a mode that needs none (Reservasi Internal).
+   */
   owner?: ReservationOwner;
   /** "internal" for an admin's own booking: no phone or letter. */
   mode?: BookingMode;
@@ -118,7 +121,8 @@ export function VehicleReservationForm({
       unitName: `Kendaraan ke ${values.destination}`,
       purpose: values.activity,
     }),
-    owner: needsApproval ? owner : undefined,
+    owner,
+    approvedOnSubmit: !needsApproval,
   });
 
   const field = (id: string, error?: string) => ({

@@ -62,7 +62,10 @@ export interface RoomReservationFormProps {
   /** ISO 8601 server time, for the default date and time */
   now: string;
   requester: { name: string; fakultasId: string | null };
-  /** The signed-in borrower. When set and the request needs approval, a sent request is kept in the demo store. */
+  /**
+   * The signed-in user. When set, a sent request is kept in the demo store: waiting for approval,
+   * or approved right away in a mode that needs none (Reservasi Internal).
+   */
   owner?: ReservationOwner;
   /** "internal" for an admin's own booking: no phone, letter, draft, or approval. */
   mode?: BookingMode;
@@ -161,7 +164,8 @@ export function RoomReservationForm({
         purpose: values.purpose,
       };
     },
-    owner: needsApproval ? owner : undefined,
+    owner,
+    approvedOnSubmit: !needsApproval,
   });
 
   const todayKey = toWibDateKey(new Date(now));

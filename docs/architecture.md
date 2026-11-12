@@ -73,9 +73,10 @@ Selama `kirei-api` belum ada, alur pemohon → antrean admin → keputusan → r
 
 - Data disimpan di `localStorage` dengan kunci `kirei:mock-reservations`, terpisah per browser. Penguji memerankan semua peran di browser yang sama lewat login cepat.
 - Isinya dua bagian: `created` (pengajuan yang dikirim dari form, berbentuk `ReservationRequest` ditambah `ownerId`) dan `decisions` (hasil Setujui/Tolak, untuk pengajuan baru maupun data contoh).
-- `createReservation` menyimpan pengajuan bila diberi `listing` dan statusnya bukan `draft`. Form hanya memberi `owner` untuk mode yang butuh persetujuan; reservasi internal tidak masuk store. Surat hanya disimpan nama berkasnya.
+- `createReservation` menyimpan pengajuan bila diberi `listing` dan statusnya bukan `draft`. Pengajuan pemohon disimpan `menunggu_persetujuan`; Reservasi Internal admin (mode tanpa persetujuan) langsung `disetujui`, jadi masuk tab Riwayat. Surat hanya disimpan nama berkasnya.
 - Loader server tetap mengirim data contoh. Komponen client (`ReservationTable`, `ReservationHistoryView`) menggabungkannya dengan store setelah mount lewat `useMockReservations`, jadi render server dan hydration pertama sama.
 - Admin melihat pengajuan baru sesuai tipe dan, untuk ruangan, sesuai kode ruangan dalam scope-nya (`getReservationCandidates`). Tab Riwayat admin memuat `disetujui`, `selesai`, dan `ditolak`.
+- Timeline operator (`modules/operator/OperatorFloorPage`) menambahkan reservasi ruangan berstatus `disetujui` dari store untuk ruangan di lantainya pada hari ini (`approvedRoomBookings`). Reservasi yang dibuat operator sendiri dan persetujuan atas data contoh admin belum ikut tampil di sana.
 - Tombol "Reset data simulasi reservasi" di bawah login cepat menghapus store. Draft (`kirei:reservation-drafts`) tidak ikut terhapus.
 
 ### Cara memilih lokasi sebuah file
