@@ -32,3 +32,26 @@ describe("ReservationHistoryTable", () => {
     expect(screen.queryByText("Alasan dibatalkan:")).toBeNull();
   });
 });
+
+describe("ReservationHistoryTable for vehicles", () => {
+  // 12–14 Nov 2026 as whole WIB days: 00.00 on the 12th to 00.00 on the 15th.
+  const trip: ReservationRecord = {
+    ...rejected,
+    id: "res-2",
+    type: "kendaraan",
+    status: "selesai",
+    startsAt: "2026-11-11T17:00:00.000Z",
+    endsAt: "2026-11-14T17:00:00.000Z",
+    unitName: "Kendaraan ke Bandung",
+    rejectionReason: null,
+  };
+
+  it("shows the date range without a time column", () => {
+    render(
+      <ReservationHistoryTable tipe="kendaraan" items={[trip]} page={1} perPage={10} totalPages={1} prevHref={null} nextHref={null} baseParams={{}} />,
+    );
+    expect(screen.queryByRole("columnheader", { name: "Waktu (WIB)" })).toBeNull();
+    expect(screen.getAllByText("12 – 14 Nov 2026")).toHaveLength(2);
+    expect(screen.queryByText(/00\.00/)).toBeNull();
+  });
+});

@@ -9,7 +9,8 @@ import { z } from "zod";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { useCountdown } from "@/hooks/useCountdown";
-import { formatDateLongWIB, formatTimeRangeWIB } from "@/lib/date";
+import { formatTimeRangeWIB } from "@/lib/date";
+import { isWholeDayType, reservationDateLong } from "@/shared/reservation/reservationTime";
 import { letterFileSchema } from "@/shared/reservation/letter";
 import { RESERVATION_TYPE_LABEL } from "@/shared/reservation/reservationTypes";
 import { letterDeadline, type StoredDraft } from "@/shared/reservation-draft/draftStorage";
@@ -63,7 +64,7 @@ export function DraftCard({ draft, booker, onSubmitted, onRequestCancel }: Draft
     <article aria-labelledby={`${id}-title`} className="grid gap-4 lg:grid-cols-[minmax(0,724fr)_minmax(0,394fr)] lg:gap-6">
       <Card className="flex flex-col gap-4 p-4">
         <h2 id={`${id}-title`} className="sr-only">
-          Draft {draft.unitName}, {formatDateLongWIB(draft.startsAt)}
+          Draft {draft.unitName}, {reservationDateLong(draft)}
         </h2>
 
         {expired ? (
@@ -99,9 +100,13 @@ export function DraftCard({ draft, booker, onSubmitted, onRequestCancel }: Draft
             </div>
             <div className="flex flex-col gap-4">
               <Field label="Waktu Reservasi">
-                {formatDateLongWIB(draft.startsAt)}
-                <br />
-                {formatTimeRangeWIB(draft.startsAt, draft.endsAt)}
+                {reservationDateLong(draft)}
+                {!isWholeDayType(draft.type) && (
+                  <>
+                    <br />
+                    {formatTimeRangeWIB(draft.startsAt, draft.endsAt)}
+                  </>
+                )}
               </Field>
               <Field label="Tipe Reservasi">{RESERVATION_TYPE_LABEL[draft.type]}</Field>
             </div>

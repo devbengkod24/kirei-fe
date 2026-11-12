@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Field, INPUT_CLASS } from "@/components/form/Field";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
-import { formatDateShortWIB } from "@/lib/date";
+import { reservationDateShort } from "@/shared/reservation/reservationTime";
 import type { ReservationRequest, ReservationType } from "@/types/reservation";
 import { describeReservationUnit } from "./typeColumns";
 
@@ -48,7 +48,7 @@ export function RejectReservationDialog({ reservation, onClose, onReject }: Reje
     >
       <p className="text-sm">
         Reservasi <span className="font-semibold">{describeReservationUnit(reservation)}</span> oleh{" "}
-        <span className="font-semibold">{reservation.borrowerName}</span> pada {formatDateShortWIB(reservation.startsAt)}.
+        <span className="font-semibold">{reservation.borrowerName}</span> pada {reservationDateShort(reservation)}.
       </p>
       <form id="reject-reservation-form" onSubmit={submit} noValidate>
         <Field label="Alasan penolakan" htmlFor="reject-reason" error={error}>

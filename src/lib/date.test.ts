@@ -4,6 +4,8 @@ import {
   formatDateShortWIB,
   formatDateTimeShortWIB,
   formatDateWIB,
+  formatDayRangeShortWIB,
+  formatDayRangeWIB,
   formatFullDateWIB,
   formatRelativeDayWIB,
   formatTimeRangeWIB,
@@ -59,5 +61,29 @@ describe("date (WIB)", () => {
   it("names months in Indonesian", () => {
     expect(monthName(0)).toBe("Januari");
     expect(monthName(3)).toBe("April");
+  });
+});
+
+describe("whole-day ranges (WIB)", () => {
+  // A vehicle booking runs from 00.00 WIB on the first day to 00.00 WIB after the last day.
+  const day = (key: string) => wibToIso(key, "00:00");
+
+  it("shows one day with its weekday, without a time", () => {
+    expect(formatDayRangeWIB(day("2026-11-12"), day("2026-11-13"))).toBe("Kamis, 12 November 2026");
+    expect(formatDayRangeShortWIB(day("2026-11-12"), day("2026-11-13"))).toBe("12 Nov 2026");
+  });
+
+  it("shows several days in one month once", () => {
+    expect(formatDayRangeWIB(day("2026-11-12"), day("2026-11-15"))).toBe("12 – 14 November 2026");
+    expect(formatDayRangeShortWIB(day("2026-11-12"), day("2026-11-15"))).toBe("12 – 14 Nov 2026");
+  });
+
+  it("names both months, or both years, when the trip crosses them", () => {
+    expect(formatDayRangeWIB(day("2026-11-30"), day("2026-12-03"))).toBe("30 November – 2 Desember 2026");
+    expect(formatDayRangeShortWIB(day("2026-12-31"), day("2027-01-02"))).toBe("31 Des 2026 – 1 Jan 2027");
+  });
+
+  it("keeps the last day for older bookings that end within the day", () => {
+    expect(formatDayRangeWIB(wibToIso("2026-11-12", "06:00"), wibToIso("2026-11-12", "18:00"))).toBe("Kamis, 12 November 2026");
   });
 });
