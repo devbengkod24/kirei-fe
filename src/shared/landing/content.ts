@@ -56,26 +56,91 @@ export const FACILITY_ITEMS: IconItem[] = [
   },
 ];
 
-export const RULE_ITEMS: IconItem[] = [
+export interface RuleTab {
+  id: string;
+  label: string;
+  iconSrc: string;
+  rules: IconItem[];
+}
+
+const LETTER_RULE: IconItem = {
+  iconSrc: "/icons/sticky-note.svg",
+  title: "Surat Peminjaman",
+  description: "Ormawa dan UKM wajib mengunggah surat PDF paling lambat 1 hari kerja. Reservasi dosen tidak memerlukan surat.",
+};
+
+const BOOKING_WINDOW_RULE: IconItem = {
+  iconSrc: "/icons/calendar-clock.svg",
+  title: "Batas Pemesanan",
+  description: "Ormawa dan UKM tidak dapat memesan untuk besok (H-1) maupun hari ini (H-0).",
+};
+
+/** Rules per facility type, shown as tabs in the Peraturan section. */
+export const RULE_TABS: RuleTab[] = [
   {
-    iconSrc: "/icons/clock.svg",
-    title: "Jam Operasional",
-    description: "Ruangan dapat dipesan pukul 07.00 sampai 20.00 WIB dengan slot kelipatan 10 menit.",
+    id: "ruangan",
+    label: "Ruangan",
+    iconSrc: "/icons/classroom.svg",
+    rules: [
+      {
+        iconSrc: "/icons/clock.svg",
+        title: "Jam Operasional",
+        description: "Ruangan dapat dipesan pukul 07.00 sampai 20.00 WIB dengan slot kelipatan 10 menit.",
+      },
+      LETTER_RULE,
+      BOOKING_WINDOW_RULE,
+      {
+        iconSrc: "/icons/slot-check.svg",
+        title: "Persetujuan",
+        description: "Disetujui admin fakultas pemilik ruangan, atau admin universitas untuk ruangan bersama.",
+      },
+    ],
   },
   {
-    iconSrc: "/icons/sticky-note.svg",
-    title: "Surat Peminjaman",
-    description: "Ormawa dan UKM wajib mengunggah surat PDF paling lambat 5 hari kerja. Reservasi dosen tidak memerlukan surat.",
+    id: "gor",
+    label: "GOR",
+    iconSrc: "/landing/stadium.svg",
+    rules: [
+      {
+        iconSrc: "/icons/clock.svg",
+        title: "Durasi Pemakaian",
+        description: "GOR dapat dipesan maksimal 2 jam per pemesanan, di antara pukul 07.00 dan 20.00 WIB.",
+      },
+      LETTER_RULE,
+      BOOKING_WINDOW_RULE,
+      {
+        iconSrc: "/icons/slot-check.svg",
+        title: "Persetujuan",
+        description: "Semua pemesanan GOR dari dosen, ormawa, dan UKM disetujui oleh admin universitas.",
+      },
+    ],
   },
   {
-    iconSrc: "/icons/calendar-clock.svg",
-    title: "Batas Pemesanan",
-    description: "Ormawa dan UKM tidak dapat memesan untuk besok (H-1) maupun hari ini (H-0).",
-  },
-  {
-    iconSrc: "/icons/running.svg",
-    title: "Durasi GOR",
-    description: "GOR dapat dipesan maksimal 2 jam per pemesanan dan disetujui oleh admin universitas.",
+    id: "kendaraan",
+    label: "Kendaraan",
+    iconSrc: "/landing/bus.png",
+    rules: [
+      {
+        iconSrc: "/icons/sticky-note.svg",
+        title: "Data Permohonan",
+        description: "Isi tujuan, tanggal mulai dan selesai, jumlah rombongan, serta kontak penanggung jawab.",
+      },
+      {
+        iconSrc: "/landing/bus.png",
+        title: "Tanpa Pilih Unit",
+        description: "Cukup ajukan kebutuhan perjalananmu. Kamu tidak memilih unit mobil maupun slot jam.",
+      },
+      {
+        iconSrc: "/icons/slot-check.svg",
+        title: "Persetujuan",
+        description: "Semua permohonan kendaraan disetujui atau ditolak oleh admin universitas.",
+      },
+      {
+        iconSrc: "/icons/contact-mail.svg",
+        title: "Pemberitahuan",
+        description: "Keputusan atas permohonanmu dikirim lewat email dan dapat dilihat di Reservasi & Riwayat.",
+      },
+    ],
   },
 ];
 
@@ -132,7 +197,7 @@ export const TUTORIALS = [
       {
         iconSrc: "/icons/upload.svg",
         title: "Unggah Surat Peminjaman",
-        description: "Unggah surat PDF lalu kirim. Kalau belum siap, simpan sebagai draft dan unggah paling lambat 5 hari kerja.",
+        description: "Unggah surat PDF lalu kirim. Kalau belum siap, simpan sebagai draft dan unggah paling lambat 1 hari kerja.",
       },
       {
         iconSrc: "/icons/slot-check.svg",

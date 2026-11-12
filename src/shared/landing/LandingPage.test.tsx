@@ -59,6 +59,20 @@ describe("LandingPage", () => {
     expect(screen.queryByText("Unggah Surat Peminjaman")).toBeNull();
   });
 
+  it("shows the rules of the chosen facility type", () => {
+    render(<LandingPage />);
+    const tablist = screen.getByRole("tablist", { name: "Jenis fasilitas" });
+    expect(within(tablist).getAllByRole("tab").map((tab) => tab.textContent)).toEqual(["Ruangan", "GOR", "Kendaraan"]);
+    expect(screen.getByText("Jam Operasional")).toBeTruthy();
+
+    fireEvent.click(within(tablist).getByRole("tab", { name: "GOR" }));
+    expect(screen.getByText("Durasi Pemakaian")).toBeTruthy();
+
+    fireEvent.click(within(tablist).getByRole("tab", { name: "Kendaraan" }));
+    expect(screen.getByText("Tanpa Pilih Unit")).toBeTruthy();
+    expect(screen.queryByText("Jam Operasional")).toBeNull();
+  });
+
   it("opens one FAQ answer at a time", () => {
     render(<LandingPage />);
     const first = screen.getByRole("button", { name: /cara mendapatkan akun/ });

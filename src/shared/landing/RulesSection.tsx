@@ -1,11 +1,16 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useState } from "react";
 import { MaskIcon } from "@/components/ui/MaskIcon";
-import { RULE_ITEMS, SECTION_IDS } from "./content";
+import { RULE_TABS, SECTION_IDS } from "./content";
 import { SectionHeading } from "./SectionHeading";
+import { TabSwitcher } from "./TabSwitcher";
 
 export function RulesSection() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const activeTab = RULE_TABS[activeIndex];
+
   return (
     <section
       id={SECTION_IDS.rules}
@@ -26,13 +31,29 @@ export function RulesSection() {
           description="Hai Dinusian! Perhatikan aturan berikut supaya permohonan reservasimu tidak tertahan."
         />
 
-        <ul className="mx-auto grid max-w-6xl grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-          {RULE_ITEMS.map((rule, index) => (
+        <TabSwitcher
+          label="Jenis fasilitas"
+          idPrefix="rules"
+          panelId="rules-panel"
+          tabs={RULE_TABS.map((tab) => ({ id: tab.id, label: tab.label, icon: <MaskIcon src={tab.iconSrc} size={16} /> }))}
+          activeIndex={activeIndex}
+          onChange={setActiveIndex}
+        />
+
+        {/* Keyed on the tab so the cards animate in again after switching. */}
+        <ul
+          key={activeTab.id}
+          id="rules-panel"
+          role="tabpanel"
+          aria-labelledby={`rules-tab-${activeTab.id}`}
+          className="mx-auto grid max-w-6xl grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4"
+        >
+          {activeTab.rules.map((rule, index) => (
             <motion.li
               key={rule.title}
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1, ease: "easeOut" }}
+              transition={{ duration: 0.5, delay: index * 0.08, ease: "easeOut" }}
               viewport={{ once: true }}
               className="h-full"
             >
@@ -60,7 +81,7 @@ export function RulesSection() {
           viewport={{ once: true }}
           className="mt-16 text-center text-sm font-medium text-muted"
         >
-          Semua reservasi ruangan menunggu persetujuan admin sebelum dapat dipakai.
+          Setiap permohonan menunggu persetujuan admin sebelum fasilitas dapat dipakai.
         </motion.p>
       </div>
     </section>

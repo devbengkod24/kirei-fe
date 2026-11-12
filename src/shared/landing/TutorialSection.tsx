@@ -6,6 +6,7 @@ import { useState } from "react";
 import { LOGIN_HREF, SECTION_IDS, TUTORIALS } from "./content";
 import { ArrowRightIcon, GroupIcon, PersonIcon } from "./LandingIcons";
 import { SectionHeading } from "./SectionHeading";
+import { TabSwitcher } from "./TabSwitcher";
 import { TutorialCarousel } from "./TutorialCarousel";
 
 const TAB_ICONS = { organisasi: GroupIcon, dosen: PersonIcon } as const;
@@ -31,37 +32,17 @@ export function TutorialSection() {
           description="Hai Dinusian! Ikuti panduan langkah demi langkah untuk memesan fasilitas kampus dengan mudah."
         />
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          viewport={{ once: true }}
-          className="mb-12 flex justify-center"
-        >
-          <div role="tablist" aria-label="Jenis pemohon" className="flex gap-1 rounded-xl border border-border bg-surface p-1 shadow-lg">
-            {TUTORIALS.map((item, index) => {
-              const Icon = TAB_ICONS[item.id];
-              const selected = index === activeIndex;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  role="tab"
-                  id={`tutorial-tab-${item.id}`}
-                  aria-selected={selected}
-                  aria-controls="tutorial-panel"
-                  onClick={() => setActiveIndex(index)}
-                  className={`relative inline-flex min-h-11 items-center gap-2 rounded-lg px-5 text-sm font-semibold transition-colors duration-300 sm:px-8 ${
-                    selected ? "bg-primary text-on-primary shadow-lg" : "text-muted hover:bg-page hover:text-ink"
-                  }`}
-                >
-                  <Icon className="size-4" />
-                  {item.label}
-                </button>
-              );
-            })}
-          </div>
-        </motion.div>
+        <TabSwitcher
+          label="Jenis pemohon"
+          idPrefix="tutorial"
+          panelId="tutorial-panel"
+          tabs={TUTORIALS.map((item) => {
+            const Icon = TAB_ICONS[item.id];
+            return { id: item.id, label: item.label, icon: <Icon className="size-4" /> };
+          })}
+          activeIndex={activeIndex}
+          onChange={setActiveIndex}
+        />
 
         <motion.div
           initial={{ opacity: 0, y: 30 }}
