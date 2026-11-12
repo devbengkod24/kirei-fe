@@ -4,10 +4,16 @@ import { useEffect, useRef, useState } from "react";
 import { MaskIcon } from "@/components/ui/MaskIcon";
 import { carouselPages } from "./carouselPages";
 import type { TutorialStep } from "./content";
+import { AutoplayToggle } from "./AutoplayToggle";
 import { ChevronIcon } from "./LandingIcons";
+import { useAutoplay } from "./useAutoplay";
 
 const ARROW =
   "absolute top-1/2 z-20 inline-flex size-12 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-surface text-primary shadow-xl transition-all duration-300 hover:bg-primary-soft active:bg-primary-tint disabled:opacity-40 disabled:hover:bg-surface";
+
+function scrollToPage(track: HTMLElement | null, target: number, instant: boolean) {
+  track?.scrollTo({ left: target * track.clientWidth, behavior: instant ? "auto" : "smooth" });
+}
 
 export interface TutorialCarouselProps {
   label: string;
@@ -39,15 +45,22 @@ export function TutorialCarousel({ label, steps }: TutorialCarouselProps) {
     };
   }, [steps]);
 
-  const goTo = (target: number) => {
-    const track = trackRef.current;
-    if (!track) return;
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    track.scrollTo({ left: target * track.clientWidth, behavior: reduceMotion ? "auto" : "smooth" });
-  };
+  // Autoplay wraps from the last page back to the first.
+  const autoplay = useAutoplay(
+    pageCount > 1,
+    () => scrollToPage(trackRef.current, (page + 1) % pageCount, false),
+    page,
+  );
+  const goTo = (target: number) => scrollToPage(trackRef.current, target, autoplay.reduceMotion);
 
   return (
-    <div role="region" aria-roledescription="carousel" aria-label={label} className="relative">
+    <div
+      role="region"
+      aria-roledescription="carousel"
+      aria-label={label}
+      className="relative"
+      {...autoplay.regionProps}
+    >
       <button
         type="button"
         onClick={() => goTo(page - 1)}
@@ -69,6 +82,7 @@ export function TutorialCarousel({ label, steps }: TutorialCarouselProps) {
 
       <ul
         ref={trackRef}
+        aria-live={autoplay.playing ? "off" : "polite"}
         className="flex snap-x snap-mandatory overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {steps.map((step, index) => (
@@ -95,7 +109,14 @@ export function TutorialCarousel({ label, steps }: TutorialCarouselProps) {
         ))}
       </ul>
 
-      <div className="mt-6 flex justify-center gap-2">
+      <div className="mt-6 flex items-center justify-center gap-2">
+        {autoplay.showToggle && (
+          <AutoplayToggle
+            paused={autoplay.paused}
+            onToggle={autoplay.togglePaused}
+            className="mr-2 border-border bg-surface text-primary hover:bg-primary-soft active:bg-primary-tint"
+          />
+        )}
         {Array.from({ length: pageCount }, (_, index) => (
           <button
             key={index}

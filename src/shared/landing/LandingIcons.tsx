@@ -37,6 +37,22 @@ export function ChevronIcon({ className, direction }: IconProps & { direction: "
   );
 }
 
+export function PauseIcon({ className }: IconProps) {
+  return (
+    <Stroke className={className}>
+      <path d="M9 5v14M15 5v14" />
+    </Stroke>
+  );
+}
+
+export function PlayIcon({ className }: IconProps) {
+  return (
+    <Stroke className={className}>
+      <path d="M7 5v14l11-7L7 5Z" />
+    </Stroke>
+  );
+}
+
 export function PlusIcon({ className }: IconProps) {
   return (
     <Stroke className={className}>

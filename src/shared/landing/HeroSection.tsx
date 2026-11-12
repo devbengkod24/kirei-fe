@@ -75,19 +75,16 @@ export function HeroSection() {
           transition={{ duration: 0.8, delay: 0.3 }}
           className="group relative"
         >
-          {/* w-fit keeps the frame on the image; in the stacked layout the column would stretch it. */}
-          <div className="w-fit overflow-hidden rounded-3xl border-4 border-surface/80 shadow-2xl">
-            <Image
-              src="/images/sample-room.jpg"
-              alt="Ruangan kampus dengan meja panjang dan kursi tinggi"
-              width={1200}
-              height={900}
-              loading="eager"
-              fetchPriority="high"
-              sizes="(min-width: 1024px) 550px, (min-width: 768px) 420px, 320px"
-              className="block h-auto w-[320px] max-w-full transition-transform duration-700 md:w-[420px] md:group-hover:scale-105 lg:w-[550px]"
-            />
-          </div>
+          <Image
+            src="/landing/mock-device.webp"
+            alt="Tampilan aplikasi reservasi di laptop dan ponsel"
+            width={1100}
+            height={899}
+            loading="eager"
+            fetchPriority="high"
+            sizes="(min-width: 1024px) 550px, (min-width: 768px) 420px, 320px"
+            className="w-[320px] drop-shadow-2xl transition-transform duration-700 md:w-[420px] md:group-hover:scale-105 lg:w-[550px]"
+          />
         </motion.div>
       </div>
 
