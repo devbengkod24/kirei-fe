@@ -9,7 +9,10 @@ import { VehicleReservationForm } from "./VehicleReservationForm";
 export interface ReservationFormPageProps {
   tipe: ReservationType;
   requester: { name: string; fakultasId: string | null };
-  /** The signed-in borrower. When set and the request needs approval, a sent request is kept in the demo store. */
+  /**
+   * The signed-in user. When set, a sent request is kept in the demo store: waiting for approval,
+   * or approved right away in a mode that needs none (Reservasi Internal).
+   */
   owner?: ReservationOwner;
   /** For admins later: allows picking a booked room. Only applies to `ruangan`. */
   canUseBookedSlot?: boolean;

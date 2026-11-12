@@ -79,6 +79,8 @@ export interface ReservationListing {
   purpose: string;
   /** Rooms only; GOR and vehicles fall back to their unit name. */
   buildingName?: string;
+  /** A booking that needs no approval (Reservasi Internal) is stored as approved right away. */
+  approved?: boolean;
 }
 
 const text = (value: unknown) => (typeof value === "string" && value.trim() ? value.trim() : null);
@@ -91,7 +93,7 @@ export function toMockReservation(request: ReservationRequest, listing: Reservat
   return {
     id: `mock-${now.getTime().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
     type: request.type,
-    status: "menunggu_persetujuan",
+    status: listing.approved ? "disetujui" : "menunggu_persetujuan",
     startsAt: request.starts_at,
     endsAt: request.ends_at,
     buildingName: listing.buildingName ?? (request.type === "kendaraan" ? "Kendaraan" : listing.unitName),
