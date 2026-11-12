@@ -10,7 +10,7 @@ import { ReservationTrendCard } from "./ReservationTrendCard";
 import { TypeSummaryCard } from "./TypeSummaryCard";
 
 const TONE: Record<ReservationType, keyof typeof STAT_TONES> = {
-  ruangan: "violet",
+  ruangan: "accent",
   gor: "teal",
   kendaraan: "orange",
 };
