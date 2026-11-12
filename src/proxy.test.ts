@@ -27,6 +27,11 @@ describe("proxy", () => {
     expect(location(proxy(request("/login")))).toBeNull();
   });
 
+  it("shows the landing page to a visitor without a session", () => {
+    expect(location(proxy(request("/")))).toBeNull();
+    expect(location(proxy(request("/", "usr-unknown")))).toBeNull();
+  });
+
   it("sends a signed-in user from the login page and the root to their home", () => {
     expect(location(proxy(request("/login", MOCK_ADMIN_FAKULTAS.id)))).toBe("http://localhost:3000/fakultas/dashboard");
     expect(location(proxy(request("/", MOCK_CURRENT_USER.id)))).toBe("http://localhost:3000/dashboard");
@@ -53,7 +58,8 @@ describe("proxy with AUTH_MODE=api", () => {
     expect(location(proxy(apiRequest("/dashboard", SESSION_COOKIE)))).toBe("http://localhost:3000/login");
   });
 
-  it("lets a visitor open the login page, and a session through to the pages", () => {
+  it("lets a visitor open the landing and login pages, and a session through to the pages", () => {
+    expect(location(proxy(apiRequest("/")))).toBeNull();
     expect(location(proxy(apiRequest("/login")))).toBeNull();
     expect(location(proxy(apiRequest("/login", "kirei_session")))).toBeNull();
     expect(location(proxy(apiRequest("/pengumuman", "kirei_session")))).toBeNull();

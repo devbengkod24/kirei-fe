@@ -22,6 +22,7 @@ URL di bawah adalah rencana. Yang sudah ada di kode hanya halaman ormawa/dosen; 
 
 | Halaman | URL | Catatan |
 |---|---|---|
+| Landing page | `/` | Halaman publik untuk tamu: fasilitas, peraturan, panduan reservasi (tab Ormawa & UKM dan Dosen), dan FAQ. Tata letaknya mengikuti landing page reservasi-fe, dengan animasi framer-motion. Isinya menyalin aturan dari vault (`shared/landing/content.ts`), jadi perbarui file itu bila vault berubah. Di mode `mock`, orang yang sudah masuk dialihkan ke dashboard role-nya. Di mode `api`, proxy tidak tahu role, jadi landing tetap tampil dan tombol Masuk mengarahkannya ke dashboard. Komponen: `shared/landing`. |
 | Login | `/login` | Login Sanctum SPA. Satu login untuk semua role, lalu diarahkan ke dashboard role-nya. Mode dipilih lewat `AUTH_MODE` (lihat `.env.example`): `mock` (bawaan) memakai akun demo dan Quick Login tanpa backend; `api` login ke Laravel (`/sanctum/csrf-cookie`, `/login`, `/api/user`, `/logout`), error 422 tampil di bawah field, dan Quick Login disembunyikan. Orang yang sudah masuk langsung dialihkan ke dashboard role-nya. |
 | Lupa sandi | `/lupa-sandi` | |
 | Konfirmasi berhasil | `/konfirmasi/berhasil` | Tujuan tautan dari email. |
