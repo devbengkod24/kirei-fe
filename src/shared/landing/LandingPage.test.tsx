@@ -64,7 +64,7 @@ describe("LandingPage", () => {
 
   it("opens one FAQ answer at a time", () => {
     render(<LandingPage />);
-    const first = screen.getByRole("button", { name: /cara mendapatkan akun/ });
+    const first = screen.getByRole("button", { name: /Siapa yang bisa memesan/ });
     const second = screen.getByRole("button", { name: /membatalkan reservasi/ });
 
     fireEvent.click(first);

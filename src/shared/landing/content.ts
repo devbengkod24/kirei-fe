@@ -54,6 +54,20 @@ export const FACILITY_ITEMS: IconItem[] = [
   },
 ];
 
+export interface FacilitySlide {
+  src: string;
+  label: string;
+  alt: string;
+}
+
+/** Illustrations cycled by the carousel beside the facility list. */
+export const FACILITY_SLIDES: FacilitySlide[] = [
+  { src: "/landing/facility-classroom.svg", label: "ruang kelas", alt: "Ilustrasi ruang kelas dengan papan tulis dan meja mahasiswa" },
+  { src: "/landing/facility-meeting.svg", label: "ruang rapat", alt: "Ilustrasi ruang rapat dengan meja panjang dan layar presentasi" },
+  { src: "/landing/facility-sports-hall.svg", label: "GOR", alt: "Ilustrasi lapangan basket di dalam gedung olahraga" },
+  { src: "/landing/facility-vehicle.svg", label: "kendaraan operasional", alt: "Ilustrasi bus operasional di depan gedung kampus" },
+];
+
 export interface RuleTab {
   id: string;
   label: string;
@@ -161,7 +175,7 @@ export const FAQ_ITEMS: FaqItem[] = [
   {
     question: "Kenapa reservasi saya yang sudah disetujui bisa dicabut?",
     answer:
-      "Admin universitas dapat mengambil alih slot untuk agenda universitas (override BIUM). Reservasi dicabut tanpa ruangan pengganti, dan kamu menerima notifikasi email.",
+      "Admin universitas dapat mengambil alih slot untuk agenda universitas. Reservasi dicabut tanpa ruangan pengganti, dan kamu menerima notifikasi email.",
   },
   {
     question: "Saya dosen dan kelas saya perlu pindah sementara. Bagaimana?",

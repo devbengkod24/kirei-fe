@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Ilustrasi gedung olahraga">
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f0f5fe"/>
+      <stop offset="1" stop-color="#e2ecff"/>
+    </linearGradient>
+    <clipPath id="court">
+      <path d="M210 350h380l190 250H20z"/>
+    </clipPath>
+  </defs>
+
+  <rect width="800" height="600" fill="url(#wall)"/>
+
+  <!-- arched roof -->
+  <path d="M0 0h800v170Q400 20 0 170z" fill="#1e3a8a"/>
+  <path d="M0 170Q400 20 800 170" stroke="#152a66" stroke-width="12" fill="none"/>
+  <path d="M0 120Q400-20 800 120M0 70Q400-60 800 70" stroke="#3b5fc0" stroke-width="5" fill="none"/>
+  <path d="M130 0v128M265 0v92M400 0v80M535 0v92M670 0v128" stroke="#3b5fc0" stroke-width="5"/>
+  <g fill="#f5b942">
+    <rect x="112" y="128" width="36" height="10" rx="5"/>
+    <rect x="247" y="92" width="36" height="10" rx="5"/>
+    <rect x="382" y="80" width="36" height="10" rx="5"/>
+    <rect x="517" y="92" width="36" height="10" rx="5"/>
+    <rect x="652" y="128" width="36" height="10" rx="5"/>
+  </g>
+
+  <!-- back wall windows -->
+  <g fill="#b7cfff">
+    <rect x="70" y="200" width="90" height="44" rx="6"/>
+    <rect x="180" y="184" width="90" height="60" rx="6"/>
+    <rect x="530" y="184" width="90" height="60" rx="6"/>
+    <rect x="640" y="200" width="90" height="44" rx="6"/>
+  </g>
+
+  <!-- scoreboard -->
+  <rect x="318" y="150" width="164" height="62" rx="8" fill="#152a66"/>
+  <rect x="332" y="164" width="52" height="34" rx="4" fill="#1e3a8a"/>
+  <rect x="416" y="164" width="52" height="34" rx="4" fill="#1e3a8a"/>
+  <g fill="#f5b942">
+    <rect x="342" y="172" width="8" height="18" rx="2"/>
+    <rect x="356" y="172" width="18" height="18" rx="3"/>
+    <rect x="426" y="172" width="18" height="18" rx="3"/>
+    <rect x="450" y="172" width="8" height="18" rx="2"/>
+    <circle cx="400" cy="174" r="3"/>
+    <circle cx="400" cy="188" r="3"/>
+  </g>
+
+  <!-- back bleachers -->
+  <rect x="40" y="262" width="720" height="30" fill="#6f8fe0"/>
+  <rect x="24" y="292" width="752" height="30" fill="#3b5fc0"/>
+  <rect x="8" y="322" width="784" height="30" fill="#1e3a8a"/>
+  <path d="M40 262v30M130 262v30M220 262v30M580 262v30M670 262v30M760 262v30M24 292v30M118 292v30M212 292v30M588 292v30M682 292v30M776 292v30" stroke="#e2ecff" stroke-width="3" opacity=".5"/>
+
+  <!-- floor and court -->
+  <rect y="350" width="800" height="250" fill="#c9d9f8"/>
+  <path d="M210 350h380l190 250H20z" fill="#f1d2a4"/>
+  <g clip-path="url(#court)" fill="none" stroke="#ffffff" stroke-width="6">
+    <path d="M226 362h348l172 238M226 362L54 600"/>
+    <path d="M118 478h564"/>
+    <ellipse cx="400" cy="478" rx="78" ry="26"/>
+    <path d="M342 362l-12 52h140l-12-52" fill="#9db8f5"/>
+    <path d="M330 414a70 22 0 0 0 140 0"/>
+    <path d="M250 362c10 90 290 90 300 0"/>
+    <path d="M298 600l8-62h188l8 62" fill="#9db8f5"/>
+    <path d="M306 538a94 30 0 0 1 188 0"/>
+  </g>
+
+  <!-- hoop -->
+  <rect x="394" y="212" width="12" height="46" fill="#152a66"/>
+  <rect x="346" y="254" width="108" height="72" rx="6" fill="#ffffff" stroke="#1e3a8a" stroke-width="6"/>
+  <rect x="380" y="282" width="40" height="30" fill="none" stroke="#1e3a8a" stroke-width="4"/>
+  <ellipse cx="400" cy="326" rx="24" ry="7" fill="none" stroke="#f5b942" stroke-width="6"/>
+  <path d="M378 330l8 28h28l8-28M390 332l4 26M410 332l-4 26M383 344h34" stroke="#1e3a8a" stroke-width="2.5" fill="none"/>
+
+  <!-- ball -->
+  <ellipse cx="596" cy="552" rx="34" ry="8" fill="#152a66" opacity=".2"/>
+  <circle cx="596" cy="518" r="32" fill="#f5b942"/>
+  <path d="M564 518h64M596 486v64M574 495c14 14 14 32 0 46M618 495c-14 14-14 32 0 46" stroke="#152a66" stroke-width="3" fill="none"/>
+</svg>

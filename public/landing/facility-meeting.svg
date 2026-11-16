@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Ilustrasi ruang rapat">
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f0f5fe"/>
+      <stop offset="1" stop-color="#e2ecff"/>
+    </linearGradient>
+    <g id="lamp">
+      <rect x="-2" y="0" width="4" height="52" fill="#152a66"/>
+      <path d="M-34 84l12-32h44l12 32z" fill="#1e3a8a"/>
+      <rect x="-26" y="84" width="52" height="8" rx="4" fill="#f5b942"/>
+    </g>
+    <g id="backChair">
+      <rect x="-36" y="0" width="72" height="96" rx="16" fill="#6f8fe0"/>
+      <rect x="-22" y="16" width="44" height="8" rx="4" fill="#b7cfff"/>
+    </g>
+    <g id="frontChair">
+      <rect x="-5" y="104" width="10" height="46" fill="#152a66"/>
+      <rect x="-40" y="146" width="80" height="10" rx="5" fill="#152a66"/>
+      <rect x="-52" y="92" width="104" height="18" rx="9" fill="#152a66"/>
+      <rect x="-44" y="0" width="88" height="100" rx="18" fill="#1e3a8a"/>
+      <rect x="-28" y="18" width="56" height="8" rx="4" fill="#3b5fc0"/>
+    </g>
+    <g id="laptop">
+      <path d="M-26 0h52l-6-34h-40z" fill="#b7cfff"/>
+      <rect x="-32" y="0" width="64" height="5" rx="2.5" fill="#ffffff"/>
+    </g>
+  </defs>
+
+  <rect width="800" height="600" fill="url(#wall)"/>
+  <rect y="420" width="800" height="180" fill="#c9d9f8"/>
+  <rect y="420" width="800" height="8" fill="#b7cfff"/>
+
+  <!-- glass partition -->
+  <rect x="36" y="70" width="150" height="350" fill="#ffffff" opacity=".55"/>
+  <rect x="36" y="210" width="150" height="90" fill="#b7cfff" opacity=".6"/>
+  <path d="M36 70v350M186 70v350M111 70v350M36 70h150" stroke="#1e3a8a" stroke-width="8" fill="none"/>
+
+  <!-- lamps -->
+  <use href="#lamp" x="280"/>
+  <use href="#lamp" x="400"/>
+  <use href="#lamp" x="520"/>
+
+  <!-- display -->
+  <rect x="262" y="132" width="276" height="164" rx="12" fill="#1e3a8a"/>
+  <rect x="274" y="144" width="252" height="140" rx="4" fill="#ffffff"/>
+  <rect x="292" y="162" width="96" height="10" rx="5" fill="#1e3a8a"/>
+  <rect x="292" y="182" width="64" height="8" rx="4" fill="#b7cfff"/>
+  <rect x="296" y="234" width="24" height="34" rx="4" fill="#b7cfff"/>
+  <rect x="330" y="216" width="24" height="52" rx="4" fill="#6f8fe0"/>
+  <rect x="364" y="200" width="24" height="68" rx="4" fill="#3b5fc0"/>
+  <circle cx="462" cy="216" r="44" fill="#e2ecff"/>
+  <path d="M462 216v-44a44 44 0 0 1 38 66z" fill="#f5b942"/>
+  <path d="M462 216l38 22a44 44 0 0 1-70 8z" fill="#3b5fc0"/>
+
+  <!-- plant -->
+  <path d="M700 430c-34-30-40-74-22-112 22 30 30 70 22 112zM700 430c30-24 44-58 40-98-28 22-42 56-40 98zM700 430c-4-44 6-82 30-112 10 40 0 80-30 112z" fill="#3b5fc0"/>
+  <path d="M700 430c-34-30-40-74-22-112 22 30 30 70 22 112z" fill="#6f8fe0"/>
+  <path d="M668 426h64l-10 74h-44z" fill="#1e3a8a"/>
+
+  <!-- chairs behind table -->
+  <use href="#backChair" x="250" y="318"/>
+  <use href="#backChair" x="350" y="318"/>
+  <use href="#backChair" x="450" y="318"/>
+  <use href="#backChair" x="550" y="318"/>
+
+  <!-- table -->
+  <use href="#laptop" x="300" y="384"/>
+  <use href="#laptop" x="500" y="384"/>
+  <rect x="388" y="364" width="24" height="20" rx="4" fill="#f5b942"/>
+  <rect x="150" y="384" width="500" height="28" rx="14" fill="#152a66"/>
+  <rect x="186" y="412" width="28" height="118" fill="#3b5fc0"/>
+  <rect x="586" y="412" width="28" height="118" fill="#3b5fc0"/>
+  <rect x="154" y="526" width="92" height="12" rx="6" fill="#3b5fc0"/>
+  <rect x="554" y="526" width="92" height="12" rx="6" fill="#3b5fc0"/>
+
+  <!-- chairs in front -->
+  <use href="#frontChair" x="300" y="402"/>
+  <use href="#frontChair" x="500" y="402"/>
+</svg>

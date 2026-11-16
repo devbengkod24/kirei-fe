@@ -1,9 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
 import { MaskIcon } from "@/components/ui/MaskIcon";
 import { FACILITY_ITEMS, SECTION_IDS } from "./content";
+import { FacilityCarousel } from "./FacilityCarousel";
 import { SectionHeading } from "./SectionHeading";
 
 export function FacilitySection() {
@@ -29,18 +29,7 @@ export function FacilitySection() {
             viewport={{ once: true }}
             className="relative order-2 mb-12 lg:order-1 lg:mb-0"
           >
-            <div className="group overflow-hidden rounded-3xl bg-linear-to-br from-surface to-primary-tint p-2 shadow-xl">
-              <div className="overflow-hidden rounded-2xl">
-                <Image
-                  src="/images/rooms/sample-room.png"
-                  alt="Ruangan kampus Udinus yang dapat dipesan"
-                  width={504}
-                  height={378}
-                  sizes="(min-width: 1024px) 600px, 100vw"
-                  className="h-auto w-full transition-transform duration-700 md:group-hover:scale-105"
-                />
-              </div>
-            </div>
+            <FacilityCarousel />
           </motion.div>
 
           <motion.ul

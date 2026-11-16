@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Ilustrasi ruang kelas">
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f0f5fe"/>
+      <stop offset="1" stop-color="#e2ecff"/>
+    </linearGradient>
+    <g id="desk">
+      <rect x="-12" y="-78" width="24" height="16" rx="3" fill="#152a66"/>
+      <rect x="-40" y="-64" width="80" height="6" rx="3" fill="#6f8fe0"/>
+      <rect x="-82" y="-58" width="164" height="16" rx="5" fill="#3b5fc0"/>
+      <rect x="-72" y="-42" width="10" height="92" fill="#6f8fe0"/>
+      <rect x="62" y="-42" width="10" height="92" fill="#6f8fe0"/>
+      <rect x="-34" y="18" width="8" height="42" fill="#152a66"/>
+      <rect x="26" y="18" width="8" height="42" fill="#152a66"/>
+      <rect x="-46" y="-30" width="92" height="62" rx="14" fill="#1e3a8a"/>
+      <rect x="-30" y="-16" width="60" height="8" rx="4" fill="#3b5fc0"/>
+    </g>
+  </defs>
+
+  <rect width="800" height="600" fill="url(#wall)"/>
+  <rect y="392" width="800" height="208" fill="#c9d9f8"/>
+  <rect y="392" width="800" height="8" fill="#b7cfff"/>
+
+  <!-- window -->
+  <rect x="44" y="96" width="112" height="188" rx="8" fill="#1e3a8a"/>
+  <rect x="54" y="106" width="92" height="168" rx="4" fill="#b7cfff"/>
+  <circle cx="118" cy="146" r="16" fill="#f5b942"/>
+  <path d="M54 250q24-30 46-8t46-14v46H54z" fill="#6f8fe0"/>
+  <rect x="97" y="106" width="6" height="168" fill="#1e3a8a"/>
+  <rect x="54" y="186" width="92" height="6" fill="#1e3a8a"/>
+
+  <!-- whiteboard -->
+  <rect x="200" y="84" width="400" height="212" rx="10" fill="#1e3a8a"/>
+  <rect x="212" y="96" width="376" height="188" rx="4" fill="#ffffff"/>
+  <rect x="236" y="122" width="150" height="12" rx="6" fill="#1e3a8a"/>
+  <rect x="236" y="150" width="110" height="8" rx="4" fill="#b7cfff"/>
+  <rect x="236" y="170" width="132" height="8" rx="4" fill="#b7cfff"/>
+  <rect x="236" y="190" width="92" height="8" rx="4" fill="#b7cfff"/>
+  <rect x="236" y="232" width="56" height="24" rx="12" fill="#f5b942"/>
+  <path d="M424 250V136M424 250h140" stroke="#1e3a8a" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <path d="M436 230l32-34 28 18 50-62" stroke="#3b5fc0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <circle cx="546" cy="152" r="8" fill="#f5b942"/>
+  <rect x="260" y="296" width="280" height="10" rx="5" fill="#152a66"/>
+  <rect x="290" y="288" width="34" height="8" rx="3" fill="#f5b942"/>
+  <rect x="332" y="288" width="34" height="8" rx="3" fill="#6f8fe0"/>
+
+  <!-- clock -->
+  <circle cx="684" cy="124" r="34" fill="#1e3a8a"/>
+  <circle cx="684" cy="124" r="26" fill="#ffffff"/>
+  <path d="M684 106v18l13 9" stroke="#1e3a8a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- lecturer desk -->
+  <path d="M664 300h74l-8 -44h-58z" fill="#6f8fe0"/>
+  <rect x="656" y="300" width="90" height="6" rx="3" fill="#152a66"/>
+  <rect x="628" y="306" width="146" height="14" rx="4" fill="#152a66"/>
+  <rect x="636" y="320" width="130" height="96" rx="6" fill="#1e3a8a"/>
+  <rect x="654" y="340" width="94" height="10" rx="5" fill="#3b5fc0"/>
+
+  <!-- student desks -->
+  <use href="#desk" transform="translate(170 438) scale(.78)"/>
+  <use href="#desk" transform="translate(360 438) scale(.78)"/>
+  <use href="#desk" transform="translate(550 438) scale(.78)"/>
+  <use href="#desk" transform="translate(150 528)"/>
+  <use href="#desk" transform="translate(400 528)"/>
+  <use href="#desk" transform="translate(650 528)"/>
+</svg>
