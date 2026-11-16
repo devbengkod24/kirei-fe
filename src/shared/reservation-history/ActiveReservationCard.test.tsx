@@ -34,4 +34,14 @@ describe("ActiveReservationCard", () => {
     expect(screen.getByText("Kamis, 12 November 2026")).toBeTruthy();
     expect(screen.queryByText(/WIB/)).toBeNull();
   });
+
+  it("names the borrowed unit for a room but not for the GOR", () => {
+    render(<ActiveReservationCard reservation={room} />);
+    expect(screen.getByText("Dipinjam")).toBeTruthy();
+    cleanup();
+
+    render(<ActiveReservationCard reservation={{ ...room, type: "gor", unitName: "GOR Udinus" }} />);
+    expect(screen.queryByText("Dipinjam")).toBeNull();
+    expect(screen.queryByText("GOR Udinus")).toBeNull();
+  });
 });

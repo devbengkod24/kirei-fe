@@ -1,14 +1,15 @@
+import { ROOM_CLOSE_TIME, ROOM_OPEN_TIME } from "@/config/reservation";
 import { toWibDateKey, toWibTimeKey } from "@/lib/date";
 import { buildSlots, type TimeSlot } from "@/shared/reservation-form/sportsHallSlots";
 import type { ReservationRecord } from "@/types/reservation";
 import type { ClassSchedule } from "@/types/schedule";
 
-/** Hours the floor can be booked, WIB. */
-export const OPEN_TIME = "07:00";
-export const CLOSE_TIME = "21:00";
+/** Hours the floor can be booked, WIB: the same window as the booking form. */
+export const OPEN_TIME = ROOM_OPEN_TIME;
+export const CLOSE_TIME = ROOM_CLOSE_TIME;
 const STEP_MINUTES = 10;
 
-/** Every 10-minute boundary of the day ("07:00", "07:10", ... "21:00"), for the time pickers. */
+/** Every 10-minute boundary of the day ("07:00", "07:10", ... "20:00"), for the time pickers. */
 export const SLOT_TIMES = [...buildSlots(OPEN_TIME, CLOSE_TIME, STEP_MINUTES).map((slot) => slot.start), CLOSE_TIME];
 
 /** Whole hours offered by the "Filter Jam" pickers. */

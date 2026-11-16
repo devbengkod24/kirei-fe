@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { TIME_PARTS, formatPart, joinTime, parseTypedPart, splitTime, stepPart, type TimePart } from "./timeParts";
+import { TIME_PARTS, clampTime, formatPart, joinTime, parseTypedPart, splitTime, stepPart } from "./timeParts";
 
 export interface TimeWheelProps {
   /** id of the hour input, so a <label htmlFor> focuses it. */
@@ -13,6 +13,9 @@ export interface TimeWheelProps {
   onChange: (value: string) => void;
   onBlur?: () => void;
   invalid?: boolean;
+  /** Earliest and latest "HH:MM" the wheel offers, e.g. opening hours. Both or neither. */
+  min?: string;
+  max?: string;
 }
 
 // Pixels of wheel or drag that move the column by one step.
@@ -20,41 +23,70 @@ const WHEEL_STEP = 40;
 const DRAG_STEP = 24;
 
 /** Hour and minute wheels: scroll, drag, arrow keys, or type straight into the middle number. */
-export function TimeWheel({ id, label, value, onChange, onBlur, invalid }: TimeWheelProps) {
+export function TimeWheel({ id, label, value, onChange, onBlur, invalid, min, max }: TimeWheelProps) {
   const { hour, minute } = splitTime(value);
+  const hours = min && max ? { min: splitTime(min).hour, max: splitTime(max).hour } : undefined;
+  const bounded = (time: string) => (min && max ? clampTime(time, min, max) : time);
+  const hourRange = hours ?? { min: 0, max: TIME_PARTS.hour.count - TIME_PARTS.hour.step };
   return (
     <div
       className={`flex items-center justify-center gap-1 rounded-inner bg-primary-tint px-1 text-primary ${invalid ? "outline outline-danger-strong" : ""}`}
     >
-      <WheelColumn id={id} part="hour" label={`Jam ${label}`} value={hour} onChange={(next) => onChange(joinTime(next, minute))} onBlur={onBlur} />
+      <WheelColumn
+        id={id}
+        label={`Jam ${label}`}
+        value={hour}
+        min={hourRange.min}
+        max={hourRange.max}
+        stepBy={(steps) => stepPart("hour", hour, steps, hours)}
+        parse={(raw) => parseTypedPart("hour", raw, hours)}
+        onChange={(next) => onChange(bounded(joinTime(next, minute)))}
+        onBlur={onBlur}
+      />
       <span aria-hidden="true" className="text-sm">
         :
       </span>
-      <WheelColumn id={`${id}-minute`} part="minute" label={`Menit ${label}`} value={minute} onChange={(next) => onChange(joinTime(hour, next))} onBlur={onBlur} />
+      <WheelColumn
+        id={`${id}-minute`}
+        label={`Menit ${label}`}
+        value={minute}
+        min={0}
+        max={TIME_PARTS.minute.count - TIME_PARTS.minute.step}
+        // In the closing hour the minutes stay at the closing minute.
+        stepBy={(steps) => splitTime(bounded(joinTime(hour, stepPart("minute", minute, steps)))).minute}
+        parse={(raw) => parseTypedPart("minute", raw)}
+        onChange={(next) => onChange(bounded(joinTime(hour, next)))}
+        onBlur={onBlur}
+      />
     </div>
   );
 }
 
 interface WheelColumnProps {
   id: string;
-  part: TimePart;
   label: string;
   value: number;
+  min: number;
+  max: number;
+  /** The value this many steps away, wrapping inside the column's range. */
+  stepBy: (steps: number) => number;
+  /** A typed number fitted to the column; null when it is not a number. */
+  parse: (raw: string) => number | null;
   onChange: (value: number) => void;
   onBlur?: () => void;
 }
 
-function WheelColumn({ id, part, label, value, onChange, onBlur }: WheelColumnProps) {
+function WheelColumn({ id, label, value, min, max, stepBy, parse, onChange, onBlur }: WheelColumnProps) {
   const [draft, setDraft] = useState<string | null>(null);
   const columnRef = useRef<HTMLDivElement>(null);
   const drag = useRef<{ y: number } | null>(null);
   // The wheel listener is attached once; it reads the latest value and handler from here.
-  const latest = useRef({ value, onChange });
+  const latest = useRef({ stepBy, onChange });
   useEffect(() => {
-    latest.current = { value, onChange };
+    latest.current = { stepBy, onChange };
   });
 
-  const step = (steps: number) => onChange(stepPart(part, value, steps));
+  const step = (steps: number) => onChange(stepBy(steps));
 
   // React's onWheel is passive, so it cannot stop the page from scrolling under the wheel.
   useEffect(() => {
@@ -65,23 +97,22 @@ function WheelColumn({ id, part, label, value, onChange, onBlur }: WheelColumnPr
       event.preventDefault();
       pending += event.deltaY;
       if (Math.abs(pending) < WHEEL_STEP) return;
-      const { value: current, onChange: change } = latest.current;
-      change(stepPart(part, current, Math.sign(pending)));
+      const { stepBy: move, onChange: change } = latest.current;
+      change(move(Math.sign(pending)));
       pending = 0;
     };
     column.addEventListener("wheel", onWheel, { passive: false });
     return () => column.removeEventListener("wheel", onWheel);
-  }, [part]);
+  }, []);
 
   const commit = () => {
     if (draft === null) return;
-    const parsed = parseTypedPart(part, draft);
+    const parsed = parse(draft);
     if (parsed !== null) onChange(parsed);
     setDraft(null);
   };
 
-  const { count, step: size } = TIME_PARTS[part];
-  const neighbour = (offset: number) => formatPart(stepPart(part, value, offset));
+  const neighbour = (offset: number) => formatPart(stepBy(offset));
 
   return (
     <div
@@ -116,8 +147,8 @@ function WheelColumn({ id, part, label, value, onChange, onBlur }: WheelColumnPr
         role="spinbutton"
         aria-label={label}
         aria-valuenow={value}
-        aria-valuemin={0}
-        aria-valuemax={count - size}
+        aria-valuemin={min}
+        aria-valuemax={max}
         aria-valuetext={formatPart(value)}
         value={draft ?? formatPart(value)}
         onFocus={(event) => event.currentTarget.select()}

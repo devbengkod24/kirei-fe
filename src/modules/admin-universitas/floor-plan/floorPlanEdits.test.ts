@@ -1,7 +1,17 @@
 import { describe, expect, it } from "vitest";
 import type { Floor, FloorPlanRoom } from "@/types/facility";
 import { MOCK_BUILDINGS } from "@/mocks/facilities";
-import { GRID, collidingRoom, fitRoom, gridSize, newRoom, resizeFloor, roomCodeErrors, suggestRoomCode } from "./floorPlanEdits";
+import {
+  GRID,
+  collidingRoom,
+  fitRoom,
+  gridSize,
+  newRoom,
+  resizeFloor,
+  roomCodeErrors,
+  suggestRoomCode,
+  typeRect,
+} from "./floorPlanEdits";
 
 const room = (code: string, x = 0, y = 0, width = 50, height = 50): FloorPlanRoom => ({
   id: `room-${code}`,
@@ -96,6 +106,18 @@ describe("newRoom", () => {
     expect(newRoom(floor([]), "room-new")).toMatchObject({ x: 0, y: 0, width: 50, height: 50, code: "" });
     const added = newRoom(floor([room("H.5.1", 0, 0, 50, 50)]), "room-new");
     expect(added).toMatchObject({ id: "room-new", code: "H.5.2", x: 50, y: 0 });
+  });
+});
+
+describe("typeRect", () => {
+  it("gives the room its type's size from the same corner", () => {
+    expect(typeRect(room("H.5.1", 25, 25, 100, 75), "kelas", floor([]))).toEqual({ x: 25, y: 25, width: 50, height: 50 });
+    expect(typeRect(room("H.5.1", 25, 25), "meeting", floor([]))).toEqual({ x: 25, y: 25, width: 75, height: 50 });
+  });
+
+  it("stays on the floor", () => {
+    // 18 columns: a 6-wide auditorium starting at column 17 is pulled back to column 13.
+    expect(typeRect(room("H.7", 400, 0), "auditorium", floor([]))).toEqual({ x: 300, y: 0, width: 150, height: 100 });
   });
 });
 

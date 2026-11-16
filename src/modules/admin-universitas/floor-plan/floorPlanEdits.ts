@@ -75,10 +75,26 @@ export function collidingRoom(floor: Floor, roomId: string, rect: RoomRect): Flo
   return floor.rooms.find((room) => room.id !== roomId && overlaps(room, rect));
 }
 
-/** A new 2 × 2 room in the first free spot, scanning row by row; the top-left corner when the floor is full. */
+/** The footprint each room type gets on the plan, in grid cells: small classes up to a large auditorium. */
+export const ROOM_TYPE_CELLS: Record<RoomCategory, { columns: number; rows: number }> = {
+  kelas: { columns: 2, rows: 2 },
+  lab: { columns: 3, rows: 2 },
+  meeting: { columns: 3, rows: 2 },
+  galeri: { columns: 3, rows: 3 },
+  auditorium: { columns: 6, rows: 4 },
+};
+
+/** Where the room lands at its type's size: its corner stays put unless the floor's edge pushes it back in. */
+export function typeRect(room: RoomRect, category: RoomCategory, floor: PlanSize): RoomRect {
+  const { columns, rows } = ROOM_TYPE_CELLS[category];
+  return fitRoom({ x: room.x, y: room.y, width: columns * GRID, height: rows * GRID }, floor);
+}
+
+/** A new room at its type's size in the first free spot, scanning row by row; the top-left corner when the floor is full. */
 export function newRoom(floor: Floor, id: string, category: RoomCategory = "kelas"): FloorPlanRoom {
   const { columns, rows } = gridSize(floor);
-  const size = { width: Math.min(2, columns) * GRID, height: Math.min(2, rows) * GRID };
+  const preset = ROOM_TYPE_CELLS[category];
+  const size = { width: Math.min(preset.columns, columns) * GRID, height: Math.min(preset.rows, rows) * GRID };
   let spot = { x: 0, y: 0 };
   search: for (let row = 0; row * GRID + size.height <= rows * GRID; row++) {
     for (let column = 0; column * GRID + size.width <= columns * GRID; column++) {
