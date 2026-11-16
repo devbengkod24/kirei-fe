@@ -58,7 +58,7 @@ kirei-fe/
 | `styles/` | **Token desain dari Figma** (warna, radius, font) sebagai variabel CSS. | Variabel dan gaya global | Gaya khusus satu komponen |
 | `mocks/` | **Data contoh** selama endpoint Laravel belum ada. Hanya dipanggil dari loader (`lib/auth`, `shared/*/get*.ts`), tidak dari komponen. Nanti diganti client orval atau handler MSW. | Fixture dan pembuat data contoh | Logika aplikasi |
 | `types/` | **Tipe TypeScript bersama** yang tidak berasal dari OpenAPI. | Deklarasi tipe global | Tipe hasil generate (ada di `lib/api/generated`) |
-| `proxy.ts` | **Pagar kasar di level request**: mengalihkan ke `/login` bila tidak ada cookie sesi. Di Next.js sebelum v16 bernama `middleware.ts`. | Pengalihan sederhana | Pengecekan peran yang mendalam (itu di layout dan backend) |
+| `proxy.ts` | **Pagar kasar di level request**: mengalihkan ke `/login` bila tidak ada cookie sesi, kecuali landing page publik di `/`. Di Next.js sebelum v16 bernama `middleware.ts`. | Pengalihan sederhana | Pengecekan peran yang mendalam (itu di layout dan backend) |
 
 ### Client API (orval)
 
