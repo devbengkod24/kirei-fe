@@ -37,11 +37,12 @@ describe("ActiveReservationCard", () => {
 
   it("names the borrowed unit for a room but not for the GOR", () => {
     render(<ActiveReservationCard reservation={room} />);
-    expect(screen.getByText("Dipinjam")).toBeTruthy();
+    const terms = () => screen.getAllByRole("term").map((term) => term.textContent);
+    expect(terms()).toContain("Dipinjam");
     cleanup();
 
     render(<ActiveReservationCard reservation={{ ...room, type: "gor", unitName: "GOR Udinus" }} />);
-    expect(screen.queryByText("Dipinjam")).toBeNull();
+    expect(terms()).not.toContain("Dipinjam");
     expect(screen.queryByText("GOR Udinus")).toBeNull();
   });
 });
