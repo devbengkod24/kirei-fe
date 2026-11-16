@@ -15,6 +15,8 @@ export interface UserDashboardData {
   todayReservation: ReservationSummary | null;
   reservationStarts: string[];
   announcements: Announcement[];
+  /** Set in the "empty" data mode: the borrower whose requests in this browser fill the figures. */
+  liveOwnerId?: string;
 }
 
 export interface UserDashboardLinks {

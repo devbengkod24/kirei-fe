@@ -1,4 +1,5 @@
 import { connection } from "next/server";
+import { getDataMode } from "@/lib/data-mode/getDataMode";
 import { buildAnnouncementsMock } from "@/mocks/announcements";
 import type { AdminScope } from "@/shared/admin-scope";
 import type { Announcement } from "@/types/announcement";
@@ -11,5 +12,6 @@ import type { Announcement } from "@/types/announcement";
 export async function getAnnouncements(scope: AdminScope): Promise<Announcement[]> {
   await connection();
   // TODO: replace with the orval client for announcements (no-store, filtered by scope.fakultasId).
-  return buildAnnouncementsMock(new Date());
+  // The "empty" data mode starts without announcements; the ones made in the browser are added on the client.
+  return (await getDataMode()) === "sample" ? buildAnnouncementsMock(new Date()) : [];
 }

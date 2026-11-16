@@ -13,7 +13,12 @@ import { sendComplaint } from "./sendComplaint";
 
 const DEFAULTS = { category: "", body: "" } as unknown as ComplaintInput;
 
-export function ComplaintForm() {
+export interface ComplaintFormProps {
+  /** The signed-in borrower, shown to the admin as the reporter. */
+  authorName: string;
+}
+
+export function ComplaintForm({ authorName }: ComplaintFormProps) {
   const [result, setResult] = useState<"sent" | "failed" | null>(null);
   const form = useForm<ComplaintInput, unknown, ComplaintValues>({
     resolver: zodResolver(complaintSchema),
@@ -23,7 +28,7 @@ export function ComplaintForm() {
   const category = useWatch({ control: form.control, name: "category" });
 
   const submit = form.handleSubmit(async (values) => {
-    const response = await sendComplaint(values);
+    const response = await sendComplaint(values, authorName);
     if (response.ok) {
       form.reset(DEFAULTS);
       setResult("sent");

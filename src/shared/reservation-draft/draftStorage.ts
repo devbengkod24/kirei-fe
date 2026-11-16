@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { DRAFT_LETTER_HOURS } from "@/config/reservation";
+import { readBrowserDataMode } from "@/lib/data-mode/dataMode";
+import { liveKey } from "@/lib/data-mode/liveStorage";
 
 /*
  * Drafts live only in this browser: nothing reaches Laravel until the borrower sends the draft
@@ -8,6 +10,9 @@ import { DRAFT_LETTER_HOURS } from "@/config/reservation";
  */
 
 const STORAGE_KEY = "kirei:reservation-drafts";
+
+/** The "empty" data mode starts without drafts and keeps its own. */
+const storageKey = () => (readBrowserDataMode() === "empty" ? liveKey("reservation-drafts") : STORAGE_KEY);
 
 const storedDraftSchema = z.object({
   id: z.string(),
@@ -63,7 +68,7 @@ export function parseDrafts(raw: string | null): StoredDraft[] {
 /** The stored JSON as is. A string, so React can compare snapshots without re-parsing. */
 export function draftsSnapshot(storage: DraftStorage | null = browserStorage()): string {
   try {
-    return storage?.getItem(STORAGE_KEY) ?? "[]";
+    return storage?.getItem(storageKey()) ?? "[]";
   } catch {
     return "[]";
   }
@@ -78,7 +83,7 @@ const listeners = new Set<() => void>();
 /** For useSyncExternalStore: fires on changes from this tab and from other tabs. */
 export function subscribeDrafts(listener: () => void) {
   const onStorage = (event: StorageEvent) => {
-    if (event.key === STORAGE_KEY) listener();
+    if (event.key === storageKey() || event.key === null) listener();
   };
   listeners.add(listener);
   window.addEventListener("storage", onStorage);
@@ -91,7 +96,7 @@ export function subscribeDrafts(listener: () => void) {
 function writeDrafts(drafts: StoredDraft[], storage: DraftStorage | null): boolean {
   if (!storage) return false;
   try {
-    storage.setItem(STORAGE_KEY, JSON.stringify(drafts));
+    storage.setItem(storageKey(), JSON.stringify(drafts));
   } catch {
     return false;
   }

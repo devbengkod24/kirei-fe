@@ -79,6 +79,18 @@ Selama `kirei-api` belum ada, alur pemohon → antrean admin → keputusan → r
 - Timeline operator (`modules/operator/OperatorFloorPage`) menambahkan reservasi ruangan berstatus `disetujui` dari store untuk ruangan di lantainya pada hari ini (`approvedRoomBookings`). Reservasi yang dibuat operator sendiri dan persetujuan atas data contoh admin belum ikut tampil di sana.
 - Tombol "Reset data simulasi reservasi" di bawah login cepat menghapus store. Draft (`kirei:reservation-drafts`) tidak ikut terhapus.
 
+### Mode data: dengan atau tanpa data dummy
+
+Di bawah login cepat ada pengalih "Dengan data dummy" / "Tanpa data dummy" (`shared/data-mode/`). Pilihannya disimpan di cookie `kirei_data_mode` (`sample` atau `empty`, bukan data sensitif), jadi Server Component (`lib/data-mode/getDataMode.ts`) dan Client Component (`readBrowserDataMode`) membaca nilai yang sama. Hapus bersama data mock begitu API tersambung.
+
+- `sample`: perilaku lama. Loader server mengirim data contoh dari `src/mocks/`.
+- `empty`: loader server mengirim daftar kosong (reservasi, riwayat, jadwal terisi, pengumuman, laporan, jadwal dosen, angka dashboard). Yang tetap ada: akun demo, fakultas, gedung dan denah dasar, daftar ruangan Kelola Ruangan, GOR, kendaraan, peraturan reservasi. Kelola Pengguna hanya berisi akun demo.
+- Semua yang dibuat lewat UI di mode `empty` disimpan di `localStorage` dengan awalan `kirei:live:` (`lib/data-mode/liveStorage.ts`): `reservations`, `reservation-drafts`, `buildings` (hasil Simpan denah), `announcements`, `reports`, `lecturer-schedules`, `users-<role>`, `room-edits`. Tiap mode punya datanya sendiri, jadi berpindah mode tidak mencampurnya.
+- Komponen client membaca data itu setelah mount lewat `useLiveData` / `useLiveState` (`hooks/useLiveData.ts`); di mode `sample` hook ini sama dengan `useState`. Denah tersimpan dipakai form reservasi, lantai operator, Kelola Pengguna, dan Jadwal Dosen lewat `shared/live-data/useLiveFacilities.ts`.
+- Dashboard di mode `empty` dihitung di browser dari store (`shared/reservation-store/liveDashboard.ts`).
+- Di mode `empty` tombol reset berubah menjadi "Hapus semua data yang saya buat" (dengan konfirmasi) dan menghapus semua kunci `kirei:live:`.
+- Batasan: data hanya ada di browser itu; akun yang ditambah di Kelola Pengguna belum bisa dipakai login; Kelola Ruangan dan Kelola Denah masih dua sumber data terpisah.
+
 ### Cara memilih lokasi sebuah file
 
 1. Apakah hanya dipakai satu role? Taruh di `modules/<role>/`.

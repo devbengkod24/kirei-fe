@@ -15,7 +15,7 @@ export interface UniversityReservationsProps {
 
 /** Kelola Reservasi for one type. */
 export async function UniversityReservations({ tipe, tab }: UniversityReservationsProps) {
-  const { reservations, roomCodes } = await getReservationCandidates({ fakultasId: null }, tipe);
+  const candidates = await getReservationCandidates({ fakultasId: null }, tipe);
 
   return (
     <ReservationManagement
@@ -25,8 +25,7 @@ export async function UniversityReservations({ tipe, tab }: UniversityReservatio
         persetujuan: reservationsRoute(tipe, "persetujuan"),
         riwayat: reservationsRoute(tipe, "riwayat"),
       }}
-      reservations={reservations}
-      roomCodes={roomCodes}
+      {...candidates}
       heading={null}
       leading={<TypeTabs basePath={ADMIN_UNIVERSITAS_ROUTES.reservations} />}
     />

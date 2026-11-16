@@ -6,6 +6,7 @@ import {
   buildRoomBookingsMock,
   buildSportsHallBookingsMock,
 } from "@/mocks/facilities";
+import { getDataMode } from "@/lib/data-mode/getDataMode";
 import { getMockLecturerSchedules } from "@/mocks/lecturerSchedules";
 import { toWibDateKey } from "@/lib/date";
 import type { Building, SportsHall, UnitBooking } from "@/types/facility";
@@ -37,9 +38,11 @@ export async function getRoomReservationOptions(scope?: { fakultasId: string | n
   const buildings = scope ? MOCK_BUILDINGS.filter((building) => building.fakultasId === scope.fakultasId) : MOCK_BUILDINGS;
   // The lecture schedule uploaded by each admin fakultas blocks its rooms for the whole semester.
   const lectures = lecturerScheduleBookings(getMockLecturerSchedules(), MOCK_BUILDINGS, toWibDateKey(now));
+  // The "empty" data mode has no sample bookings or lectures; the form adds what was made in the browser.
+  const seeded = (await getDataMode()) === "sample";
   return {
     buildings,
-    bookings: [...buildRoomBookingsMock(now), ...lectures],
+    bookings: seeded ? [...buildRoomBookingsMock(now), ...lectures] : [],
     now: now.toISOString(),
     rules: MOCK_ROOM_RULES,
   };
@@ -49,7 +52,8 @@ export async function getSportsHallReservationOptions(): Promise<SportsHallReser
   await connection();
   const now = new Date();
   // TODO: replace with the orval clients for the GOR and its bookings (no-store).
-  return { hall: MOCK_SPORTS_HALL, bookings: buildSportsHallBookingsMock(now), now: now.toISOString() };
+  const seeded = (await getDataMode()) === "sample";
+  return { hall: MOCK_SPORTS_HALL, bookings: seeded ? buildSportsHallBookingsMock(now) : [], now: now.toISOString() };
 }
 
 /** Which vehicle goes is arranged outside the app, so the form only needs the server time for its defaults. */

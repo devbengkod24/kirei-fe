@@ -90,6 +90,9 @@ export function typeRect(room: RoomRect, category: RoomCategory, floor: PlanSize
   return fitRoom({ x: room.x, y: room.y, width: columns * GRID, height: rows * GRID }, floor);
 }
 
+/** Unique across reloads, since saved plans can outlive the page. */
+export const newRoomId = () => `room-new-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+
 /** A new room at its type's size in the first free spot, scanning row by row; the top-left corner when the floor is full. */
 export function newRoom(floor: Floor, id: string, category: RoomCategory = "kelas"): FloorPlanRoom {
   const { columns, rows } = gridSize(floor);

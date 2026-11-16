@@ -1,15 +1,20 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { Field, INPUT_CLASS } from "@/components/form/Field";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { useLiveData } from "@/hooks/useLiveData";
+import { lecturerSchedulesSchema, LIVE_NAMES } from "@/shared/live-data/liveSchemas";
+import { useStoredBuildings } from "@/shared/live-data/useLiveFacilities";
 import { formatDateLongWIB, formatDateTimeShortWIB, wibToIso } from "@/lib/date";
 import type { LecturerSchedule } from "@/types/schedule";
 import { saveLecturerSchedule } from "./actions";
 import { DAY_LABEL, parseScheduleCsv, SCHEDULE_COLUMNS, semesterSchema, type ParsedSchedule } from "./scheduleCsv";
 
 export interface LecturerScheduleUploadProps {
+  /** The admin's faculty. */
+  fakultasId: string;
   schedule: LecturerSchedule | null;
   roomCodes: string[];
   templateHref: string;
@@ -22,8 +27,21 @@ const timeText = (time: string) => time.replace(":", ".");
 
 type Picked = { fileName: string; result: ParsedSchedule };
 
-export function LecturerScheduleUpload({ schedule: initial, roomCodes, templateHref }: LecturerScheduleUploadProps) {
-  const [schedule, setSchedule] = useState(initial);
+export function LecturerScheduleUpload({ fakultasId, schedule: initial, roomCodes: serverRoomCodes, templateHref }: LecturerScheduleUploadProps) {
+  // "Empty" data mode: the schedule and the saved floor plans are kept in this browser.
+  const live = useLiveData(LIVE_NAMES.lecturerSchedules, lecturerSchedulesSchema);
+  const storedBuildings = useStoredBuildings();
+  const roomCodes = useMemo(
+    () =>
+      storedBuildings
+        ? storedBuildings
+            .filter((building) => building.fakultasId === fakultasId)
+            .flatMap((building) => building.floors.flatMap((floor) => floor.rooms.map((room) => room.code)))
+        : serverRoomCodes,
+    [storedBuildings, fakultasId, serverRoomCodes],
+  );
+  const [uploaded, setUploaded] = useState(initial);
+  const schedule = live.value?.[fakultasId] ?? uploaded;
   const [semester, setSemester] = useState({ startDate: initial?.semester.startDate ?? "", endDate: initial?.semester.endDate ?? "" });
   const [picked, setPicked] = useState<Picked | null>(null);
   const [fileError, setFileError] = useState<string>();
@@ -57,7 +75,8 @@ export function LecturerScheduleUpload({ schedule: initial, roomCodes, templateH
     startSaving(async () => {
       const result = await saveLecturerSchedule({ semester: parsedSemester.data, entries });
       if (result.ok) {
-        setSchedule(result.schedule);
+        const stored = live.ready && live.save({ ...live.value, [fakultasId]: result.schedule });
+        if (!stored) setUploaded(result.schedule);
         setPicked(null);
         setOutcome({
           tone: "success",

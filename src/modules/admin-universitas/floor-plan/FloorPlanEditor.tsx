@@ -1,9 +1,11 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { Field, INPUT_CLASS, SelectInput } from "@/components/form/Field";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { useLiveData } from "@/hooks/useLiveData";
+import { buildingsSchema, LIVE_NAMES } from "@/shared/live-data/liveSchemas";
 import { ROOM_CATEGORY_LABEL } from "@/shared/reservation-form/labels";
 import { PanelHeading } from "@/shared/reservation-form/PanelHeading";
 import type { Building, Floor, FloorPlanRoom, RoomCategory } from "@/types/facility";
@@ -16,6 +18,7 @@ import {
   fitRoom,
   gridSize,
   newRoom,
+  newRoomId,
   resizeFloor,
   roomCodeErrors,
   type RoomRect,
@@ -62,17 +65,36 @@ function RectInput({ id, label, value, onCommit }: { id: string; label: string; 
 }
 
 /**
+ * Kelola Denah. In the "empty" data mode saved plans are kept in this browser, where the booking
+ * form and the operator's floor read them; in "sample" mode a save lasts until the page reloads.
+ */
+export function FloorPlanEditor({ buildings }: FloorPlanEditorProps) {
+  const live = useLiveData(LIVE_NAMES.buildings, buildingsSchema);
+  const stored = live.value;
+  const current = useMemo(
+    () => (stored ? buildings.map((building) => stored.find((item) => item.id === building.id) ?? building) : buildings),
+    [buildings, stored],
+  );
+  // Remounts once the browser's saved plans are read, so the editor starts from them.
+  return <FloorPlanForm key={live.ready ? "saved" : "server"} buildings={current} persist={live.ready ? live.save : undefined} />;
+}
+
+interface FloorPlanFormProps extends FloorPlanEditorProps {
+  /** Keeps the saved plans; returns false when that failed. Unset when a save only lasts for this page. */
+  persist?: (buildings: Building[]) => boolean;
+}
+
+/**
  * Edits the floor plans of the buildings in scope. Changes stay in a draft until "Simpan denah";
  * the saved shape is the same Floor/FloorPlanRoom the booking form reads.
  */
-export function FloorPlanEditor({ buildings: initial }: FloorPlanEditorProps) {
+function FloorPlanForm({ buildings: initial, persist }: FloorPlanFormProps) {
   const [saved, setSaved] = useState(initial);
   const [draft, setDraft] = useState(initial);
   const [buildingId, setBuildingId] = useState(initial[0]?.id ?? "");
   const [floorId, setFloorId] = useState(initial[0]?.floors[0]?.id ?? "");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [notice, setNotice] = useState<{ tone: "success" | "danger"; text: string } | null>(null);
-  const newRoomCount = useRef(0);
   const helpId = useId();
 
   const building = draft.find((item) => item.id === buildingId);
@@ -124,8 +146,7 @@ export function FloorPlanEditor({ buildings: initial }: FloorPlanEditorProps) {
 
   const addRoom = () => {
     if (!floor) return;
-    newRoomCount.current += 1;
-    const added = newRoom(floor, `room-new-${newRoomCount.current}`);
+    const added = newRoom(floor, newRoomId());
     if (collidingRoom(floor, added.id, added)) {
       setNotice({ tone: "danger", text: "Tidak ada tempat kosong 2 × 2 kotak untuk ruang kelas baru. Perbesar lantai atau kecilkan ruangan lain." });
       return;
@@ -165,7 +186,12 @@ export function FloorPlanEditor({ buildings: initial }: FloorPlanEditorProps) {
         }
       }
     }
-    // TODO: PUT the changed floors through the orval client, then refetch; this keeps them locally.
+    // TODO: PUT the changed floors through the orval client, then refetch. Until then the "empty"
+    // data mode keeps them in the browser and "sample" mode only on this page.
+    if (persist && !persist(draft)) {
+      setNotice({ tone: "danger", text: "Browser ini tidak bisa menyimpan denah. Matikan mode privat atau coba browser lain." });
+      return;
+    }
     setSaved(draft);
     setNotice({ tone: "success", text: "Denah disimpan." });
   };

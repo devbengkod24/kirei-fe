@@ -10,6 +10,8 @@ export interface ReservationManagementProps {
   /** Every request in scope for this type; the table shows the tab's rows. See getReservationCandidates. */
   reservations: ReservationRequest[];
   roomCodes: string[] | null;
+  /** Buildings in scope; see getReservationCandidates. */
+  buildingNames?: string[];
   /** Controls on the left of the header row, e.g. the Ruangan / Kendaraan / GOR tabs. */
   leading?: React.ReactNode;
   /** Controls placed under the tabs on the right, e.g. the faculty filter. */
@@ -25,6 +27,7 @@ export function ReservationManagement({
   links,
   reservations,
   roomCodes,
+  buildingNames,
   leading,
   toolbar,
   heading = "Kelola Reservasi",
@@ -46,7 +49,7 @@ export function ReservationManagement({
           {toolbar}
         </div>
       </div>
-      <ReservationTable key={tab} tipe={tipe} tab={tab} reservations={reservations} roomCodes={roomCodes} />
+      <ReservationTable key={tab} tipe={tipe} tab={tab} reservations={reservations} roomCodes={roomCodes} buildingNames={buildingNames} />
     </div>
   );
 }

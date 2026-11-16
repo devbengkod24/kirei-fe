@@ -5,13 +5,16 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { SelectInput } from "@/components/form/Field";
 import { Card } from "@/components/ui/Card";
 import { MaskIcon } from "@/components/ui/MaskIcon";
+import { readBrowserDataMode } from "@/lib/data-mode/dataMode";
 import { formatDateLongWIB, formatTimeRangeWIB, toWibDateKey } from "@/lib/date";
+import { lecturesOnDay, useLiveFloor, useLiveLecturerSchedules } from "@/shared/live-data/useLiveFacilities";
 import type { TimeSlot } from "@/shared/reservation-form/sportsHallSlots";
-import { approvedRoomBookings } from "@/shared/reservation-store/reservationStore";
+import { addMockReservation, approvedRoomBookings } from "@/shared/reservation-store/reservationStore";
 import { useMockReservations } from "@/shared/reservation-store/useMockReservations";
 import { CreateReservationPanel } from "./CreateReservationPanel";
 import { FloorTimeline } from "./FloorTimeline";
 import type { OperatorFloorData } from "./getOperatorFloor";
+import { toStoredOperatorBooking } from "./operatorReservations";
 import { buildTimeline, defaultHourFilter, FILTER_HOURS, toggleRoom } from "./slots";
 import { TimelineDetailPopover } from "./TimelineDetailPopover";
 import { itemKey, type TimelineItem } from "./timelineDetail";
@@ -27,15 +30,23 @@ export function OperatorFloorPage({ data }: { data: OperatorFloorData | null }) 
   if (!data) {
     return <EmptyState>Akun Anda belum ditugaskan ke lantai mana pun. Hubungi Admin Universitas untuk penugasan lantai.</EmptyState>;
   }
-  if (data.floor.rooms.length === 0) {
+  return <AssignedFloor data={data} />;
+}
+
+/** In the "empty" data mode the floor is the one saved in Kelola Denah in this browser. */
+function AssignedFloor({ data }: { data: OperatorFloorData }) {
+  const floor = useLiveFloor(data.floor);
+  const liveData = useMemo(() => ({ ...data, floor }), [data, floor]);
+  if (floor.rooms.length === 0) {
     return (
       <EmptyState>
-        Belum ada ruangan di {data.buildingName} lantai {data.floor.number}. Ruangan ditambahkan oleh Admin Universitas lewat Kelola
+        Belum ada ruangan di {data.buildingName} lantai {floor.number}. Ruangan ditambahkan oleh Admin Universitas lewat Kelola
         Denah.
       </EmptyState>
     );
   }
-  return <FloorAvailability data={data} />;
+  // Remounts when the saved plan arrives, so the room filter starts from its rooms.
+  return <FloorAvailability key={floor === data.floor ? "server" : "saved"} data={liveData} />;
 }
 
 function FloorAvailability({ data }: { data: OperatorFloorData }) {
@@ -49,6 +60,12 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
   const reservations = useMemo(
     () => [...created, ...approvedRoomBookings(store, floor.rooms.map((room) => room.code), dateKey)],
     [created, store, floor.rooms, dateKey],
+  );
+  // "Empty" data mode: today's lectures come from the schedules the admins uploaded in this browser.
+  const lecturerSchedules = useLiveLecturerSchedules();
+  const classSchedules = useMemo(
+    () => [...data.classSchedules, ...lecturesOnDay(lecturerSchedules, floor.rooms.map((room) => room.code), dateKey)],
+    [data.classSchedules, lecturerSchedules, floor.rooms, dateKey],
   );
   // Every room starts visible so the operator sees the whole floor at once.
   const [visibleIds, setVisibleIds] = useState(() => floor.rooms.map((room) => room.id));
@@ -90,7 +107,7 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
     for (const room of visibleRooms) {
       const gap =
         validRange &&
-        buildTimeline(dateKey, room.code, hours.from, hours.to, reservations, data.classSchedules).find((segment) => segment.kind === "free");
+        buildTimeline(dateKey, room.code, hours.from, hours.to, reservations, classSchedules).find((segment) => segment.kind === "free");
       if (gap) return openCreate(room.id, gap);
     }
     openCreate(visibleRooms[0].id, { start: hours.from, end: hours.to });
@@ -206,7 +223,7 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
                 to={hours.to}
                 now={now}
                 reservations={reservations}
-                schedules={data.classSchedules}
+                schedules={classSchedules}
                 canCreate={canCreate}
                 activeKey={detail ? itemKey(detail.item) : null}
                 onOpen={openDetail}
@@ -238,13 +255,16 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
                   dateKey={dateKey}
                   startTime={draft.start}
                   endTime={draft.end}
-                  busy={[...reservations, ...data.classSchedules]}
+                  busy={[...reservations, ...classSchedules]}
                   onCollapse={() => {
                     setDraft(null);
                     statusHeadingRef.current?.focus();
                   }}
                   onCreated={(reservation) => {
-                    setCreated((current) => [...current, reservation]);
+                    // "Empty" data mode keeps the booking in the browser store, which the timeline already reads.
+                    const stored =
+                      readBrowserDataMode() === "empty" && addMockReservation(toStoredOperatorBooking(reservation, data.buildingName));
+                    if (!stored) setCreated((current) => [...current, reservation]);
                     setDraft(null);
                     statusHeadingRef.current?.focus();
                     setNotice(`Reservasi ${reservation.unitName}, ${formatTimeRangeWIB(reservation.startsAt, reservation.endsAt)}, dibuat.`);

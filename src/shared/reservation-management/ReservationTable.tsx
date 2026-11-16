@@ -26,6 +26,8 @@ export interface ReservationTableProps {
   reservations: ReservationRequest[];
   /** Room codes in the admin's scope, for requests created in this browser; null for GOR and vehicles. */
   roomCodes: string[] | null;
+  /** Buildings in the admin's scope, so a room added later in Kelola Denah still counts. */
+  buildingNames?: string[];
 }
 
 const TH = `${TABLE_HEAD_CELL} text-left`;
@@ -45,13 +47,17 @@ const EMPTY_TEXT: Record<ReservationTab, string> = {
 };
 
 /** Reservations table for both tabs: approval actions on "persetujuan", status on "riwayat". */
-export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes }: ReservationTableProps) {
+export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, buildingNames }: ReservationTableProps) {
   const store = useMockReservations();
   // Decisions this browser could not store (e.g. private mode) still apply until the page reloads.
   const [unsaved, setUnsaved] = useState<Record<string, MockDecision>>({});
   const reservations = useMemo(
-    () => requestsForTab(mergeAdminRequests(seeded, { ...store, decisions: { ...store.decisions, ...unsaved } }, tipe, roomCodes), tab),
-    [seeded, store, unsaved, tipe, roomCodes, tab],
+    () =>
+      requestsForTab(
+        mergeAdminRequests(seeded, { ...store, decisions: { ...store.decisions, ...unsaved } }, tipe, roomCodes, buildingNames),
+        tab,
+      ),
+    [seeded, store, unsaved, tipe, roomCodes, buildingNames, tab],
   );
   const [viewing, setViewing] = useState<ReservationRequest | null>(null);
   const [approving, setApproving] = useState<ReservationRequest | null>(null);

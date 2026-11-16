@@ -1,10 +1,27 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("next/server", () => ({ connection: async () => {} }));
+vi.mock("@/lib/data-mode/getDataMode", () => ({ getDataMode: async () => dataMode }));
+
+let dataMode: "sample" | "empty" = "sample";
 
 const { getUniversityDashboard } = await import("./getUniversityDashboard");
 
+afterEach(() => {
+  dataMode = "sample";
+});
+
 describe("getUniversityDashboard", () => {
+  it("starts from zero in the empty data mode and says which rooms to count", async () => {
+    dataMode = "empty";
+    const data = await getUniversityDashboard({ fakultasId: "fik" });
+    expect(data.summaries.every((summary) => summary.today === 0 && summary.pending === 0)).toBe(true);
+    expect(data.todayReservations).toEqual([]);
+    expect(data.weeklyTrend.byType.gor.succeeded).toEqual([0, 0, 0, 0]);
+    expect(data.userActivity.activeUsers).toBe(0);
+    expect(data.live?.rooms.buildingNames).toEqual(["Gedung H"]);
+  });
+
   it("summarises rooms, vehicles, and GOR in the tab order", async () => {
     const data = await getUniversityDashboard({ fakultasId: null });
     expect(data.summaries.map((summary) => summary.type)).toEqual(["ruangan", "kendaraan", "gor"]);
