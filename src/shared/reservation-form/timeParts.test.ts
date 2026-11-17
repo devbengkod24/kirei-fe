@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { joinTime, parseTypedPart, splitTime, stepPart } from "./timeParts";
+import { clampTime, joinTime, parseTypedPart, splitTime, stepPart } from "./timeParts";
 
 describe("time wheel", () => {
   it("steps hours by 1 and minutes by 10, wrapping around", () => {
@@ -19,6 +19,19 @@ describe("time wheel", () => {
     expect(parseTypedPart("hour", "7")).toBe(7);
     expect(parseTypedPart("hour", "ab")).toBeNull();
     expect(parseTypedPart("hour", "")).toBeNull();
+  });
+
+  it("keeps hours inside an opening-hours range", () => {
+    const hours = { min: 7, max: 20 };
+    expect(stepPart("hour", 20, 1, hours)).toBe(7);
+    expect(stepPart("hour", 7, -1, hours)).toBe(20);
+    expect(stepPart("hour", 12, 1, hours)).toBe(13);
+    expect(stepPart("hour", 0, 1, hours)).toBe(8);
+    expect(parseTypedPart("hour", "3", hours)).toBe(7);
+    expect(parseTypedPart("hour", "23", hours)).toBe(20);
+    expect(clampTime("20:30", "07:00", "20:00")).toBe("20:00");
+    expect(clampTime("06:50", "07:00", "20:00")).toBe("07:00");
+    expect(clampTime("13:40", "07:00", "20:00")).toBe("13:40");
   });
 
   it("splits and joins HH:MM", () => {

@@ -106,8 +106,8 @@ export function buildRoomBookingsMock(now: Date): UnitBooking[] {
   });
 
   return [0, 1, 2, 3, 4, 5, 6].flatMap((days) => [
-    booking("H.5.2", days, "07:00", "21:00"),
-    booking("H.5.11", days, "07:00", "21:00"),
+    booking("H.5.2", days, "07:00", "20:00"),
+    booking("H.5.11", days, "07:00", "20:00"),
     booking("H.5.9", days, "08:00", "12:00"),
     booking("H.5.9", days, "13:00", "17:00"),
     booking("H.7", days, "09:00", "11:00"),
@@ -126,7 +126,7 @@ export const MOCK_SPORTS_HALL: SportsHall = {
   id: "gor-udinus",
   name: "GOR Udinus",
   openTime: "07:00",
-  closeTime: "22:00",
+  closeTime: "20:00",
   slotMinutes: 60,
   activities: ["Badminton", "Futsal", "Basket", "Voli"],
 };
@@ -141,7 +141,7 @@ export function buildSportsHallBookingsMock(now: Date): UnitBooking[] {
   });
 
   return [
-    booking(1, "07:00", "22:00"),
+    booking(1, "07:00", "20:00"),
     ...[0, 2, 3, 4, 5, 6, 8, 10, 12].flatMap((days) => [booking(days, "08:00", "09:00"), booking(days, "16:00", "18:00")]),
   ];
 }

@@ -590,6 +590,8 @@ export function RoomReservationForm({
                       }}
                       onBlur={field.onBlur}
                       invalid={Boolean(errors.startTime)}
+                      min={ROOM_OPEN_TIME}
+                      max={ROOM_CLOSE_TIME}
                     />
                   )}
                 />
@@ -619,6 +621,8 @@ export function RoomReservationForm({
                       }}
                       onBlur={field.onBlur}
                       invalid={Boolean(errors.endTime)}
+                      min={ROOM_OPEN_TIME}
+                      max={ROOM_CLOSE_TIME}
                     />
                   )}
                 />

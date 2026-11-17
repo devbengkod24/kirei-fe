@@ -40,7 +40,14 @@ export function ActiveReservationCard({ reservation }: { reservation: Reservatio
           </Field>
           <Field label="Tipe Reservasi">{RESERVATION_TYPE_LABEL[reservation.type]}</Field>
         </div>
-        <Field label="Dipinjam">{reservation.unitName}</Field>
+        {/* There is only one GOR, so naming it adds nothing. The empty column keeps the others where they sit on every card. */}
+        {reservation.type === "gor" ? (
+          <div aria-hidden="true" className="invisible hidden sm:block">
+            Dipinjam
+          </div>
+        ) : (
+          <Field label="Dipinjam">{reservation.unitName}</Field>
+        )}
       </dl>
     </Card>
   );

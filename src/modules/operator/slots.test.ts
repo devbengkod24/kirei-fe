@@ -69,7 +69,7 @@ describe("defaultHourFilter", () => {
 
   it("stays inside opening hours early and late in the day", () => {
     expect(defaultHourFilter(new Date("2026-10-30T22:00:00Z"))).toEqual({ from: "07:00", to: "09:00" });
-    expect(defaultHourFilter(new Date("2026-10-31T14:30:00Z"))).toEqual({ from: "19:00", to: "21:00" });
+    expect(defaultHourFilter(new Date("2026-10-31T14:30:00Z"))).toEqual({ from: "18:00", to: "20:00" });
   });
 });
 

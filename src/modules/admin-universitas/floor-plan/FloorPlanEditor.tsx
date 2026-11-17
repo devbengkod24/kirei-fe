@@ -8,7 +8,19 @@ import { ROOM_CATEGORY_LABEL } from "@/shared/reservation-form/labels";
 import { PanelHeading } from "@/shared/reservation-form/PanelHeading";
 import type { Building, Floor, FloorPlanRoom, RoomCategory } from "@/types/facility";
 import { FloorPlanCanvas } from "./FloorPlanCanvas";
-import { FLOOR_CELLS, GRID, collidingRoom, fitRoom, gridSize, newRoom, resizeFloor, roomCodeErrors, type RoomRect } from "./floorPlanEdits";
+import {
+  FLOOR_CELLS,
+  GRID,
+  ROOM_TYPE_CELLS,
+  collidingRoom,
+  fitRoom,
+  gridSize,
+  newRoom,
+  resizeFloor,
+  roomCodeErrors,
+  type RoomRect,
+  typeRect,
+} from "./floorPlanEdits";
 
 export interface FloorPlanEditorProps {
   buildings: Building[];
@@ -87,7 +99,24 @@ export function FloorPlanEditor({ buildings: initial }: FloorPlanEditorProps) {
     updateRoom(roomId, rect);
   };
 
-  const chooseBuilding =(id: string) => {
+  const describeRoom = (item: FloorPlanRoom) => item.code.trim() || "tanpa kode";
+
+  // The size follows the type. When the new size would cover a neighbour, only the type changes.
+  const changeCategory = (category: RoomCategory) => {
+    if (!room || !floor) return;
+    const rect = typeRect(room, category, floor);
+    const blocker = collidingRoom(floor, room.id, rect);
+    updateRoom(room.id, blocker ? { category } : { category, ...rect });
+    if (blocker) {
+      const { columns, rows } = ROOM_TYPE_CELLS[category];
+      setNotice({
+        tone: "danger",
+        text: `Tipe diubah, tetapi ukuran ${columns} × ${rows} kotak menabrak ruangan ${describeRoom(blocker)}. Pindahkan ruangan lalu atur ukurannya.`,
+      });
+    }
+  };
+
+  const chooseBuilding = (id: string) => {
     setBuildingId(id);
     setFloorId(draft.find((item) => item.id === id)?.floors[0]?.id ?? "");
     setSelectedId(null);
@@ -98,7 +127,7 @@ export function FloorPlanEditor({ buildings: initial }: FloorPlanEditorProps) {
     newRoomCount.current += 1;
     const added = newRoom(floor, `room-new-${newRoomCount.current}`);
     if (collidingRoom(floor, added.id, added)) {
-      setNotice({ tone: "danger", text: "Tidak ada tempat kosong 2 × 2 kotak. Perbesar lantai atau kecilkan ruangan lain." });
+      setNotice({ tone: "danger", text: "Tidak ada tempat kosong 2 × 2 kotak untuk ruang kelas baru. Perbesar lantai atau kecilkan ruangan lain." });
       return;
     }
     updateFloor((level) => ({ ...level, rooms: [...level.rooms, added] }));
@@ -258,7 +287,7 @@ export function FloorPlanEditor({ buildings: initial }: FloorPlanEditorProps) {
                 <SelectInput
                   id="plan-room-category"
                   value={room.category}
-                  onChange={(event) => updateRoom(room.id, { category: event.target.value as RoomCategory })}
+                  onChange={(event) => changeCategory(event.target.value as RoomCategory)}
                 >
                   {CATEGORIES.map((category) => (
                     <option key={category} value={category}>
@@ -267,6 +296,10 @@ export function FloorPlanEditor({ buildings: initial }: FloorPlanEditorProps) {
                   ))}
                 </SelectInput>
               </Field>
+              <p className="text-[11px] text-muted">
+                Ukuran otomatis {ROOM_CATEGORY_LABEL[room.category]}: {ROOM_TYPE_CELLS[room.category].columns} ×{" "}
+                {ROOM_TYPE_CELLS[room.category].rows} kotak.
+              </p>
               <Field label="Kapasitas (orang)" htmlFor="plan-room-capacity">
                 <input
                   id="plan-room-capacity"

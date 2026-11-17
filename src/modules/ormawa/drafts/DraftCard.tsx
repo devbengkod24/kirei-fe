@@ -111,7 +111,8 @@ export function DraftCard({ draft, booker, onSubmitted, onRequestCancel }: Draft
               <Field label="Tipe Reservasi">{RESERVATION_TYPE_LABEL[draft.type]}</Field>
             </div>
             <div className="flex flex-col gap-4 sm:gap-7">
-              <Field label="Dipinjam">{draft.unitName}</Field>
+              {/* There is only one GOR, so naming it adds nothing. */}
+              {draft.type !== "gor" && <Field label="Dipinjam">{draft.unitName}</Field>}
               <div className="flex flex-col gap-1">
                 <span className={CAPS_LABEL_CLASS} id={`${id}-letter-label`}>
                   Surat Peminjaman
