@@ -54,6 +54,7 @@ import {
   SummaryWhen,
 } from "./summaryParts";
 import { useReservationSubmit } from "./useReservationSubmit";
+import { useLiveBuildings, useLiveLectureBookings } from "@/shared/live-data/useLiveFacilities";
 import { heldBookings, type ReservationOwner } from "@/shared/reservation-store/reservationStore";
 import { useMockReservations } from "@/shared/reservation-store/useMockReservations";
 
@@ -97,7 +98,7 @@ function firstFloorId(building: Building | undefined) {
 }
 
 export function RoomReservationForm({
-  buildings,
+  buildings: serverBuildings,
   bookings: serverBookings,
   now,
   requester,
@@ -110,6 +111,9 @@ export function RoomReservationForm({
 }: RoomReservationFormProps) {
   const { askPhone, withLetter, withDraft, needsApproval, requesterLabel, submittedText, minDaysAhead } =
     BOOKING_MODES[mode];
+  // "Empty" data mode: floor plans saved in Kelola Denah and uploaded lecture schedules live in this browser.
+  const buildings = useLiveBuildings(serverBuildings);
+  const lectureBookings = useLiveLectureBookings(buildings, now);
   const schema = useMemo(
     () => createRoomReservationSchema(undefined, mode),
     [mode],
@@ -180,8 +184,8 @@ export function RoomReservationForm({
     const roomIds = new Map(
       buildings.flatMap((b) => b.floors.flatMap((f) => f.rooms.map((room) => [room.code, room.id] as const))),
     );
-    return [...serverBookings, ...heldBookings(store, "ruangan", roomIds)];
-  }, [serverBookings, store, buildings]);
+    return [...serverBookings, ...lectureBookings, ...heldBookings(store, "ruangan", roomIds)];
+  }, [serverBookings, lectureBookings, store, buildings]);
 
   const statuses = new Map(
     (floor?.rooms ?? []).map((room) => [

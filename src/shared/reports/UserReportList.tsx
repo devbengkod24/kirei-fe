@@ -10,6 +10,7 @@ import { TABLE, TABLE_CELL, TABLE_HEAD_CELL, TABLE_ROW } from "@/components/ui/t
 import { usePagination } from "@/hooks/usePagination";
 import { formatRelativeDayWIB, formatTimeWIB } from "@/lib/date";
 import type { UserReport } from "@/types/report";
+import { useLiveReports } from "./liveReports";
 import { DEFAULT_REPORT_FILTER, filterReports, isDefaultReportFilter } from "./filterReports";
 import { ReportFilterForm } from "./ReportFilterForm";
 import { REPORT_CATEGORY_LABEL } from "./report-labels";
@@ -28,7 +29,9 @@ const TH = `${TABLE_HEAD_CELL} text-left`;
 const TD = TABLE_CELL;
 const VIEW_BUTTON = "flex h-11 w-11 items-center justify-center rounded-md border border-border transition-colors hover:bg-page";
 
-export function UserReportList({ reports, loadedAt }: UserReportListProps) {
+export function UserReportList({ reports: serverReports, loadedAt }: UserReportListProps) {
+  // "Empty" data mode: reports sent from the borrower's Hubungi Kami form in this browser.
+  const reports = useLiveReports(serverReports);
   const [filter, setFilter] = useState(DEFAULT_REPORT_FILTER);
   const [filterOpen, setFilterOpen] = useState(false);
   const [viewing, setViewing] = useState<UserReport | null>(null);

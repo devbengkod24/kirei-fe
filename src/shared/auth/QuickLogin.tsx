@@ -1,5 +1,6 @@
+import { Suspense } from "react";
 import { quickLogin } from "@/lib/auth/actions";
-import { ResetMockReservationsButton } from "@/shared/reservation-store/ResetMockReservationsButton";
+import { DataModeControls } from "@/shared/data-mode/DataModeControls";
 import type { CurrentUser, UserRole } from "@/types/user";
 
 const ROLE_LABEL: Partial<Record<UserRole, string>> = {
@@ -42,7 +43,10 @@ export function QuickLogin({ accounts }: QuickLoginProps) {
           </li>
         ))}
       </ul>
-      <ResetMockReservationsButton />
+      {/* Reads the data mode cookie, so it streams in after the static part of the page. */}
+      <Suspense fallback={null}>
+        <DataModeControls />
+      </Suspense>
     </section>
   );
 }

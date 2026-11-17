@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { requireRole } from "@/lib/auth/requireRole";
 import { getUniversityDashboard } from "@/modules/admin-universitas/dashboard/getUniversityDashboard";
-import { UniversityDashboard } from "@/modules/admin-universitas/dashboard/UniversityDashboard";
+import { LiveUniversityDashboard } from "@/modules/admin-universitas/dashboard/LiveUniversityDashboard";
 import { fakultasScopeFromSearchParams } from "@/shared/fakultas-filter/fakultasScope";
 import { getFakultasOptions } from "@/shared/fakultas-filter/getFakultasOptions";
 
@@ -14,7 +14,7 @@ export default async function Page({ searchParams }: PageProps<"/admin/dashboard
   const data = await getUniversityDashboard(scope);
 
   return (
-    <UniversityDashboard
+    <LiveUniversityDashboard
       data={data}
       fakultasOptions={fakultasOptions}
       fakultas={fakultasOptions.find((fakultas) => fakultas.id === scope.fakultasId) ?? null}

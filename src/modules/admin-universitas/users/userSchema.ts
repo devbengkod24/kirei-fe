@@ -74,6 +74,20 @@ export function createUserSchema(role: ManagedRole, existing: ManagedUser[], bui
     });
 }
 
+/** Accounts as the "empty" data mode keeps them in the browser. Passwords are never part of it. */
+export const managedUsersSchema: z.ZodType<ManagedUser[]> = z.array(
+  z.object({
+    id: z.string(),
+    role: z.enum(["organisasi", "dosen", "admin_fakultas", "operator"]),
+    name: z.string(),
+    email: z.string(),
+    fakultasId: z.string().nullable(),
+    npp: z.string().optional(),
+    floor: z.object({ buildingId: z.string(), floorId: z.string() }).optional(),
+    isActive: z.boolean(),
+  }),
+);
+
 export type NewUserInput = z.input<ReturnType<typeof createUserSchema>>;
 export type NewUserValues = z.output<ReturnType<typeof createUserSchema>>;
 

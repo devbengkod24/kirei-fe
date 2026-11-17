@@ -1,9 +1,11 @@
 import { connection } from "next/server";
+import { getDataMode } from "@/lib/data-mode/getDataMode";
 import { toWibDateKey } from "@/lib/date";
 import { MOCK_UNIVERSITY_USER_ACTIVITY, MOCK_WEEKLY_TREND_BY_TYPE } from "@/mocks/admin-dashboard";
 import { MOCK_VEHICLES } from "@/mocks/facilities";
 import { buildFacilityRequestsMock, buildReservationsMock } from "@/mocks/reservations";
 import { mockRoomsInScope } from "@/mocks/rooms";
+import { BORROWER_ACCOUNTS, liveDashboardScope, type LiveDashboardScope } from "@/shared/admin-dashboard/getAdminDashboard";
 import type { AdminScope } from "@/shared/admin-scope";
 import { RESERVATION_TYPES, type ReservationRequest, type ReservationType } from "@/types/reservation";
 
@@ -27,6 +29,7 @@ export interface UniversityDashboardData {
   weeklyTrend: { labels: string[]; byType: Record<ReservationType, WeeklyCounts> };
   todayReservations: ReservationRequest[];
   userActivity: { activeUsers: number; totalUsers: number };
+  live?: LiveDashboardScope;
 }
 
 /**
@@ -40,10 +43,12 @@ export async function getUniversityDashboard(scope: AdminScope): Promise<Univers
   const todayKey = toWibDateKey(now);
   const rooms = mockRoomsInScope(scope.fakultasId);
   const roomCodes = new Set(rooms.map((room) => room.code));
-  const requests = [
-    ...buildReservationsMock(now).filter((request) => roomCodes.has(request.roomName)),
-    ...buildFacilityRequestsMock(now),
-  ];
+  // The "empty" data mode starts from zero; the dashboard then counts what was made in the browser.
+  const seeded = (await getDataMode()) === "sample";
+  const requests = seeded
+    ? [...buildReservationsMock(now).filter((request) => roomCodes.has(request.roomName)), ...buildFacilityRequestsMock(now)]
+    : [];
+  const noTrend = { succeeded: [0, 0, 0, 0], cancelled: [0, 0, 0, 0] };
   const ofType = (type: ReservationType) => requests.filter((request) => request.type === type);
   const isToday = (request: ReservationRequest) =>
     toWibDateKey(request.startsAt) === todayKey && (request.status === "disetujui" || request.status === "selesai");
@@ -58,7 +63,7 @@ export async function getUniversityDashboard(scope: AdminScope): Promise<Univers
   };
 
   // The mock has one trend for all rooms; a faculty without rooms gets none.
-  const roomTrend = rooms.length > 0 ? MOCK_WEEKLY_TREND_BY_TYPE.ruangan : { succeeded: [0, 0, 0, 0], cancelled: [0, 0, 0, 0] };
+  const roomTrend = seeded && rooms.length > 0 ? MOCK_WEEKLY_TREND_BY_TYPE.ruangan : noTrend;
 
   return {
     summaries: RESERVATION_TYPES.map((type) => ({
@@ -70,9 +75,14 @@ export async function getUniversityDashboard(scope: AdminScope): Promise<Univers
     })),
     weeklyTrend: {
       labels: MOCK_WEEKLY_TREND_BY_TYPE.labels,
-      byType: { ruangan: roomTrend, gor: MOCK_WEEKLY_TREND_BY_TYPE.gor, kendaraan: MOCK_WEEKLY_TREND_BY_TYPE.kendaraan },
+      byType: {
+        ruangan: roomTrend,
+        gor: seeded ? MOCK_WEEKLY_TREND_BY_TYPE.gor : noTrend,
+        kendaraan: seeded ? MOCK_WEEKLY_TREND_BY_TYPE.kendaraan : noTrend,
+      },
     },
     todayReservations: requests.filter(isToday).sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt)),
-    userActivity: MOCK_UNIVERSITY_USER_ACTIVITY,
+    userActivity: seeded ? MOCK_UNIVERSITY_USER_ACTIVITY : { activeUsers: 0, totalUsers: BORROWER_ACCOUNTS },
+    ...(seeded ? {} : { live: liveDashboardScope(scope, now) }),
   };
 }

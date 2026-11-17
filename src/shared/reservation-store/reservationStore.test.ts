@@ -50,6 +50,16 @@ const created = (overrides: Partial<MockReservation> = {}): MockReservation => (
   ...overrides,
 });
 
+describe("mergeAdminRequests with buildings", () => {
+  it("keeps a request for a room added later when its building is in scope", () => {
+    const created: MockReservation = { ...SEEDED, id: "mock-new", roomName: "H.5.99", ownerId: "usr-1", ownerEmail: "a@b.c", createdAt: "2026-11-16T00:00:00.000Z" };
+    const state = { created: [created], decisions: {} };
+    expect(mergeAdminRequests([], state, "ruangan", ["H.5.1"])).toEqual([]);
+    expect(mergeAdminRequests([], state, "ruangan", ["H.5.1"], ["Gedung H"]).map((item) => item.id)).toEqual(["mock-new"]);
+    expect(mergeAdminRequests([], state, "ruangan", ["E.2.1"], ["Gedung E"])).toEqual([]);
+  });
+});
+
 describe("reservation store", () => {
   it("reads missing or foreign data as an empty store", () => {
     expect(parseState(null)).toEqual({ created: [], decisions: {} });

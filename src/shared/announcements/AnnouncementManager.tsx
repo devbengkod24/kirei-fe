@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Pagination } from "@/components/ui/Pagination";
 import { Popover } from "@/components/ui/Popover";
+import { useLiveState } from "@/hooks/useLiveData";
 import { usePagination } from "@/hooks/usePagination";
 import { formatRelativeDayWIB, formatTimeWIB } from "@/lib/date";
+import { announcementsSchema, LIVE_NAMES } from "@/shared/live-data/liveSchemas";
 import { FILTER_BUTTON } from "@/shared/reports/UserReportList";
 import type { Announcement } from "@/types/announcement";
 import { ANNOUNCEMENT_CATEGORY } from "./announcement-labels";
@@ -31,7 +33,8 @@ export type AnnouncementManagerProps = {
 
 /** Announcement list with filter; admins also get a "Tambah Pengumuman" form. */
 export function AnnouncementManager({ announcements: initial, loadedAt, canManage, authorName }: AnnouncementManagerProps) {
-  const [announcements, setAnnouncements] = useState(initial);
+  // "Empty" data mode: announcements are kept in this browser, so every role reads the same list.
+  const [announcements, setAnnouncements] = useLiveState(LIVE_NAMES.announcements, announcementsSchema, initial);
   const [filter, setFilter] = useState(DEFAULT_ANNOUNCEMENT_FILTER);
   const [filterOpen, setFilterOpen] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -140,9 +143,9 @@ export function AnnouncementManager({ announcements: initial, loadedAt, canManag
         <CreateAnnouncementDialog
           onClose={() => setCreating(false)}
           onCreate={(created) => {
-            setAnnouncements((current) => [
+            setAnnouncements([
               { id: `ann-new-${Date.now()}`, ...created, authorName, publishedAt: new Date().toISOString() },
-              ...current,
+              ...announcements,
             ]);
             setCreating(false);
             setNotice(`Pengumuman "${created.title}" diterbitkan.`);

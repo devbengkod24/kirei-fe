@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "Persetujuan Reservasi" };
 
 export default async function Page() {
   const user = await requireRole(["admin_fakultas"]);
-  const { reservations, roomCodes } = await getReservationCandidates({ fakultasId: user.fakultasId });
+  const candidates = await getReservationCandidates({ fakultasId: user.fakultasId });
 
-  return <ReservationManagement tipe="ruangan" tab="persetujuan" links={RESERVATION_TAB_LINKS} reservations={reservations} roomCodes={roomCodes} />;
+  return <ReservationManagement tipe="ruangan" tab="persetujuan" links={RESERVATION_TAB_LINKS} {...candidates} />;
 }

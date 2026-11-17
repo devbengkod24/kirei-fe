@@ -7,7 +7,8 @@ export const metadata: Metadata = { title: "Jadwal Dosen" };
 
 export default async function Page() {
   const user = await requireRole(["admin_fakultas"]);
-  const { schedule, roomCodes } = await getLecturerSchedule(user.fakultasId ?? "");
+  const fakultasId = user.fakultasId ?? "";
+  const { schedule, roomCodes } = await getLecturerSchedule(fakultasId);
 
-  return <LecturerScheduleUpload schedule={schedule} roomCodes={roomCodes} templateHref="/samples/jadwal-dosen.csv" />;
+  return <LecturerScheduleUpload fakultasId={fakultasId} schedule={schedule} roomCodes={roomCodes} templateHref="/samples/jadwal-dosen.csv" />;
 }

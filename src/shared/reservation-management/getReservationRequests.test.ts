@@ -1,10 +1,26 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("next/server", () => ({ connection: async () => {} }));
+vi.mock("@/lib/data-mode/getDataMode", () => ({ getDataMode: async () => dataMode }));
+
+let dataMode: "sample" | "empty" = "sample";
 
 const { getReservationCandidates, getReservationRequests } = await import("./getReservationRequests");
 
+afterEach(() => {
+  dataMode = "sample";
+});
+
 describe("getReservationCandidates", () => {
+  it("has no sample requests in the empty data mode, but keeps the scope", async () => {
+    dataMode = "empty";
+    const rooms = await getReservationCandidates({ fakultasId: "fik" });
+    expect(rooms.reservations).toEqual([]);
+    expect(rooms.roomCodes).toContain("H.5.1");
+    expect(rooms.buildingNames).toEqual(["Gedung H"]);
+    expect((await getReservationCandidates({ fakultasId: null }, "gor")).reservations).toEqual([]);
+  });
+
   it("scopes browser-made requests by every room the booking form offers", async () => {
     const fik = (await getReservationCandidates({ fakultasId: "fik" })).roomCodes;
     expect(fik).toEqual(expect.arrayContaining(["H.5.1", "H.5.13", "H.5.14", "H.7"]));

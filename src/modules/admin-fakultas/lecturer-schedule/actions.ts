@@ -1,6 +1,7 @@
 "use server";
 
 import { getCurrentUser } from "@/lib/auth/getCurrentUser";
+import { getDataMode } from "@/lib/data-mode/getDataMode";
 import { setMockLecturerSchedule } from "@/mocks/lecturerSchedules";
 import type { LecturerSchedule, Weekday } from "@/types/schedule";
 import { facultyRoomCodes } from "./getLecturerSchedule";
@@ -19,8 +20,11 @@ export async function saveLecturerSchedule(input: unknown): Promise<SaveSchedule
   const parsed = lecturerScheduleInputSchema.safeParse(input);
   if (!parsed.success) return { ok: false, message: "Data jadwal tidak valid. Unggah ulang berkas CSV." };
 
+  // In the "empty" data mode the floor plans and the schedule live in the browser: the rooms were
+  // checked there against the saved plans, and the caller stores the result.
+  const seeded = (await getDataMode()) === "sample";
   const rooms = new Set(facultyRoomCodes(user.fakultasId));
-  if (parsed.data.entries.some((entry) => !rooms.has(entry.roomCode))) {
+  if (seeded && parsed.data.entries.some((entry) => !rooms.has(entry.roomCode))) {
     return { ok: false, message: "Ada ruangan yang bukan milik fakultas Anda. Unggah ulang berkas CSV." };
   }
 
@@ -30,6 +34,6 @@ export async function saveLecturerSchedule(input: unknown): Promise<SaveSchedule
     entries: parsed.data.entries.map((entry) => ({ ...entry, day: entry.day as Weekday })),
     uploadedAt: new Date().toISOString(),
   };
-  setMockLecturerSchedule(schedule);
+  if (seeded) setMockLecturerSchedule(schedule);
   return { ok: true, schedule };
 }

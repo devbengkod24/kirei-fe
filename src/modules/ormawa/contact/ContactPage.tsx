@@ -16,10 +16,10 @@ function ChannelIcon({ src, width, height }: { src: string; width: number; heigh
 }
 
 /** Complaint form for the admin, next to the Sarpras contact channels. */
-export function ContactPage() {
+export function ContactPage({ authorName }: { authorName: string }) {
   return (
     <Card className="flex flex-col gap-10 p-6 md:p-10 lg:flex-row lg:justify-between">
-      <ComplaintForm />
+      <ComplaintForm authorName={authorName} />
 
       <section aria-label="Kontak Sarpras" className="flex w-full flex-col gap-3 lg:max-w-[326px]">
         <a href={CONTACT.whatsapp.href} target="_blank" rel="noopener noreferrer" className={`${CHANNEL_LINK} items-center`}>

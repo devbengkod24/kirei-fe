@@ -1,4 +1,5 @@
 import { connection } from "next/server";
+import { getDataMode } from "@/lib/data-mode/getDataMode";
 import { MOCK_BUILDINGS } from "@/mocks/facilities";
 import { buildClassSchedulesMock, buildOperatorReservationsMock, MOCK_OPERATOR_FLOOR } from "@/mocks/operator";
 import type { Floor } from "@/types/facility";
@@ -26,12 +27,14 @@ export async function getOperatorFloor(): Promise<OperatorFloorData | null> {
   const building = MOCK_BUILDINGS.find((item) => item.id === MOCK_OPERATOR_FLOOR.buildingId);
   const floor = building?.floors.find((item) => item.number === MOCK_OPERATOR_FLOOR.floorNumber);
   if (!building || !floor) return null;
+  // The "empty" data mode has no sample reservations or classes; the page adds what was made in the browser.
+  const seeded = (await getDataMode()) === "sample";
 
   return {
     buildingName: building.name,
     floor,
-    reservations: buildOperatorReservationsMock(now),
-    classSchedules: buildClassSchedulesMock(now),
+    reservations: seeded ? buildOperatorReservationsMock(now) : [],
+    classSchedules: seeded ? buildClassSchedulesMock(now) : [],
     now: now.toISOString(),
     // Operators never delete reservations. TODO: kirei-api must reject a delete from an operator too;
     // leaving the button out is only the user experience.

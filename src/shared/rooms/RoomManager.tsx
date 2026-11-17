@@ -4,17 +4,20 @@ import Image from "next/image";
 import { useState } from "react";
 import { SelectInput } from "@/components/form/Field";
 import { Card } from "@/components/ui/Card";
+import { useLiveState } from "@/hooks/useLiveData";
 import type { Building, Room, RoomType } from "@/types/room";
 import { EditRoomDialog } from "./EditRoomDialog";
 import { ROOM_TYPE_LABEL, roomTitle } from "./room-labels";
+import { applyRoomEdits, localPhotoUrl, ROOM_EDITS_NAME, roomEditsSchema } from "./roomEdits";
 import type { RoomPhotoChange } from "./roomPhoto";
 
-/** Mock only: until the API returns the stored photo URL, a new photo is shown from a local blob URL. */
-function applyPhoto(room: Room, photo: RoomPhotoChange): Room {
-  if (photo.kind === "replace") return { ...room, photoUrl: URL.createObjectURL(photo.file) };
+async function applyPhoto(room: Room, photo: RoomPhotoChange): Promise<Room> {
+  if (photo.kind === "replace") return { ...room, photoUrl: await localPhotoUrl(photo.file) };
   if (photo.kind === "remove") return { ...room, photoUrl: null };
   return room;
 }
+
+const NO_EDITS: Record<string, Room> = {};
 
 export interface RoomManagerProps {
   buildings: Building[];
@@ -26,7 +29,9 @@ const FILTER_SELECT = "min-h-10 border-0 bg-primary-soft py-1 text-xs font-mediu
 
 /** Kelola Ruangan: pick a building floor, select a room, edit it. */
 export function RoomManager({ buildings, rooms: initialRooms }: RoomManagerProps) {
-  const [rooms, setRooms] = useState(initialRooms);
+  // Saved changes sit on top of the server's rooms; the "empty" data mode keeps them in this browser.
+  const [edits, setEdits] = useLiveState(ROOM_EDITS_NAME, roomEditsSchema, NO_EDITS);
+  const rooms = applyRoomEdits(initialRooms, edits);
   const [type, setType] = useState<RoomType | "semua">("semua");
   const [buildingId, setBuildingId] = useState(buildings[0]?.id ?? "");
   const [floor, setFloor] = useState(buildings[0]?.floors[0] ?? 0);
@@ -146,7 +151,7 @@ export function RoomManager({ buildings, rooms: initialRooms }: RoomManagerProps
                     alt={`Foto ${roomTitle(selected)}`}
                     fill
                     sizes="363px"
-                    unoptimized={selected.photoUrl.startsWith("blob:")}
+                    unoptimized={/^(blob|data):/.test(selected.photoUrl)}
                     className="object-cover"
                   />
                 ) : (
@@ -208,9 +213,9 @@ export function RoomManager({ buildings, rooms: initialRooms }: RoomManagerProps
           buildings={buildings}
           takenCodes={rooms.filter((room) => room.id !== selected.id).map((room) => room.code)}
           onClose={() => setEditing(false)}
-          onSave={(updated, photo) => {
-            const saved = applyPhoto(updated, photo);
-            setRooms((current) => current.map((room) => (room.id === saved.id ? saved : room)));
+          onSave={async (updated, photo) => {
+            const saved = await applyPhoto(updated, photo);
+            setEdits({ ...edits, [saved.id]: saved });
             setEditing(false);
             setNotice(`${roomTitle(saved)} disimpan.`);
           }}

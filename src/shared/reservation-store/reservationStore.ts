@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { readBrowserDataMode } from "@/lib/data-mode/dataMode";
+import { liveKey } from "@/lib/data-mode/liveStorage";
 import { toWibDateKey } from "@/lib/date";
 import type { UnitBooking } from "@/types/facility";
 import type { ReservationRecord, ReservationRequest, ReservationStatus, ReservationType } from "@/types/reservation";
@@ -15,6 +17,11 @@ import type { ReservationRecord, ReservationRequest, ReservationStatus, Reservat
  */
 
 export const MOCK_RESERVATIONS_KEY = "kirei:mock-reservations";
+
+/** Each data mode keeps its own requests, so switching modes never mixes them. */
+export function reservationsKey(): string {
+  return readBrowserDataMode() === "empty" ? liveKey("reservations") : MOCK_RESERVATIONS_KEY;
+}
 
 /** Who sent a request, so it shows up in their own history. */
 export interface ReservationOwner {
@@ -104,7 +111,7 @@ function browserStorage(): Storage | null {
 /** The stored JSON as is, or "" when there is none. A string, so React can compare snapshots cheaply. */
 export function readSnapshot(storage: Storage | null = browserStorage()): string {
   try {
-    return storage?.getItem(MOCK_RESERVATIONS_KEY) ?? "";
+    return storage?.getItem(reservationsKey()) ?? "";
   } catch {
     return "";
   }
@@ -115,7 +122,7 @@ const listeners = new Set<() => void>();
 /** For useSyncExternalStore: fires on changes from this tab and from other tabs. */
 export function subscribe(listener: () => void) {
   const onStorage = (event: StorageEvent) => {
-    if (event.key === MOCK_RESERVATIONS_KEY || event.key === null) listener();
+    if (event.key === reservationsKey() || event.key === null) listener();
   };
   listeners.add(listener);
   window.addEventListener("storage", onStorage);
@@ -132,7 +139,7 @@ function notify() {
 function write(state: MockReservationState, storage: Storage | null): boolean {
   if (!storage) return false;
   try {
-    storage.setItem(MOCK_RESERVATIONS_KEY, JSON.stringify(state));
+    storage.setItem(reservationsKey(), JSON.stringify(state));
   } catch {
     return false;
   }
@@ -160,7 +167,7 @@ export function decideMockReservation(
 export function resetMockReservations(storage: Storage | null = browserStorage()): boolean {
   if (!storage) return false;
   try {
-    storage.removeItem(MOCK_RESERVATIONS_KEY);
+    storage.removeItem(reservationsKey());
   } catch {
     return false;
   }
@@ -179,17 +186,23 @@ export function withDecision<T extends { id: string; status: string; rejectionRe
 
 /**
  * The admin's list: the server's sample requests plus requests created in this browser for this
- * type and, for rooms, only rooms in the admin's scope (`roomCodes`; null means no room filter).
+ * type and, for rooms, only rooms in the admin's scope (`roomCodes` or a building in
+ * `buildingNames`; null `roomCodes` means no room filter).
  */
 export function mergeAdminRequests(
   seeded: ReservationRequest[],
   state: MockReservationState,
   tipe: ReservationType,
   roomCodes: string[] | null,
+  buildingNames: string[] = [],
 ): ReservationRequest[] {
   const inScope = new Set(roomCodes ?? []);
+  // A room added in Kelola Denah after the page loaded is not in `roomCodes`, but its building is known.
+  const buildings = new Set(buildingNames);
   const created = state.created.filter(
-    (reservation) => reservation.type === tipe && (roomCodes === null || inScope.has(reservation.roomName)),
+    (reservation) =>
+      reservation.type === tipe &&
+      (roomCodes === null || inScope.has(reservation.roomName) || buildings.has(reservation.buildingName)),
   );
   return [...seeded, ...created].map((reservation) => withDecision(reservation, state.decisions));
 }

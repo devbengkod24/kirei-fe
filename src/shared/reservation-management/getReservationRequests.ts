@@ -1,4 +1,5 @@
 import { connection } from "next/server";
+import { getDataMode } from "@/lib/data-mode/getDataMode";
 import { MOCK_BUILDINGS } from "@/mocks/facilities";
 import { buildFacilityRequestsMock, buildReservationsMock } from "@/mocks/reservations";
 import { mockRoomsInScope } from "@/mocks/rooms";
@@ -13,6 +14,8 @@ export interface ReservationCandidates {
   reservations: ReservationRequest[];
   /** Room codes in the scope, for requests created later in the browser; null for GOR and vehicles. */
   roomCodes: string[] | null;
+  /** Buildings in the scope, so a room added later in Kelola Denah still counts; empty for GOR and vehicles. */
+  buildingNames: string[];
 }
 
 /**
@@ -27,16 +30,24 @@ export async function getReservationCandidates(
   await connection();
   // TODO: replace with the orval client (no-store, filtered by scope, type, and tab).
   const now = new Date();
+  // The "empty" data mode has no sample requests; the table lists what was made in the browser.
+  const seeded = (await getDataMode()) === "sample";
   if (tipe !== "ruangan") {
-    return { reservations: buildFacilityRequestsMock(now).filter((reservation) => reservation.type === tipe), roomCodes: null };
+    return {
+      reservations: seeded ? buildFacilityRequestsMock(now).filter((reservation) => reservation.type === tipe) : [],
+      roomCodes: null,
+      buildingNames: [],
+    };
   }
   const inScope = new Set(mockRoomsInScope(scope.fakultasId).map((room) => room.code));
   // Requests made in this browser come from the booking form's floor plans, which list more rooms
   // than the sample room list (e.g. H.5.13, Gedung E, Rektorat), so the scope is taken from those.
-  const roomCodes = MOCK_BUILDINGS.filter(
-    (building) => scope.fakultasId === null || building.fakultasId === scope.fakultasId,
-  ).flatMap((building) => building.floors.flatMap((floor) => floor.rooms.map((room) => room.code)));
-  return { reservations: buildReservationsMock(now).filter((reservation) => inScope.has(reservation.roomName)), roomCodes };
+  const buildings = MOCK_BUILDINGS.filter((building) => scope.fakultasId === null || building.fakultasId === scope.fakultasId);
+  return {
+    reservations: seeded ? buildReservationsMock(now).filter((reservation) => inScope.has(reservation.roomName)) : [],
+    roomCodes: buildings.flatMap((building) => building.floors.flatMap((floor) => floor.rooms.map((room) => room.code))),
+    buildingNames: buildings.map((building) => building.name),
+  };
 }
 
 /** Pending requests for "persetujuan", decided ones for "riwayat"; newest first in history. */

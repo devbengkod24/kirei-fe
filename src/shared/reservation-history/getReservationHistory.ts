@@ -1,4 +1,5 @@
 import { connection } from "next/server";
+import { getDataMode } from "@/lib/data-mode/getDataMode";
 import { buildReservationHistoryMock } from "@/mocks/reservations";
 import type { ReservationRecord, ReservationScope, ReservationType } from "@/types/reservation";
 
@@ -18,5 +19,7 @@ export async function getHistoryRecords(
   const now = new Date();
   // TODO: replace with the orval client for the reservation list endpoint (no-store). Laravel does the
   // filtering and pagination; buildHistoryResult only imitates it.
-  return { records: buildReservationHistoryMock(now).filter((record) => record.type === tipe), now: now.toISOString() };
+  // The "empty" data mode has no sample history; the view adds what was made in the browser.
+  const records = (await getDataMode()) === "sample" ? buildReservationHistoryMock(now).filter((record) => record.type === tipe) : [];
+  return { records, now: now.toISOString() };
 }

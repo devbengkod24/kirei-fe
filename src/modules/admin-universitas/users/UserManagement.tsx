@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useId, useRef, useState } from "react";
+import { useId, useState } from "react";
 import { INPUT_CLASS } from "@/components/form/Field";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -9,14 +9,16 @@ import { Card } from "@/components/ui/Card";
 import { Pagination } from "@/components/ui/Pagination";
 import { SegmentedNav } from "@/components/ui/SegmentedNav";
 import { TABLE, TABLE_CELL, TABLE_HEAD_CELL, TABLE_ROW } from "@/components/ui/table";
+import { useLiveState } from "@/hooks/useLiveData";
 import { usePagination } from "@/hooks/usePagination";
+import { useLiveBuildings } from "@/shared/live-data/useLiveFacilities";
 import type { Fakultas } from "@/types/fakultas";
 import type { Building } from "@/types/facility";
 import type { ManagedRole, ManagedUser } from "@/types/managedUser";
 import { ADMIN_UNIVERSITAS_ROUTES } from "../routes";
 import { AddUserDialog } from "./AddUserDialog";
 import { UserDetailDialog } from "./UserDetailDialog";
-import { searchUsers, toManagedUser } from "./userSchema";
+import { managedUsersSchema, searchUsers, toManagedUser } from "./userSchema";
 import { USER_ROLES, USER_TAB_PARAM, USER_TABS } from "./userTabs";
 
 export interface UserManagementProps {
@@ -52,13 +54,14 @@ function StatusBadge({ isActive, size = "md" }: { isActive: boolean; size?: "sm"
 }
 
 /** Accounts of one kind: search, add, switch on or off, and set a new password. Columns follow USER_TABS. */
-export function UserManagement({ role, users: initial, fakultasOptions, buildings }: UserManagementProps) {
-  const [users, setUsers] = useState(initial);
+export function UserManagement({ role, users: initial, fakultasOptions, buildings: serverBuildings }: UserManagementProps) {
+  // "Empty" data mode: the accounts of this kind and the saved floor plans are kept in this browser.
+  const [users, setUsers] = useLiveState(`users-${role}`, managedUsersSchema, initial);
+  const buildings = useLiveBuildings(serverBuildings);
   const [query, setQuery] = useState("");
   const [viewing, setViewing] = useState<ManagedUser | null>(null);
   const [adding, setAdding] = useState(false);
   const [notice, setNotice] = useState("");
-  const added = useRef(0);
   const searchId = useId();
   const visible = searchUsers(users, query);
   const paging = usePagination(visible, 10);
@@ -208,7 +211,7 @@ export function UserManagement({ role, users: initial, fakultasOptions, building
           onClose={() => setViewing(null)}
           onSave={({ isActive, newPassword }) => {
             // TODO: PATCH the status and PUT the new password through the orval client; the password never enters state.
-            setUsers((current) => current.map((user) => (user.id === viewing.id ? { ...user, isActive } : user)));
+            setUsers(users.map((user) => (user.id === viewing.id ? { ...user, isActive } : user)));
             const changes = [
               isActive !== viewing.isActive && `sekarang ${isActive ? "aktif" : "tidak aktif"}`,
               newPassword && "memakai kata sandi baru",
@@ -226,10 +229,9 @@ export function UserManagement({ role, users: initial, fakultasOptions, building
           buildings={buildings}
           onClose={() => setAdding(false)}
           onAdd={(values) => {
-            added.current += 1;
-            const user = toManagedUser(values, role, `${role}-new-${added.current}`);
+            const user = toManagedUser(values, role, `${role}-new-${Date.now().toString(36)}`);
             // TODO: POST the account (with its password) through the orval client; the password never enters state.
-            setUsers((current) => [user, ...current]);
+            setUsers([user, ...users]);
             setQuery("");
             paging.setPage(1);
             setNotice(`Akun ${user.name} ditambahkan. Pemilik akun bisa masuk dengan ${user.email} dan kata sandi yang Anda buat.`);
