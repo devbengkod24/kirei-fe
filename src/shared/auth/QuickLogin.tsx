@@ -6,7 +6,7 @@ import type { CurrentUser, UserRole } from "@/types/user";
 const ROLE_LABEL: Partial<Record<UserRole, string>> = {
   organisasi: "Ormawa",
   dosen: "Dosen",
-  admin_fakultas: "Admin Fakultas",
+  admin_fakultas: "Admin Gedung",
   admin_universitas: "Admin Universitas",
   operator: "Operator",
 };

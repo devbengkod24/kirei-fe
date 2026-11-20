@@ -6,7 +6,7 @@ export function LogoutButton({ className = "w-full" }: { className?: string }) {
   return (
     <form action={logout} className={className}>
       <Button type="submit" variant="danger-outline" className="w-full tracking-[0.05em]">
-        Logout
+        Keluar
       </Button>
     </form>
   );

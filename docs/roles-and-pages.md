@@ -13,7 +13,7 @@ URL di bawah adalah rencana. Yang sudah ada di kode hanya halaman ormawa/dosen; 
 | Role | Route group | Prefix URL | Navigasi |
 |---|---|---|---|
 | `organisasi`, `dosen` | `(ormawa)` | `/` | Sidebar |
-| `admin_fakultas` | `(admin-fakultas)` | `/fakultas` | Sidebar |
+| `admin_fakultas` | `(admin-gedung)` | `/gedung` | Sidebar |
 | `admin_universitas` | `(admin-universitas)` | `/admin` | Sidebar + tab tipe (Ruangan, Kendaraan, GOR) di halaman yang sama untuk tiap tipe |
 | `operator` | `(operator)` | `/operator` | Header saja, tanpa sidebar |
 | Publik | `(auth)` | `/` | Tanpa shell |
@@ -56,21 +56,22 @@ Catatan:
 - Ormawa tidak terikat fakultas (`fakultasId: null`) dan semuanya setara, jadi reservasi ruangan fakultas oleh ormawa selalu lewat jalur di atas. Dosen punya fakultas asal.
 - Bila reservasi dipindah karena slotnya dipakai admin, peminjam cukup menerima pemberitahuan dan melihat jadwal barunya di Riwayat.
 
-## Admin Fakultas
+## Admin Gedung (role `admin_fakultas`)
+
+Di UI role ini bernama **Admin Gedung** (revisi notulen 19/11/2026). Route group `(admin-gedung)`, folder `modules/admin-gedung`, dan URL `/gedung/...` sudah memakai nama baru. Kunci role tetap `admin_fakultas` karena mengikuti API, dan scope data di kode masih `fakultasId` sampai API memakai gedung. Halaman Profil hanya ada untuk ormawa dan dosen.
 
 Semua data terkunci ke fakultas admin (`scope={{ fakultasId: user.fakultasId }}`). Hanya mengelola **ruangan**, jadi tidak ada pilihan tipe.
 
 | Menu | URL | Isi | Komponen |
 |---|---|---|---|
-| Dashboard | `/fakultas/dashboard` | Kartu Total Reservasi Hari Ini, Check-in Hari Ini, Ruangan Tersedia; grafik distribusi reservasi; tabel reservasi hari ini; laporan pengguna terbaru | `shared/dashboard` (`AdminDashboard`) |
-| Kelola Ruangan | `/fakultas/ruangan` | Daftar ruangan di gedung milik fakultas, ubah detail dan status ruangan, serta unggah, ganti, dan hapus foto ruangan (JPG, PNG, atau WebP, maksimal `ROOM_PHOTO_MAX_SIZE_MB`). Tidak termasuk edit denah. | `shared/rooms` (`RoomManager`, `EditRoomDialog`) |
-| Jadwal Dosen | `/fakultas/jadwal-dosen` | Unggah CSV jadwal kuliah (`hari, jam_mulai, jam_selesai, ruangan, mata_kuliah, dosen`) dan rentang semester. Tiap baris dicek dengan Zod dan kesalahannya ditampilkan per baris; berkas hanya bisa disimpan bila semua baris valid. Unggahan baru menggantikan jadwal sebelumnya. Ruangan pada jam kuliah tampil sebagai tidak tersedia di denah dan form reservasi setiap minggu selama semester. | `modules/admin-fakultas/lecturer-schedule`, booking dibentuk di `shared/reservation-form/lecturerScheduleBookings.ts` |
-| Reservasi Internal | `/fakultas/reservasi-internal` | Admin memesan ruangan di gedung fakultasnya. Komponen sama dengan Buat Reservasi: Ruangan milik peminjam, tetapi tanpa No HP, surat, dan draft. Memakai slot yang sudah dipesan belum dibangun. | `shared/reservation-form` (`RoomReservationForm` dengan `mode="internal"`) |
-| Kelola Reservasi: Persetujuan | `/fakultas/persetujuan` | Reservasi ruangan fakultas yang menunggu keputusan, termasuk dari peminjam luar fakultas. | `shared/reservation-approval` |
-| Kelola Reservasi: Riwayat | `/fakultas/riwayat` | | `shared/reservation-history` |
-| Laporan Pengguna | `/fakultas/laporan` | Pengaduan pengguna, dengan filter status, kategori, dan tanggal. Laporan Pengguna hanya ada di Admin Fakultas; laporan untuk GOR dan kendaraan belum dibuat. | `shared/reports` |
-| Pengumuman | `/fakultas/pengumuman` | Kelola pengumuman fakultas. Hanya Admin Fakultas dan Admin Universitas yang mendapat `canManage` (tombol Tambah Pengumuman). | `shared/announcements` (`canManage`) |
-| Profil | `/fakultas/profil` | | `shared/profile` |
+| Dashboard | `/gedung/dashboard` | Kartu Total Reservasi Hari Ini, Check-in Hari Ini, Ruangan Tersedia; grafik distribusi reservasi; tabel reservasi hari ini; laporan pengguna terbaru | `shared/dashboard` (`AdminDashboard`) |
+| Kelola Ruangan | `/gedung/ruangan` | Daftar ruangan di gedung milik fakultas, ubah detail dan status ruangan, serta unggah, ganti, dan hapus foto ruangan (JPG, PNG, atau WebP, maksimal `ROOM_PHOTO_MAX_SIZE_MB`). Tidak termasuk edit denah. | `shared/rooms` (`RoomManager`, `EditRoomDialog`) |
+| Jadwal Dosen | `/gedung/jadwal-dosen` | Unggah CSV jadwal kuliah (`hari, jam_mulai, jam_selesai, ruangan, mata_kuliah, dosen`) dan rentang semester. Tiap baris dicek dengan Zod dan kesalahannya ditampilkan per baris; berkas hanya bisa disimpan bila semua baris valid. Unggahan baru menggantikan jadwal sebelumnya. Ruangan pada jam kuliah tampil sebagai tidak tersedia di denah dan form reservasi setiap minggu selama semester. | `modules/admin-gedung/lecturer-schedule`, booking dibentuk di `shared/reservation-form/lecturerScheduleBookings.ts` |
+| Reservasi Internal | `/gedung/reservasi-internal` | Admin memesan ruangan di gedung fakultasnya. Komponen sama dengan Buat Reservasi: Ruangan milik peminjam, tetapi tanpa No HP, surat, dan draft. Memakai slot yang sudah dipesan belum dibangun. | `shared/reservation-form` (`RoomReservationForm` dengan `mode="internal"`) |
+| Kelola Reservasi: Persetujuan | `/gedung/persetujuan` | Reservasi ruangan fakultas yang menunggu keputusan, termasuk dari peminjam luar fakultas. | `shared/reservation-approval` |
+| Kelola Reservasi: Riwayat | `/gedung/riwayat` | | `shared/reservation-history` |
+| Laporan Pengguna | `/gedung/laporan` | Pengaduan pengguna, dengan filter status, kategori, dan tanggal. Laporan Pengguna hanya ada di Admin Fakultas; laporan untuk GOR dan kendaraan belum dibuat. | `shared/reports` |
+| Pengumuman | `/gedung/pengumuman` | Kelola pengumuman fakultas. Hanya Admin Fakultas dan Admin Universitas yang mendapat `canManage` (tombol Tambah Pengumuman). | `shared/announcements` (`canManage`) |
 
 Persetujuan dan Riwayat tampil sebagai dua tab rata kanan di satu halaman "Kelola Reservasi", tetapi masing-masing punya URL sendiri. Urutan kolom Riwayat sama dengan Admin Universitas: Alasan Ditolak, Status, Aksi.
 
@@ -84,9 +85,8 @@ Mengambil alih semua menu SuperAdmin lama. Satu sidebar untuk semua tipe. Menu y
 | Reservasi Internal | Ruangan, Kendaraan, GOR | `/admin/reservasi-internal/[tipe]` | Admin memesan atas nama kampus, tanpa No HP, surat, draft, dan persetujuan. Ruangan: semua gedung, dipilih lewat pilihan gedung di form, tanpa filter fakultas (memakai slot yang sudah dipesan belum dibangun). Kendaraan: tujuan, peserta, dan tanggal; unit diatur di luar aplikasi. GOR: jadwal slot seperti peminjam. | `shared/reservation-form` (form per tipe dengan `mode="internal"`), dirakit di `modules/admin-universitas/internal-reservation` |
 | Kelola Reservasi | Ruangan, Kendaraan, GOR | `/admin/reservasi/[tipe]/persetujuan`, `/admin/reservasi/[tipe]/riwayat` | Tab Persetujuan dan Riwayat, masing-masing ber-URL. Tab tipe ada di kiri; di kanan, filter Fakultas (hanya Ruangan) bertumpuk di atas tab Persetujuan dan Riwayat, dan di layar sempit semuanya bertumpuk satu kolom. Tab Riwayat punya kolom Alasan Ditolak lalu Status tepat sebelum Aksi (alasan dari admin untuk reservasi ditolak, "-" untuk yang lain); di layar sempit alasan tampil di bawah status. Kolom per tipe (`TYPE_COLUMNS`): Ruangan; Tujuan dan peserta untuk kendaraan; Kegiatan untuk GOR. Unit kendaraan diatur di luar aplikasi, jadi menyetujui kendaraan sama seperti tipe lain. Filter fakultas hanya di tab Ruangan dan ikut saat pindah tab. | `shared/reservation-management`, dirakit di `modules/admin-universitas/reservations` |
 | Kelola Denah | | `/admin/denah` | Editor denah lantai dengan SVG: pilih gedung dan lantai, lalu tambah, geser, ubah ukuran, dan hapus ruangan. Bisa lewat mouse/sentuh, tombol panah, atau input angka. Disimpan dalam format `Floor`/`FloorPlanRoom` yang dibaca form reservasi. | `modules/admin-universitas/floor-plan` |
-| Kelola Pengguna | | `/admin/pengguna` | Tab Ormawa, Dosen, Admin Fakultas, Operator di URL (`?tab=ormawa|dosen|admin_fakultas|operator`): tabel berhalaman dengan pencarian, dialog detail (status Aktif/Tidak Aktif dan kata sandi baru opsional), dan tambah akun dengan kata sandi. Ormawa tanpa fakultas; dosen wajib fakultas dan NPP; admin fakultas wajib fakultas (boleh lebih dari satu per fakultas, tanpa NPP); operator wajib gedung dan lantai. Field per tab diatur di `USER_TABS`. | `modules/admin-universitas/users` |
+| Kelola Pengguna | | `/admin/pengguna` | Tab Ormawa, Dosen, Admin Gedung, Operator di URL (`?tab=ormawa|dosen|admin_fakultas|operator`): tabel berhalaman dengan pencarian, dialog detail (status Aktif/Tidak Aktif dan kata sandi baru opsional), dan tambah akun dengan kata sandi. Ormawa tanpa fakultas; dosen wajib nama, fakultas, dan NPP; admin gedung wajib gedung (boleh lebih dari satu per gedung) tanpa nama, dan namanya dibentuk dari gedung, mis. "Admin Gedung H"; operator wajib gedung dan lantai tanpa nama, mis. "Operator Gedung H Lantai 5". Field per tab diatur di `USER_TABS`. | `modules/admin-universitas/users` |
 | Pengumuman | | `/admin/pengumuman` | Pengumuman universitas dan fakultas. | `shared/announcements` (`canManage`) |
-| Profil | | `/admin/profil` | | `shared/profile` |
 
 Berpindah tab di Kelola Reservasi mempertahankan tab Persetujuan atau Riwayat yang sedang dibuka.
 

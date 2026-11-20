@@ -39,8 +39,8 @@ Dokumen untuk issue #13. Isinya memetakan halaman dan komponen yang dipakai saat
 
 | Halaman / File | Section / Komponen | Deskripsi dan Pemetaan Isi |
 |---|---|---|
-| Persetujuan Admin Fakultas (`src/app/(admin-fakultas)/fakultas/reservasi/persetujuan/page.tsx`) | Page | Mengambil reservasi ruangan berstatus `menunggu_persetujuan` di ruangan milik fakultas admin (`scope: { fakultasId }`). Hanya ruangan; tidak ada tab tipe dan filter fakultas. |
-| Riwayat Admin Fakultas (`src/app/(admin-fakultas)/fakultas/reservasi/riwayat/page.tsx`) | Page | Reservasi ruangan fakultas yang sudah diputuskan atau selesai. |
+| Persetujuan Admin Fakultas (`src/app/(admin-gedung)/gedung/reservasi/persetujuan/page.tsx`) | Page | Mengambil reservasi ruangan berstatus `menunggu_persetujuan` di ruangan milik fakultas admin (`scope: { fakultasId }`). Hanya ruangan; tidak ada tab tipe dan filter fakultas. |
+| Riwayat Admin Fakultas (`src/app/(admin-gedung)/gedung/reservasi/riwayat/page.tsx`) | Page | Reservasi ruangan fakultas yang sudah diputuskan atau selesai. |
 | Kelola Reservasi Admin Universitas (`src/app/(admin-universitas)/admin/reservasi/[tipe]/persetujuan/page.tsx`, `.../riwayat/page.tsx`) | `UniversityReservations` (`src/modules/admin-universitas/reservations/`) | Satu halaman per tipe (`ruangan`, `gor`, `kendaraan`). Tab tipe di kiri, tab Persetujuan / Riwayat di kanan. Menampilkan reservasi semua fakultas tanpa filter fakultas. |
 | | `ReservationManagement` (`src/shared/reservation-management/`) | Rangka halaman: tab Persetujuan dan Riwayat (masing-masing ber-URL) dan slot `leading` untuk tab tipe. |
 | | `ReservationTable` | Kolom: Tanggal, Nama Pemesan, kolom per tipe (Ruangan; Tujuan dan jumlah peserta untuk kendaraan; Kegiatan untuk GOR), Waktu, Keperluan, lalu Alasan Ditolak dan Status (hanya Riwayat), dan Aksi. Aksi di Persetujuan: ikon centang (Setujui), ikon silang (Tolak), ikon mata (Lihat detail). Di Riwayat hanya ikon mata. Baris tidak bisa diklik. Di layar sempit tabel menjadi daftar kartu. |
