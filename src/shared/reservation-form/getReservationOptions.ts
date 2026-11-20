@@ -3,14 +3,17 @@ import {
   MOCK_BUILDINGS,
   MOCK_ROOM_RULES,
   MOCK_SPORTS_HALL,
+  MOCK_VEHICLES,
   buildRoomBookingsMock,
   buildSportsHallBookingsMock,
 } from "@/mocks/facilities";
 import { getDataMode } from "@/lib/data-mode/getDataMode";
 import { getMockLecturerSchedules } from "@/mocks/lecturerSchedules";
+import { buildFacilityRequestsMock } from "@/mocks/reservations";
 import { toWibDateKey } from "@/lib/date";
-import type { Building, SportsHall, UnitBooking } from "@/types/facility";
+import type { Building, SportsHall, UnitBooking, Vehicle } from "@/types/facility";
 import { lecturerScheduleBookings } from "./lecturerScheduleBookings";
+import { vehicleBookings, type VehicleBooking } from "./vehicleAvailability";
 
 export interface RoomReservationOptions {
   buildings: Building[];
@@ -56,8 +59,23 @@ export async function getSportsHallReservationOptions(): Promise<SportsHallReser
   return { hall: MOCK_SPORTS_HALL, bookings: seeded ? buildSportsHallBookingsMock(now) : [], now: now.toISOString() };
 }
 
-/** Which vehicle goes is arranged outside the app, so the form only needs the server time for its defaults. */
-export async function getVehicleReservationOptions(): Promise<{ now: string }> {
+export interface VehicleReservationOptions {
+  /** Every vehicle type; the form offers only the active ones. */
+  vehicles: Vehicle[];
+  /** Units already held by waiting or approved requests, to tell which types are free on the chosen days. */
+  bookings: VehicleBooking[];
+  now: string;
+}
+
+/** Vehicle types and the units already taken. The borrower picks a type; the admin still assigns the units. */
+export async function getVehicleReservationOptions(): Promise<VehicleReservationOptions> {
   await connection();
-  return { now: new Date().toISOString() };
+  const now = new Date();
+  // TODO: replace with the orval clients for vehicles and their availability (no-store).
+  const seeded = (await getDataMode()) === "sample";
+  return {
+    vehicles: MOCK_VEHICLES,
+    bookings: seeded ? vehicleBookings(buildFacilityRequestsMock(now), MOCK_VEHICLES) : [],
+    now: now.toISOString(),
+  };
 }
