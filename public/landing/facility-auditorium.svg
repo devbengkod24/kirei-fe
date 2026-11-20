@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Ilustrasi auditorium">
+  <defs>
+    <linearGradient id="hall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f0f5fe"/>
+      <stop offset="1" stop-color="#e2ecff"/>
+    </linearGradient>
+    <g id="seat">
+      <rect x="-26" y="0" width="52" height="44" rx="12" fill="#3b5fc0"/>
+      <rect x="-30" y="34" width="60" height="16" rx="8" fill="#1e3a8a"/>
+    </g>
+    <g id="seatFront">
+      <rect x="-30" y="0" width="60" height="52" rx="14" fill="#1e3a8a"/>
+      <rect x="-34" y="40" width="68" height="18" rx="9" fill="#152a66"/>
+    </g>
+    <g id="spot">
+      <rect x="-14" y="0" width="28" height="20" rx="6" fill="#152a66"/>
+      <circle cx="0" cy="22" r="8" fill="#f5b942"/>
+    </g>
+  </defs>
+
+  <rect width="800" height="600" fill="url(#hall)"/>
+
+  <!-- lighting rig -->
+  <rect x="120" y="40" width="560" height="10" rx="5" fill="#152a66"/>
+  <use href="#spot" x="220" y="50"/>
+  <use href="#spot" x="400" y="50"/>
+  <use href="#spot" x="580" y="50"/>
+
+  <!-- curtains -->
+  <path d="M60 70h120v300c-40-10-80 0-120 10z" fill="#1e3a8a"/>
+  <path d="M740 70H620v300c40-10 80 0 120 10z" fill="#1e3a8a"/>
+  <path d="M60 70h680v34c-60 18-120 18-170 0-60 18-120 18-170 0-60 18-120 18-170 0-60 18-120 18-170 0z" fill="#3b5fc0"/>
+
+  <!-- screen -->
+  <rect x="236" y="124" width="328" height="176" rx="10" fill="#ffffff"/>
+  <rect x="262" y="150" width="140" height="12" rx="6" fill="#1e3a8a"/>
+  <rect x="262" y="172" width="96" height="9" rx="4.5" fill="#b7cfff"/>
+  <rect x="262" y="214" width="84" height="62" rx="6" fill="#e2ecff"/>
+  <rect x="358" y="214" width="84" height="62" rx="6" fill="#b7cfff"/>
+  <rect x="454" y="214" width="84" height="62" rx="6" fill="#6f8fe0"/>
+  <circle cx="512" cy="166" r="20" fill="#f5b942"/>
+
+  <!-- stage and podium -->
+  <rect x="60" y="370" width="680" height="30" fill="#152a66"/>
+  <rect x="60" y="400" width="680" height="10" fill="#3b5fc0"/>
+  <path d="M572 300h72l-8 70h-56z" fill="#6f8fe0"/>
+  <rect x="566" y="292" width="84" height="12" rx="6" fill="#1e3a8a"/>
+  <rect x="604" y="268" width="4" height="26" fill="#152a66"/>
+  <circle cx="606" cy="266" r="6" fill="#152a66"/>
+
+  <!-- audience seating -->
+  <rect y="410" width="800" height="190" fill="#c9d9f8"/>
+  <use href="#seat" x="160" y="430"/>
+  <use href="#seat" x="240" y="430"/>
+  <use href="#seat" x="320" y="430"/>
+  <use href="#seat" x="400" y="430"/>
+  <use href="#seat" x="480" y="430"/>
+  <use href="#seat" x="560" y="430"/>
+  <use href="#seat" x="640" y="430"/>
+  <use href="#seatFront" x="120" y="508"/>
+  <use href="#seatFront" x="210" y="508"/>
+  <use href="#seatFront" x="300" y="508"/>
+  <use href="#seatFront" x="500" y="508"/>
+  <use href="#seatFront" x="590" y="508"/>
+  <use href="#seatFront" x="680" y="508"/>
+</svg>

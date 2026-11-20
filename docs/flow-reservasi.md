@@ -110,6 +110,7 @@ Keputusan project leader pada 2026-11-11 atas perbedaan vault dan kode:
 | Surat dosen untuk kendaraan | Booking dosen tanpa surat; kendaraan tidak menyebut surat | Dosen wajib surat untuk kendaraan | Di branch `ormawa` (`59b62a0`), di-merge sendiri oleh pengembang |
 | Alasan ditolak di Riwayat pemohon | Penolakan wajib alasan | Tampil sekali saja | Sudah: hanya di kolom Alasan Ditolak (perubahan sama dengan `59b62a0`) |
 | Kontak pemohon di detail admin | Admin menghubungi WhatsApp penanggung jawab | Tampilkan No HP | Sudah: No HP tampil di dialog detail admin |
+| Pemilihan kendaraan (notulen 19/11/2026) | §12: tidak ada pemilihan unit mobil atau slot jam | Pemohon memilih satu jenis kendaraan yang tersedia menurut tanggal mulai dan selesai; tujuan boleh lebih dari satu; ada pilihan menginap atau antar jemput; ormawa disarankan bertanya ke BIUM dulu | Baru di teks peraturan landing (`shared/landing/content.ts`); form kendaraan belum diubah. Vault perlu diperbarui leader |
 
 Catatan lain:
 
