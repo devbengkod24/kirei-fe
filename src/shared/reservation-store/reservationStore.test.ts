@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { ReservationRecord, ReservationRequest } from "@/types/reservation";
 import {
   addMockReservation,
+  assignVehicleCrew,
   approvedRoomBookings,
   decideMockReservation,
   heldBookings,
@@ -78,6 +79,17 @@ describe("reservation store", () => {
 
     expect(resetMockReservations(storage)).toBe(true);
     expect(readSnapshot(storage)).toBe("");
+  });
+
+  it("keeps the drivers and costs of a vehicle request, and reads older stores without them", () => {
+    const storage = memoryStorage();
+    expect(parseState(JSON.stringify({ created: [], decisions: {} })).assignments).toBeUndefined();
+
+    const crew = { driverId: "staff-1", coDriverId: null, travelAllowance: 300000, fuelAndToll: 750000, driverFee: 400000 };
+    expect(assignVehicleCrew("res-kendaraan-1", crew, storage)).toBe(true);
+    expect(assignVehicleCrew("res-kendaraan-1", { ...crew, driverFee: 0 }, storage)).toBe(true);
+    expect(parseState(storage.getItem(MOCK_RESERVATIONS_KEY)).assignments).toEqual({ "res-kendaraan-1": { ...crew, driverFee: 0 } });
+    expect(assignVehicleCrew("res-kendaraan-1", crew, null)).toBe(false);
   });
 
   it("reports when the browser cannot store anything", () => {

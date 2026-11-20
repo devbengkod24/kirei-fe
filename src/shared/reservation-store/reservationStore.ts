@@ -14,7 +14,8 @@ import type { ReservationRecord, ReservationRequest, ReservationStatus, Reservat
  *
  * Two kinds of data are kept:
  * - `created`: requests sent from the booking forms in this browser;
- * - `decisions`: approve/reject results, for created requests and for the seeded sample ones.
+ * - `decisions`: approve/reject results, for created requests and for the seeded sample ones;
+ * - `assignments`: the drivers and costs an admin sets on a vehicle request.
  */
 
 export const MOCK_RESERVATIONS_KEY = "kirei:mock-reservations";
@@ -47,9 +48,20 @@ export interface MockDecision {
   decidedAt: string;
 }
 
+/** Who drives a vehicle request and what the trip costs, set by the admin. Amounts in rupiah. */
+export interface VehicleAssignment {
+  driverId: string | null;
+  coDriverId: string | null;
+  travelAllowance: number;
+  fuelAndToll: number;
+  driverFee: number;
+}
+
 export interface MockReservationState {
   created: MockReservation[];
   decisions: Record<string, MockDecision>;
+  /** Missing in stores written before drivers and costs could be set. */
+  assignments?: Record<string, VehicleAssignment>;
 }
 
 export const EMPTY_STATE: MockReservationState = { created: [], decisions: {} };
@@ -95,6 +107,18 @@ const stateSchema = z.object({
       decidedAt: z.string(),
     }),
   ),
+  assignments: z
+    .record(
+      z.string(),
+      z.object({
+        driverId: z.string().nullable(),
+        coDriverId: z.string().nullable(),
+        travelAllowance: z.number(),
+        fuelAndToll: z.number(),
+        driverFee: z.number(),
+      }),
+    )
+    .optional(),
 });
 
 /** Broken or foreign data reads as an empty store instead of crashing the page. */
@@ -171,6 +195,16 @@ export function decideMockReservation(
 ): boolean {
   const state = parseState(readSnapshot(storage));
   return write({ ...state, decisions: { ...state.decisions, [id]: { ...decision, decidedAt: now.toISOString() } } }, storage);
+}
+
+/** Saves the drivers and costs of a vehicle request, replacing any earlier ones. */
+export function assignVehicleCrew(
+  id: string,
+  assignment: VehicleAssignment,
+  storage: Storage | null = browserStorage(),
+): boolean {
+  const state = parseState(readSnapshot(storage));
+  return write({ ...state, assignments: { ...state.assignments, [id]: assignment } }, storage);
 }
 
 /** Back to the seeded sample data: forgets created requests and every decision. */
