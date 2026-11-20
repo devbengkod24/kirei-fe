@@ -68,8 +68,12 @@ export function VehicleCrewPanel({ reservation, staff }: VehicleCrewPanelProps) 
     return Number.isFinite(amount) && amount > 0 ? sum + amount : sum;
   }, 0);
 
-  const drivers = staff.filter((member) => member.role === "sopir");
-  const coDrivers = staff.filter((member) => member.role === "co_sopir");
+  // An inactive driver is not offered again, but stays listed where this trip already has them.
+  const offered = (role: Staff["role"], assigned: string) =>
+    staff.filter((member) => member.role === role && (member.isActive || member.id === assigned));
+  const drivers = offered("sopir", values.driverId);
+  const coDrivers = offered("co_sopir", values.coDriverId);
+  const label = (member: Staff) => (member.isActive ? member.name : `${member.name} (tidak aktif)`);
   const fieldId = (name: string) => `crew-${reservation.id}-${name}`;
 
   const save = handleSubmit((crew) => {
@@ -100,7 +104,7 @@ export function VehicleCrewPanel({ reservation, staff }: VehicleCrewPanelProps) 
             <option value="">Belum dipilih</option>
             {drivers.map((member) => (
               <option key={member.id} value={member.id}>
-                {member.name}
+                {label(member)}
               </option>
             ))}
           </SelectInput>
@@ -113,7 +117,7 @@ export function VehicleCrewPanel({ reservation, staff }: VehicleCrewPanelProps) 
             <option value="">Tanpa co-sopir</option>
             {coDrivers.map((member) => (
               <option key={member.id} value={member.id}>
-                {member.name}
+                {label(member)}
               </option>
             ))}
           </SelectInput>

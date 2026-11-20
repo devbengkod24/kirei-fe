@@ -22,7 +22,7 @@ export type ReservationIntent = "draft" | "submit";
  * and its 422 errors are mapped back onto these fields.
  */
 
-const phoneSchema = z
+export const phoneSchema = z
   .string()
   .transform((value) => value.replace(/[\s-]/g, ""))
   .pipe(z.string().regex(PHONE, "Nomor HP tidak valid. Contoh: 081234567890."));

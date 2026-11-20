@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Pagination } from "@/components/ui/Pagination";
-import { SegmentedNav } from "@/components/ui/SegmentedNav";
 import { TABLE, TABLE_CELL, TABLE_HEAD_CELL, TABLE_ROW } from "@/components/ui/table";
 import { useLiveState } from "@/hooks/useLiveData";
 import { usePagination } from "@/hooks/usePagination";
@@ -15,11 +14,11 @@ import { useLiveBuildings } from "@/shared/live-data/useLiveFacilities";
 import type { Fakultas } from "@/types/fakultas";
 import type { Building } from "@/types/facility";
 import type { ManagedRole, ManagedUser } from "@/types/managedUser";
-import { ADMIN_UNIVERSITAS_ROUTES } from "../routes";
 import { AddUserDialog } from "./AddUserDialog";
 import { UserDetailDialog } from "./UserDetailDialog";
 import { managedUsersSchema, searchUsers, toManagedUser } from "./userSchema";
-import { USER_ROLES, USER_TAB_PARAM, USER_TABS } from "./userTabs";
+import { USER_TABS } from "./userTabs";
+import { UserTabsNav } from "./UserTabsNav";
 
 export interface UserManagementProps {
   role: ManagedRole;
@@ -96,14 +95,7 @@ export function UserManagement({ role, users: initial, fakultasOptions, building
 
   return (
     <div className="flex flex-col gap-4">
-      <SegmentedNav
-        label="Jenis pengguna"
-        items={USER_ROLES.map((item) => ({
-          label: USER_TABS[item].label,
-          href: `${ADMIN_UNIVERSITAS_ROUTES.users}?${USER_TAB_PARAM}=${item}`,
-          active: item === role,
-        }))}
-      />
+      <UserTabsNav active={role} />
 
       <Card as="section" aria-labelledby="users-title" className="flex flex-col gap-4 p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">

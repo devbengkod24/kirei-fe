@@ -10,4 +10,6 @@ export interface Staff {
   /** "YYYY-MM-DD" */
   licenseExpiresOn: string;
   role: StaffRole;
+  /** An inactive driver is no longer offered for new trips; older trips keep showing the name. */
+  isActive: boolean;
 }
