@@ -84,6 +84,24 @@ describe("reservation store", () => {
     expect(addMockReservation(created(), null)).toBe(false);
     expect(resetMockReservations(null)).toBe(false);
   });
+
+  it("reads vehicle requests stored before destinations, vehicle type, and trip kind existed", () => {
+    const old = created({ id: "old-trip", type: "kendaraan", roomName: "", trip: { destination: "Kudus", participants: 8 } });
+    const current = created({
+      id: "new-trip",
+      type: "kendaraan",
+      roomName: "",
+      trip: {
+        destination: "Kudus, Pati",
+        participants: 8,
+        destinations: ["Kudus", "Pati"],
+        vehicle: { id: "vehicle-bus", name: "Bus Udinus", units: 1 },
+        kind: "antar_jemput",
+      },
+    });
+    const state = parseState(JSON.stringify({ created: [old, current], decisions: {} }));
+    expect(state.created.map((reservation) => reservation.trip)).toEqual([old.trip, current.trip]);
+  });
 });
 
 describe("admin list", () => {

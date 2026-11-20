@@ -1,5 +1,5 @@
 import { toWibDateKey } from "@/lib/date";
-import type { ReservationRecord, ReservationRequest, ReservationStatus, ReservationType } from "@/types/reservation";
+import type { ReservationRecord, ReservationRequest, ReservationStatus, ReservationType, VehicleTrip } from "@/types/reservation";
 import { wibDateTime } from "./time";
 
 /* ---------- Borrower: own reservations and history ---------- */
@@ -139,19 +139,20 @@ type FacilityRow = Row & {
   type: "gor" | "kendaraan";
   buildingName: string;
   activity?: string;
-  trip?: { destination: string; participants: number };
+  trip?: VehicleTrip;
 };
 
-// A pending vehicle request has no vehicle yet (roomName ""): the approving admin assigns one.
+// A vehicle request names the type and units asked for (trip.vehicle); the approving admin assigns
+// the actual units, so a pending one has no roomName yet.
 const FACILITY_ROWS: FacilityRow[] = [
   { type: "gor", buildingName: "GOR Udinus", roomName: "GOR Udinus", days: 0, start: "16:00", end: "18:00", borrowerName: "UKM Bulu Tangkis", borrowerDetail: "Ormawa", purpose: "Latihan rutin badminton", activity: "Badminton", status: "disetujui" },
   { type: "gor", buildingName: "GOR Udinus", roomName: "GOR Udinus", days: 0, start: "08:00", end: "09:00", borrowerName: "UKM Futsal", borrowerDetail: "Ormawa", purpose: "Latihan futsal", activity: "Futsal", status: "selesai" },
   { type: "gor", buildingName: "GOR Udinus", roomName: "GOR Udinus", days: 2, start: "15:00", end: "17:00", borrowerName: "HMTI", borrowerDetail: "Ormawa", purpose: "Turnamen voli antar angkatan", activity: "Voli", status: "menunggu_persetujuan" },
   { type: "gor", buildingName: "GOR Udinus", roomName: "GOR Udinus", days: 4, start: "18:00", end: "20:00", borrowerName: "UKM Basket", borrowerDetail: "Ormawa", purpose: "Persiapan liga mahasiswa", activity: "Basket", status: "menunggu_persetujuan" },
   { type: "gor", buildingName: "GOR Udinus", roomName: "GOR Udinus", days: -3, start: "16:00", end: "18:00", borrowerName: "UKM Bulu Tangkis", borrowerDetail: "Ormawa", purpose: "Latihan rutin badminton", activity: "Badminton", status: "selesai" },
-  { type: "kendaraan", buildingName: "Kendaraan", roomName: "Toyota Hiace", days: 0, start: "06:00", end: "18:00", borrowerName: "BEM Universitas", borrowerDetail: "Ormawa", purpose: "Kunjungan industri ke Kudus", trip: { destination: "Kudus", participants: 14 }, status: "disetujui" },
-  { type: "kendaraan", buildingName: "Kendaraan", roomName: "", days: 3, start: "05:00", end: "20:00", borrowerName: "Dr. Hendra Gunawan, S.Kom", borrowerDetail: "Dosen Pembimbing BEM • NPP: 19820411", purpose: "Studi banding ke Yogyakarta", trip: { destination: "Yogyakarta", participants: 35 }, status: "menunggu_persetujuan" },
-  { type: "kendaraan", buildingName: "Kendaraan", roomName: "", days: 1, start: "08:00", end: "15:00", borrowerName: "Dr. Maria Lestari, M.Pd.", borrowerDetail: "Dosen • NPP: 19800521", purpose: "Pendampingan lomba", trip: { destination: "Salatiga", participants: 6 }, status: "menunggu_persetujuan" },
+  { type: "kendaraan", buildingName: "Kendaraan", roomName: "Toyota Hiace", days: 0, start: "06:00", end: "18:00", borrowerName: "BEM Universitas", borrowerDetail: "Ormawa", purpose: "Kunjungan industri ke Kudus", trip: { destination: "Kudus", participants: 14, destinations: ["Kudus"], vehicle: { id: "vehicle-hiace", name: "Toyota Hiace", units: 1 }, kind: "antar_jemput" }, status: "disetujui" },
+  { type: "kendaraan", buildingName: "Kendaraan", roomName: "", days: 3, start: "05:00", end: "20:00", borrowerName: "Dr. Hendra Gunawan, S.Kom", borrowerDetail: "Dosen Pembimbing BEM • NPP: 19820411", purpose: "Studi banding ke Yogyakarta", trip: { destination: "Yogyakarta, Magelang", participants: 35, destinations: ["Yogyakarta", "Magelang"], vehicle: { id: "vehicle-bus", name: "Bus Udinus", units: 1 }, kind: "antar_jemput" }, status: "menunggu_persetujuan" },
+  { type: "kendaraan", buildingName: "Kendaraan", roomName: "", days: 1, start: "08:00", end: "15:00", borrowerName: "Dr. Maria Lestari, M.Pd.", borrowerDetail: "Dosen • NPP: 19800521", purpose: "Pendampingan lomba", trip: { destination: "Salatiga", participants: 6, destinations: ["Salatiga"], vehicle: { id: "vehicle-innova", name: "Toyota Innova", units: 1 }, kind: "antar_jemput" }, status: "menunggu_persetujuan" },
   { type: "kendaraan", buildingName: "Kendaraan", roomName: "Toyota Hiace", days: -6, start: "07:00", end: "17:00", borrowerName: "HMTI", borrowerDetail: "Ormawa", purpose: "Bakti sosial", trip: { destination: "Demak", participants: 12 }, status: "selesai" },
   { type: "gor", buildingName: "GOR Udinus", roomName: "GOR Udinus", days: -7, start: "18:00", end: "20:00", borrowerName: "HMTI", borrowerDetail: "Ormawa", purpose: "Futsal antar angkatan", activity: "Futsal", status: "ditolak" },
   { type: "kendaraan", buildingName: "Kendaraan", roomName: "", days: -10, start: "06:00", end: "19:00", borrowerName: "HMTI", borrowerDetail: "Ormawa", purpose: "Rekreasi pengurus", trip: { destination: "Bandungan", participants: 20 }, status: "ditolak" },

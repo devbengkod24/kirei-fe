@@ -272,23 +272,54 @@ export const SPORTS_HALL_RESERVATION_FIELD_MAP = {
 
 /* ---------- Kendaraan ---------- */
 
-/** A trip, not a vehicle: which vehicle goes is arranged outside the app. "internal" skips phone and letter. */
+/** A longer route is planned with the admin; five covers the trips in the sample data with room to spare. */
+export const MAX_DESTINATIONS = 5;
+
+export const TRIP_KIND_LABEL = {
+  menginap: "Menginap",
+  antar_jemput: "Antar jemput",
+} as const;
+
+/** What the vehicle check needs to know; returns which field is wrong and why, or null. */
+export type VehicleIssue = (values: {
+  vehicleId: string;
+  units: number;
+  startDate: string;
+  endDate: string;
+}) => { field: "vehicleId" | "units"; message: string } | null;
+
+/**
+ * A trip with one vehicle type and how many units of it. Which units go is still the admin's call.
+ * "internal" skips phone and letter. `vehicleIssue` checks the free units against the bookings the form knows.
+ */
 export function createVehicleReservationSchema(
   today: () => string,
   mode: BookingMode = "request",
+  vehicleIssue: VehicleIssue = () => null,
 ) {
   const { askPhone, withLetter, withDraft } = BOOKING_MODES[mode];
   return z
     .object({
       phone: askPhone ? phoneSchema : z.string(),
-      destination: describe("tujuan", 3),
+      startDate: z.string().regex(DATE, "Pilih tanggal mulai."),
+      endDate: z.string().regex(DATE, "Pilih tanggal selesai."),
+      tripKind: z
+        .string()
+        .pipe(z.enum(["menginap", "antar_jemput"], { message: "Pilih menginap atau antar jemput." })),
       participants: z.coerce
         .number({ message: "Isi jumlah peserta dengan angka." })
         .int("Jumlah peserta harus bilangan bulat.")
         .min(1, "Jumlah peserta minimal 1."),
+      vehicleId: z.string().min(1, "Pilih kendaraan."),
+      units: z.coerce
+        .number({ message: "Isi jumlah unit dengan angka." })
+        .int("Jumlah unit harus bilangan bulat.")
+        .min(1, "Jumlah unit minimal 1."),
+      destinations: z
+        .array(z.object({ name: describe("tujuan", 3) }))
+        .min(1, "Tambah minimal satu tujuan.")
+        .max(MAX_DESTINATIONS, `Tujuan maksimal ${MAX_DESTINATIONS}.`),
       activity: describe("keterangan kegiatan", 5),
-      startDate: z.string().regex(DATE, "Pilih tanggal mulai."),
-      endDate: z.string().regex(DATE, "Pilih tanggal selesai."),
       ...submissionShape,
     })
     .superRefine((values, ctx) => {
@@ -300,16 +331,25 @@ export function createVehicleReservationSchema(
           message: "Tanggal mulai sudah lewat.",
         });
       }
-      if (
-        DATE.test(values.startDate) &&
-        DATE.test(values.endDate) &&
-        values.endDate < values.startDate
-      ) {
+      const datesValid = DATE.test(values.startDate) && DATE.test(values.endDate);
+      if (datesValid && values.endDate < values.startDate) {
         ctx.addIssue({
           code: "custom",
           path: ["endDate"],
           message: "Tanggal selesai tidak boleh sebelum tanggal mulai.",
         });
+      }
+      if (datesValid && values.tripKind === "menginap" && values.endDate <= values.startDate) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["tripKind"],
+          message: "Menginap butuh tanggal selesai setelah tanggal mulai.",
+        });
+      }
+      const units = Number(values.units);
+      if (values.vehicleId && Number.isInteger(units) && units > 0) {
+        const issue = vehicleIssue({ ...values, units });
+        if (issue) ctx.addIssue({ code: "custom", path: [issue.field], message: issue.message });
       }
       if (withLetter) requireLetterToSubmit(values, ctx, withDraft);
     }, ALWAYS);
@@ -324,10 +364,13 @@ export type VehicleReservationValues = z.output<
 
 export const VEHICLE_RESERVATION_FIELD_MAP = {
   phone: "phone",
-  destination: "destination",
-  participants: "participants",
-  activity: "activity",
   start_date: "startDate",
   end_date: "endDate",
+  trip_kind: "tripKind",
+  participants: "participants",
+  vehicle_id: "vehicleId",
+  units: "units",
+  destinations: "destinations",
+  activity: "activity",
   letter: "letter",
 } as const;

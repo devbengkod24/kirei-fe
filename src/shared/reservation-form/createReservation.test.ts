@@ -1,24 +1,39 @@
 import { describe, expect, it } from "vitest";
+import type { Vehicle } from "@/types/facility";
 import { toMockReservation, toSportsHallReservationRequest, toVehicleReservationRequest } from "./createReservation";
+
+const BUS: Vehicle = { id: "vehicle-bus", name: "Bus Udinus", capacity: 40, unitCount: 2, isActive: true };
 
 describe("reservation requests", () => {
   it("sends a vehicle trip as whole WIB days, ending at midnight after the last day", () => {
-    const request = toVehicleReservationRequest({
-      phone: "0857111211",
-      destination: "Bali",
-      participants: 12,
-      activity: "Kunjungan studi",
-      startDate: "2026-10-20",
-      endDate: "2026-10-21",
-      letter: null,
-      intent: "draft",
-    });
+    const request = toVehicleReservationRequest(
+      {
+        phone: "0857111211",
+        tripKind: "menginap",
+        vehicleId: "vehicle-bus",
+        units: 2,
+        destinations: [{ name: "Bali" }, { name: "Banyuwangi" }],
+        participants: 60,
+        activity: "Kunjungan studi",
+        startDate: "2026-10-20",
+        endDate: "2026-10-21",
+        letter: null,
+        intent: "draft",
+      },
+      [BUS],
+    );
     expect(request).toMatchObject({
       type: "kendaraan",
       // 20 Oct 00:00 WIB and 22 Oct 00:00 WIB
       starts_at: "2026-10-19T17:00:00.000Z",
       ends_at: "2026-10-21T17:00:00.000Z",
       status: "draft",
+      vehicle_id: "vehicle-bus",
+      vehicle_name: "Bus Udinus",
+      units: 2,
+      trip_kind: "menginap",
+      destinations: ["Bali", "Banyuwangi"],
+      destination: "Bali, Banyuwangi",
     });
   });
 
@@ -58,19 +73,35 @@ describe("demo store listing", () => {
     });
   });
 
-  it("lists a vehicle trip without a vehicle, like the sample requests", () => {
-    const request = toVehicleReservationRequest({
-      phone: "0857111211",
-      destination: "Kudus",
-      participants: 8,
-      activity: "Kunjungan industri",
-      startDate: "2026-11-20",
-      endDate: "2026-11-20",
-      letter: null,
-      intent: "submit",
+  it("lists a vehicle trip with the type asked for but no assigned unit, like the sample requests", () => {
+    const request = toVehicleReservationRequest(
+      {
+        phone: "0857111211",
+        tripKind: "antar_jemput",
+        vehicleId: "vehicle-bus",
+        units: 2,
+        destinations: [{ name: "Kudus" }, { name: "Pati" }],
+        participants: 8,
+        activity: "Kunjungan industri",
+        startDate: "2026-11-20",
+        endDate: "2026-11-20",
+        letter: null,
+        intent: "submit",
+      },
+      [BUS],
+    );
+    const reservation = toMockReservation(request, { owner, unitName: "Kendaraan ke Kudus, Pati", purpose: "Kunjungan industri" });
+    expect(reservation).toMatchObject({
+      roomName: "",
+      buildingName: "Kendaraan",
+      trip: {
+        destination: "Kudus, Pati",
+        destinations: ["Kudus", "Pati"],
+        participants: 8,
+        vehicle: { id: "vehicle-bus", name: "Bus Udinus", units: 2 },
+        kind: "antar_jemput",
+      },
     });
-    const reservation = toMockReservation(request, { owner, unitName: "Kendaraan ke Kudus", purpose: "Kunjungan industri" });
-    expect(reservation).toMatchObject({ roomName: "", buildingName: "Kendaraan", trip: { destination: "Kudus", participants: 8 } });
   });
 });
 

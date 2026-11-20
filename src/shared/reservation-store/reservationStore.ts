@@ -67,7 +67,16 @@ const reservationSchema = z.object({
   purpose: z.string(),
   letterFileName: z.string().nullable(),
   letterUrl: z.string().nullable(),
-  trip: z.object({ destination: z.string(), participants: z.number() }).optional(),
+  // Requests stored before destinations, vehicle, and kind existed have only destination and participants.
+  trip: z
+    .object({
+      destination: z.string(),
+      participants: z.number(),
+      destinations: z.array(z.string()).optional(),
+      vehicle: z.object({ id: z.string(), name: z.string(), units: z.number() }).optional(),
+      kind: z.enum(["menginap", "antar_jemput"]).optional(),
+    })
+    .optional(),
   activity: z.string().optional(),
   rejectionReason: z.string().nullable(),
   ownerId: z.string(),

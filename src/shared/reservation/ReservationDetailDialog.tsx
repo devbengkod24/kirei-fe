@@ -24,9 +24,12 @@ const READONLY_BOX = "flex min-h-10 items-center rounded-md border border-border
 /** Details that depend on what is reserved, shown under the time. Rooms show their place inline instead. */
 const TYPE_DETAILS: Record<ReservationType, (reservation: ReservationRequest) => { label: string; value: string }[]> = {
   ruangan: () => [],
-  kendaraan: (reservation) => [
-    { label: "Tujuan", value: reservation.trip?.destination ?? "-" },
-    { label: "Jumlah peserta", value: reservation.trip ? `${reservation.trip.participants} orang` : "-" },
+  kendaraan: ({ trip }) => [
+    { label: "Tujuan", value: trip?.destination ?? "-" },
+    { label: "Jumlah peserta", value: trip ? `${trip.participants} orang` : "-" },
+    // Requests made before vehicle choice existed have no type; the admin picks one as before.
+    ...(trip?.vehicle ? [{ label: "Kendaraan", value: `${trip.vehicle.name}, ${trip.vehicle.units} unit` }] : []),
+    ...(trip?.kind ? [{ label: "Perjalanan", value: trip.kind === "menginap" ? "Menginap" : "Antar jemput" }] : []),
   ],
   gor: (reservation) => [
     { label: "Tempat", value: reservation.roomName },
