@@ -1,6 +1,7 @@
 export const ADMIN_GEDUNG_ROUTES = {
   dashboard: "/gedung/dashboard",
   rooms: "/gedung/ruangan",
+  floorPlan: "/gedung/denah",
   lecturerSchedule: "/gedung/jadwal-dosen",
   internalReservation: "/gedung/reservasi-internal",
   reservations: "/gedung/reservasi",

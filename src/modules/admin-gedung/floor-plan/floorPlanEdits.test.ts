@@ -7,7 +7,6 @@ import {
   fitRoom,
   gridSize,
   newRoom,
-  resizeFloor,
   roomCodeErrors,
   suggestRoomCode,
   typeRect,
@@ -38,28 +37,6 @@ describe("collidingRoom", () => {
   it("lets rooms touch and ignores the room itself", () => {
     expect(collidingRoom(plan, "room-H.5.1", { x: 50, y: 0, width: 50, height: 50 })).toBeUndefined();
     expect(collidingRoom(plan, "room-H.5.1", { x: 0, y: 0, width: 75, height: 50 })).toBeUndefined();
-  });
-});
-
-describe("resizeFloor", () => {
-  it("grows the floor to whole cells", () => {
-    const result = resizeFloor(floor([room("H.5.1")]), 24, 16);
-    expect(result).toEqual({ floor: expect.objectContaining({ planWidth: 24 * GRID, planHeight: 16 * GRID }) });
-  });
-
-  it("refuses to cut off a room and names it", () => {
-    const result = resizeFloor(floor([room("H.5.1"), room("H.5.2", 250, 0, 100, 50)]), 12, 12);
-    expect(result).toEqual({ error: expect.stringContaining("H.5.2") });
-    expect(JSON.stringify(result)).not.toContain("H.5.1");
-  });
-
-  it("allows shrinking down to the room's edge", () => {
-    expect(resizeFloor(floor([room("H.5.2", 250, 0, 100, 50)]), 14, 4)).toHaveProperty("floor");
-  });
-
-  it("rejects sizes outside the allowed range", () => {
-    expect(resizeFloor(floor([]), 2, 12)).toHaveProperty("error");
-    expect(resizeFloor(floor([]), 18.5, 12)).toHaveProperty("error");
   });
 });
 

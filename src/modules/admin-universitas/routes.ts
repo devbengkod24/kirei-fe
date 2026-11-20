@@ -7,7 +7,6 @@ export const ADMIN_UNIVERSITAS_ROUTES = {
   internalReservation: "/admin/reservasi-internal",
   reservations: "/admin/reservasi",
   rooms: "/admin/ruangan",
-  floorPlans: "/admin/denah",
   users: "/admin/pengguna",
   announcements: "/admin/pengumuman",
 } as const;
