@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { requireRole } from "@/lib/auth/requireRole";
-import { ADMIN_FAKULTAS_ROUTES } from "@/modules/admin-fakultas/routes";
+import { ADMIN_GEDUNG_ROUTES } from "@/modules/admin-gedung/routes";
 import { getRoomReservationOptions } from "@/shared/reservation-form/getReservationOptions";
 import { RoomReservationForm } from "@/shared/reservation-form/RoomReservationForm";
 
@@ -16,10 +16,10 @@ export default async function Page() {
     <RoomReservationForm
       {...options}
       requester={{ name: user.name, fakultasId: user.fakultasId }}
-      owner={{ id: user.id, name: user.name, email: user.email, detail: "Admin Fakultas" }}
+      owner={{ id: user.id, name: user.name, email: user.email, detail: "Admin Gedung" }}
       mode="internal"
       purposePlaceholder="Contoh: Rapat dosen prodi"
-      links={{ history: ADMIN_FAKULTAS_ROUTES.reservationHistory, historyLabel: "Buka Kelola Reservasi" }}
+      links={{ history: ADMIN_GEDUNG_ROUTES.reservationHistory, historyLabel: "Buka Kelola Reservasi" }}
     />
   );
 }

@@ -14,7 +14,7 @@ export async function saveLecturerSchedule(input: unknown): Promise<SaveSchedule
   const user = await getCurrentUser();
   // UX guard only. TODO: POST to kirei-api, which checks the role, the faculty, and every row itself.
   if (user.role !== "admin_fakultas" || !user.fakultasId) {
-    return { ok: false, message: "Hanya admin fakultas yang bisa mengunggah jadwal dosen." };
+    return { ok: false, message: "Hanya admin gedung yang bisa mengunggah jadwal dosen." };
   }
 
   const parsed = lecturerScheduleInputSchema.safeParse(input);
@@ -25,7 +25,7 @@ export async function saveLecturerSchedule(input: unknown): Promise<SaveSchedule
   const seeded = (await getDataMode()) === "sample";
   const rooms = new Set(facultyRoomCodes(user.fakultasId));
   if (seeded && parsed.data.entries.some((entry) => !rooms.has(entry.roomCode))) {
-    return { ok: false, message: "Ada ruangan yang bukan milik fakultas Anda. Unggah ulang berkas CSV." };
+    return { ok: false, message: "Ada ruangan yang bukan milik gedung Anda. Unggah ulang berkas CSV." };
   }
 
   const schedule: LecturerSchedule = {

@@ -67,7 +67,7 @@ function rowSchema(roomCodes: Map<string, string>) {
         .string()
         .trim()
         .min(1, "Ruangan wajib diisi.")
-        .refine((code) => roomCodes.has(code.toUpperCase()), "Ruangan tidak ada di gedung fakultas ini.")
+        .refine((code) => roomCodes.has(code.toUpperCase()), "Ruangan tidak ada di gedung ini.")
         .transform((code) => roomCodes.get(code.toUpperCase()) ?? code),
       mata_kuliah: text("Mata kuliah"),
       dosen: text("Nama dosen"),

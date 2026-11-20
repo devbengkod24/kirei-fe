@@ -17,9 +17,9 @@ export interface AddUserDialogProps {
   role: ManagedRole;
   /** Accounts already in the list, to catch a duplicate email before sending. */
   existing: ManagedUser[];
-  /** For dosen and admin fakultas. */
+  /** For dosen. */
   fakultasOptions: Fakultas[];
-  /** For operators, who look after one floor. */
+  /** For admin gedung, who manage one building, and operators, who look after one floor of it. */
   buildings: Building[];
   onClose: () => void;
   onAdd: (values: NewUserValues) => void;
@@ -56,9 +56,25 @@ export function AddUserDialog({ role, existing, fakultasOptions, buildings, onCl
     >
       {/* TODO: POST through the orval client and map 422 errors with lib/api/form-errors. */}
       <form id="add-user-form" onSubmit={form.handleSubmit(onAdd)} noValidate className="flex flex-col gap-3">
-        <Field label={`Nama ${tab.label.toLowerCase()}`} htmlFor="add-user-name" error={errors.name?.message}>
-          <input id="add-user-name" placeholder={tab.namePlaceholder} {...form.register("name")} {...described("name")} className={INPUT_CLASS} />
-        </Field>
+        {tab.fields.name && (
+          <Field label={`Nama ${tab.label.toLowerCase()}`} htmlFor="add-user-name" error={errors.name?.message}>
+            <input id="add-user-name" placeholder={tab.namePlaceholder} {...form.register("name")} {...described("name")} className={INPUT_CLASS} />
+          </Field>
+        )}
+        {tab.fields.building && (
+          <Field label="Gedung" htmlFor="add-user-buildingId" error={errors.buildingId?.message}>
+            <SelectInput id="add-user-buildingId" {...form.register("buildingId")} {...described("buildingId")}>
+              <option value="" disabled>
+                Pilih gedung
+              </option>
+              {buildings.map((building) => (
+                <option key={building.id} value={building.id}>
+                  {building.name}
+                </option>
+              ))}
+            </SelectInput>
+          </Field>
+        )}
         <Field label="Email" htmlFor="add-user-email" error={errors.email?.message}>
           <input
             id="add-user-email"

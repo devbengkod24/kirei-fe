@@ -67,16 +67,21 @@ export function UserManagement({ role, users: initial, fakultasOptions, building
   const paging = usePagination(visible, 10);
   const { label, fields } = USER_TABS[role];
 
-  // Ormawa belong to no faculty; dosen and admin fakultas do, operators work on one floor.
+  // Ormawa belong to nothing; dosen belong to a faculty, admin gedung to a building, operators to one floor.
   const fakultasById = new Map(fakultasOptions.map((fakultas) => [fakultas.id, fakultas]));
   const fakultasOf = (user: ManagedUser) => (user.fakultasId ? fakultasById.get(user.fakultasId) : undefined);
+  const buildingOf = (user: ManagedUser) => buildings.find((item) => item.id === user.buildingId)?.name;
   const floorOf = (user: ManagedUser) => {
     if (!user.floor) return undefined;
     const building = buildings.find((item) => item.id === user.floor?.buildingId);
     const floor = building?.floors.find((item) => item.id === user.floor?.floorId);
     return building && floor ? `${building.name} · Lantai ${floor.number}` : undefined;
   };
-  const placementOf = (user: ManagedUser) => (fields.floor ? floorOf(user) : fakultasOf(user)?.name);
+  const placementOf = (user: ManagedUser) => {
+    if (fields.floor) return floorOf(user);
+    if (fields.building) return buildingOf(user);
+    return fakultasOf(user)?.name;
+  };
 
   const viewButton = (user: ManagedUser) => (
     <button
@@ -117,7 +122,7 @@ export function UserManagement({ role, users: initial, fakultasOptions, building
                 setQuery(event.target.value);
                 paging.setPage(1);
               }}
-              placeholder={fields.npp ? "Cari nama, email, atau NPP" : "Cari nama atau email"}
+              placeholder={fields.npp ? "Cari nama, email, atau NPP" : fields.name ? "Cari nama atau email" : "Cari gedung atau email"}
               className={`${INPUT_CLASS} min-w-0 flex-1 sm:w-64`}
             />
             <Button onClick={() => setAdding(true)}>+ {label}</Button>
@@ -139,10 +144,11 @@ export function UserManagement({ role, users: initial, fakultasOptions, building
               <thead>
                 <tr className={TABLE_ROW}>
                   <th scope="col" className={TH}>No</th>
-                  <th scope="col" className={TH}>Nama</th>
+                  {fields.name && <th scope="col" className={TH}>Nama</th>}
                   {fields.npp && <th scope="col" className={TH}>NPP</th>}
                   <th scope="col" className={TH}>Email</th>
                   {fields.fakultas && <th scope="col" className={TH}>Fakultas</th>}
+                  {fields.building && <th scope="col" className={TH}>Gedung</th>}
                   {fields.floor && <th scope="col" className={TH}>Tempat tugas</th>}
                   <th scope="col" className={TH}>Status</th>
                   <th scope="col" className={TH}>Aksi</th>
@@ -152,7 +158,7 @@ export function UserManagement({ role, users: initial, fakultasOptions, building
                 {paging.items.map((user, index) => (
                   <tr key={user.id} className={TABLE_ROW}>
                     <td className={TD}>{(paging.page - 1) * paging.pageSize + index + 1}</td>
-                    <td className={TD}>{user.name}</td>
+                    {fields.name && <td className={TD}>{user.name}</td>}
                     {fields.npp && <td className={`${TD} tabular-nums`}>{user.npp}</td>}
                     <td className={TD}>
                       <Email address={user.email} />
@@ -162,6 +168,7 @@ export function UserManagement({ role, users: initial, fakultasOptions, building
                         {fakultasOf(user)?.shortName ?? "-"}
                       </td>
                     )}
+                    {fields.building && <td className={TD}>{buildingOf(user) ?? "-"}</td>}
                     {fields.floor && <td className={TD}>{floorOf(user) ?? "-"}</td>}
                     <td className={TD}>
                       <StatusBadge isActive={user.isActive} />
@@ -181,7 +188,8 @@ export function UserManagement({ role, users: initial, fakultasOptions, building
                     <span className="text-xs text-muted">
                       <Email address={user.email} />
                     </span>
-                    {(fields.npp || placementOf(user)) && (
+                    {/* Accounts without a name are already named after their place. */}
+                    {fields.name && (fields.npp || placementOf(user)) && (
                       <span className="text-xs text-muted">
                         {[fields.npp && user.npp && `NPP ${user.npp}`, placementOf(user)].filter(Boolean).join(" · ")}
                       </span>
@@ -229,7 +237,7 @@ export function UserManagement({ role, users: initial, fakultasOptions, building
           buildings={buildings}
           onClose={() => setAdding(false)}
           onAdd={(values) => {
-            const user = toManagedUser(values, role, `${role}-new-${Date.now().toString(36)}`);
+            const user = toManagedUser(values, role, `${role}-new-${Date.now().toString(36)}`, buildings);
             // TODO: POST the account (with its password) through the orval client; the password never enters state.
             setUsers([user, ...users]);
             setQuery("");

@@ -209,7 +209,7 @@ export function LecturerScheduleUpload({ fakultasId, schedule: initial, roomCode
             </ul>
           </>
         ) : (
-          <p className="py-6 text-center text-sm text-muted">Belum ada jadwal dosen untuk fakultas ini.</p>
+          <p className="py-6 text-center text-sm text-muted">Belum ada jadwal dosen untuk gedung ini.</p>
         )}
       </Card>
     </div>

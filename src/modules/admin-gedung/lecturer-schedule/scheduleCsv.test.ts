@@ -35,7 +35,7 @@ describe("parseScheduleCsv", () => {
         messages: [
           "Hari harus Senin, Selasa, Rabu, Kamis, Jumat, Sabtu, atau Minggu.",
           "Jam mulai harus berformat JJ:MM, misalnya 07:30.",
-          "Ruangan tidak ada di gedung fakultas ini.",
+          "Ruangan tidak ada di gedung ini.",
           "Mata kuliah wajib diisi.",
         ],
       },

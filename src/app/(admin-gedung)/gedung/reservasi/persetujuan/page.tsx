@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { requireRole } from "@/lib/auth/requireRole";
-import { RESERVATION_TAB_LINKS } from "@/modules/admin-fakultas/reservation-tabs";
+import { RESERVATION_TAB_LINKS } from "@/modules/admin-gedung/reservation-tabs";
 import { getReservationCandidates } from "@/shared/reservation-management/getReservationRequests";
 import { ReservationManagement } from "@/shared/reservation-management/ReservationManagement";
 
