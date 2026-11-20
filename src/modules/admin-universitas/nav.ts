@@ -11,7 +11,6 @@ export const ADMIN_UNIVERSITAS_NAV: NavLinkConfig[][] = [
       iconSrc: "/icons/nav/internal-reservation.svg",
     },
     { label: "Kelola Reservasi", href: ADMIN_UNIVERSITAS_ROUTES.reservations, iconSrc: "/icons/nav/manage-reservations.svg" },
-    { label: "Kelola Denah", href: ADMIN_UNIVERSITAS_ROUTES.floorPlans, iconSrc: "/icons/nav/floor-plan.svg" },
     { label: "Kelola Pengguna", href: ADMIN_UNIVERSITAS_ROUTES.users, iconSrc: "/icons/nav/manage-users.svg" },
     { label: "Pengumuman", href: ADMIN_UNIVERSITAS_ROUTES.announcements, iconSrc: "/icons/nav/announcements.svg", iconSize: 20 },
   ],

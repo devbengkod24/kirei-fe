@@ -1,6 +1,7 @@
 export const ADMIN_FAKULTAS_ROUTES = {
   dashboard: "/fakultas/dashboard",
   rooms: "/fakultas/ruangan",
+  floorPlan: "/fakultas/denah",
   lecturerSchedule: "/fakultas/jadwal-dosen",
   internalReservation: "/fakultas/reservasi-internal",
   reservations: "/fakultas/reservasi",
