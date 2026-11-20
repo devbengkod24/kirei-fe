@@ -30,28 +30,6 @@ export function fitRoom(rect: RoomRect, floor: PlanSize): RoomRect {
   };
 }
 
-/** Allowed floor size, in cells, for both columns and rows. */
-export const FLOOR_CELLS = { min: 4, max: 60 };
-
-/**
- * Sets the floor to whole cells. Growing always works; shrinking is refused while a room would be
- * cut off, naming those rooms, so the plan never changes behind the admin's back.
- */
-export function resizeFloor(floor: Floor, columns: number, rows: number): { floor: Floor } | { error: string } {
-  const { min, max } = FLOOR_CELLS;
-  if (![columns, rows].every((value) => Number.isInteger(value) && value >= min && value <= max)) {
-    return { error: `Ukuran lantai harus bilangan bulat ${min}–${max} kotak.` };
-  }
-  const planWidth = columns * GRID;
-  const planHeight = rows * GRID;
-  const cut = floor.rooms.filter((room) => room.x + room.width > planWidth || room.y + room.height > planHeight);
-  if (cut.length > 0) {
-    const codes = cut.map((room) => room.code.trim() || "tanpa kode").join(", ");
-    return { error: `Ruangan ${codes} berada di luar ukuran baru. Pindahkan atau kecilkan dulu.` };
-  }
-  return { floor: { ...floor, planWidth, planHeight } };
-}
-
 /** Next code on the floor from its existing pattern, e.g. "H.5.14" → "H.5.15". Empty when there is no pattern. */
 export function suggestRoomCode(floor: Floor): string {
   let prefix = "";

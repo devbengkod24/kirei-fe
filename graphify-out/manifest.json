@@ -71,18 +71,6 @@
     "ast_hash": "e947e53dd49cc099eabdd0ecef307002",
     "semantic_hash": ""
   },
-  "src/app/(admin-universitas)/admin/denah/loading.tsx": {
-    "mtime": 1793449834.8528304,
-    "seen": 1794818106.5108883,
-    "ast_hash": "2fff6d21266c92c3a158fd89a3635f0d",
-    "semantic_hash": ""
-  },
-  "src/app/(admin-universitas)/admin/denah/page.tsx": {
-    "mtime": 1793449834.8528304,
-    "seen": 1794818106.5108883,
-    "ast_hash": "8f76782ded73d4bcb71d39154d81da66",
-    "semantic_hash": ""
-  },
   "src/app/(admin-universitas)/admin/page.tsx": {
     "mtime": 1793449834.8539267,
     "seen": 1794818106.5108883,
@@ -96,9 +84,9 @@
     "semantic_hash": ""
   },
   "src/app/(admin-universitas)/admin/pengguna/page.tsx": {
-    "mtime": 1793449834.854506,
-    "seen": 1794818106.5108883,
-    "ast_hash": "e702f66ad8ed2fd805bed6e8d3eea8d3",
+    "mtime": 1795162517.3945744,
+    "seen": 1795162946.3361108,
+    "ast_hash": "4f63ab8520b59cca23f76f83b27bdeda",
     "semantic_hash": ""
   },
   "src/app/(admin-universitas)/admin/pengumuman/loading.tsx": {
@@ -126,15 +114,15 @@
     "semantic_hash": ""
   },
   "src/app/(admin-universitas)/admin/reservasi-internal/layout.tsx": {
-    "mtime": 1793449834.8566737,
-    "seen": 1794818106.5108883,
-    "ast_hash": "71f1ff26dcf5ed5f16d6314d2d6eee89",
+    "mtime": 1795162517.3945744,
+    "seen": 1795162946.3361108,
+    "ast_hash": "d6ce0bc9723cd7f3e109e26ead7b5523",
     "semantic_hash": ""
   },
   "src/app/(admin-universitas)/admin/reservasi-internal/page.tsx": {
-    "mtime": 1793449834.8571987,
-    "seen": 1794818106.5108883,
-    "ast_hash": "5b11b6d3b2954ae011473cdb4f64b88c",
+    "mtime": 1795162517.3945744,
+    "seen": 1795162946.3361108,
+    "ast_hash": "12e1db15a6f0c12c5d9bb750586d56e4",
     "semantic_hash": ""
   },
   "src/app/(admin-universitas)/admin/reservasi/[tipe]/loading.tsx": {
@@ -270,8 +258,8 @@
     "semantic_hash": ""
   },
   "src/app/(ormawa)/profil/page.tsx": {
-    "mtime": 1795160222.7426198,
-    "seen": 1795160333.0261633,
+    "mtime": 1795162294.562273,
+    "seen": 1795162352.995036,
     "ast_hash": "e1930d70378c44819ed612bad3cffa41",
     "semantic_hash": ""
   },
@@ -468,9 +456,9 @@
     "semantic_hash": ""
   },
   "src/components/ui/Modal.tsx": {
-    "mtime": 1793377452.812683,
-    "seen": 1794818106.5108883,
-    "ast_hash": "3bb4ef9a0cfca15d4add8399a7c15e42",
+    "mtime": 1795162517.3955727,
+    "seen": 1795162946.3361108,
+    "ast_hash": "ad051c0b906b21654d3b7bd20da2376d",
     "semantic_hash": ""
   },
   "src/components/ui/Pagination.tsx": {
@@ -576,8 +564,8 @@
     "semantic_hash": ""
   },
   "src/lib/auth/actions.test.ts": {
-    "mtime": 1795160219.3653123,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.563274,
+    "seen": 1795162352.995036,
     "ast_hash": "b40e2065cb2f18148019f3fc38336163",
     "semantic_hash": ""
   },
@@ -624,8 +612,8 @@
     "semantic_hash": "7ad5d57f3b063eccaaa0e8fe6f1202cd"
   },
   "src/lib/auth/session.ts": {
-    "mtime": 1795160219.3663137,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.563274,
+    "seen": 1795162352.995036,
     "ast_hash": "52527d47b05a9c223d64a1e830f81c1d",
     "semantic_hash": ""
   },
@@ -726,8 +714,8 @@
     "semantic_hash": ""
   },
   "src/mocks/reservations.ts": {
-    "mtime": 1795160222.7426198,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.564271,
+    "seen": 1795162352.995036,
     "ast_hash": "c2370d22430bc8904573cfdbd57c4a4a",
     "semantic_hash": ""
   },
@@ -744,14 +732,14 @@
     "semantic_hash": ""
   },
   "src/mocks/user.ts": {
-    "mtime": 1795160219.3663137,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.564271,
+    "seen": 1795162352.995036,
     "ast_hash": "5fc81edf30315d13e6eb26debbb3c8e2",
     "semantic_hash": ""
   },
   "src/mocks/users.ts": {
-    "mtime": 1795160219.3663137,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.5652716,
+    "seen": 1795162352.995036,
     "ast_hash": "a3641ac244369752947b8acd192dfc40",
     "semantic_hash": ""
   },
@@ -797,36 +785,6 @@
     "ast_hash": "425fbf410df082b5e7541fce94c51809",
     "semantic_hash": ""
   },
-  "src/modules/admin-universitas/floor-plan/FloorPlanCanvas.tsx": {
-    "mtime": 1793450966.2601144,
-    "seen": 1794818106.5108883,
-    "ast_hash": "958bb766ba079dc55330d2d6c10fae41",
-    "semantic_hash": ""
-  },
-  "src/modules/admin-universitas/floor-plan/FloorPlanEditor.tsx": {
-    "mtime": 1794882514.006148,
-    "seen": 1795143029.1846364,
-    "ast_hash": "c1c32ad37ad5ab981875ab5518658b05",
-    "semantic_hash": ""
-  },
-  "src/modules/admin-universitas/floor-plan/floorPlanEdits.test.ts": {
-    "mtime": 1794882514.006148,
-    "seen": 1795143029.1846364,
-    "ast_hash": "151a6e9d3257301ecd1645b3facbf364",
-    "semantic_hash": ""
-  },
-  "src/modules/admin-universitas/floor-plan/floorPlanEdits.ts": {
-    "mtime": 1794882514.006148,
-    "seen": 1795143029.1846364,
-    "ast_hash": "dc7e9a8dcd07b8203f4fb1e7f863ffdf",
-    "semantic_hash": ""
-  },
-  "src/modules/admin-universitas/floor-plan/getFloorPlanBuildings.ts": {
-    "mtime": 1793449834.869807,
-    "seen": 1794818106.5108883,
-    "ast_hash": "148d048a1def3d3249095f1789f9920b",
-    "semantic_hash": ""
-  },
   "src/modules/admin-universitas/internal-reservation/InternalReservationForm.tsx": {
     "mtime": 1794454448.697464,
     "seen": 1794818106.5108883,
@@ -834,87 +792,87 @@
     "semantic_hash": ""
   },
   "src/modules/admin-universitas/nav.ts": {
-    "mtime": 1795160219.3683138,
-    "seen": 1795160333.027151,
-    "ast_hash": "4a74a029281d768687a6fd7e4f8dc493",
+    "mtime": 1795162517.398574,
+    "seen": 1795162946.3361108,
+    "ast_hash": "6d991f91a87941f53a16829351a6924d",
     "semantic_hash": ""
   },
   "src/modules/admin-universitas/reservations/UniversityReservations.tsx": {
-    "mtime": 1794882514.0071483,
-    "seen": 1795143029.1846364,
-    "ast_hash": "4b72ce4950878b7512582bb8cfa4fa32",
+    "mtime": 1795162517.398574,
+    "seen": 1795162946.3361108,
+    "ast_hash": "37bb2128ca832dccc34bf7e33dc87964",
     "semantic_hash": ""
   },
   "src/modules/admin-universitas/routes.ts": {
-    "mtime": 1795160219.3683138,
-    "seen": 1795160333.027151,
-    "ast_hash": "c631e19609a1b6b954ab58dfa7bf6e3b",
+    "mtime": 1795162517.398574,
+    "seen": 1795162946.3361108,
+    "ast_hash": "8ca1b6d4c66aa09d0a94f9bee32c16e6",
     "semantic_hash": ""
   },
   "src/modules/admin-universitas/users/AddUserDialog.tsx": {
-    "mtime": 1795160219.3683138,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.570271,
+    "seen": 1795162352.995036,
     "ast_hash": "f4387adf0429eefad946bd8caf347914",
     "semantic_hash": ""
   },
   "src/modules/admin-universitas/users/UserDetailDialog.tsx": {
-    "mtime": 1795160219.3683138,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.570271,
+    "seen": 1795162352.995036,
     "ast_hash": "48f73d20e3e92b9acb05aa9e235f05dd",
     "semantic_hash": ""
   },
   "src/modules/admin-universitas/users/UserManagement.tsx": {
-    "mtime": 1795160219.3683138,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.5712705,
+    "seen": 1795162352.995036,
     "ast_hash": "046ee0c7e75ff8065432a80b845ecf2f",
     "semantic_hash": ""
   },
   "src/modules/admin-universitas/users/getManagedUsers.ts": {
-    "mtime": 1795160219.3693137,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.5712705,
+    "seen": 1795162352.995036,
     "ast_hash": "ff5e6ad8d33943746f5a1f8d725284ea",
     "semantic_hash": ""
   },
   "src/modules/admin-universitas/users/userSchema.test.ts": {
-    "mtime": 1795160219.3693137,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.5712705,
+    "seen": 1795162352.995036,
     "ast_hash": "5ca7c1ca4785d2fa7e95ef5307d84ca6",
     "semantic_hash": ""
   },
   "src/modules/admin-universitas/users/userSchema.ts": {
-    "mtime": 1795160219.3693137,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.572271,
+    "seen": 1795162352.995036,
     "ast_hash": "4afcc2e0a65ec2ff5b95f5e2eec896bc",
     "semantic_hash": ""
   },
   "src/modules/admin-universitas/users/userTabs.ts": {
-    "mtime": 1795160219.3693137,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.572271,
+    "seen": 1795162352.995036,
     "ast_hash": "67b98932df284a27ee2672c18d5610ef",
     "semantic_hash": ""
   },
   "src/modules/operator/CreateReservationPanel.tsx": {
-    "mtime": 1793449834.8728075,
-    "seen": 1794818106.5108883,
-    "ast_hash": "6a0c67953596f647a822acff6db515df",
+    "mtime": 1795162894.072817,
+    "seen": 1795162946.3361108,
+    "ast_hash": "cc2616aaa2f879bcf8aae9fd6e8e4ce5",
     "semantic_hash": ""
   },
   "src/modules/operator/FloorTimeline.tsx": {
-    "mtime": 1793808195.9057617,
-    "seen": 1794818106.5108883,
-    "ast_hash": "7aa86bc7f7a50d38a7b4b08e4994c26c",
+    "mtime": 1795162867.528058,
+    "seen": 1795162946.3361108,
+    "ast_hash": "6ee09204ab6b21f24adba8600b41f234",
     "semantic_hash": ""
   },
   "src/modules/operator/OperatorAccountBar.tsx": {
-    "mtime": 1795160219.3693137,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.5732715,
+    "seen": 1795162352.995036,
     "ast_hash": "54e2928f60d2f63e31656cc75de4306b",
     "semantic_hash": ""
   },
   "src/modules/operator/OperatorFloorPage.tsx": {
-    "mtime": 1794882514.009148,
-    "seen": 1795143029.1846364,
-    "ast_hash": "f5acce20286c0175806bf491519896cd",
+    "mtime": 1795162887.01902,
+    "seen": 1795162946.3361108,
+    "ast_hash": "19e3daf551f2415b96e4d3895ceb5c2f",
     "semantic_hash": ""
   },
   "src/modules/operator/OperatorShell.tsx": {
@@ -954,15 +912,15 @@
     "semantic_hash": ""
   },
   "src/modules/operator/slots.test.ts": {
-    "mtime": 1794882514.0101478,
-    "seen": 1795143029.1846364,
-    "ast_hash": "209342daaed1e824ec4dd4d57ed699db",
+    "mtime": 1795162838.5172045,
+    "seen": 1795162946.3361108,
+    "ast_hash": "eacb1eac271c0b4e4ac7b758eae576e0",
     "semantic_hash": ""
   },
   "src/modules/operator/slots.ts": {
-    "mtime": 1794882514.0101478,
-    "seen": 1795143029.1846364,
-    "ast_hash": "f46c84d85138e7f42030f8006a4b9ca5",
+    "mtime": 1795162838.3820465,
+    "seen": 1795162946.3361108,
+    "ast_hash": "47a5d8e577659fe6d87a43438dc20632",
     "semantic_hash": ""
   },
   "src/modules/operator/timelineDetail.test.ts": {
@@ -1074,14 +1032,14 @@
     "semantic_hash": ""
   },
   "src/modules/ormawa/faq/faq-items.ts": {
-    "mtime": 1795160219.3703136,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.5732715,
+    "seen": 1795162352.995036,
     "ast_hash": "53350f8bfa6a1b04e73edd070c6620b9",
     "semantic_hash": ""
   },
   "src/modules/ormawa/nav.ts": {
-    "mtime": 1795160222.7436197,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.5732715,
+    "seen": 1795162352.995036,
     "ast_hash": "5bc4b365eec7b06f5cc6403bdaf3dc4f",
     "semantic_hash": ""
   },
@@ -1092,8 +1050,8 @@
     "semantic_hash": ""
   },
   "src/proxy.test.ts": {
-    "mtime": 1795160219.3703136,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.5742712,
+    "seen": 1795162352.995036,
     "ast_hash": "31007d1692e4b9f0a14a0cee51ef6481",
     "semantic_hash": ""
   },
@@ -1212,8 +1170,8 @@
     "semantic_hash": ""
   },
   "src/shared/auth/QuickLogin.tsx": {
-    "mtime": 1795160219.3703136,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.5742712,
+    "seen": 1795162352.9960425,
     "ast_hash": "f7ce17d33ea374b67f3ccd2895c39543",
     "semantic_hash": ""
   },
@@ -1314,8 +1272,8 @@
     "semantic_hash": ""
   },
   "src/shared/layout/LogoutButton.tsx": {
-    "mtime": 1795160219.3713143,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.5752714,
+    "seen": 1795162352.9960425,
     "ast_hash": "1699dedb54ec0f0b69ba9ddb0fa25258",
     "semantic_hash": ""
   },
@@ -1506,8 +1464,8 @@
     "semantic_hash": ""
   },
   "src/shared/reservation-form/VehicleReservationForm.tsx": {
-    "mtime": 1795160222.7436197,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.5752714,
+    "seen": 1795162352.9960425,
     "ast_hash": "b4d2fce5a411676398c560d8700c2bd1",
     "semantic_hash": ""
   },
@@ -1530,20 +1488,20 @@
     "semantic_hash": ""
   },
   "src/shared/reservation-form/createReservation.test.ts": {
-    "mtime": 1795160222.7436197,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.5762713,
+    "seen": 1795162352.9960425,
     "ast_hash": "d3f65b76db242ed489335dc2c568c0d7",
     "semantic_hash": ""
   },
   "src/shared/reservation-form/createReservation.ts": {
-    "mtime": 1795160222.7436197,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.5762713,
+    "seen": 1795162352.9960425,
     "ast_hash": "872cbf07e7052ad718b642cee78df0a7",
     "semantic_hash": ""
   },
   "src/shared/reservation-form/getReservationOptions.ts": {
-    "mtime": 1795160222.744621,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.577271,
+    "seen": 1795162352.9960425,
     "ast_hash": "d2500be683b93c40d5c8c3e8bf3cf92a",
     "semantic_hash": ""
   },
@@ -1566,14 +1524,14 @@
     "semantic_hash": ""
   },
   "src/shared/reservation-form/schema.test.ts": {
-    "mtime": 1795160222.744621,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.577271,
+    "seen": 1795162352.9960425,
     "ast_hash": "5b0ff035fb068012656d627ba988d8e7",
     "semantic_hash": ""
   },
   "src/shared/reservation-form/schema.ts": {
-    "mtime": 1795160222.744621,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.578271,
+    "seen": 1795162352.9960425,
     "ast_hash": "6043f1bbf69cce8e20609c7f150173cf",
     "semantic_hash": ""
   },
@@ -1614,8 +1572,8 @@
     "semantic_hash": ""
   },
   "src/shared/reservation-history/ActiveReservationCard.tsx": {
-    "mtime": 1795160222.7456205,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.5792704,
+    "seen": 1795162352.9960425,
     "ast_hash": "c79c883c47c4a4928a7383955cc1f4df",
     "semantic_hash": ""
   },
@@ -1638,8 +1596,8 @@
     "semantic_hash": ""
   },
   "src/shared/reservation-history/ReservationHistoryTable.tsx": {
-    "mtime": 1795160222.7456205,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.5802693,
+    "seen": 1795162352.9960425,
     "ast_hash": "506054950aad2bab29bf8f041bc0797f",
     "semantic_hash": ""
   },
@@ -1674,21 +1632,21 @@
     "semantic_hash": ""
   },
   "src/shared/reservation-management/ReservationManagement.tsx": {
-    "mtime": 1794882514.0301487,
-    "seen": 1795143029.1846364,
-    "ast_hash": "1e3d3f1891842b49af29ab7b2b0feafa",
+    "mtime": 1795162517.3995752,
+    "seen": 1795162946.3361108,
+    "ast_hash": "96505ec061288a4c20f1baa2052b26d2",
     "semantic_hash": ""
   },
   "src/shared/reservation-management/ReservationTable.test.tsx": {
-    "mtime": 1794454448.7034652,
-    "seen": 1794818106.5108883,
-    "ast_hash": "abd1551136e83784024378d1908443ff",
+    "mtime": 1795162517.3995752,
+    "seen": 1795162946.3361108,
+    "ast_hash": "f32952bd8e6666505c27761e954e07b6",
     "semantic_hash": ""
   },
   "src/shared/reservation-management/ReservationTable.tsx": {
-    "mtime": 1794882514.0311494,
-    "seen": 1795143029.1846364,
-    "ast_hash": "400c6960e4682299764efb8b4e851a45",
+    "mtime": 1795162517.3995752,
+    "seen": 1795162946.3361108,
+    "ast_hash": "1a8c84013e92354429e605fdce6031a3",
     "semantic_hash": ""
   },
   "src/shared/reservation-management/getReservationRequests.test.ts": {
@@ -1704,15 +1662,15 @@
     "semantic_hash": ""
   },
   "src/shared/reservation-management/typeColumns.tsx": {
-    "mtime": 1795160222.7466207,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.5822718,
+    "seen": 1795162352.9960425,
     "ast_hash": "fa8f6dbd9c72506ac471b2d3ca760a73",
     "semantic_hash": ""
   },
   "src/shared/reservation/ReservationDetailDialog.tsx": {
-    "mtime": 1795160222.7476199,
-    "seen": 1795160333.027151,
-    "ast_hash": "26e890467a67b4494411f4258b132833",
+    "mtime": 1795162517.402575,
+    "seen": 1795162946.3361108,
+    "ast_hash": "8114a66788b68b54b0594bec32b83236",
     "semantic_hash": ""
   },
   "src/shared/reservation/ReservationStatusBadge.tsx": {
@@ -1752,15 +1710,15 @@
     "semantic_hash": ""
   },
   "src/shared/rooms/EditRoomDialog.tsx": {
-    "mtime": 1795145942.3857956,
-    "seen": 1795160333.027151,
-    "ast_hash": "e3abef8fe6d760f9269a0dc12deb17c9",
+    "mtime": 1795162517.4035769,
+    "seen": 1795162946.3361108,
+    "ast_hash": "d39adb297236a4fd453edc77571d945c",
     "semantic_hash": ""
   },
   "src/shared/rooms/RoomManager.tsx": {
-    "mtime": 1795145942.3857956,
-    "seen": 1795160333.027151,
-    "ast_hash": "c746f63175dc3d71b092452ce008b8f3",
+    "mtime": 1795162517.4035769,
+    "seen": 1795162946.3361108,
+    "ast_hash": "e6261d8532ad65b1ff6487fce4852fb8",
     "semantic_hash": ""
   },
   "src/shared/rooms/getRooms.ts": {
@@ -1770,9 +1728,9 @@
     "semantic_hash": ""
   },
   "src/shared/rooms/room-labels.ts": {
-    "mtime": 1795145942.3857956,
-    "seen": 1795160333.027151,
-    "ast_hash": "c6d49b2ec2aaaea238d63723c0d66508",
+    "mtime": 1795162517.4045753,
+    "seen": 1795162946.3361108,
+    "ast_hash": "41b2ddb6189df5ccaec7e87f1b7a68d2",
     "semantic_hash": ""
   },
   "src/shared/rooms/roomPhoto.test.ts": {
@@ -1794,9 +1752,9 @@
     "semantic_hash": ""
   },
   "src/types/facility.ts": {
-    "mtime": 1794387713.921192,
-    "seen": 1794818106.5108883,
-    "ast_hash": "999cbd8b1509e7cdcb74b2cf46046c22",
+    "mtime": 1795162517.405576,
+    "seen": 1795162946.3361108,
+    "ast_hash": "263d4d4d4d347f71d876d669d74456b5",
     "semantic_hash": ""
   },
   "src/types/fakultas.ts": {
@@ -1806,8 +1764,8 @@
     "semantic_hash": ""
   },
   "src/types/managedUser.ts": {
-    "mtime": 1795160219.3713143,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.5872698,
+    "seen": 1795162352.9960425,
     "ast_hash": "329a30e5569b04e45babde91c576c8ab",
     "semantic_hash": ""
   },
@@ -1818,15 +1776,15 @@
     "semantic_hash": ""
   },
   "src/types/reservation.ts": {
-    "mtime": 1795160222.7476199,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.588269,
+    "seen": 1795162352.9960425,
     "ast_hash": "1b9abeab1fa0b936c153a1d49c937fbb",
     "semantic_hash": ""
   },
   "src/types/room.ts": {
-    "mtime": 1795145942.386796,
-    "seen": 1795160333.027151,
-    "ast_hash": "a9f38eefa58fadcdb1cf9c4204c8e8c4",
+    "mtime": 1795162517.4065769,
+    "seen": 1795162946.3361108,
+    "ast_hash": "9a4c2be678298c4b70c2a0f7b7bdb1e4",
     "semantic_hash": ""
   },
   "src/types/schedule.ts": {
@@ -1938,8 +1896,8 @@
     "semantic_hash": ""
   },
   "src/shared/landing/content.ts": {
-    "mtime": 1795160219.3703136,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.5742712,
+    "seen": 1795162352.9960425,
     "ast_hash": "6f193c65f733cef098dd39826bdb58aa",
     "semantic_hash": ""
   },
@@ -1962,14 +1920,14 @@
     "semantic_hash": ""
   },
   "src/shared/reservation-history/ActiveReservationCard.test.tsx": {
-    "mtime": 1795160222.7456205,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.5792704,
+    "seen": 1795162352.9960425,
     "ast_hash": "ca9f12ac1c83894a0fecb204e403600b",
     "semantic_hash": ""
   },
   "src/shared/reservation-history/ReservationHistoryTable.test.tsx": {
-    "mtime": 1795160222.7456205,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.5802693,
+    "seen": 1795162352.9960425,
     "ast_hash": "dea15bc9d00296c779e15f3026056166",
     "semantic_hash": ""
   },
@@ -2004,15 +1962,15 @@
     "semantic_hash": ""
   },
   "src/shared/reservation-store/reservationStore.test.ts": {
-    "mtime": 1795160222.7466207,
-    "seen": 1795160333.027151,
-    "ast_hash": "3e9eafeb78184d3875dc241a74d048a0",
+    "mtime": 1795162517.4016442,
+    "seen": 1795162946.3361108,
+    "ast_hash": "7bad4965893fb4cf17141f697258a30e",
     "semantic_hash": ""
   },
   "src/shared/reservation-store/reservationStore.ts": {
-    "mtime": 1795160222.7466207,
-    "seen": 1795160333.027151,
-    "ast_hash": "701fe50539dd28fe04438d444e2b460f",
+    "mtime": 1795162517.402575,
+    "seen": 1795162946.3361108,
+    "ast_hash": "641ea82b6f65e93e7a17c6a96c3de5e4",
     "semantic_hash": ""
   },
   "src/shared/reservation-store/useMockReservations.ts": {
@@ -2238,21 +2196,21 @@
     "semantic_hash": ""
   },
   "docs/architecture.md": {
-    "mtime": 1795160219.3273141,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.4635627,
+    "seen": 1795162352.9960425,
     "ast_hash": "b529eeac174841c683d0f4c0692cdf34",
     "semantic_hash": ""
   },
   "docs/flow-reservasi.md": {
-    "mtime": 1795160222.7416198,
-    "seen": 1795160333.027151,
-    "ast_hash": "a4e63a1b647c6ca18e940852efa2b541",
+    "mtime": 1795162517.3522904,
+    "seen": 1795162946.3361108,
+    "ast_hash": "3bf42044ca1916af89985578b46db4f2",
     "semantic_hash": ""
   },
   "docs/roles-and-pages.md": {
-    "mtime": 1795160168.8337333,
-    "seen": 1795160333.027151,
-    "ast_hash": "9200a610bae77b7bbafead9ff3e248e6",
+    "mtime": 1795162914.233398,
+    "seen": 1795162946.3361108,
+    "ast_hash": "650b030c6fcdda58060a423573250596",
     "semantic_hash": ""
   },
   "public/samples/surat-peminjaman.pdf": {
@@ -2928,195 +2886,309 @@
     "semantic_hash": ""
   },
   "src/shared/rooms/roomEdits.ts": {
-    "mtime": 1795145942.386796,
-    "seen": 1795160333.027151,
-    "ast_hash": "941435741ee372d17b80b368cc7970c4",
+    "mtime": 1795162517.4045753,
+    "seen": 1795162946.3361108,
+    "ast_hash": "410ac986073643f80a0cd1b4945caca3",
     "semantic_hash": ""
   },
   "src/app/(admin-gedung)/error.tsx": {
-    "mtime": 1795160219.3623128,
-    "seen": 1795160333.0261633,
+    "mtime": 1795162294.5457497,
+    "seen": 1795162352.995036,
     "ast_hash": "974c0714526c707c273c2b5a2b9dff6d",
     "semantic_hash": ""
   },
   "src/app/(admin-gedung)/gedung/dashboard/loading.tsx": {
-    "mtime": 1795160219.3633127,
-    "seen": 1795160333.0261633,
+    "mtime": 1795162294.5467527,
+    "seen": 1795162352.995036,
     "ast_hash": "56e49102c29a633028a01a6957b4e899",
     "semantic_hash": ""
   },
   "src/app/(admin-gedung)/gedung/dashboard/page.tsx": {
-    "mtime": 1795160219.3633127,
-    "seen": 1795160333.0261633,
+    "mtime": 1795162294.5467527,
+    "seen": 1795162352.995036,
     "ast_hash": "a0efc4fef920bd094815202806bb1d7a",
     "semantic_hash": ""
   },
   "src/app/(admin-gedung)/gedung/jadwal-dosen/loading.tsx": {
-    "mtime": 1795160219.3633127,
-    "seen": 1795160333.0261633,
+    "mtime": 1795162294.5477526,
+    "seen": 1795162352.995036,
     "ast_hash": "2fff6d21266c92c3a158fd89a3635f0d",
     "semantic_hash": ""
   },
   "src/app/(admin-gedung)/gedung/jadwal-dosen/page.tsx": {
-    "mtime": 1795160219.3633127,
-    "seen": 1795160333.0261633,
+    "mtime": 1795162294.5477526,
+    "seen": 1795162352.995036,
     "ast_hash": "0115d4b66e5ddb3cbe5705fe59bd1563",
     "semantic_hash": ""
   },
   "src/app/(admin-gedung)/gedung/laporan/loading.tsx": {
-    "mtime": 1795160219.3633127,
-    "seen": 1795160333.0261633,
+    "mtime": 1795162294.5487537,
+    "seen": 1795162352.995036,
     "ast_hash": "2fff6d21266c92c3a158fd89a3635f0d",
     "semantic_hash": ""
   },
   "src/app/(admin-gedung)/gedung/laporan/page.tsx": {
-    "mtime": 1795160219.3633127,
-    "seen": 1795160333.0261633,
+    "mtime": 1795162294.5487537,
+    "seen": 1795162352.995036,
     "ast_hash": "11b5c88d3c710c76e701fa9c9bf3529f",
     "semantic_hash": ""
   },
   "src/app/(admin-gedung)/gedung/pengumuman/loading.tsx": {
-    "mtime": 1795160219.3633127,
-    "seen": 1795160333.0261633,
+    "mtime": 1795162294.5487537,
+    "seen": 1795162352.995036,
     "ast_hash": "2fff6d21266c92c3a158fd89a3635f0d",
     "semantic_hash": ""
   },
   "src/app/(admin-gedung)/gedung/pengumuman/page.tsx": {
-    "mtime": 1795160219.3643124,
-    "seen": 1795160333.0261633,
+    "mtime": 1795162294.5487537,
+    "seen": 1795162352.995036,
     "ast_hash": "770789177a95f80b15c7a769a0328c6c",
     "semantic_hash": ""
   },
   "src/app/(admin-gedung)/gedung/reservasi-internal/loading.tsx": {
-    "mtime": 1795160219.3643124,
-    "seen": 1795160333.0261633,
+    "mtime": 1795162294.549752,
+    "seen": 1795162352.995036,
     "ast_hash": "2fff6d21266c92c3a158fd89a3635f0d",
     "semantic_hash": ""
   },
   "src/app/(admin-gedung)/gedung/reservasi-internal/page.tsx": {
-    "mtime": 1795160219.3643124,
-    "seen": 1795160333.0261633,
+    "mtime": 1795162294.549752,
+    "seen": 1795162352.995036,
     "ast_hash": "24622fb7cc91d6e2ede470bb978753bb",
     "semantic_hash": ""
   },
   "src/app/(admin-gedung)/gedung/reservasi/page.tsx": {
-    "mtime": 1795160219.3643124,
-    "seen": 1795160333.0261633,
+    "mtime": 1795162294.5507517,
+    "seen": 1795162352.995036,
     "ast_hash": "b9a11280b1fe638e416d35cff1d98db5",
     "semantic_hash": ""
   },
   "src/app/(admin-gedung)/gedung/reservasi/persetujuan/loading.tsx": {
-    "mtime": 1795160219.3643124,
-    "seen": 1795160333.0261633,
+    "mtime": 1795162294.5507517,
+    "seen": 1795162352.995036,
     "ast_hash": "2fff6d21266c92c3a158fd89a3635f0d",
     "semantic_hash": ""
   },
   "src/app/(admin-gedung)/gedung/reservasi/persetujuan/page.tsx": {
-    "mtime": 1795160219.3643124,
-    "seen": 1795160333.0261633,
+    "mtime": 1795162294.5507517,
+    "seen": 1795162352.995036,
     "ast_hash": "6fcdf1178afc6e939701e9a6e572972e",
     "semantic_hash": ""
   },
   "src/app/(admin-gedung)/gedung/reservasi/riwayat/loading.tsx": {
-    "mtime": 1795160219.3653123,
-    "seen": 1795160333.0261633,
+    "mtime": 1795162294.5517535,
+    "seen": 1795162352.995036,
     "ast_hash": "2fff6d21266c92c3a158fd89a3635f0d",
     "semantic_hash": ""
   },
   "src/app/(admin-gedung)/gedung/reservasi/riwayat/page.tsx": {
-    "mtime": 1795160219.3653123,
-    "seen": 1795160333.0261633,
+    "mtime": 1795162294.5517535,
+    "seen": 1795162352.995036,
     "ast_hash": "f93fc53eb0559e13de23bc693580e2f7",
     "semantic_hash": ""
   },
   "src/app/(admin-gedung)/gedung/ruangan/loading.tsx": {
-    "mtime": 1795160219.3653123,
-    "seen": 1795160333.0261633,
+    "mtime": 1795162294.5592716,
+    "seen": 1795162352.995036,
     "ast_hash": "2fff6d21266c92c3a158fd89a3635f0d",
     "semantic_hash": ""
   },
   "src/app/(admin-gedung)/gedung/ruangan/page.tsx": {
-    "mtime": 1795160219.3653123,
-    "seen": 1795160333.0261633,
-    "ast_hash": "2267b2f5819a21ce6ef34e99297f4ddb",
+    "mtime": 1795162517.393573,
+    "seen": 1795162946.3361108,
+    "ast_hash": "d54949c51316d70bbabfa9fd0dba3b6f",
     "semantic_hash": ""
   },
   "src/app/(admin-gedung)/layout.tsx": {
-    "mtime": 1795160219.3653123,
-    "seen": 1795160333.0261633,
+    "mtime": 1795162294.5592716,
+    "seen": 1795162352.995036,
     "ast_hash": "d16553fd4dc6a923b5294b2e4b173ba4",
     "semantic_hash": ""
   },
   "src/modules/admin-gedung/AdminGedungShell.tsx": {
-    "mtime": 1795160219.3663137,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.5652716,
+    "seen": 1795162352.995036,
     "ast_hash": "f244da7e2f83d142850328b884ff7bae",
     "semantic_hash": ""
   },
   "src/modules/admin-gedung/lecturer-schedule/LecturerScheduleUpload.tsx": {
-    "mtime": 1795160219.3663137,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.566271,
+    "seen": 1795162352.995036,
     "ast_hash": "5ced2dc7268a06db1a21219509d2964b",
     "semantic_hash": ""
   },
   "src/modules/admin-gedung/lecturer-schedule/actions.ts": {
-    "mtime": 1795160219.3673139,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.566271,
+    "seen": 1795162352.995036,
     "ast_hash": "29f6ef452bf4a19c8981f0b67e1a122d",
     "semantic_hash": ""
   },
   "src/modules/admin-gedung/lecturer-schedule/getLecturerSchedule.ts": {
-    "mtime": 1795160219.3673139,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.566271,
+    "seen": 1795162352.995036,
     "ast_hash": "801d75e3a09a976ac21194e9bb7ff89b",
     "semantic_hash": ""
   },
   "src/modules/admin-gedung/lecturer-schedule/scheduleCsv.test.ts": {
-    "mtime": 1795160219.3673139,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.5672705,
+    "seen": 1795162352.995036,
     "ast_hash": "e17684d522598c7e93405a9e8ec755fe",
     "semantic_hash": ""
   },
   "src/modules/admin-gedung/lecturer-schedule/scheduleCsv.ts": {
-    "mtime": 1795160219.3673139,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.5672705,
+    "seen": 1795162352.995036,
     "ast_hash": "da345b7c68ffff642285903701030911",
     "semantic_hash": ""
   },
   "src/modules/admin-gedung/nav.ts": {
-    "mtime": 1795160219.3673139,
-    "seen": 1795160333.027151,
-    "ast_hash": "4586903e57f62fd858f6e0731e692bee",
+    "mtime": 1795162517.3975744,
+    "seen": 1795162946.3361108,
+    "ast_hash": "6cbb9f042ba8d822fd50aa3fb45256a4",
     "semantic_hash": ""
   },
   "src/modules/admin-gedung/reservation-tabs.ts": {
-    "mtime": 1795160219.3673139,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.5672705,
+    "seen": 1795162352.995036,
     "ast_hash": "a14f4f2c936fb8b33f53be25b8f6d8b5",
     "semantic_hash": ""
   },
   "src/modules/admin-gedung/routes.ts": {
-    "mtime": 1795160219.3673139,
-    "seen": 1795160333.027151,
-    "ast_hash": "223c72b81363ba5f328732c5fdda5214",
+    "mtime": 1795162517.3975744,
+    "seen": 1795162946.3361108,
+    "ast_hash": "e68cac36935367f326dad307b8df903c",
     "semantic_hash": ""
   },
   "src/shared/reservation-form/vehicleAvailability.test.ts": {
-    "mtime": 1795160222.744621,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.578271,
+    "seen": 1795162352.9960425,
     "ast_hash": "60a81f6addfde5d9dc235af018064557",
     "semantic_hash": ""
   },
   "src/shared/reservation-form/vehicleAvailability.ts": {
-    "mtime": 1795160222.7456205,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.578271,
+    "seen": 1795162352.9960425,
     "ast_hash": "1e4433f3d817afa40c7a673865b91507",
     "semantic_hash": ""
   },
   "src/shared/reservation/vehicleTrip.ts": {
-    "mtime": 1795160222.7476199,
-    "seen": 1795160333.027151,
+    "mtime": 1795162294.5852704,
+    "seen": 1795162352.9960425,
     "ast_hash": "b4281df53890b7a86739a9409e3ad941",
+    "semantic_hash": ""
+  },
+  "src/app/(admin-universitas)/admin/ruangan/loading.tsx": {
+    "mtime": 1795162517.3955727,
+    "seen": 1795162946.3361108,
+    "ast_hash": "2fff6d21266c92c3a158fd89a3635f0d",
+    "semantic_hash": ""
+  },
+  "src/app/(admin-universitas)/admin/ruangan/page.tsx": {
+    "mtime": 1795162517.3955727,
+    "seen": 1795162946.3361108,
+    "ast_hash": "bef50d6b12b6ed9d45ec5f6df04e6e85",
+    "semantic_hash": ""
+  },
+  "src/mocks/staff.ts": {
+    "mtime": 1795162517.3955727,
+    "seen": 1795162946.3361108,
+    "ast_hash": "1f2303b146c306dd5b54a7543cf8ed9b",
+    "semantic_hash": ""
+  },
+  "src/modules/admin-universitas/internal-reservation/InternalReservationBreadcrumb.tsx": {
+    "mtime": 1795162517.3975744,
+    "seen": 1795162946.3361108,
+    "ast_hash": "e9f55bd305ba8c877649bd0340815365",
+    "semantic_hash": ""
+  },
+  "src/modules/admin-universitas/reservations/VehicleFleetInfo.tsx": {
+    "mtime": 1795162517.398574,
+    "seen": 1795162946.3361108,
+    "ast_hash": "3f0558425b65cc73d349f8095c4be129",
+    "semantic_hash": ""
+  },
+  "src/shared/reservation-management/VehicleCrewPanel.tsx": {
+    "mtime": 1795162517.4005926,
+    "seen": 1795162946.3361108,
+    "ast_hash": "477f922f5ae0b83f87268b6c67f22c87",
+    "semantic_hash": ""
+  },
+  "src/shared/reservation-management/vehicleReport.test.ts": {
+    "mtime": 1795162517.4005926,
+    "seen": 1795162946.3361108,
+    "ast_hash": "bef37ee8dd3a37774d8b4c181ee94cf0",
+    "semantic_hash": ""
+  },
+  "src/shared/reservation-management/vehicleReport.ts": {
+    "mtime": 1795162517.4005926,
+    "seen": 1795162946.3361108,
+    "ast_hash": "4fe38d8c2d5b2ce7ce2a0fb77b04bdde",
+    "semantic_hash": ""
+  },
+  "src/shared/rooms/RoomPhotoImage.tsx": {
+    "mtime": 1795162517.4035769,
+    "seen": 1795162946.3361108,
+    "ast_hash": "0341c990f72f6d286f1d0d913f506a37",
+    "semantic_hash": ""
+  },
+  "src/shared/rooms/roomEdits.test.ts": {
+    "mtime": 1795162517.4045753,
+    "seen": 1795162946.3361108,
+    "ast_hash": "0c12caa34817945fd3e2d0a47daf571c",
+    "semantic_hash": ""
+  },
+  "src/types/staff.ts": {
+    "mtime": 1795162517.4065769,
+    "seen": 1795162946.3361108,
+    "ast_hash": "eebf89876e3974227e8c875758c78b8e",
+    "semantic_hash": ""
+  },
+  "src/app/(admin-gedung)/gedung/denah/loading.tsx": {
+    "mtime": 1795162517.393573,
+    "seen": 1795162946.3361108,
+    "ast_hash": "2fff6d21266c92c3a158fd89a3635f0d",
+    "semantic_hash": ""
+  },
+  "src/app/(admin-gedung)/gedung/denah/page.tsx": {
+    "mtime": 1795162517.393573,
+    "seen": 1795162946.3361108,
+    "ast_hash": "7533e7e05fdac89b09ed8f49fa35d89b",
+    "semantic_hash": ""
+  },
+  "src/modules/admin-gedung/floor-plan/FloorPlanCanvas.tsx": {
+    "mtime": 1795162517.3955727,
+    "seen": 1795162946.3361108,
+    "ast_hash": "958bb766ba079dc55330d2d6c10fae41",
+    "semantic_hash": ""
+  },
+  "src/modules/admin-gedung/floor-plan/FloorPlanEditor.tsx": {
+    "mtime": 1795162517.3965747,
+    "seen": 1795162946.3361108,
+    "ast_hash": "1cd23529e62c3d016079eef0c824fe29",
+    "semantic_hash": ""
+  },
+  "src/modules/admin-gedung/floor-plan/floorPlanEdits.test.ts": {
+    "mtime": 1795162517.3965747,
+    "seen": 1795162946.3361108,
+    "ast_hash": "d87a0bebc4b2a68a923fb9464777798f",
+    "semantic_hash": ""
+  },
+  "src/modules/admin-gedung/floor-plan/floorPlanEdits.ts": {
+    "mtime": 1795162517.3965747,
+    "seen": 1795162946.3361108,
+    "ast_hash": "ba2531d5f6b902a8f5a8d0d25f5581ee",
+    "semantic_hash": ""
+  },
+  "src/shared/facilities/getBuildings.ts": {
+    "mtime": 1795162517.3995752,
+    "seen": 1795162946.3361108,
+    "ast_hash": "c5057df7efabf47f1dbc023e6abfafb7",
+    "semantic_hash": ""
+  },
+  "src/modules/operator/operatorReservationSchema.test.ts": {
+    "mtime": 1795162901.1807394,
+    "seen": 1795162946.3361108,
+    "ast_hash": "3e6ff93041669877987dd46f5d1e2eaf",
     "semantic_hash": ""
   }
 }

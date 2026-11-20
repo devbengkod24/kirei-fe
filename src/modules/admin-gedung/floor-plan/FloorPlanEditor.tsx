@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useMemo, useState } from "react";
+import { useCallback, useId, useMemo, useState } from "react";
 import { Field, INPUT_CLASS, SelectInput } from "@/components/form/Field";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -11,22 +11,20 @@ import { PanelHeading } from "@/shared/reservation-form/PanelHeading";
 import type { Building, Floor, FloorPlanRoom, RoomCategory } from "@/types/facility";
 import { FloorPlanCanvas } from "./FloorPlanCanvas";
 import {
-  FLOOR_CELLS,
   GRID,
   ROOM_TYPE_CELLS,
   collidingRoom,
   fitRoom,
-  gridSize,
   newRoom,
   newRoomId,
-  resizeFloor,
   roomCodeErrors,
   type RoomRect,
   typeRect,
 } from "./floorPlanEdits";
 
 export interface FloorPlanEditorProps {
-  buildings: Building[];
+  /** The building of the signed-in admin; null when the account has none. */
+  building: Building | null;
 }
 
 const CATEGORIES = Object.keys(ROOM_CATEGORY_LABEL) as RoomCategory[];
@@ -68,47 +66,57 @@ function RectInput({ id, label, value, onCommit }: { id: string; label: string; 
  * Kelola Denah. In the "empty" data mode saved plans are kept in this browser, where the booking
  * form and the operator's floor read them; in "sample" mode a save lasts until the page reloads.
  */
-export function FloorPlanEditor({ buildings }: FloorPlanEditorProps) {
+export function FloorPlanEditor({ building }: FloorPlanEditorProps) {
   const live = useLiveData(LIVE_NAMES.buildings, buildingsSchema);
   const stored = live.value;
   const current = useMemo(
-    () => (stored ? buildings.map((building) => stored.find((item) => item.id === building.id) ?? building) : buildings),
-    [buildings, stored],
+    () => (building ? (stored?.find((item) => item.id === building.id) ?? building) : null),
+    [building, stored],
   );
-  // Remounts once the browser's saved plans are read, so the editor starts from them.
-  return <FloorPlanForm key={live.ready ? "saved" : "server"} buildings={current} persist={live.ready ? live.save : undefined} />;
+  const { ready, save } = live;
+  // The browser keeps every building's saved plan in one list, so a save replaces only this building.
+  const persist = useCallback(
+    (next: Building) => save([...(stored ?? []).filter((item) => item.id !== next.id), next]),
+    [save, stored],
+  );
+
+  if (!current) {
+    return (
+      <Card className="px-6 py-12 text-center">
+        <p className="text-sm font-medium">Akun ini belum terhubung ke gedung.</p>
+        <p className="mt-1 text-xs text-muted">Minta Admin Universitas menghubungkan akun Anda ke gedung yang Anda kelola.</p>
+      </Card>
+    );
+  }
+  // Remounts once the browser's saved plan is read, so the editor starts from it.
+  return <FloorPlanForm key={ready ? "saved" : "server"} building={current} persist={ready ? persist : undefined} />;
 }
 
-interface FloorPlanFormProps extends FloorPlanEditorProps {
-  /** Keeps the saved plans; returns false when that failed. Unset when a save only lasts for this page. */
-  persist?: (buildings: Building[]) => boolean;
+interface FloorPlanFormProps {
+  building: Building;
+  /** Keeps the saved plan; returns false when that failed. Unset when a save only lasts for this page. */
+  persist?: (building: Building) => boolean;
 }
 
 /**
- * Edits the floor plans of the buildings in scope. Changes stay in a draft until "Simpan denah";
- * the saved shape is the same Floor/FloorPlanRoom the booking form reads.
+ * Edits the floor plans of one building. Changes stay in a draft until "Simpan denah"; the saved
+ * shape is the same Floor/FloorPlanRoom the booking form reads.
  */
-function FloorPlanForm({ buildings: initial, persist }: FloorPlanFormProps) {
+function FloorPlanForm({ building: initial, persist }: FloorPlanFormProps) {
   const [saved, setSaved] = useState(initial);
   const [draft, setDraft] = useState(initial);
-  const [buildingId, setBuildingId] = useState(initial[0]?.id ?? "");
-  const [floorId, setFloorId] = useState(initial[0]?.floors[0]?.id ?? "");
+  const [floorId, setFloorId] = useState(initial.floors[0]?.id ?? "");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [notice, setNotice] = useState<{ tone: "success" | "danger"; text: string } | null>(null);
   const helpId = useId();
 
-  const building = draft.find((item) => item.id === buildingId);
-  const floor = building?.floors.find((item) => item.id === floorId);
+  const floor = draft.floors.find((item) => item.id === floorId);
   const room = floor?.rooms.find((item) => item.id === selectedId) ?? null;
   const codeErrors = floor ? roomCodeErrors(floor) : new Map<string, string>();
   const dirty = draft !== saved;
 
   const updateFloor = (change: (floor: Floor) => Floor) => {
-    setDraft((current) =>
-      current.map((item) =>
-        item.id !== buildingId ? item : { ...item, floors: item.floors.map((level) => (level.id === floorId ? change(level) : level)) },
-      ),
-    );
+    setDraft((current) => ({ ...current, floors: current.floors.map((level) => (level.id === floorId ? change(level) : level)) }));
     setNotice(null);
   };
 
@@ -138,31 +146,15 @@ function FloorPlanForm({ buildings: initial, persist }: FloorPlanFormProps) {
     }
   };
 
-  const chooseBuilding = (id: string) => {
-    setBuildingId(id);
-    setFloorId(draft.find((item) => item.id === id)?.floors[0]?.id ?? "");
-    setSelectedId(null);
-  };
-
   const addRoom = () => {
     if (!floor) return;
     const added = newRoom(floor, newRoomId());
     if (collidingRoom(floor, added.id, added)) {
-      setNotice({ tone: "danger", text: "Tidak ada tempat kosong 2 × 2 kotak untuk ruang kelas baru. Perbesar lantai atau kecilkan ruangan lain." });
+      setNotice({ tone: "danger", text: "Tidak ada tempat kosong 2 × 2 kotak untuk ruang kelas baru. Kecilkan atau pindahkan ruangan lain." });
       return;
     }
     updateFloor((level) => ({ ...level, rooms: [...level.rooms, added] }));
     setSelectedId(added.id);
-  };
-
-  const resize = (columns: number, rows: number) => {
-    if (!floor) return;
-    const result = resizeFloor(floor, columns, rows);
-    if ("error" in result) {
-      setNotice({ tone: "danger", text: result.error });
-      return;
-    }
-    updateFloor(() => result.floor);
   };
 
   const deleteRoom = () => {
@@ -174,16 +166,13 @@ function FloorPlanForm({ buildings: initial, persist }: FloorPlanFormProps) {
 
   const save = () => {
     // Check every floor, not just the one on screen, since the draft covers them all.
-    for (const item of draft) {
-      for (const level of item.floors) {
-        const [roomId, message] = roomCodeErrors(level).entries().next().value ?? [];
-        if (roomId) {
-          setBuildingId(item.id);
-          setFloorId(level.id);
-          setSelectedId(roomId);
-          setNotice({ tone: "danger", text: `${item.name} lantai ${level.number}: ${message}` });
-          return;
-        }
+    for (const level of draft.floors) {
+      const [roomId, message] = roomCodeErrors(level).entries().next().value ?? [];
+      if (roomId) {
+        setFloorId(level.id);
+        setSelectedId(roomId);
+        setNotice({ tone: "danger", text: `Lantai ${level.number}: ${message}` });
+        return;
       }
     }
     // TODO: PUT the changed floors through the orval client, then refetch. Until then the "empty"
@@ -201,15 +190,6 @@ function FloorPlanForm({ buildings: initial, persist }: FloorPlanFormProps) {
     setSelectedId(null);
     setNotice(null);
   };
-
-  if (initial.length === 0) {
-    return (
-      <Card className="px-6 py-12 text-center">
-        <p className="text-sm font-medium">Belum ada gedung.</p>
-        <p className="mt-1 text-xs text-muted">Data gedung dan denah belum tersedia. Coba lagi nanti.</p>
-      </Card>
-    );
-  }
 
   return (
     <div className="flex flex-col gap-2 lg:grid lg:h-[calc(100dvh-9rem)] lg:grid-cols-[minmax(0,1fr)_18rem]">
@@ -241,16 +221,7 @@ function FloorPlanForm({ buildings: initial, persist }: FloorPlanFormProps) {
           <PanelHeading id="plan-location" iconSrc="/icons/building-solid.svg" iconWidth={13} iconHeight={15}>
             Gedung &amp; Lantai
           </PanelHeading>
-          <Field label="Lokasi" htmlFor="plan-building">
-            <SelectInput id="plan-building" value={buildingId} onChange={(event) => chooseBuilding(event.target.value)}>
-              {draft.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name}
-                  {item.fakultasName ? ` (${item.fakultasName})` : " (Universitas)"}
-                </option>
-              ))}
-            </SelectInput>
-          </Field>
+          <p className="text-sm font-medium">{draft.name}</p>
           <Field label="Lantai" htmlFor="plan-floor">
             <SelectInput
               id="plan-floor"
@@ -259,37 +230,15 @@ function FloorPlanForm({ buildings: initial, persist }: FloorPlanFormProps) {
                 setFloorId(event.target.value);
                 setSelectedId(null);
               }}
-              disabled={!building?.floors.length}
+              disabled={!draft.floors.length}
             >
-              {building?.floors.map((level) => (
+              {draft.floors.map((level) => (
                 <option key={level.id} value={level.id}>
                   Lantai {level.number}
                 </option>
               ))}
             </SelectInput>
           </Field>
-          {floor && (
-            <>
-              <div className="grid grid-cols-2 gap-2">
-                <RectInput
-                  id="plan-floor-columns"
-                  label="Kolom lantai"
-                  value={gridSize(floor).columns}
-                  onCommit={(columns) => resize(columns, gridSize(floor).rows)}
-                />
-                <RectInput
-                  id="plan-floor-rows"
-                  label="Baris lantai"
-                  value={gridSize(floor).rows}
-                  onCommit={(rows) => resize(gridSize(floor).columns, rows)}
-                />
-              </div>
-              <p className="text-[11px] text-muted">
-                Ukuran lantai {FLOOR_CELLS.min}–{FLOOR_CELLS.max} kotak. Lantai tidak bisa dikecilkan selama ada ruangan di
-                luar ukuran baru.
-              </p>
-            </>
-          )}
         </Card>
 
         <Card as="section" aria-labelledby="plan-room" className="flex flex-col gap-3 p-3">

@@ -1,7 +1,17 @@
 import { describe, expect, it } from "vitest";
 import type { ReservationRecord } from "@/types/reservation";
 import type { ClassSchedule } from "@/types/schedule";
-import { buildTimeline, defaultHourFilter, nowOffset, rulerTicks, segmentSpan, toggleRoom } from "./slots";
+import {
+  buildTimeline,
+  CLOSE_TIME,
+  defaultStartHour,
+  FILTER_START_HOURS,
+  hourFrom,
+  nowOffset,
+  rulerTicks,
+  segmentSpan,
+  toggleRoom,
+} from "./slots";
 
 // WIB is UTC+7, so 07:00 WIB on 2026-10-31 is 00:00Z.
 const at = (time: string) => `2026-10-31T${String(Number(time.slice(0, 2)) - 7).padStart(2, "0")}:${time.slice(3)}:00.000Z`;
@@ -62,14 +72,31 @@ describe("buildTimeline", () => {
   });
 });
 
-describe("defaultHourFilter", () => {
+describe("defaultStartHour", () => {
   it("starts at the current WIB hour", () => {
-    expect(defaultHourFilter(new Date("2026-10-31T02:25:00Z"))).toEqual({ from: "09:00", to: "11:00" });
+    expect(defaultStartHour(new Date("2026-10-31T02:25:00Z"))).toBe("09:00");
   });
 
   it("stays inside opening hours early and late in the day", () => {
-    expect(defaultHourFilter(new Date("2026-10-30T22:00:00Z"))).toEqual({ from: "07:00", to: "09:00" });
-    expect(defaultHourFilter(new Date("2026-10-31T14:30:00Z"))).toEqual({ from: "18:00", to: "20:00" });
+    expect(defaultStartHour(new Date("2026-10-30T22:00:00Z"))).toBe("07:00");
+    // 19:40 and 21:30 WIB: the last start the filter offers, so the range still runs to 20.00.
+    expect(defaultStartHour(new Date("2026-10-31T12:40:00Z"))).toBe("19:00");
+    expect(defaultStartHour(new Date("2026-10-31T14:30:00Z"))).toBe("19:00");
+  });
+});
+
+describe("FILTER_START_HOURS", () => {
+  it("offers whole hours from opening up to an hour before closing", () => {
+    expect(FILTER_START_HOURS[0]).toBe("07:00");
+    expect(FILTER_START_HOURS.at(-1)).toBe("19:00");
+    expect(FILTER_START_HOURS).not.toContain(CLOSE_TIME);
+  });
+});
+
+describe("hourFrom", () => {
+  it("gives a one-hour slot, cut off at closing time", () => {
+    expect(hourFrom("09:00")).toEqual({ start: "09:00", end: "10:00" });
+    expect(hourFrom("19:30")).toEqual({ start: "19:30", end: "20:00" });
   });
 });
 

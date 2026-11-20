@@ -27,4 +27,9 @@ export interface Room {
   photoUrl: string | null;
   /** null until the room is placed on the floor plan */
   plan: PlanRect | null;
+  /** Who manages the room. Missing means the default: see `roomManagedBy`. */
+  managedBy?: RoomManagedBy;
 }
+
+/** The admin of the room's own building, or admin universitas. */
+export type RoomManagedBy = "gedung" | "universitas";

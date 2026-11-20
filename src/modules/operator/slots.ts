@@ -12,8 +12,8 @@ const STEP_MINUTES = 10;
 /** Every 10-minute boundary of the day ("07:00", "07:10", ... "20:00"), for the time pickers. */
 export const SLOT_TIMES = [...buildSlots(OPEN_TIME, CLOSE_TIME, STEP_MINUTES).map((slot) => slot.start), CLOSE_TIME];
 
-/** Whole hours offered by the "Filter Jam" pickers. */
-export const FILTER_HOURS = SLOT_TIMES.filter((time) => time.endsWith(":00"));
+/** Whole hours the "Filter Jam" start picker offers; the range always ends at closing time. */
+export const FILTER_START_HOURS = SLOT_TIMES.filter((time) => time.endsWith(":00") && time < CLOSE_TIME);
 
 export const toMinutes = (time: string) => Number(time.slice(0, 2)) * 60 + Number(time.slice(3, 5));
 
@@ -89,11 +89,15 @@ export function toggleRoom(visibleIds: string[], roomId: string): string[] {
   return visibleIds.length === 1 ? visibleIds : visibleIds.filter((id) => id !== roomId);
 }
 
-/** Two hours from the current hour, kept inside opening hours. */
-export function defaultHourFilter(now: Date) {
-  const hour = (value: number) => `${pad(value)}:00`;
+/** The current WIB hour, kept to a start the filter offers: from opening time to an hour before closing. */
+export function defaultStartHour(now: Date) {
   const open = Number(OPEN_TIME.slice(0, 2));
-  const close = Number(CLOSE_TIME.slice(0, 2));
-  const from = Math.min(Math.max(Number(toWibTimeKey(now).slice(0, 2)), open), close - 2);
-  return { from: hour(from), to: hour(from + 2) };
+  const lastStart = Number(CLOSE_TIME.slice(0, 2)) - 1;
+  return `${pad(Math.min(Math.max(Number(toWibTimeKey(now).slice(0, 2)), open), lastStart))}:00`;
+}
+
+/** A one-hour slot from `start`, cut off at closing time. */
+export function hourFrom(start: string): TimeSlot {
+  const end = Math.min(toMinutes(start) + 60, toMinutes(CLOSE_TIME));
+  return { start, end: `${pad(Math.floor(end / 60))}:${pad(end % 60)}` };
 }
