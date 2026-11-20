@@ -1,0 +1,25 @@
+import type { Metadata } from "next";
+import { requireRole } from "@/lib/auth/requireRole";
+import { ADMIN_GEDUNG_ROUTES } from "@/modules/admin-gedung/routes";
+import { getRoomReservationOptions } from "@/shared/reservation-form/getReservationOptions";
+import { RoomReservationForm } from "@/shared/reservation-form/RoomReservationForm";
+
+export const metadata: Metadata = { title: "Reservasi Internal" };
+
+// Same room form as the borrower's, set up for an admin booking for the faculty:
+// no phone, no loan letter or draft, and only the faculty's buildings.
+export default async function Page() {
+  const user = await requireRole(["admin_fakultas"]);
+  const options = await getRoomReservationOptions({ fakultasId: user.fakultasId });
+
+  return (
+    <RoomReservationForm
+      {...options}
+      requester={{ name: user.name, fakultasId: user.fakultasId }}
+      owner={{ id: user.id, name: user.name, email: user.email, detail: "Admin Gedung" }}
+      mode="internal"
+      purposePlaceholder="Contoh: Rapat dosen prodi"
+      links={{ history: ADMIN_GEDUNG_ROUTES.reservationHistory, historyLabel: "Buka Kelola Reservasi" }}
+    />
+  );
+}

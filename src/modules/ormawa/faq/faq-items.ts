@@ -29,7 +29,7 @@ export const FAQ_ITEMS: FaqItem[] = [
   {
     question: "Bolehkah saya meminjam ruangan di fakultas lain?",
     answer:
-      "Boleh. Ruangan di fakultas mana pun bisa dipesan. Reservasinya diperiksa admin fakultas pemilik ruangan, dan tetap memakai surat peminjaman seperti biasa. Ormawa tidak terikat fakultas, jadi semua ormawa memakai jalur ini.",
+      "Boleh. Ruangan di fakultas mana pun bisa dipesan. Reservasinya diperiksa admin gedung tempat ruangan itu berada, dan tetap memakai surat peminjaman seperti biasa. Ormawa tidak terikat fakultas, jadi semua ormawa memakai jalur ini.",
   },
   {
     question: "Bagaimana cara mengetahui reservasi saya sudah disetujui?",
@@ -59,7 +59,7 @@ const DOSEN_ANSWERS: Record<string, string> = {
   "Surat peminjaman seperti apa yang harus diunggah?":
     `Surat hanya diminta untuk reservasi kendaraan, berformat PDF dengan ukuran maksimal ${LETTER_MAX_SIZE_MB} MB. Siapkan suratnya sebelum memesan kendaraan, karena reservasi kendaraan tidak bisa dikirim tanpa surat.`,
   "Bolehkah saya meminjam ruangan di fakultas lain?":
-    "Boleh. Ruangan di fakultas mana pun bisa dipesan. Reservasinya diperiksa admin fakultas pemilik ruangan.",
+    "Boleh. Ruangan di fakultas mana pun bisa dipesan. Reservasinya diperiksa admin gedung tempat ruangan itu berada.",
   "Apakah akun saya bisa diblokir jika tidak hadir atau terlambat?":
     "Tidak. KIREI tidak memberi penalti atau memblokir akun. Meski begitu, beri tahu admin bila rencana berubah, agar slotnya bisa dipakai peminjam lain.",
 };

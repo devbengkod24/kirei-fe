@@ -10,14 +10,17 @@ export interface TypeColumn {
 export const TYPE_COLUMNS: Record<ReservationType, TypeColumn[]> = {
   ruangan: [{ header: "Ruangan", cell: (reservation) => reservation.roomName }],
   kendaraan: [
-    // Which vehicle goes is arranged outside the app, so a trip shows only where and how many.
+    // The vehicle type asked for, when the request has one; the admin assigns the actual units.
     {
       header: "Tujuan",
       cell: (reservation) =>
         reservation.trip ? (
           <span className="flex flex-col">
             {reservation.trip.destination}
-            <span className="text-muted">{reservation.trip.participants} orang</span>
+            <span className="text-muted">
+              {reservation.trip.participants} orang
+              {reservation.trip.vehicle && `, ${reservation.trip.vehicle.name} ${reservation.trip.vehicle.units} unit`}
+            </span>
           </span>
         ) : (
           "-"

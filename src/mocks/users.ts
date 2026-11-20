@@ -30,21 +30,21 @@ const DOSEN: [string, string, string, string, boolean][] = [
   ["dr. Fajar Nugroho, Sp.PD.", "fajar.nugroho@dsn.dinus.ac.id", "19760830", "fk", false],
 ];
 
-// A faculty may have more than one admin.
-const ADMIN_FAKULTAS: [string, string, string, boolean][] = [
-  ["Adhitya Nugraha S.Kom, M.CS", "admin.fik@dinus.ac.id", "fik", true],
-  ["Rina Kartika, S.Kom.", "rina.kartika@dinus.ac.id", "fik", true],
-  ["Dewi Anggraini, S.E.", "admin.feb@dinus.ac.id", "feb", true],
-  ["Taufik Hidayat, S.S.", "admin.fib@dinus.ac.id", "fib", false],
-  ["Yusuf Prasetyo, S.T.", "admin.ft@dinus.ac.id", "ft", true],
+// Admin gedung (role admin_fakultas). Buildings from mocks/facilities.ts; a building may have more than one admin.
+// Admin gedung and operator accounts have no personal name; they are named after their place.
+const ADMIN_GEDUNG: [string, string, string, boolean][] = [
+  ["Admin Gedung H", "admin.fik@dinus.ac.id", "gedung-h", true],
+  ["Admin Gedung H", "admin2.gedungh@dinus.ac.id", "gedung-h", true],
+  ["Admin Gedung E", "admin.gedunge@dinus.ac.id", "gedung-e", true],
+  ["Admin Gedung Rektorat", "admin.rektorat@dinus.ac.id", "gedung-rektorat", false],
 ];
 
 // Floors from mocks/facilities.ts; each operator looks after one floor.
 const OPERATORS: [string, string, string, string, boolean][] = [
-  ["Agus Setiawan", "agus.setiawan@dinus.ac.id", "gedung-h", "gedung-h-5", true],
-  ["Budi Hartono", "budi.hartono@dinus.ac.id", "gedung-h", "gedung-h-7", true],
-  ["Sri Wahyuni", "sri.wahyuni@dinus.ac.id", "gedung-e", "gedung-e-2", true],
-  ["Joko Susilo", "joko.susilo@dinus.ac.id", "gedung-rektorat", "gedung-rektorat-1", false],
+  ["Operator Gedung H Lantai 5", "agus.setiawan@dinus.ac.id", "gedung-h", "gedung-h-5", true],
+  ["Operator Gedung H Lantai 7", "budi.hartono@dinus.ac.id", "gedung-h", "gedung-h-7", true],
+  ["Operator Gedung E Lantai 2", "sri.wahyuni@dinus.ac.id", "gedung-e", "gedung-e-2", true],
+  ["Operator Gedung Rektorat Lantai 1", "joko.susilo@dinus.ac.id", "gedung-rektorat", "gedung-rektorat-1", false],
 ];
 
 export const MOCK_MANAGED_USERS: ManagedUser[] = [
@@ -65,12 +65,13 @@ export const MOCK_MANAGED_USERS: ManagedUser[] = [
     fakultasId,
     isActive,
   })),
-  ...ADMIN_FAKULTAS.map(([name, email, fakultasId, isActive], index): ManagedUser => ({
-    id: `admin-fakultas-${index + 1}`,
+  ...ADMIN_GEDUNG.map(([name, email, buildingId, isActive], index): ManagedUser => ({
+    id: `admin-gedung-${index + 1}`,
     role: "admin_fakultas",
     name,
     email,
-    fakultasId,
+    fakultasId: null,
+    buildingId,
     isActive,
   })),
   ...OPERATORS.map(([name, email, buildingId, floorId, isActive], index): ManagedUser => ({

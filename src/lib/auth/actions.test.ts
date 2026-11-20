@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { MOCK_ADMIN_FAKULTAS, MOCK_CURRENT_USER, MOCK_PASSWORD } from "@/mocks/user";
+import { MOCK_ADMIN_GEDUNG, MOCK_CURRENT_USER, MOCK_PASSWORD } from "@/mocks/user";
 import { SESSION_COOKIE } from "./session";
 
 const cookieStore = { set: vi.fn(), delete: vi.fn(), getAll: vi.fn(() => [] as { name: string; value: string }[]) };
@@ -25,18 +25,18 @@ afterEach(() => {
 
 describe("login", () => {
   it("sets the session cookie and redirects to the role's home", async () => {
-    await expect(login({ email: MOCK_ADMIN_FAKULTAS.email, password: MOCK_PASSWORD })).rejects.toThrow(
-      "redirect:/fakultas/dashboard",
+    await expect(login({ email: MOCK_ADMIN_GEDUNG.email, password: MOCK_PASSWORD })).rejects.toThrow(
+      "redirect:/gedung/dashboard",
     );
     expect(cookieStore.set).toHaveBeenCalledWith(
       SESSION_COOKIE,
-      MOCK_ADMIN_FAKULTAS.id,
+      MOCK_ADMIN_GEDUNG.id,
       expect.objectContaining({ httpOnly: true, sameSite: "lax", path: "/" }),
     );
   });
 
   it("returns an error under the email field and sets no cookie for a wrong password", async () => {
-    const result = await login({ email: MOCK_ADMIN_FAKULTAS.email, password: "salah" });
+    const result = await login({ email: MOCK_ADMIN_GEDUNG.email, password: "salah" });
     expect(result.error).toBe("Email atau kata sandi salah.");
     expect(result.validation?.errors.email).toEqual(["Email atau kata sandi salah."]);
     expect(cookieStore.set).not.toHaveBeenCalled();

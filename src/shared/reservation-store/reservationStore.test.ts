@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { ReservationRecord, ReservationRequest } from "@/types/reservation";
 import {
   addMockReservation,
+  assignVehicleCrew,
   approvedRoomBookings,
   decideMockReservation,
   heldBookings,
@@ -80,9 +81,38 @@ describe("reservation store", () => {
     expect(readSnapshot(storage)).toBe("");
   });
 
+  it("keeps the drivers and costs of a vehicle request, and reads older stores without them", () => {
+    const storage = memoryStorage();
+    expect(parseState(JSON.stringify({ created: [], decisions: {} })).assignments).toBeUndefined();
+
+    const crew = { driverId: "staff-1", coDriverId: null, travelAllowance: 300000, fuelAndToll: 750000, driverFee: 400000 };
+    expect(assignVehicleCrew("res-kendaraan-1", crew, storage)).toBe(true);
+    expect(assignVehicleCrew("res-kendaraan-1", { ...crew, driverFee: 0 }, storage)).toBe(true);
+    expect(parseState(storage.getItem(MOCK_RESERVATIONS_KEY)).assignments).toEqual({ "res-kendaraan-1": { ...crew, driverFee: 0 } });
+    expect(assignVehicleCrew("res-kendaraan-1", crew, null)).toBe(false);
+  });
+
   it("reports when the browser cannot store anything", () => {
     expect(addMockReservation(created(), null)).toBe(false);
     expect(resetMockReservations(null)).toBe(false);
+  });
+
+  it("reads vehicle requests stored before destinations, vehicle type, and trip kind existed", () => {
+    const old = created({ id: "old-trip", type: "kendaraan", roomName: "", trip: { destination: "Kudus", participants: 8 } });
+    const current = created({
+      id: "new-trip",
+      type: "kendaraan",
+      roomName: "",
+      trip: {
+        destination: "Kudus, Pati",
+        participants: 8,
+        destinations: ["Kudus", "Pati"],
+        vehicle: { id: "vehicle-bus", name: "Bus Udinus", units: 1 },
+        kind: "antar_jemput",
+      },
+    });
+    const state = parseState(JSON.stringify({ created: [old, current], decisions: {} }));
+    expect(state.created.map((reservation) => reservation.trip)).toEqual([old.trip, current.trip]);
   });
 });
 
@@ -129,10 +159,23 @@ describe("borrower history", () => {
     });
   });
 
-  it("names a vehicle trip by its destination", () => {
+  it("names an older vehicle trip by its destination", () => {
     const trip = created({ id: "mock-trip", type: "kendaraan", roomName: "", trip: { destination: "Kudus", participants: 8 } });
     const [record] = mergeOwnHistory([], { created: [trip], decisions: {} }, "kendaraan", "usr-ormawa");
     expect(record.unitName).toBe("Kendaraan ke Kudus");
+  });
+
+  it("names a vehicle trip by the vehicle and units, and keeps the trip details", () => {
+    const details = {
+      destination: "Kudus, Pati",
+      participants: 50,
+      destinations: ["Kudus", "Pati"],
+      vehicle: { id: "vehicle-bus", name: "Bus Udinus", units: 2 },
+      kind: "menginap" as const,
+    };
+    const trip = created({ id: "mock-trip", type: "kendaraan", roomName: "", trip: details });
+    const [record] = mergeOwnHistory([], { created: [trip], decisions: {} }, "kendaraan", "usr-ormawa");
+    expect(record).toMatchObject({ unitName: "Bus Udinus, 2 unit", trip: details });
   });
 });
 
