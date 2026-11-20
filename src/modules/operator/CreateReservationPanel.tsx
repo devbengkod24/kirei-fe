@@ -17,7 +17,7 @@ import {
   type OperatorReservationValues,
 } from "./operatorReservationSchema";
 import { createOperatorReservation } from "./operatorReservations";
-import { SLOT_TIMES } from "./slots";
+import { SLOT_TIMES } from "@/shared/floor-timeline/slots";
 
 export interface CreateReservationPanelProps {
   rooms: FloorPlanRoom[];

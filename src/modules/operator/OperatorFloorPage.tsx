@@ -12,12 +12,12 @@ import type { TimeSlot } from "@/shared/reservation-form/sportsHallSlots";
 import { addMockReservation, approvedRoomBookings } from "@/shared/reservation-store/reservationStore";
 import { useMockReservations } from "@/shared/reservation-store/useMockReservations";
 import { CreateReservationPanel } from "./CreateReservationPanel";
-import { FloorTimeline } from "./FloorTimeline";
+import { FloorTimeline } from "@/shared/floor-timeline/FloorTimeline";
 import type { OperatorFloorData } from "./getOperatorFloor";
 import { toStoredOperatorBooking } from "./operatorReservations";
-import { CLOSE_TIME, defaultStartHour, FILTER_START_HOURS, hourFrom, toggleRoom } from "./slots";
-import { TimelineDetailPopover } from "./TimelineDetailPopover";
-import { itemKey, type TimelineItem } from "./timelineDetail";
+import { CLOSE_TIME, defaultStartHour, FILTER_START_HOURS, hourFrom, toggleRoom } from "@/shared/floor-timeline/slots";
+import { TimelineDetailPopover } from "@/shared/floor-timeline/TimelineDetailPopover";
+import { itemKey, type TimelineItem } from "@/shared/floor-timeline/timelineDetail";
 
 const displayTime = (time: string) => time.replace(":", ".");
 

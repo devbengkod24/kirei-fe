@@ -127,7 +127,8 @@ src/app/(admin-gedung)/layout.tsx            → AdminGedungShell (menu + avatar
 src/app/(admin-gedung)/gedung/*/page.tsx   → requireRole(["admin_fakultas"]) lalu loader shared dengan scope { fakultasId }
 src/app/(admin-gedung)/gedung/*/loading.tsx→ satu loading per halaman (cacheComponents butuh Suspense per segmen)
 src/modules/admin-gedung/                    → routes.ts, nav.ts, shell, link tab reservasi
-src/modules/admin-gedung/lecturer-schedule/  → Jadwal Dosen: parser CSV (lib/csv.ts + Zod per baris), server action simpan, halaman unggah
+src/modules/admin-gedung/lecturer-schedule/  → Kelola Jadwal: timeline jadwal per lantai, dialog Import Jadwal (CSV) dengan parser (lib/csv.ts + Zod per baris), server action simpan
+src/shared/floor-timeline/                     → timeline ruangan ala editor video (FloorTimeline, slots, kartu detail), dipakai operator dan Kelola Jadwal
 src/shared/layout/RoleShell.tsx                → shell + menu ikon, dipakai semua role
 src/shared/admin-dashboard/                    → dashboard admin (stat, grafik mingguan, reservasi hari ini, laporan)
 src/shared/rooms/                              → Kelola Ruangan + dialog edit (termasuk foto ruangan, roomPhoto.ts)
