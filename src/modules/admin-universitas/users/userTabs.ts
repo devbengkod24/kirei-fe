@@ -52,10 +52,21 @@ export const USER_TABS: Record<ManagedRole, UserTabConfig> = {
 
 export const USER_ROLES = Object.keys(USER_TABS) as ManagedRole[];
 
+/** Drivers have no account, but are managed on the same page, in their own tab. */
+export const STAFF_TAB = "staf";
+
+export type UserPageTab = ManagedRole | typeof STAFF_TAB;
+
+/** Tabs of Kelola Pengguna, in order: one per account role, then the drivers. */
+export const USER_PAGE_TABS: { id: UserPageTab; label: string }[] = [
+  ...USER_ROLES.map((role) => ({ id: role, label: USER_TABS[role].label })),
+  { id: STAFF_TAB, label: "Staf" },
+];
+
 /** The tab in the URL; anything else opens Ormawa. */
-export function parseUserTab(value: string | string[] | undefined): ManagedRole {
+export function parseUserTab(value: string | string[] | undefined): UserPageTab {
   const tab = Array.isArray(value) ? value[0] : value;
-  return USER_ROLES.includes(tab as ManagedRole) ? (tab as ManagedRole) : "organisasi";
+  return USER_PAGE_TABS.some((item) => item.id === tab) ? (tab as UserPageTab) : "organisasi";
 }
 
 /** Display name of an account without a name field, e.g. "Admin Gedung H" or "Operator Gedung H Lantai 5". */

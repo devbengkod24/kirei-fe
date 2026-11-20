@@ -4,8 +4,8 @@ import type { Staff } from "@/types/staff";
 import { vehicleHistoryCsv } from "./vehicleReport";
 
 const STAFF: Staff[] = [
-  { id: "staff-1", name: "Slamet Riyadi", phone: "081234500011", licenseNumber: "1", licenseExpiresOn: "2028-03-14", role: "sopir" },
-  { id: "staff-4", name: "Dedi Kurniawan", phone: "081234500014", licenseNumber: "4", licenseExpiresOn: "2027-11-30", role: "co_sopir" },
+  { id: "staff-1", name: "Slamet Riyadi", phone: "081234500011", licenseNumber: "1", licenseExpiresOn: "2028-03-14", role: "sopir", isActive: true },
+  { id: "staff-4", name: "Dedi Kurniawan", phone: "081234500014", licenseNumber: "4", licenseExpiresOn: "2027-11-30", role: "co_sopir", isActive: true },
 ];
 
 // 12-14 Nov 2026 as whole WIB days

@@ -98,7 +98,7 @@ describe("ReservationTable history", () => {
 
 describe("ReservationTable vehicle drivers and report", () => {
   const STAFF = [
-    { id: "staff-1", name: "Slamet Riyadi", phone: "081234500011", licenseNumber: "1", licenseExpiresOn: "2028-03-14", role: "sopir" as const },
+    { id: "staff-1", name: "Slamet Riyadi", phone: "081234500011", licenseNumber: "1", licenseExpiresOn: "2028-03-14", role: "sopir" as const, isActive: true },
   ];
   const approved: ReservationRequest = { ...TRIP, id: "res-kendaraan-4", status: "disetujui" };
 

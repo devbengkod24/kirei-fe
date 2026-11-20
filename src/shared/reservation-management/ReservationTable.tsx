@@ -14,6 +14,7 @@ import { isWholeDayType, reservationDateShort } from "@/shared/reservation/reser
 import { RESERVATION_TYPE_LABEL } from "@/shared/reservation/reservationTypes";
 import { decideMockReservation, mergeAdminRequests, type MockDecision } from "@/shared/reservation-store/reservationStore";
 import { useMockReservations } from "@/shared/reservation-store/useMockReservations";
+import { useStaff } from "@/shared/staff/useStaff";
 import type { ReservationRequest, ReservationType } from "@/types/reservation";
 import type { Staff } from "@/types/staff";
 import { requestsForTab, type ReservationTab } from "./requestTabs";
@@ -80,7 +81,9 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, b
   // Extra type columns need more room, so the card list stays on until xl.
   const layout = columns.length > 1 ? WIDE_LAYOUT : DEFAULT_LAYOUT;
 
-  const vehicleCrew = tipe === "kendaraan" && staff ? staff : null;
+  // Drivers as this browser has them, so ones added in Kelola Staf show up in the Sopir card and the report.
+  const [browserStaff] = useStaff(staff ?? []);
+  const vehicleCrew = tipe === "kendaraan" && staff ? browserStaff : null;
 
   const exportReport = () => {
     if (!vehicleCrew) return;

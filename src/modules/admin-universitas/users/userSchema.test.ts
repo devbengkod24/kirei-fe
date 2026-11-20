@@ -123,6 +123,7 @@ describe("parseUserTab", () => {
     expect(parseUserTab("dosen")).toBe("dosen");
     expect(parseUserTab(["dosen", "organisasi"])).toBe("dosen");
     expect(parseUserTab("operator")).toBe("operator");
+    expect(parseUserTab("staf")).toBe("staf");
     expect(parseUserTab("admin_universitas")).toBe("organisasi");
     expect(parseUserTab(undefined)).toBe("organisasi");
   });

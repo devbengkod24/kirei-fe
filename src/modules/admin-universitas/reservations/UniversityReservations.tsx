@@ -1,4 +1,3 @@
-import { MOCK_STAFF } from "@/mocks/staff";
 import type { AdminScope } from "@/shared/admin-scope";
 import { getVehicleReservationOptions } from "@/shared/reservation-form/getReservationOptions";
 import { getReservationCandidates, type ReservationTab } from "@/shared/reservation-management/getReservationRequests";
@@ -7,6 +6,7 @@ import type { Fakultas } from "@/types/fakultas";
 import type { ReservationType } from "@/types/reservation";
 import { ADMIN_UNIVERSITAS_ROUTES, reservationsRoute } from "../routes";
 import { TypeTabs } from "../TypeTabs";
+import { getStaff } from "../staff/getStaff";
 import { VehicleFleetInfo } from "./VehicleFleetInfo";
 
 export interface UniversityReservationsProps {
@@ -34,7 +34,7 @@ export async function UniversityReservations({ tipe, tab }: UniversityReservatio
     );
   }
 
-  const fleet = await getVehicleReservationOptions();
+  const [fleet, staff] = await Promise.all([getVehicleReservationOptions(), getStaff()]);
   return (
     <ReservationManagement
       tipe={tipe}
@@ -48,8 +48,7 @@ export async function UniversityReservations({ tipe, tab }: UniversityReservatio
           <VehicleFleetInfo vehicles={fleet.vehicles} bookings={fleet.bookings} now={fleet.now} />
         </div>
       }
-      // TODO: load drivers from Kelola Staf (orval) once it exists; sample drivers until then.
-      staff={MOCK_STAFF}
+      staff={staff}
     />
   );
 }
