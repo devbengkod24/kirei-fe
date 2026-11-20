@@ -105,7 +105,7 @@ export const RULE_TABS: RuleTab[] = [
       {
         iconSrc: "/icons/slot-check.svg",
         title: "Persetujuan",
-        description: "Disetujui admin fakultas pemilik ruangan, atau admin universitas untuk ruangan bersama.",
+        description: "Disetujui admin gedung tempat ruangan berada, atau admin universitas untuk ruangan bersama.",
       },
     ],
   },

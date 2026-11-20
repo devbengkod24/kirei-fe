@@ -1,10 +1,13 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMemo } from "react";
-import { FormProvider, useForm, useWatch } from "react-hook-form";
+import { useEffect, useMemo } from "react";
+import { FormProvider, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { Card } from "@/components/ui/Card";
 import { formatFullDateWIB, toWibDateKey, wibToIso } from "@/lib/date";
+import { withDecision, type ReservationOwner } from "@/shared/reservation-store/reservationStore";
+import { useMockReservations } from "@/shared/reservation-store/useMockReservations";
+import type { Vehicle } from "@/types/facility";
 import { toVehicleReservationRequest } from "./createReservation";
 import { BOOKING_MODES, type BookingMode } from "./bookingMode";
 import { LetterPanel, ReviewButton } from "./LetterPanel";
@@ -14,18 +17,31 @@ import {
   type ReservationLinks,
 } from "./ReservationSubmitDialog";
 import {
+  MAX_DESTINATIONS,
+  TRIP_KIND_LABEL,
   VEHICLE_RESERVATION_FIELD_MAP,
   createVehicleReservationSchema,
+  type VehicleIssue,
   type VehicleReservationInput,
   type VehicleReservationValues,
 } from "./schema";
 import { FieldError, SummaryRow } from "./summaryParts";
 import { useReservationSubmit } from "./useReservationSubmit";
-import type { ReservationOwner } from "@/shared/reservation-store/reservationStore";
+import {
+  passengerSeats,
+  tripRange,
+  vehicleBookings,
+  vehicleOptions,
+  type VehicleBooking,
+} from "./vehicleAvailability";
 
 export interface VehicleReservationFormProps {
   /** ISO 8601 server time */
   now: string;
+  /** Every vehicle type; only the active ones are offered. */
+  vehicles: Vehicle[];
+  /** Units held by requests the server knows; requests made in this browser are added here. */
+  bookings: VehicleBooking[];
   requester: { name: string };
   /**
    * The signed-in user. When set, a sent request is kept in the demo store: waiting for approval,
@@ -39,22 +55,31 @@ export interface VehicleReservationFormProps {
 
 const DETAIL_FIELDS = [
   "phone",
-  "destination",
-  "participants",
-  "activity",
   "startDate",
   "endDate",
+  "tripKind",
+  "participants",
+  "vehicleId",
+  "units",
+  "destinations",
+  "activity",
 ] as const;
+
+const TRIP_KINDS = Object.keys(TRIP_KIND_LABEL) as (keyof typeof TRIP_KIND_LABEL)[];
 
 const LABEL = "text-[10px] font-medium tracking-wide text-plan-selected";
 const INPUT =
   "min-h-11 w-full rounded-md border border-border bg-surface px-2 text-xs aria-invalid:border-danger-strong";
+const CHOICE =
+  "flex min-h-11 items-center gap-2 rounded-md border border-border px-3 text-xs has-[:checked]:border-primary has-[:checked]:bg-primary-soft has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-border-focus";
 
 const dayLabel = (dateKey: string) =>
   formatFullDateWIB(wibToIso(dateKey, "12:00"));
 
 export function VehicleReservationForm({
   now,
+  vehicles,
+  bookings: serverBookings,
   requester,
   owner,
   mode = "request",
@@ -63,18 +88,41 @@ export function VehicleReservationForm({
   const { askPhone, withLetter, withDraft, needsApproval, requesterLabel, submittedText } =
     BOOKING_MODES[mode];
   const todayKey = toWibDateKey(new Date(now));
-  const schema = useMemo(
-    () => createVehicleReservationSchema(() => todayKey, mode),
-    [todayKey, mode],
+
+  // Requests sent in this browser (demo store) hold their units too, until kirei-api serves availability.
+  const store = useMockReservations();
+  const bookings = useMemo(
+    () => [
+      ...serverBookings,
+      ...vehicleBookings(store.created.map((reservation) => withDecision(reservation, store.decisions)), vehicles),
+    ],
+    [serverBookings, store, vehicles],
   );
+
+  // Rebuilt when the bookings change; useForm picks up the new resolver on the next render.
+  const schema = useMemo(() => {
+    const vehicleIssue: VehicleIssue = ({ vehicleId, units, startDate, endDate }) => {
+      const option = vehicleOptions(vehicles, bookings, tripRange(startDate, endDate), null).find(
+        (item) => item.vehicle.id === vehicleId,
+      );
+      if (!option) return { field: "vehicleId", message: "Kendaraan ini tidak bisa dipesan." };
+      if (option.reason) return { field: "vehicleId", message: option.reason };
+      if (units > option.free) return { field: "units", message: `Tersisa ${option.free} unit pada tanggal ini.` };
+      return null;
+    };
+    return createVehicleReservationSchema(() => todayKey, mode, vehicleIssue);
+  }, [todayKey, mode, vehicles, bookings]);
   const defaults = useMemo(
     (): VehicleReservationInput => ({
       phone: "",
-      destination: "",
-      participants: "",
-      activity: "",
       startDate: todayKey,
       endDate: todayKey,
+      tripKind: "",
+      participants: "",
+      vehicleId: "",
+      units: "1",
+      destinations: [{ name: "" }],
+      activity: "",
       letter: null,
       intent: "submit",
     }),
@@ -90,40 +138,57 @@ export function VehicleReservationForm({
     defaultValues: defaults,
     mode: "onTouched",
   });
-  const { register, setValue, control, formState } = form;
+  const { register, setValue, trigger, control, formState } = form;
   const { errors } = formState;
-  const [
-    phone,
-    destination,
-    participants,
-    activity,
-    startDate,
-    endDate,
-    letter,
-  ] = useWatch({
+  const destinationFields = useFieldArray({ control, name: "destinations" });
+  const [phone, startDate, endDate, tripKind, participants, vehicleId, units, destinations, activity, letter] = useWatch({
     control,
-    name: [
-      "phone",
-      "destination",
-      "participants",
-      "activity",
-      "startDate",
-      "endDate",
-      "letter",
-    ],
+    name: ["phone", "startDate", "endDate", "tripKind", "participants", "vehicleId", "units", "destinations", "activity", "letter"],
   });
 
   const flow = useReservationSubmit(form, {
     defaults,
-    toRequest: toVehicleReservationRequest,
+    toRequest: (values) => toVehicleReservationRequest(values, vehicles),
     fieldMap: VEHICLE_RESERVATION_FIELD_MAP,
     toDraft: (values) => ({
-      unitName: `Kendaraan ke ${values.destination}`,
+      unitName: `Kendaraan ke ${values.destinations.map((item) => item.name).join(", ")}`,
       purpose: values.activity,
     }),
     owner,
     approvedOnSubmit: !needsApproval,
   });
+
+  const groupSize = Number(participants);
+  const options = vehicleOptions(
+    vehicles,
+    bookings,
+    tripRange(startDate, endDate),
+    Number.isInteger(groupSize) && groupSize > 0 ? groupSize : null,
+  );
+  const chosen = options.find((option) => option.vehicle.id === vehicleId);
+  const unitCount = Number(units);
+  const seats = chosen && Number.isInteger(unitCount) && unitCount > 0 ? unitCount * passengerSeats(chosen.vehicle) : null;
+  const leftOver = seats !== null && groupSize > seats ? groupSize - seats : 0;
+  const changeUnits = (next: number) => {
+    setValue("units", String(next), { shouldValidate: true });
+  };
+  // One handler for every radio: they share the field name, so RHF keeps only the last registration.
+  const pickVehicle = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const picked = options.find((option) => option.vehicle.id === event.target.value);
+    // start from enough units for the whole group, or as many as are left
+    if (picked) setValue("units", String(picked.suggested));
+    void trigger(["vehicleId", "units"]);
+  };
+
+  // Drop the chosen vehicle once new dates or a bigger group make it unavailable. Not after sending:
+  // the sent request now holds the units, and the result dialog still names it.
+  const selectionLost = Boolean(vehicleId) && !flow.result && Boolean(!chosen || chosen.reason);
+  useEffect(() => {
+    if (selectionLost) setValue("vehicleId", "");
+  }, [selectionLost, setValue]);
+
+  const destinationNames = (destinations ?? []).map((item) => item.name.trim()).filter(Boolean);
+  const destinationError = errors.destinations?.message ?? errors.destinations?.root?.message;
 
   const field = (id: string, error?: string) => ({
     id: `vehicle-${id}`,
@@ -137,22 +202,29 @@ export function VehicleReservationForm({
       <form
         noValidate
         onSubmit={(event) => event.preventDefault()}
-        className="flex w-full flex-col gap-2 lg:grid lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start"
+        className="flex w-full flex-col gap-2"
       >
-        {/* trip details take the wide column; dates and the letter sit beside them from lg up */}
+        {/* one column: trip details and dates, then the letter and the send button below them */}
         <Card
           as="section"
-          aria-labelledby="panel-borrower-data"
+          aria-labelledby="panel-vehicle-data"
           className="flex flex-col gap-3 p-3 lg:p-4"
         >
           <PanelHeading
-            id="panel-borrower-data"
+            id="panel-vehicle-data"
             iconSrc="/icons/notes.svg"
             iconWidth={11}
             iconHeight={12}
           >
-            Data {requesterLabel}
+            Data dan Tanggal Reservasi
           </PanelHeading>
+
+          {mode === "request" && (
+            <p className="rounded-md bg-primary-soft px-3 py-2 text-xs text-primary">
+              Tanyakan dulu ke BIUM kendaraan mana yang tersedia, lalu ajukan di sini.
+            </p>
+          )}
+
           <div className="grid gap-x-3 gap-y-3 sm:grid-cols-2">
             <div
               className={`flex flex-col gap-1 ${askPhone ? "" : "sm:col-span-2"}`}
@@ -181,22 +253,63 @@ export function VehicleReservationForm({
                 />
               </div>
             )}
+
             <div className="flex flex-col gap-1">
-              <label htmlFor="vehicle-destination" className={LABEL}>
-                Tujuan
+              <label htmlFor="vehicle-startDate" className={LABEL}>
+                Mulai
               </label>
               <input
-                type="text"
-                placeholder="Contoh: Semarang Barat"
-                {...field("destination", errors.destination?.message)}
-                {...register("destination")}
+                type="date"
+                min={todayKey}
+                {...field("startDate", errors.startDate?.message)}
+                {...register("startDate", { deps: ["endDate", "tripKind", "vehicleId", "units"] })}
               />
               <FieldError
-                id="vehicle-destination-error"
-                message={errors.destination?.message}
+                id="vehicle-startDate-error"
+                message={errors.startDate?.message}
               />
             </div>
             <div className="flex flex-col gap-1">
+              <label htmlFor="vehicle-endDate" className={LABEL}>
+                Selesai
+              </label>
+              <input
+                type="date"
+                min={startDate || todayKey}
+                {...field("endDate", errors.endDate?.message)}
+                {...register("endDate", { deps: ["startDate", "tripKind", "vehicleId", "units"] })}
+              />
+              <FieldError
+                id="vehicle-endDate-error"
+                message={errors.endDate?.message}
+              />
+            </div>
+
+            <fieldset
+              className="flex flex-col gap-1 sm:col-span-2"
+              aria-describedby={errors.tripKind ? "vehicle-tripKind-error" : undefined}
+            >
+              <legend className={`${LABEL} mb-1`}>Jenis Perjalanan</legend>
+              <div className="grid grid-cols-2 gap-2">
+                {TRIP_KINDS.map((kind) => (
+                  <label key={kind} className={CHOICE}>
+                    <input
+                      type="radio"
+                      value={kind}
+                      className="size-4 accent-primary"
+                      {...register("tripKind", { onChange: () => void trigger("tripKind") })}
+                    />
+                    {TRIP_KIND_LABEL[kind]}
+                  </label>
+                ))}
+              </div>
+              <FieldError
+                id="vehicle-tripKind-error"
+                message={errors.tripKind?.message}
+              />
+            </fieldset>
+
+            <div className="flex flex-col gap-1 sm:col-span-2">
               <label htmlFor="vehicle-participants" className={LABEL}>
                 Jumlah Peserta
               </label>
@@ -214,6 +327,131 @@ export function VehicleReservationForm({
                 message={errors.participants?.message}
               />
             </div>
+
+            <fieldset
+              className="flex flex-col gap-1 sm:col-span-2"
+              aria-describedby={errors.vehicleId ? "vehicle-vehicleId-error" : undefined}
+            >
+              <legend className={`${LABEL} mb-1`}>Kendaraan</legend>
+              <p className="text-[11px] text-muted">
+                Pilih satu jenis, lalu atur jumlah unitnya.
+              </p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {options.map(({ vehicle, free, reason }) => (
+                  <label
+                    key={vehicle.id}
+                    className={`${CHOICE} min-h-16 items-start py-2 ${reason ? "cursor-not-allowed bg-page text-muted" : "cursor-pointer"}`}
+                  >
+                    <input
+                      type="radio"
+                      value={vehicle.id}
+                      disabled={reason !== null}
+                      className="mt-0.5 size-4 accent-primary"
+                      {...register("vehicleId", { onChange: pickVehicle })}
+                    />
+                    <span className="flex flex-col gap-0.5">
+                      <span className="font-medium text-ink">{vehicle.name}</span>
+                      <span>{passengerSeats(vehicle)} penumpang per unit</span>
+                      <span>
+                        {reason ?? `${free} unit tersedia`}
+                      </span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+              <FieldError
+                id="vehicle-vehicleId-error"
+                message={errors.vehicleId?.message}
+              />
+            </fieldset>
+
+            {chosen && !chosen.reason && (
+              <div className="flex flex-col gap-1 sm:col-span-2">
+                <label htmlFor="vehicle-units" className={LABEL}>
+                  Jumlah Unit {chosen.vehicle.name}
+                </label>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => changeUnits(unitCount - 1)}
+                    disabled={!(unitCount > 1)}
+                    aria-label="Kurangi unit"
+                    className="flex min-h-11 min-w-11 items-center justify-center rounded-md border border-border text-sm text-primary hover:bg-primary-soft disabled:text-muted disabled:hover:bg-transparent"
+                  >
+                    −
+                  </button>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    min={1}
+                    max={chosen.free}
+                    step={1}
+                    {...field("units", errors.units?.message)}
+                    className={`${INPUT} max-w-20 text-center`}
+                    {...register("units")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => changeUnits(unitCount + 1)}
+                    disabled={!(unitCount < chosen.free)}
+                    aria-label="Tambah unit"
+                    className="flex min-h-11 min-w-11 items-center justify-center rounded-md border border-border text-sm text-primary hover:bg-primary-soft disabled:text-muted disabled:hover:bg-transparent"
+                  >
+                    +
+                  </button>
+                  <span className="text-[11px] text-muted">dari {chosen.free} tersedia</span>
+                </div>
+                {seats !== null && (
+                  <p className="text-[11px] text-muted">
+                    {seats} kursi penumpang.
+                    {leftOver > 0 && ` ${leftOver} peserta lainnya berangkat dengan kendaraan sendiri.`}
+                  </p>
+                )}
+                <FieldError id="vehicle-units-error" message={errors.units?.message} />
+              </div>
+            )}
+
+            <fieldset className="flex flex-col gap-2 sm:col-span-2">
+              <legend className={`${LABEL} mb-1`}>Tujuan</legend>
+              {destinationFields.fields.map((item, index) => {
+                const error = errors.destinations?.[index]?.name?.message;
+                return (
+                  <div key={item.id} className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        aria-label={`Tujuan ${index + 1}`}
+                        placeholder={index === 0 ? "Contoh: Semarang Barat" : "Tujuan berikutnya"}
+                        {...field(`destinations-${index}`, error)}
+                        {...register(`destinations.${index}.name`)}
+                      />
+                      {destinationFields.fields.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => destinationFields.remove(index)}
+                          aria-label={`Hapus tujuan ${index + 1}`}
+                          className="flex min-h-11 min-w-11 items-center justify-center rounded-md border border-border text-sm text-danger hover:bg-danger-soft"
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
+                    <FieldError id={`vehicle-destinations-${index}-error`} message={error} />
+                  </div>
+                );
+              })}
+              {destinationFields.fields.length < MAX_DESTINATIONS && (
+                <button
+                  type="button"
+                  onClick={() => destinationFields.append({ name: "" })}
+                  className="flex min-h-11 items-center justify-center gap-1 rounded-md border border-dashed border-primary text-xs font-medium text-primary hover:bg-primary-soft"
+                >
+                  + Tambah tujuan
+                </button>
+              )}
+              <FieldError id="vehicle-destinations-error" message={destinationError} />
+            </fieldset>
+
             <div className="flex flex-col gap-1 sm:col-span-2">
               <label htmlFor="vehicle-activity" className={LABEL}>
                 Keterangan Kegiatan
@@ -233,57 +471,6 @@ export function VehicleReservationForm({
         </Card>
 
         <div className="flex flex-col gap-2">
-          <Card
-            as="section"
-            aria-labelledby="panel-vehicle-dates"
-            className="flex flex-col gap-2 p-3"
-          >
-            <PanelHeading
-              id="panel-vehicle-dates"
-              iconSrc="/icons/calendar-outline.svg"
-            >
-              Tanggal Reservasi
-            </PanelHeading>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-              <div className="flex flex-col gap-1">
-                <label
-                  htmlFor="vehicle-startDate"
-                  className={`${LABEL} text-center`}
-                >
-                  Mulai
-                </label>
-                <input
-                  type="date"
-                  min={todayKey}
-                  {...field("startDate", errors.startDate?.message)}
-                  {...register("startDate", { deps: ["endDate"] })}
-                />
-                <FieldError
-                  id="vehicle-startDate-error"
-                  message={errors.startDate?.message}
-                />
-              </div>
-              <div className="flex flex-col gap-1">
-                <label
-                  htmlFor="vehicle-endDate"
-                  className={`${LABEL} text-center`}
-                >
-                  Selesai
-                </label>
-                <input
-                  type="date"
-                  min={startDate || todayKey}
-                  {...field("endDate", errors.endDate?.message)}
-                  {...register("endDate", { deps: ["startDate"] })}
-                />
-                <FieldError
-                  id="vehicle-endDate-error"
-                  message={errors.endDate?.message}
-                />
-              </div>
-            </div>
-          </Card>
-
           {withLetter ? (
             <LetterPanel
               file={letter ?? null}
@@ -304,7 +491,7 @@ export function VehicleReservationForm({
           open={flow.dialogOpen}
           onClose={flow.close}
           title="Informasi Reservasi"
-          subject={`Reservasi kendaraan ke ${destination.trim() || "tujuan"}`}
+          subject={`Reservasi kendaraan ke ${destinationNames[0] ?? "tujuan"}`}
           approver={null}
           submitting={formState.isSubmitting}
           onSubmit={flow.submit}
@@ -318,15 +505,22 @@ export function VehicleReservationForm({
           <dl className="flex flex-col gap-3 py-2">
             <SummaryRow label={requesterLabel}>{requester.name}</SummaryRow>
             {askPhone && <SummaryRow label="No HP">{phone}</SummaryRow>}
-            <SummaryRow label="Tujuan">
-              {destination}, {String(participants)} peserta
-            </SummaryRow>
-            <SummaryRow label="Kegiatan">{activity}</SummaryRow>
             <SummaryRow label="Tanggal">
               {startDate === endDate
                 ? dayLabel(startDate)
                 : `${dayLabel(startDate)} sampai ${dayLabel(endDate)}`}
             </SummaryRow>
+            {(tripKind === "menginap" || tripKind === "antar_jemput") && (
+              <SummaryRow label="Perjalanan">{TRIP_KIND_LABEL[tripKind]}</SummaryRow>
+            )}
+            <SummaryRow label="Peserta">{String(participants)} orang</SummaryRow>
+            {chosen && (
+              <SummaryRow label="Kendaraan">
+                {chosen.vehicle.name}, {String(units)} unit
+              </SummaryRow>
+            )}
+            <SummaryRow label="Tujuan">{destinationNames.join(", ")}</SummaryRow>
+            <SummaryRow label="Kegiatan">{activity}</SummaryRow>
           </dl>
         </ReservationSubmitDialog>
       </form>

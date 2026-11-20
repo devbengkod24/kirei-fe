@@ -15,7 +15,7 @@ export const LOGIN_PATH = "/login";
 const ROLE_HOME: Partial<Record<UserRole, string>> = {
   organisasi: "/dashboard",
   dosen: "/dashboard",
-  admin_fakultas: "/fakultas/dashboard",
+  admin_fakultas: "/gedung/dashboard",
   admin_universitas: "/admin/dashboard",
   operator: "/operator",
 };

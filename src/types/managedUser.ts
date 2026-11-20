@@ -13,10 +13,12 @@ export interface ManagedUser {
   role: ManagedRole;
   name: string;
   email: string;
-  /** Dosen and admin fakultas only. Ormawa belong to no faculty and may book rooms in any of them. */
+  /** Dosen only. Ormawa belong to no faculty and may book rooms in any of them. */
   fakultasId: string | null;
   /** Dosen only: the staff number. */
   npp?: string;
+  /** Admin gedung (`admin_fakultas`) only: the building it manages. */
+  buildingId?: string;
   /** Operator only. */
   floor?: FloorAssignment;
   /** An inactive account cannot sign in. This is an admin decision, not a penalty. */

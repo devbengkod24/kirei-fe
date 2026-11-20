@@ -1,5 +1,6 @@
 import { SegmentedNav } from "@/components/ui/SegmentedNav";
 import type { ReservationRequest, ReservationType } from "@/types/reservation";
+import type { Staff } from "@/types/staff";
 import type { ReservationTab } from "./requestTabs";
 import { ReservationTable } from "./ReservationTable";
 
@@ -18,6 +19,8 @@ export interface ReservationManagementProps {
   toolbar?: React.ReactNode;
   /** Page heading; null when the page already shows it above, e.g. over the type tabs. */
   heading?: string | null;
+  /** Drivers for vehicle requests; see ReservationTable. */
+  staff?: Staff[];
 }
 
 /** "Kelola Reservasi" with its Persetujuan / Riwayat tabs; each tab is its own URL. */
@@ -31,6 +34,7 @@ export function ReservationManagement({
   leading,
   toolbar,
   heading = "Kelola Reservasi",
+  staff,
 }: ReservationManagementProps) {
   return (
     <div className="flex flex-col gap-4">
@@ -49,7 +53,7 @@ export function ReservationManagement({
           {toolbar}
         </div>
       </div>
-      <ReservationTable key={tab} tipe={tipe} tab={tab} reservations={reservations} roomCodes={roomCodes} buildingNames={buildingNames} />
+      <ReservationTable key={tab} tipe={tipe} tab={tab} reservations={reservations} roomCodes={roomCodes} buildingNames={buildingNames} staff={staff} />
     </div>
   );
 }

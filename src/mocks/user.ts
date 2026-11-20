@@ -11,7 +11,7 @@ export const MOCK_CURRENT_USER: CurrentUser = {
   fakultasId: null,
 };
 
-export const MOCK_ADMIN_FAKULTAS: CurrentUser = {
+export const MOCK_ADMIN_GEDUNG: CurrentUser = {
   id: "usr-100231",
   name: "Adhitya Nugraha S.Kom, M.CS",
   email: "admin.fik@dinus.ac.id",
@@ -40,7 +40,7 @@ export const MOCK_ACCOUNTS: CurrentUser[] = [
     role: "dosen",
     fakultasId: "fik",
   },
-    MOCK_ADMIN_FAKULTAS,
+    MOCK_ADMIN_GEDUNG,
   MOCK_ADMIN_UNIVERSITAS,
   {
     id: "usr-700512",

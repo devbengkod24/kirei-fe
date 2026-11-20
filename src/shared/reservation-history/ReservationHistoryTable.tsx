@@ -6,6 +6,7 @@ import { formatDateShortWIB, formatDayRangeShortWIB, formatTimeSpanWIB } from "@
 import type { ReservationRecord, ReservationType } from "@/types/reservation";
 import { ReservationStatusBadge } from "@/shared/reservation/ReservationStatusBadge";
 import { RESERVATION_TYPE_LABEL, RESERVATION_UNIT_LABEL } from "@/shared/reservation/reservationTypes";
+import { tripText } from "@/shared/reservation/vehicleTrip";
 import { HISTORY_PARAMS, PER_PAGE_OPTIONS } from "./query";
 
 export interface ReservationHistoryTableProps {
@@ -86,7 +87,18 @@ export function ReservationHistoryTable({
                 <tr key={reservation.id} className={TABLE_ROW}>
                   <td className={`${TD} whitespace-nowrap`}>{dateText(reservation)}</td>
                   <td className={TD}>{reservation.bookerName}</td>
-                  {unitLabel && <td className={TD}>{reservation.unitName}</td>}
+                  {unitLabel && (
+                    <td className={TD}>
+                      {reservation.unitName}
+                      {/* a trip also lists where it goes and how the group travels */}
+                      {reservation.trip && (
+                        <span className="mt-0.5 flex flex-col text-[11px] text-muted">
+                          <span>{reservation.trip.destination}</span>
+                          <span>{tripText(reservation.trip)}</span>
+                        </span>
+                      )}
+                    </td>
+                  )}
                   {!wholeDays && (
                     <td className={`${TD} whitespace-nowrap`}>{formatTimeSpanWIB(reservation.startsAt, reservation.endsAt)}</td>
                   )}
@@ -128,6 +140,14 @@ export function ReservationHistoryTable({
                     <>
                       <dt className="text-primary">{unitLabel}</dt>
                       <dd>{reservation.unitName}</dd>
+                    </>
+                  )}
+                  {reservation.trip && (
+                    <>
+                      <dt className="text-primary">Tujuan</dt>
+                      <dd className="break-words">{reservation.trip.destination}</dd>
+                      <dt className="text-primary">Perjalanan</dt>
+                      <dd>{tripText(reservation.trip)}</dd>
                     </>
                   )}
                   <dt className="text-primary">Keperluan</dt>

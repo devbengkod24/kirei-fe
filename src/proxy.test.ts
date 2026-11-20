@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { MOCK_ADMIN_FAKULTAS, MOCK_CURRENT_USER, MOCK_PASSWORD, findMockAccount } from "@/mocks/user";
+import { MOCK_ADMIN_GEDUNG, MOCK_CURRENT_USER, MOCK_PASSWORD, findMockAccount } from "@/mocks/user";
 import { SESSION_COOKIE } from "@/lib/auth/session";
 import { proxy } from "./proxy";
 
@@ -33,7 +33,7 @@ describe("proxy", () => {
   });
 
   it("sends a signed-in user from the login page and the root to their home", () => {
-    expect(location(proxy(request("/login", MOCK_ADMIN_FAKULTAS.id)))).toBe("http://localhost:3000/fakultas/dashboard");
+    expect(location(proxy(request("/login", MOCK_ADMIN_GEDUNG.id)))).toBe("http://localhost:3000/gedung/dashboard");
     expect(location(proxy(request("/", MOCK_CURRENT_USER.id)))).toBe("http://localhost:3000/dashboard");
   });
 
@@ -69,7 +69,7 @@ describe("proxy with AUTH_MODE=api", () => {
 describe("mock login accounts", () => {
   it("matches the email case-insensitively and needs the demo password", () => {
     expect(findMockAccount(" ADMIN.FIK@dinus.ac.id ", MOCK_PASSWORD)?.role).toBe("admin_fakultas");
-    expect(findMockAccount(MOCK_ADMIN_FAKULTAS.email, "salah")).toBeNull();
+    expect(findMockAccount(MOCK_ADMIN_GEDUNG.email, "salah")).toBeNull();
     expect(findMockAccount("tidak.ada@dinus.ac.id", MOCK_PASSWORD)).toBeNull();
   });
 });

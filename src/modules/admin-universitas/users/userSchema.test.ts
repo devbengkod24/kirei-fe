@@ -40,25 +40,31 @@ describe("new dosen", () => {
   });
 });
 
-describe("new admin fakultas", () => {
-  const schema = createUserSchema("admin_fakultas", MOCK_MANAGED_USERS);
-  const base = { name: "Lina Marlina, S.Kom.", email: "lina@dinus.ac.id", npp: "", ...NO_FLOOR, ...PASSWORD };
+describe("new admin gedung", () => {
+  const schema = createUserSchema("admin_fakultas", MOCK_MANAGED_USERS, MOCK_BUILDINGS);
+  const base = { name: "", email: "lina@dinus.ac.id", fakultas: "", npp: "", floorId: "", ...PASSWORD };
 
-  it("needs the faculty it manages, but no NPP", () => {
-    expect(issues(schema.safeParse({ ...base, fakultas: "" }))).toEqual({ fakultas: "Pilih fakultas yang dikelola." });
-    const values = schema.parse({ ...base, fakultas: "fik" });
-    expect(toManagedUser(values, "admin_fakultas", "new")).toMatchObject({ fakultasId: "fik", npp: undefined, floor: undefined });
+  it("needs the building it manages, but no name, faculty, or NPP", () => {
+    expect(issues(schema.safeParse({ ...base, buildingId: "" }))).toEqual({ buildingId: "Pilih gedung yang dikelola." });
+    const values = schema.parse({ ...base, buildingId: "gedung-h" });
+    expect(toManagedUser(values, "admin_fakultas", "new", MOCK_BUILDINGS)).toMatchObject({
+      name: "Admin Gedung H",
+      fakultasId: null,
+      buildingId: "gedung-h",
+      npp: undefined,
+      floor: undefined,
+    });
   });
 
-  it("allows a second admin for the same faculty", () => {
-    expect(MOCK_MANAGED_USERS.filter((user) => user.role === "admin_fakultas" && user.fakultasId === "fik")).toHaveLength(2);
-    expect(schema.safeParse({ ...base, fakultas: "fik" }).success).toBe(true);
+  it("allows a second admin for the same building", () => {
+    expect(MOCK_MANAGED_USERS.filter((user) => user.role === "admin_fakultas" && user.buildingId === "gedung-h")).toHaveLength(2);
+    expect(schema.safeParse({ ...base, buildingId: "gedung-h" }).success).toBe(true);
   });
 });
 
 describe("new operator", () => {
   const schema = createUserSchema("operator", [], MOCK_BUILDINGS);
-  const base = { name: "Agus Baru", email: "agus.baru@dinus.ac.id", fakultas: "", npp: "", ...PASSWORD };
+  const base = { name: "", email: "agus.baru@dinus.ac.id", fakultas: "", npp: "", ...PASSWORD };
 
   it("needs a floor that belongs to the chosen building", () => {
     expect(issues(schema.safeParse({ ...base, ...NO_FLOOR }))).toEqual({ buildingId: "Pilih gedung tempat operator bertugas." });
@@ -66,7 +72,19 @@ describe("new operator", () => {
       floorId: "Pilih lantai tempat operator bertugas.",
     });
     const values = schema.parse({ ...base, buildingId: "gedung-h", floorId: "gedung-h-7" });
-    expect(toManagedUser(values, "operator", "new")).toMatchObject({ fakultasId: null, floor: { buildingId: "gedung-h", floorId: "gedung-h-7" } });
+    expect(toManagedUser(values, "operator", "new", MOCK_BUILDINGS)).toMatchObject({
+      name: "Operator Gedung H Lantai 7",
+      fakultasId: null,
+      floor: { buildingId: "gedung-h", floorId: "gedung-h-7" },
+    });
+  });
+});
+
+describe("names", () => {
+  it("are required for ormawa and dosen only", () => {
+    const base = { email: "baru@dinus.ac.id", fakultas: "", npp: "", ...NO_FLOOR, ...PASSWORD };
+    expect(issues(createUserSchema("organisasi", []).safeParse({ ...base, name: " a " }))).toEqual({ name: "Tulis nama minimal 3 karakter." });
+    expect(createUserSchema("admin_fakultas", [], MOCK_BUILDINGS).safeParse({ ...base, name: "", buildingId: "gedung-e" }).success).toBe(true);
   });
 });
 
@@ -105,6 +123,7 @@ describe("parseUserTab", () => {
     expect(parseUserTab("dosen")).toBe("dosen");
     expect(parseUserTab(["dosen", "organisasi"])).toBe("dosen");
     expect(parseUserTab("operator")).toBe("operator");
+    expect(parseUserTab("staf")).toBe("staf");
     expect(parseUserTab("admin_universitas")).toBe("organisasi");
     expect(parseUserTab(undefined)).toBe("organisasi");
   });

@@ -6,10 +6,9 @@ export const ADMIN_UNIVERSITAS_ROUTES = {
   /** Base paths of the pages with a [tipe] segment; each opens Ruangan. */
   internalReservation: "/admin/reservasi-internal",
   reservations: "/admin/reservasi",
-  floorPlans: "/admin/denah",
+  rooms: "/admin/ruangan",
   users: "/admin/pengguna",
   announcements: "/admin/pengumuman",
-  profile: "/admin/profil",
 } as const;
 
 export function internalReservationRoute(tipe: ReservationType) {

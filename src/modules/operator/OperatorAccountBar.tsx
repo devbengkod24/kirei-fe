@@ -2,7 +2,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { LogoutButton } from "@/shared/layout/LogoutButton";
 import type { CurrentUser } from "@/types/user";
 
-/** Who is signed in, with Logout always visible: operators have one page and no sidebar to hold it. */
+/** Who is signed in, with Keluar always visible: operators have one page and no sidebar to hold it. */
 export function OperatorAccountBar({ user }: { user: CurrentUser }) {
   return (
     <div className="flex min-w-0 items-center gap-3">

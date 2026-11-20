@@ -169,7 +169,10 @@ describe("vehicle reservation schema", () => {
   const vehicleSchema = createVehicleReservationSchema(() => "2026-10-30");
   const validVehicle: VehicleReservationInput = {
     phone: "0857 1112 11",
-    destination: "Bali",
+    tripKind: "menginap",
+    vehicleId: "vehicle-hiace",
+    units: "1",
+    destinations: [{ name: "Bali" }],
     participants: "12",
     activity: "Kunjungan studi mahasiswa teknik informatika",
     startDate: "2026-10-30",
@@ -189,7 +192,7 @@ describe("vehicle reservation schema", () => {
   });
 
   it("allows a one-day trip but not one that ends before it starts", () => {
-    expect(vehicleIssues({ ...validVehicle, endDate: "2026-10-30" })).toEqual({});
+    expect(vehicleIssues({ ...validVehicle, tripKind: "antar_jemput", endDate: "2026-10-30" })).toEqual({});
     expect(vehicleIssues({ ...validVehicle, endDate: "2026-10-29" })).toMatchObject({
       endDate: "Tanggal selesai tidak boleh sebelum tanggal mulai.",
     });
@@ -212,8 +215,40 @@ describe("vehicle reservation schema", () => {
   });
 
   it("checks the destination and activity text", () => {
-    expect(vehicleIssues({ ...validVehicle, destination: "  " })).toHaveProperty("destination");
+    expect(vehicleIssues({ ...validVehicle, destinations: [{ name: "Bali" }, { name: "  " }] })).toHaveProperty("destinations.1.name");
     expect(vehicleIssues({ ...validVehicle, activity: "Tur" })).toHaveProperty("activity");
+  });
+
+  it("needs one to five destinations", () => {
+    expect(vehicleIssues({ ...validVehicle, destinations: [] })).toMatchObject({ destinations: "Tambah minimal satu tujuan." });
+    const six = Array.from({ length: 6 }, (_, index) => ({ name: `Kota ${index + 1}` }));
+    expect(vehicleIssues({ ...validVehicle, destinations: six })).toMatchObject({ destinations: "Tujuan maksimal 5." });
+  });
+
+  it("needs a trip kind and a vehicle, and an overnight trip that spans more than one day", () => {
+    expect(vehicleIssues({ ...validVehicle, tripKind: "" })).toMatchObject({ tripKind: "Pilih menginap atau antar jemput." });
+    expect(vehicleIssues({ ...validVehicle, vehicleId: "" })).toMatchObject({ vehicleId: "Pilih kendaraan." });
+    expect(vehicleIssues({ ...validVehicle, endDate: "2026-10-30" })).toMatchObject({
+      tripKind: "Menginap butuh tanggal selesai setelah tanggal mulai.",
+    });
+  });
+
+  it("reports the vehicle check on the field it names", () => {
+    const oneLeft = createVehicleReservationSchema(
+      () => "2026-10-30",
+      "request",
+      ({ units }) => (units > 1 ? { field: "units", message: "Tersisa 1 unit pada tanggal ini." } : null),
+    );
+    expect(oneLeft.safeParse(validVehicle).success).toBe(true);
+    const result = oneLeft.safeParse({ ...validVehicle, units: "2" });
+    expect(result.error?.issues).toEqual([
+      expect.objectContaining({ path: ["units"], message: "Tersisa 1 unit pada tanggal ini." }),
+    ]);
+  });
+
+  it("needs at least one unit as a whole number", () => {
+    expect(vehicleIssues({ ...validVehicle, units: "0" })).toMatchObject({ units: "Jumlah unit minimal 1." });
+    expect(vehicleIssues({ ...validVehicle, units: "1.5" })).toMatchObject({ units: "Jumlah unit harus bilangan bulat." });
   });
 });
 
@@ -239,7 +274,10 @@ describe("internal bookings by an admin", () => {
     const vehicleSchema = createVehicleReservationSchema(() => "2026-10-30", "internal");
     const trip: VehicleReservationInput = {
       phone: "",
-      destination: "Yogyakarta",
+      tripKind: "menginap",
+      vehicleId: "vehicle-bus",
+      units: "1",
+      destinations: [{ name: "Yogyakarta" }],
       participants: "30",
       activity: "Studi banding pimpinan",
       startDate: "2026-10-31",
@@ -250,11 +288,14 @@ describe("internal bookings by an admin", () => {
     expect(issues(vehicleSchema.safeParse(trip))).toEqual({});
   });
 
-  it("asks a borrower for a trip, not a vehicle", () => {
+  it("asks a borrower for a trip with one vehicle type", () => {
     const requestSchema = createVehicleReservationSchema(() => "2026-10-30");
     const result = requestSchema.safeParse({
       phone: "081234567890",
-      destination: "Yogyakarta",
+      tripKind: "menginap",
+      vehicleId: "vehicle-bus",
+      units: "1",
+      destinations: [{ name: "Yogyakarta" }],
       participants: "30",
       activity: "Studi banding himpunan",
       startDate: "2026-10-31",

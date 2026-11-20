@@ -120,14 +120,15 @@ Halaman yang ada di menu tetapi belum dibangun memakai `components/feedback/Comi
 
 ### Contoh: Admin Fakultas (Figma V3, section "Admin Fakultas")
 
-Semua URL berawalan `/fakultas`. Halamannya ditulis di `shared/` karena Admin Universitas memakai layar yang sama.
+Semua URL berawalan `/gedung`. Halamannya ditulis di `shared/` karena Admin Universitas memakai layar yang sama.
 
 ```
-src/app/(admin-fakultas)/layout.tsx            → AdminFakultasShell (menu + avatar dalam Suspense)
-src/app/(admin-fakultas)/fakultas/*/page.tsx   → requireRole(["admin_fakultas"]) lalu loader shared dengan scope { fakultasId }
-src/app/(admin-fakultas)/fakultas/*/loading.tsx→ satu loading per halaman (cacheComponents butuh Suspense per segmen)
-src/modules/admin-fakultas/                    → routes.ts, nav.ts, shell, link tab reservasi
-src/modules/admin-fakultas/lecturer-schedule/  → Jadwal Dosen: parser CSV (lib/csv.ts + Zod per baris), server action simpan, halaman unggah
+src/app/(admin-gedung)/layout.tsx            → AdminGedungShell (menu + avatar dalam Suspense)
+src/app/(admin-gedung)/gedung/*/page.tsx   → requireRole(["admin_fakultas"]) lalu loader shared dengan scope { fakultasId }
+src/app/(admin-gedung)/gedung/*/loading.tsx→ satu loading per halaman (cacheComponents butuh Suspense per segmen)
+src/modules/admin-gedung/                    → routes.ts, nav.ts, shell, link tab reservasi
+src/modules/admin-gedung/lecturer-schedule/  → Kelola Jadwal: timeline jadwal per lantai, dialog Import Jadwal (CSV) dengan parser (lib/csv.ts + Zod per baris), server action simpan
+src/shared/floor-timeline/                     → timeline ruangan ala editor video (FloorTimeline, slots, kartu detail), dipakai operator dan Kelola Jadwal
 src/shared/layout/RoleShell.tsx                → shell + menu ikon, dipakai semua role
 src/shared/admin-dashboard/                    → dashboard admin (stat, grafik mingguan, reservasi hari ini, laporan)
 src/shared/rooms/                              → Kelola Ruangan + dialog edit (termasuk foto ruangan, roomPhoto.ts)

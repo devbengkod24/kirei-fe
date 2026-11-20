@@ -16,10 +16,25 @@ export const roomEditsSchema: z.ZodType<Record<string, Room>> = z.record(
     isActive: z.boolean(),
     photoUrl: z.string().nullable(),
     plan: z.object({ x: z.number(), y: z.number(), width: z.number(), height: z.number() }).nullable(),
+    managedBy: z.enum(["gedung", "universitas"]).optional(),
   }),
 );
 
 export const applyRoomEdits = (rooms: Room[], edits: Record<string, Room>) => rooms.map((room) => edits[room.id] ?? room);
+
+/** Pilih banyak: the same change for every chosen room, added to the saved edits. */
+export function editManyRooms(
+  rooms: Room[],
+  edits: Record<string, Room>,
+  ids: ReadonlySet<string>,
+  change: Partial<Pick<Room, "photoUrl" | "managedBy">>,
+): Record<string, Room> {
+  const next = { ...edits };
+  for (const room of applyRoomEdits(rooms, edits)) {
+    if (ids.has(room.id)) next[room.id] = { ...room, ...change };
+  }
+  return next;
+}
 
 /** Longest side of a stored photo; keeps one photo well under the browser's storage quota. */
 const STORED_PHOTO_MAX_PX = 1280;

@@ -19,7 +19,7 @@ export interface UserDetailChanges {
 
 export interface UserDetailDialogProps {
   user: ManagedUser;
-  /** Where the account belongs: a faculty name, or "Gedung H · Lantai 5" for an operator. Ormawa have none. */
+  /** Where the account belongs: a faculty, a building, or "Gedung H · Lantai 5" for an operator. Ormawa have none. */
   placement?: string;
   onClose: () => void;
   onSave: (changes: UserDetailChanges) => void;
@@ -78,7 +78,7 @@ export function UserDetailDialog({ user, placement, onClose, onSave }: UserDetai
             )}
             {placement && (
               <>
-                <dt className="sr-only">{user.floor ? "Tempat tugas" : "Fakultas"}</dt>
+                <dt className="sr-only">{user.floor ? "Tempat tugas" : user.buildingId ? "Gedung" : "Fakultas"}</dt>
                 <dd className="text-xs text-muted">{placement}</dd>
               </>
             )}

@@ -2,6 +2,7 @@ import { z } from "zod";
 import { readBrowserDataMode } from "@/lib/data-mode/dataMode";
 import { liveKey } from "@/lib/data-mode/liveStorage";
 import { toWibDateKey } from "@/lib/date";
+import { vehicleText } from "@/shared/reservation/vehicleTrip";
 import type { UnitBooking } from "@/types/facility";
 import type { ReservationRecord, ReservationRequest, ReservationStatus, ReservationType } from "@/types/reservation";
 
@@ -13,7 +14,8 @@ import type { ReservationRecord, ReservationRequest, ReservationStatus, Reservat
  *
  * Two kinds of data are kept:
  * - `created`: requests sent from the booking forms in this browser;
- * - `decisions`: approve/reject results, for created requests and for the seeded sample ones.
+ * - `decisions`: approve/reject results, for created requests and for the seeded sample ones;
+ * - `assignments`: the drivers and costs an admin sets on a vehicle request.
  */
 
 export const MOCK_RESERVATIONS_KEY = "kirei:mock-reservations";
@@ -46,9 +48,20 @@ export interface MockDecision {
   decidedAt: string;
 }
 
+/** Who drives a vehicle request and what the trip costs, set by the admin. Amounts in rupiah. */
+export interface VehicleAssignment {
+  driverId: string | null;
+  coDriverId: string | null;
+  travelAllowance: number;
+  fuelAndToll: number;
+  driverFee: number;
+}
+
 export interface MockReservationState {
   created: MockReservation[];
   decisions: Record<string, MockDecision>;
+  /** Missing in stores written before drivers and costs could be set. */
+  assignments?: Record<string, VehicleAssignment>;
 }
 
 export const EMPTY_STATE: MockReservationState = { created: [], decisions: {} };
@@ -67,7 +80,16 @@ const reservationSchema = z.object({
   purpose: z.string(),
   letterFileName: z.string().nullable(),
   letterUrl: z.string().nullable(),
-  trip: z.object({ destination: z.string(), participants: z.number() }).optional(),
+  // Requests stored before destinations, vehicle, and kind existed have only destination and participants.
+  trip: z
+    .object({
+      destination: z.string(),
+      participants: z.number(),
+      destinations: z.array(z.string()).optional(),
+      vehicle: z.object({ id: z.string(), name: z.string(), units: z.number() }).optional(),
+      kind: z.enum(["menginap", "antar_jemput"]).optional(),
+    })
+    .optional(),
   activity: z.string().optional(),
   rejectionReason: z.string().nullable(),
   ownerId: z.string(),
@@ -85,6 +107,18 @@ const stateSchema = z.object({
       decidedAt: z.string(),
     }),
   ),
+  assignments: z
+    .record(
+      z.string(),
+      z.object({
+        driverId: z.string().nullable(),
+        coDriverId: z.string().nullable(),
+        travelAllowance: z.number(),
+        fuelAndToll: z.number(),
+        driverFee: z.number(),
+      }),
+    )
+    .optional(),
 });
 
 /** Broken or foreign data reads as an empty store instead of crashing the page. */
@@ -163,6 +197,16 @@ export function decideMockReservation(
   return write({ ...state, decisions: { ...state.decisions, [id]: { ...decision, decidedAt: now.toISOString() } } }, storage);
 }
 
+/** Saves the drivers and costs of a vehicle request, replacing any earlier ones. */
+export function assignVehicleCrew(
+  id: string,
+  assignment: VehicleAssignment,
+  storage: Storage | null = browserStorage(),
+): boolean {
+  const state = parseState(readSnapshot(storage));
+  return write({ ...state, assignments: { ...state.assignments, [id]: assignment } }, storage);
+}
+
 /** Back to the seeded sample data: forgets created requests and every decision. */
 export function resetMockReservations(storage: Storage | null = browserStorage()): boolean {
   if (!storage) return false;
@@ -217,10 +261,14 @@ export function toHistoryRecord(reservation: MockReservation): ReservationRecord
     endsAt: reservation.endsAt,
     bookerName: reservation.borrowerName,
     bookerEmail: reservation.ownerEmail,
-    unitName: reservation.type === "kendaraan" && reservation.trip ? `Kendaraan ke ${reservation.trip.destination}` : reservation.roomName,
+    unitName:
+      reservation.type === "kendaraan" && reservation.trip
+        ? (vehicleText(reservation.trip) ?? `Kendaraan ke ${reservation.trip.destination}`)
+        : reservation.roomName,
     purpose: reservation.purpose,
     cancellationReason: null,
     rejectionReason: reservation.rejectionReason,
+    ...(reservation.trip ? { trip: reservation.trip } : {}),
   };
 }
 
