@@ -15,7 +15,7 @@ import { CreateReservationPanel } from "./CreateReservationPanel";
 import { FloorTimeline } from "./FloorTimeline";
 import type { OperatorFloorData } from "./getOperatorFloor";
 import { toStoredOperatorBooking } from "./operatorReservations";
-import { buildTimeline, defaultHourFilter, FILTER_HOURS, toggleRoom } from "./slots";
+import { CLOSE_TIME, defaultStartHour, FILTER_START_HOURS, hourFrom, toggleRoom } from "./slots";
 import { TimelineDetailPopover } from "./TimelineDetailPopover";
 import { itemKey, type TimelineItem } from "./timelineDetail";
 
@@ -53,7 +53,8 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
   const { floor, canCreate } = data;
   const dateKey = toWibDateKey(data.now);
   const [now, setNow] = useState(() => new Date(data.now));
-  const [hours, setHours] = useState(() => defaultHourFilter(new Date(data.now)));
+  // Only the start is a filter; the timeline always runs to closing time.
+  const [from, setFrom] = useState(() => defaultStartHour(new Date(data.now)));
   const [created, setCreated] = useState(data.reservations);
   // Demo store: approved requests and Reservasi Internal made in this browser for today on this floor.
   const store = useMockReservations();
@@ -82,7 +83,6 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
     return () => clearInterval(timer);
   }, []);
 
-  const validRange = hours.from < hours.to;
   const visibleRooms = floor.rooms.filter((room) => visibleIds.includes(room.id));
   // Focus goes back to the clip that opened the popover, or to the section when that clip is gone.
   const closeDetail = () => {
@@ -102,16 +102,9 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
     setDraft({ roomId, ...range });
   };
 
-  // The "+" button starts from the first free gap on the floor within the filtered hours.
-  const openCreateAnywhere = () => {
-    for (const room of visibleRooms) {
-      const gap =
-        validRange &&
-        buildTimeline(dateKey, room.code, hours.from, hours.to, reservations, classSchedules).find((segment) => segment.kind === "free");
-      if (gap) return openCreate(room.id, gap);
-    }
-    openCreate(visibleRooms[0].id, { start: hours.from, end: hours.to });
-  };
+  // The "+" button leaves the room to the operator ("Pilih ruangan") and starts with an hour from the filter's start.
+  // A free gap on the timeline still fills in its own room and times.
+  const openCreateAnywhere = () => openCreate("", hourFrom(from));
 
   return (
     <div className="flex flex-col gap-3">
@@ -182,32 +175,22 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
                 </label>
                 <SelectInput
                   id="operator-hour-from"
-                  value={hours.from}
-                  onChange={(event) => setHours({ ...hours, from: event.target.value })}
+                  value={from}
+                  onChange={(event) => setFrom(event.target.value)}
+                  aria-describedby="operator-hour-to"
                   className="text-xs"
                 >
-                  {FILTER_HOURS.slice(0, -1).map((time) => (
+                  {FILTER_START_HOURS.map((time) => (
                     <option key={time} value={time}>
                       {displayTime(time)}
                     </option>
                   ))}
                 </SelectInput>
-                <span aria-hidden="true">-</span>
-                <label htmlFor="operator-hour-to" className="sr-only">
-                  Sampai jam
-                </label>
-                <SelectInput
-                  id="operator-hour-to"
-                  value={hours.to}
-                  onChange={(event) => setHours({ ...hours, to: event.target.value })}
-                  className="text-xs"
-                >
-                  {FILTER_HOURS.slice(1).map((time) => (
-                    <option key={time} value={time}>
-                      {displayTime(time)}
-                    </option>
-                  ))}
-                </SelectInput>
+                <span id="operator-hour-to">
+                  <span aria-hidden="true">- </span>
+                  <span className="sr-only">sampai </span>
+                  {displayTime(CLOSE_TIME)}
+                </span>
               </fieldset>
             </div>
 
@@ -215,23 +198,18 @@ function FloorAvailability({ data }: { data: OperatorFloorData }) {
               {notice}
             </p>
 
-            {validRange ? (
-              <FloorTimeline
-                rooms={visibleRooms}
-                dateKey={dateKey}
-                from={hours.from}
-                to={hours.to}
-                now={now}
-                reservations={reservations}
-                schedules={classSchedules}
-                canCreate={canCreate}
-                activeKey={detail ? itemKey(detail.item) : null}
-                onOpen={openDetail}
-                onCreate={openCreate}
-              />
-            ) : (
-              <p className="px-4 py-10 text-center text-sm text-muted">Jam akhir harus setelah jam awal. Ubah Filter Jam.</p>
-            )}
+            <FloorTimeline
+              rooms={visibleRooms}
+              dateKey={dateKey}
+              from={from}
+              to={CLOSE_TIME}
+              now={now}
+              reservations={reservations}
+              schedules={classSchedules}
+              activeKey={detail ? itemKey(detail.item) : null}
+              onOpen={openDetail}
+              onCreate={canCreate ? openCreate : undefined}
+            />
 
             {detail && (
               <TimelineDetailPopover
