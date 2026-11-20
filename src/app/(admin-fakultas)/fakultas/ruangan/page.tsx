@@ -9,5 +9,5 @@ export default async function Page() {
   const user = await requireRole(["admin_fakultas"]);
   const { buildings, rooms } = await getRooms({ fakultasId: user.fakultasId });
 
-  return <RoomManager buildings={buildings} rooms={rooms} />;
+  return <RoomManager buildings={buildings} rooms={rooms} canChangeManager={false} />;
 }
