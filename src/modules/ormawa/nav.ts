@@ -16,7 +16,9 @@ export const ORMAWA_NAV: NavLinkConfig[][] = [
   ],
 ];
 
-/** Dosen book without a loan letter, so the draft list is left out. */
+/** Dosen have no draft list (no loan letter) and no profile page. */
+const NOT_FOR_DOSEN: string[] = [ORMAWA_ROUTES.draftReservation, ORMAWA_ROUTES.profile];
+
 export const DOSEN_NAV: NavLinkConfig[][] = ORMAWA_NAV.map((group) =>
-  group.filter((item) => item.href !== ORMAWA_ROUTES.draftReservation),
+  group.filter((item) => !NOT_FOR_DOSEN.includes(item.href)),
 );

@@ -35,6 +35,25 @@ describe("ActiveReservationCard", () => {
     expect(screen.queryByText(/WIB/)).toBeNull();
   });
 
+  it("shows the vehicle, destinations, and trip kind of a vehicle trip", () => {
+    const trip: ReservationRecord = {
+      ...room,
+      type: "kendaraan",
+      unitName: "Toyota Hiace, 2 unit",
+      trip: {
+        destination: "Kudus, Pati",
+        participants: 25,
+        destinations: ["Kudus", "Pati"],
+        vehicle: { id: "vehicle-hiace", name: "Toyota Hiace", units: 2 },
+        kind: "antar_jemput",
+      },
+    };
+    render(<ActiveReservationCard reservation={trip} />);
+    expect(screen.getByText("Toyota Hiace, 2 unit")).toBeTruthy();
+    expect(screen.getByText("Kudus, Pati")).toBeTruthy();
+    expect(screen.getByText("Antar jemput, 25 orang")).toBeTruthy();
+  });
+
   it("names the borrowed unit for a room but not for the GOR", () => {
     render(<ActiveReservationCard reservation={room} />);
     const terms = () => screen.getAllByRole("term").map((term) => term.textContent);

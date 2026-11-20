@@ -147,10 +147,23 @@ describe("borrower history", () => {
     });
   });
 
-  it("names a vehicle trip by its destination", () => {
+  it("names an older vehicle trip by its destination", () => {
     const trip = created({ id: "mock-trip", type: "kendaraan", roomName: "", trip: { destination: "Kudus", participants: 8 } });
     const [record] = mergeOwnHistory([], { created: [trip], decisions: {} }, "kendaraan", "usr-ormawa");
     expect(record.unitName).toBe("Kendaraan ke Kudus");
+  });
+
+  it("names a vehicle trip by the vehicle and units, and keeps the trip details", () => {
+    const details = {
+      destination: "Kudus, Pati",
+      participants: 50,
+      destinations: ["Kudus", "Pati"],
+      vehicle: { id: "vehicle-bus", name: "Bus Udinus", units: 2 },
+      kind: "menginap" as const,
+    };
+    const trip = created({ id: "mock-trip", type: "kendaraan", roomName: "", trip: details });
+    const [record] = mergeOwnHistory([], { created: [trip], decisions: {} }, "kendaraan", "usr-ormawa");
+    expect(record).toMatchObject({ unitName: "Bus Udinus, 2 unit", trip: details });
   });
 });
 

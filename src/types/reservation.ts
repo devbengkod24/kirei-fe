@@ -41,13 +41,15 @@ export interface ReservationRecord {
   endsAt: string;
   bookerName: string;
   bookerEmail: string;
-  /** Room code, vehicle name, or GOR name. */
+  /** Room code, vehicle type and units, or GOR name. */
   unitName: string;
   purpose: string;
   /** Filled when the reservation was cancelled, e.g. by an admin after approval. */
   cancellationReason: string | null;
   /** Written by the approving admin when the reservation was rejected; null for other statuses. */
   rejectionReason: string | null;
+  /** Kendaraan only: destinations, group size, vehicle type, and trip kind. */
+  trip?: VehicleTrip;
 }
 
 /** A saved reservation still waiting for its loan letter. */

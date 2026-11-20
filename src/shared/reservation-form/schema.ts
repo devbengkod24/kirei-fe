@@ -275,10 +275,7 @@ export const SPORTS_HALL_RESERVATION_FIELD_MAP = {
 /** A longer route is planned with the admin; five covers the trips in the sample data with room to spare. */
 export const MAX_DESTINATIONS = 5;
 
-export const TRIP_KIND_LABEL = {
-  menginap: "Menginap",
-  antar_jemput: "Antar jemput",
-} as const;
+export { TRIP_KIND_LABEL } from "@/shared/reservation/vehicleTrip";
 
 /** What the vehicle check needs to know; returns which field is wrong and why, or null. */
 export type VehicleIssue = (values: {
