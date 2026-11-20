@@ -1,90 +1,93 @@
 # Graph Report - kirei-fe  (2026-11-20)
 
 ## Corpus Check
-- 426 files · ~241,309 words
+- 421 files · ~244,513 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 12 file(s) not represented in the graph (top: (none) 8, .example 1, .csv 1)
 
 ## Summary
-- 2135 nodes · 5797 edges · 121 communities (101 shown, 20 thin omitted)
-- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 92 edges (avg confidence: 0.94)
+- 2141 nodes · 5838 edges · 126 communities (107 shown, 19 thin omitted)
+- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 98 edges (avg confidence: 0.94)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `3e6bf0b1`
+- Built from commit: `e0d4e70f`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- auth/actions.ts
-- types/reservation.ts
-- toWibDateKey
+- requireRole.ts
+- OperatorFloorPage.tsx
+- reservationStore.ts
 - DraftCard.tsx
 - RoomReservationForm.tsx
 - TimeWheel.tsx
-- scheduleCsv.ts
+- LecturerScheduleUpload.tsx
 - PageSkeleton
 - RoomManager.tsx
-- AddUserDialog.tsx
-- UserManagement.tsx
+- UserDetailDialog.tsx
+- ReservationHistoryTable.tsx
 - FloorPlanEditor.tsx
-- ReportFilterForm.tsx
-- SportsHallReservationForm.tsx
+- liveDashboard.ts
 - next
+- DeadlineTimer.tsx
 - Card
 - contrast-check.py
 - useLiveData.ts
-- AnnouncementManager.tsx
 - Button
-- getAnnouncements.ts
-- CreateReservationPanel.tsx
-- 2. Struktur dan fungsi folder
+- types/reservation.ts
+- getUniversityDashboard.ts
+- AddUserDialog.tsx
+- UserDashboard.tsx
 - schema.ts
-- VehicleReservationForm.tsx
+- ReservationFormPage.tsx
 - package.json
 - date.ts
 - getDataMode.ts
-- pengguna/page.tsx
-- CreateReservationBreadcrumb.tsx
-- useLiveFacilities.ts
+- UniversityDashboard.tsx
+- react
+- 2. Struktur dan fungsi folder
 - content.ts
 - createReservation.ts
-- facility.ts
+- toWibDateKey
 - compilerOptions
 - Accessibility Code Patterns
-- getUniversityDashboard.ts
+- reservations.ts
 - ReservationLogCalendar.tsx
 - ComplaintForm.tsx
-- requireRole
+- AnnouncementManager.tsx
+- query.ts
 - Tone & Voice
 - kirei-fe
-- [tipe]/persetujuan/page.tsx
+- requireRole
 - antislop-layoutmobile
-- LecturerScheduleUpload.tsx
-- getCurrentUser.ts
-- getManagedUsers.ts
-- ReservationType
-- What You Must Do When Invoked
+- UserReportList.tsx
 - getCurrentUser
+- auth/actions.ts
+- devDependencies
+- What You Must Do When Invoked
+- ActiveReservationCard.tsx
 - AdminDashboardSkeleton
 - ReservationFormSkeleton
-- ReservationRequest
+- admin-universitas/routes.ts
 - allowBuilds
 - (ormawa)/dashboard/loading.tsx
 - (ormawa)/reservasi/riwayat/loading.tsx
 - operator/routes.ts
 - What You Must Do When Invoked
-- Arsitektur KIREI FE
+- UserManagement.tsx
 - Group 1: Hard Gate (absolute, no exceptions)
-- RoomReservationForm
+- SportsHallReservationForm.tsx
 - Comments That Add Nothing
-- react
-- QuickLogin.tsx
 - laravel.ts
+- LoginPage.tsx
+- ContactPage.tsx
 - KIREI FE
-- reservations.ts
-- devDependencies
+- dependencies
+- scripts
+- VehicleReservationForm.tsx
 - Group 2: Purpose-Gate (technique allowed, purpose required)
+- eslint.config.mjs
 - OrmawaShell.tsx
 - Decorative Elements
 - antislop-ui
@@ -101,7 +104,7 @@
 - The Craftsmanship Standard
 - graphify reference: query, path, explain
 - graphify reference: query, path, explain
-- Field.tsx
+- LoginForm.tsx
 - Delivery Gate (Mandatory)
 - graphify reference: commit hook and native CLAUDE.md integration
 - graphify reference: commit hook and native CLAUDE.md integration
@@ -122,180 +125,182 @@
 - CLAUDE.md
 - .claude/CLAUDE.md
 - .claude/skills/graphify/references/extraction-spec.md
+- vehicleAvailability.ts
+- gedung/dashboard/page.tsx
+- AnnouncementManager
+- Button.tsx
+- userSchema.ts
+- getManagedUsers.ts
 - mutator.test.ts
-- RouteError.tsx
-- UserDashboard.tsx
+- vitest
+- LiveUserDashboard.tsx
+- ReservationStatusBadge.tsx
 - 2. Alur Tindakan Pengguna (User Flow)
-- LoginPage.tsx
-- ContactPage.tsx
-- dependencies
-- scripts
-- eslint.config.mjs
 
 ## God Nodes (most connected - your core abstractions)
-1. `next` - 113 edges
+1. `next` - 110 edges
 2. `react` - 70 edges
 3. `toWibDateKey()` - 67 edges
 4. `Card()` - 62 edges
-5. `Button` - 55 edges
-6. `requireRole()` - 54 edges
-7. `vitest` - 52 edges
-8. `PageSkeleton()` - 43 edges
-9. `ReservationType` - 43 edges
-10. `RoomReservationForm()` - 40 edges
+5. `Button` - 53 edges
+6. `vitest` - 52 edges
+7. `requireRole()` - 50 edges
+8. `ReservationType` - 43 edges
+9. `RoomReservationForm()` - 40 edges
+10. `PageSkeleton()` - 37 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `Di root repo` --references--> `MaskIcon()`  [INFERRED]
   docs/architecture.md → src/components/ui/MaskIcon.tsx
 - `6. Urutan pembangunan yang disarankan` --references--> `getCurrentUser()`  [INFERRED]
   docs/architecture.md → src/lib/auth/getCurrentUser.ts
-- `Mode data: dengan atau tanpa data dummy` --references--> `useLiveData()`  [INFERRED]
-  docs/architecture.md → src/hooks/useLiveData.ts
 - `Mode data: dengan atau tanpa data dummy` --references--> `useLiveState()`  [INFERRED]
   docs/architecture.md → src/hooks/useLiveData.ts
 - `Client API (orval)` --references--> `applyFormErrors()`  [INFERRED]
   docs/architecture.md → src/lib/api/form-errors.ts
+- `Client API (orval)` --references--> `customFetch()`  [INFERRED]
+  docs/architecture.md → src/lib/api/mutator.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (121 total, 20 thin omitted)
+## Communities (126 total, 19 thin omitted)
 
-### Community 0 - "auth/actions.ts"
-Cohesion: 0.26
-Nodes (15): Admin Universitas, isLaravelValidationError(), login(), LoginResult, loginWithLaravel(), logout(), onEmail(), quickLogin() (+7 more)
+### Community 0 - "requireRole.ts"
+Cohesion: 0.18
+Nodes (15): cookieStore, LOGIN_PATH, ROLE_HOME, SESSION_COOKIE, userFromSession(), findMockAccount(), MOCK_ACCOUNTS, MOCK_ADMIN_GEDUNG (+7 more)
 
-### Community 1 - "types/reservation.ts"
+### Community 1 - "OperatorFloorPage.tsx"
 Cohesion: 0.05
-Nodes (75): Operator, ref_node_url, @testing-library/react, vitest, metadata, Page(), MaskIcon(), MaskIconProps (+67 more)
+Nodes (78): Operator, metadata, Page(), MaskIcon(), MaskIconProps, useMediaQuery(), toWibTimeKey(), buildClassSchedulesMock() (+70 more)
 
-### Community 2 - "toWibDateKey"
-Cohesion: 0.05
-Nodes (73): Simulasi alur reservasi (mock store), 3. Titik Integrasi Mock untuk Prototipe, metadata, Page(), toWibDateKey(), LiveUniversityDashboard(), LiveAdminDashboard(), createReservation() (+65 more)
+### Community 2 - "reservationStore.ts"
+Cohesion: 0.12
+Nodes (26): Simulasi alur reservasi (mock store), listing, owner, addMockReservation(), approvedRoomBookings(), decideMockReservation(), EMPTY_STATE, listeners (+18 more)
 
 ### Community 3 - "DraftCard.tsx"
-Cohesion: 0.09
-Nodes (42): Loading(), DRAFT_LETTER_HOURS, DeadlineInput, getCountdown(), NOW, useCountdown(), formatTimeRangeWIB(), cancelDraft() (+34 more)
+Cohesion: 0.10
+Nodes (36): Loading(), CAPS_LABEL_CLASS, FieldProps, SelectInputProps, cancelDraft(), DraftActionResult, submitDraft(), DraftCard() (+28 more)
 
 ### Community 4 - "RoomReservationForm.tsx"
-Cohesion: 0.10
-Nodes (32): addDaysToKey(), CreateReservationPanelProps, useLiveLectureBookings(), crossFacultyApprover(), defaultSchedule(), isRoomBooked(), roomBookingsOnDay(), roomStatus (+24 more)
+Cohesion: 0.15
+Nodes (26): addDaysToKey(), crossFacultyApprover(), defaultSchedule(), isRoomBooked(), rangesOverlap(), roomBookingsOnDay(), roomStatus, base (+18 more)
 
 ### Community 5 - "TimeWheel.tsx"
 Cohesion: 0.26
 Nodes (14): clampTime(), formatPart, HourRange, joinTime(), pad(), parseTypedPart(), splitTime(), stepPart() (+6 more)
 
-### Community 6 - "scheduleCsv.ts"
-Cohesion: 0.18
-Nodes (14): parseCsv(), DAYS, normalizeTime(), overlaps(), ParsedSchedule, parseScheduleCsv(), rowSchema(), SCHEDULE_MAX_ROWS (+6 more)
+### Community 6 - "LecturerScheduleUpload.tsx"
+Cohesion: 0.07
+Nodes (41): metadata, Page(), parseCsv(), getMockLecturerSchedule(), schedules, setMockLecturerSchedule(), saveLecturerSchedule(), SaveScheduleResult (+33 more)
 
 ### Community 7 - "PageSkeleton"
-Cohesion: 0.09
-Nodes (22): Loading(), Loading(), Loading(), Loading(), Loading(), Loading(), Loading(), Loading() (+14 more)
+Cohesion: 0.11
+Nodes (19): Loading(), Loading(), Loading(), Loading(), Loading(), Loading(), Loading(), Loading() (+11 more)
 
 ### Community 8 - "RoomManager.tsx"
-Cohesion: 0.09
-Nodes (40): Admin Fakultas, ROOM_PHOTO_MAX_SIZE_MB, classroomRow(), MOCK_BUILDINGS, MOCK_ROOMS, room(), EditRoomDialog(), EditRoomDialogProps (+32 more)
+Cohesion: 0.07
+Nodes (43): Admin Gedung (role `admin_fakultas`), Ormawa dan dosen, Override slot oleh Admin Universitas, Perbedaan dengan Figma V3, Publik dan autentikasi, Ringkasan, Role dan Halaman, metadata (+35 more)
 
-### Community 9 - "AddUserDialog.tsx"
-Cohesion: 0.14
-Nodes (23): AddUserDialogProps, DEFAULTS, STATUS_OPTIONS, UserDetailChanges, UserDetailDialogProps, UserManagementProps, createUserSchema(), IssueSink (+15 more)
+### Community 9 - "UserDetailDialog.tsx"
+Cohesion: 0.21
+Nodes (11): STATUS_OPTIONS, UserDetailChanges, UserDetailDialogProps, UserManagementProps, USER_ROLES, USER_TAB_PARAM, USER_TABS, UserTabConfig (+3 more)
 
-### Community 10 - "UserManagement.tsx"
-Cohesion: 0.08
-Nodes (39): Badge(), BadgeProps, BadgeTone, SIZE_STYLES, TONE_STYLES, LinkPagination(), LinkPaginationProps, PageLink() (+31 more)
+### Community 10 - "ReservationHistoryTable.tsx"
+Cohesion: 0.22
+Nodes (11): LinkPagination(), LinkPaginationProps, PageLink(), PerPageSelect(), PerPageSelectProps, Purpose(), rejectionText(), ReservationHistoryTable() (+3 more)
 
 ### Community 11 - "FloorPlanEditor.tsx"
-Cohesion: 0.13
-Nodes (31): metadata, Page(), Drag, FloorPlanCanvas(), FloorPlanCanvasProps, CATEGORIES, FloorPlanEditor(), FloorPlanEditorProps (+23 more)
+Cohesion: 0.12
+Nodes (33): metadata, Page(), MOCK_BUILDINGS, Drag, FloorPlanCanvas(), FloorPlanCanvasProps, CATEGORIES, FloorPlanEditor() (+25 more)
 
-### Community 12 - "ReportFilterForm.tsx"
-Cohesion: 0.15
-Nodes (21): CheckboxGrid(), ChipRadios(), Choice, GroupProps, RadioRow(), isInPeriod(), shiftKey(), TIME_PERIOD_OPTIONS (+13 more)
+### Community 12 - "liveDashboard.ts"
+Cohesion: 0.23
+Nodes (16): LiveUniversityDashboard(), LiveAdminDashboard(), activeBorrowers(), CANCELLED, HOLDS_SLOT, ownReservationFigures, roomRequestsInScope(), SUCCEEDED (+8 more)
 
-### Community 13 - "SportsHallReservationForm.tsx"
-Cohesion: 0.15
-Nodes (18): rangesOverlap(), DATE, ReservationStep, STEPS_BY_TYPE, TIME, UPLOAD, SPORTS_HALL_RESERVATION_FIELD_MAP, SPORTS_HALL_SCHEDULE_FIELDS (+10 more)
+### Community 13 - "next"
+Cohesion: 0.08
+Nodes (22): nextConfig, next, Layout(), metadata, Page(), ComingSoonProps, Breadcrumb(), BreadcrumbItem (+14 more)
 
-### Community 14 - "next"
-Cohesion: 0.15
-Nodes (15): nextConfig, next, Page(), ComingSoonProps, TypeSummary, UniversityDashboardData, TypeSummaryCard(), TypeSummaryCardProps (+7 more)
+### Community 14 - "DeadlineTimer.tsx"
+Cohesion: 0.27
+Nodes (9): Countdown, DeadlineInput, getCountdown(), NOW, useCountdown(), DeadlineTimer(), DeadlineTimerProps, display() (+1 more)
 
 ### Community 15 - "Card"
-Cohesion: 0.11
-Nodes (28): LineChart(), LineChartProps, LineSeries, niceMax(), Card(), CardProps, WeeklyCounts, ReservationTrendCard() (+20 more)
+Cohesion: 0.20
+Nodes (15): LineChart(), LineChartProps, LineSeries, niceMax(), Card(), CardProps, AdminDashboard(), AdminDashboardLinks (+7 more)
 
 ### Community 16 - "contrast-check.py"
 Cohesion: 0.11
 Nodes (27): contrast_ratio(), linearize(), luminance(), main(), parse_hex(), parse_pairing(), parse_reference_rows(), WCAG 2.x contrast checker, home of the antislop-human contrast checker. Usage:… (+19 more)
 
 ### Community 17 - "useLiveData.ts"
+Cohesion: 0.15
+Nodes (22): Mode data: dengan atau tanpa data dummy, zod, LiveData, useLiveData(), LaravelValidationError, readBrowserDataMode(), listeners, LIVE_PREFIX (+14 more)
+
+### Community 18 - "Button"
 Cohesion: 0.20
-Nodes (17): zod, LiveData, useLiveData(), clearLive(), listeners, LIVE_PREFIX, liveKey(), LiveStorage (+9 more)
+Nodes (18): CheckboxGrid(), ChipRadios(), Choice, GroupProps, RadioRow(), Button, isInPeriod(), shiftKey() (+10 more)
 
-### Community 18 - "AnnouncementManager.tsx"
-Cohesion: 0.11
-Nodes (25): PAGE_SIZE_OPTIONS, Pagination(), PaginationProps, Popover(), PopoverProps, useLiveState(), usePagination(), formatRelativeDayWIB() (+17 more)
+### Community 19 - "types/reservation.ts"
+Cohesion: 0.15
+Nodes (25): B. Pengelola (`admin_fakultas` dan `admin_universitas`), Modal(), ApproveReservationDialog(), ApproveReservationDialogProps, REASON_EXAMPLE, RejectReservationDialog(), RejectReservationDialogProps, ReservationManagementProps (+17 more)
 
-### Community 19 - "Button"
-Cohesion: 0.16
-Nodes (19): B. Pengelola (`admin_fakultas` dan `admin_universitas`), react-hook-form, CAPS_LABEL_CLASS, Button, ButtonProps, VARIANT_STYLES, Modal(), UserDetailDialog() (+11 more)
+### Community 20 - "getUniversityDashboard.ts"
+Cohesion: 0.12
+Nodes (29): getDataMode, MOCK_UNIVERSITY_USER_ACTIVITY, MOCK_USER_ACTIVITY, MOCK_WEEKLY_TREND, MOCK_WEEKLY_TREND_BY_TYPE, buildReportsMock(), buildFacilityRequestsMock(), buildReservationsMock() (+21 more)
 
-### Community 20 - "getAnnouncements.ts"
-Cohesion: 0.23
-Nodes (9): metadata, Page(), metadata, Page(), metadata, Page(), buildAnnouncementsMock(), getAnnouncements() (+1 more)
-
-### Community 21 - "CreateReservationPanel.tsx"
+### Community 21 - "AddUserDialog.tsx"
 Cohesion: 0.36
-Nodes (7): @hookform/resolvers, CreateReservationPanel(), displayTime(), createOperatorReservation(), OPERATOR_RESERVATION_FIELD_MAP, operatorReservationSchema, OperatorReservationValues
+Nodes (8): Field(), AddUserDialog(), AddUserDialogProps, DEFAULTS, createUserSchema(), NewUserValues, PasswordField(), PasswordFieldProps
 
-### Community 22 - "2. Struktur dan fungsi folder"
-Cohesion: 0.25
-Nodes (8): 2. Struktur dan fungsi folder, Cara memilih lokasi sebuah file, Client API (orval), Contoh: Admin Fakultas (Figma V3, section "Admin Fakultas"), Contoh: dashboard ormawa dan dosen, Di dalam `src/`, Di root repo, Mode data: dengan atau tanpa data dummy
+### Community 22 - "UserDashboard.tsx"
+Cohesion: 0.18
+Nodes (13): buildDashboardMock(), DashboardHero(), DashboardHeroProps, TODO: replace with the orval client for the dashboard endpoint (no-store) once…, LatestAnnouncementsCard(), ReservationTotal(), ReservationTotalProps, TodayReservationCard() (+5 more)
 
 ### Community 23 - "schema.ts"
-Cohesion: 0.11
-Nodes (25): LETTER_MAX_SIZE_MB, ROOM_CLOSE_TIME, ROOM_OPEN_TIME, SPORTS_HALL_BOOKING_DAYS, SPORTS_HALL_MAX_MINUTES, ALWAYS, createRoomReservationSchema(), createSportsHallReservationSchema() (+17 more)
+Cohesion: 0.07
+Nodes (37): DRAFT_LETTER_HOURS, LETTER_MAX_SIZE_MB, ORGANISATION_MIN_DAYS_AHEAD, ROOM_CLOSE_TIME, ROOM_OPEN_TIME, SPORTS_HALL_BOOKING_DAYS, SPORTS_HALL_MAX_MINUTES, BOOKING_MODES (+29 more)
 
-### Community 24 - "VehicleReservationForm.tsx"
-Cohesion: 0.22
-Nodes (11): ORGANISATION_MIN_DAYS_AHEAD, BOOKING_MODES, BookingMode, BookingModeSettings, ReservationLinks, RoomReservationFormProps, VEHICLE_RESERVATION_FIELD_MAP, SportsHallReservationFormProps (+3 more)
+### Community 24 - "ReservationFormPage.tsx"
+Cohesion: 0.21
+Nodes (16): metadata, Page(), getMockLecturerSchedules(), InternalReservationForm(), InternalReservationFormProps, BookingMode, getRoomReservationOptions(), getSportsHallReservationOptions() (+8 more)
 
 ### Community 25 - "package.json"
 Cohesion: 0.13
 Nodes (13): name, private, version, jsdom, orval, react-dom, tailwindcss, @tailwindcss/turbopack (+5 more)
 
 ### Community 26 - "date.ts"
-Cohesion: 0.17
-Nodes (23): Countdown, DateInput, formatDateLongWIB(), formatDateShortWIB(), formatDateTimeShortWIB(), formatDateWIB(), formatDayRange(), formatDayRangeShortWIB() (+15 more)
+Cohesion: 0.21
+Nodes (18): DateInput, formatDateLongWIB(), formatDateShortWIB(), formatDateTimeShortWIB(), formatDateWIB(), formatDayRange(), formatDayRangeShortWIB(), formatDayRangeWIB() (+10 more)
 
 ### Community 27 - "getDataMode.ts"
-Cohesion: 0.24
-Nodes (12): DATA_MODE_COOKIE, DataMode, parseDataMode(), readBrowserDataMode(), writeBrowserDataMode(), DataModeControls(), DataModeSwitch(), DataModeSwitchProps (+4 more)
+Cohesion: 0.23
+Nodes (12): DATA_MODE_COOKIE, DataMode, parseDataMode(), writeBrowserDataMode(), clearLive(), DataModeSwitchProps, MODES, notify() (+4 more)
 
-### Community 28 - "pengguna/page.tsx"
-Cohesion: 0.17
-Nodes (15): metadata, Page(), metadata, Page(), MOCK_FAKULTAS, getManagedUsers(), parseUserTab(), USER_TAB_PARAM (+7 more)
+### Community 28 - "UniversityDashboard.tsx"
+Cohesion: 0.15
+Nodes (17): MOCK_FAKULTAS, TypeSummary, UniversityDashboardData, ReservationTrendCard(), TypeSummaryCard(), TypeSummaryCardProps, TONE, UniversityDashboard() (+9 more)
 
-### Community 29 - "CreateReservationBreadcrumb.tsx"
-Cohesion: 0.33
-Nodes (6): Layout(), Breadcrumb(), BreadcrumbItem, BreadcrumbProps, CreateReservationBreadcrumb(), ORMAWA_ROUTES
+### Community 29 - "react"
+Cohesion: 0.13
+Nodes (18): react, metadata, Page(), ResultDialog(), ResultDialogProps, ModalProps, useModalDialog(), changePassword() (+10 more)
 
-### Community 30 - "useLiveFacilities.ts"
-Cohesion: 0.27
-Nodes (9): buildingsSchema, floorPlanRoomSchema, lecturerSchedulesSchema, LIVE_NAMES, reportsSchema, weekdaySchema, useLiveBuildings(), useLiveFloor() (+1 more)
+### Community 30 - "2. Struktur dan fungsi folder"
+Cohesion: 0.13
+Nodes (14): 1. Prinsip, 2. Struktur dan fungsi folder, 3. Aturan dependensi, 4. Pola utama, 5. Penamaan, 6. Urutan pembangunan yang disarankan, 7. Kapan struktur ini ditinjau ulang, Arsitektur KIREI FE (+6 more)
 
 ### Community 31 - "content.ts"
 Cohesion: 0.07
 Nodes (44): framer-motion, metadata, Page(), BOOKING_WINDOW_RULE, CAMPUS_ADDRESS, FACILITY_ITEMS, FACILITY_SLIDES, FacilitySlide (+36 more)
 
 ### Community 32 - "createReservation.ts"
-Cohesion: 0.16
-Nodes (16): wibToIso(), CreateReservationResult, TODO: send `request` with the orval client (POST, multipart). Map 422 bodies to…, TODO: match the request keys and the status field to the OpenAPI spec., ReservationListing, ReservationRequest, status(), text() (+8 more)
-
-### Community 33 - "facility.ts"
 Cohesion: 0.14
-Nodes (20): buildRoomBookingsMock(), buildSportsHallBookingsMock(), MOCK_BUILDINGS, MOCK_ROOM_RULES, MOCK_SPORTS_HALL, MOCK_VEHICLES, SAMPLE_CAPACITY, TODO: replace with the orval client for buildings and floor plans (no-store). (+12 more)
+Nodes (18): CreateReservationResult, TODO: send `request` with the orval client (POST, multipart). Map 422 bodies to…, TODO: match the request keys and the status field to the OpenAPI spec., ReservationListing, ReservationRequest, status(), BUS, text() (+10 more)
+
+### Community 33 - "toWibDateKey"
+Cohesion: 0.14
+Nodes (21): toWibDateKey(), wibToIso(), buildSportsHallBookingsMock(), MOCK_ROOM_RULES, MOCK_SPORTS_HALL, MOCK_VEHICLES, SAMPLE_CAPACITY, useLiveBuildings() (+13 more)
 
 ### Community 34 - "compilerOptions"
 Cohesion: 0.11
@@ -305,21 +310,25 @@ Nodes (18): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModu
 Cohesion: 0.04
 Nodes (45): Accessibility Code Patterns, ARIA tabs, Dragging movements, Error handling, Form labels, Live regions and notifications, Modal focus trap, Pointer cursor base layer (+37 more)
 
-### Community 36 - "getUniversityDashboard.ts"
-Cohesion: 0.15
-Nodes (19): metadata, Page(), getDataMode, MOCK_UNIVERSITY_USER_ACTIVITY, MOCK_USER_ACTIVITY, MOCK_WEEKLY_TREND, MOCK_WEEKLY_TREND_BY_TYPE, buildReportsMock() (+11 more)
+### Community 36 - "reservations.ts"
+Cohesion: 0.12
+Nodes (20): BOOKER, buildReservationHistoryMock(), FACILITY_ROWS, FacilityRow, PAST_STATUSES, PAST_TRIPS, pastRecords(), PURPOSES (+12 more)
 
 ### Community 37 - "ReservationLogCalendar.tsx"
-Cohesion: 0.24
-Nodes (12): buildMonthGrid(), CalendarCell, CalendarMarker, keyOf(), monthOfKey(), monthRange(), MonthRef, cellClass() (+4 more)
+Cohesion: 0.23
+Nodes (13): monthName(), buildMonthGrid(), CalendarCell, CalendarMarker, keyOf(), monthOfKey(), monthRange(), MonthRef (+5 more)
 
 ### Community 38 - "ComplaintForm.tsx"
-Cohesion: 0.16
-Nodes (16): applyFormErrors(), FormErrorEntry, LaravelValidationError, fieldMap, toFormErrors(), ComplaintForm(), ComplaintFormProps, DEFAULTS (+8 more)
+Cohesion: 0.21
+Nodes (10): ROWS, ComplaintFormProps, DEFAULTS, CATEGORIES, COMPLAINT_FIELD_MAP, ComplaintInput, complaintSchema, ComplaintValues (+2 more)
 
-### Community 39 - "requireRole"
-Cohesion: 0.12
-Nodes (19): metadata, Page(), metadata, Page(), metadata, Page(), metadata, Page() (+11 more)
+### Community 39 - "AnnouncementManager.tsx"
+Cohesion: 0.18
+Nodes (15): @testing-library/react, ANNOUNCEMENT_CATEGORY, AnnouncementManagerProps, ANNOUNCEMENT, CreateAnnouncementDialog(), CreateAnnouncementDialogProps, Errors, NewAnnouncement (+7 more)
+
+### Community 40 - "query.ts"
+Cohesion: 0.16
+Nodes (22): metadata, Page(), ACTIVE_STATUSES, buildHistoryResult(), ReservationHistoryResult, DEFAULT_HISTORY_QUERY, first(), groupActiveReservations() (+14 more)
 
 ### Community 41 - "Tone & Voice"
 Cohesion: 0.05
@@ -329,37 +338,37 @@ Nodes (38): Actorless Passive, All-Caps Emphasis, antislop-copywriting, Aphorism
 Cohesion: 0.20
 Nodes (9): context, dockerfile, build, container_name, environment, ports, restart, services (+1 more)
 
-### Community 43 - "[tipe]/persetujuan/page.tsx"
-Cohesion: 0.19
-Nodes (15): generateMetadata(), generateStaticParams, Page(), generateStaticParams, Page(), generateMetadata(), generateStaticParams, Page() (+7 more)
+### Community 43 - "requireRole"
+Cohesion: 0.12
+Nodes (27): metadata, Page(), metadata, Page(), metadata, Page(), generateMetadata(), generateStaticParams (+19 more)
 
 ### Community 44 - "antislop-layoutmobile"
 Cohesion: 0.06
 Nodes (30): 100vh Sections, antislop-layoutmobile, Bottom Nav That Eats Content, Breakpoint Driven by Device List, Breakpoints, Columns That Don't Collapse, Desktop-Only Layout, Desktop-Sized Everything (+22 more)
 
-### Community 45 - "LecturerScheduleUpload.tsx"
+### Community 45 - "UserReportList.tsx"
 Cohesion: 0.14
-Nodes (22): metadata, Page(), getMockLecturerSchedule(), getMockLecturerSchedules(), schedules, setMockLecturerSchedule(), saveLecturerSchedule(), SaveScheduleResult (+14 more)
+Nodes (16): PAGE_SIZE_OPTIONS, Pagination(), PaginationProps, Popover(), PopoverProps, formatRelativeDayWIB(), LatestReportsCardProps, DEFAULT_REPORT_FILTER (+8 more)
 
-### Community 46 - "getCurrentUser.ts"
-Cohesion: 0.18
-Nodes (13): cookieStore, LOGIN_PATH, ROLE_HOME, SESSION_COOKIE, userFromSession(), findMockAccount(), findMockUserById(), MOCK_ADMIN_FAKULTAS (+5 more)
+### Community 46 - "getCurrentUser"
+Cohesion: 0.23
+Nodes (12): metadata, Page(), metadata, Page(), metadata, Page(), metadata, Page() (+4 more)
 
-### Community 47 - "getManagedUsers.ts"
-Cohesion: 0.20
-Nodes (10): MOCK_ACCOUNTS, ADMIN_FAKULTAS, DOSEN, MOCK_MANAGED_USERS, OPERATORS, ORMAWA, demoAccountUsers(), isManagedRole() (+2 more)
+### Community 47 - "auth/actions.ts"
+Cohesion: 0.34
+Nodes (13): Admin Universitas, login(), LoginResult, loginWithLaravel(), logout(), onEmail(), quickLogin(), startSession() (+5 more)
 
-### Community 48 - "ReservationType"
-Cohesion: 0.10
-Nodes (19): Admin Universitas, Ormawa dan dosen, Override slot oleh Admin Universitas, Perbedaan dengan Figma V3, Publik dan autentikasi, Ringkasan, Role dan Halaman, metadata (+11 more)
+### Community 48 - "devDependencies"
+Cohesion: 0.14
+Nodes (14): devDependencies, eslint, eslint-config-next, jsdom, orval, tailwindcss, @tailwindcss/turbopack, @testing-library/dom (+6 more)
 
 ### Community 49 - "What You Must Do When Invoked"
 Cohesion: 0.08
 Nodes (24): For /graphify add and --watch, For /graphify query, For the commit hook and native CLAUDE.md integration, For --update and --cluster-only, /graphify, Honesty Rules, Interpreter guard for subcommands, Part A - Structural extraction for code files (+16 more)
 
-### Community 50 - "getCurrentUser"
-Cohesion: 0.28
-Nodes (11): metadata, Page(), metadata, Page(), metadata, Page(), metadata, Page() (+3 more)
+### Community 50 - "ActiveReservationCard.tsx"
+Cohesion: 0.26
+Nodes (9): formatTimeRangeWIB(), ActiveReservationCard(), Field(), room, ActiveReservationList(), ActiveReservationListProps, Group(), tripText() (+1 more)
 
 ### Community 51 - "AdminDashboardSkeleton"
 Cohesion: 0.60
@@ -369,9 +378,9 @@ Nodes (3): Loading(), Loading(), AdminDashboardSkeleton()
 Cohesion: 0.60
 Nodes (3): Loading(), Loading(), ReservationFormSkeleton()
 
-### Community 53 - "ReservationRequest"
-Cohesion: 0.09
-Nodes (28): metadata, Page(), metadata, Page(), Layout(), Page(), RESERVATION_TAB_LINKS, UniversityReservationsProps (+20 more)
+### Community 53 - "admin-universitas/routes.ts"
+Cohesion: 0.18
+Nodes (10): Admin Universitas, Layout(), Page(), SegmentedNav(), SegmentedNavItem, SegmentedNavProps, ADMIN_UNIVERSITAS_ROUTES, internalReservationRoute() (+2 more)
 
 ### Community 54 - "allowBuilds"
 Cohesion: 0.50
@@ -381,53 +390,61 @@ Nodes (3): allowBuilds, esbuild, unrs-resolver
 Cohesion: 0.08
 Nodes (24): For /graphify add and --watch, For /graphify query, For the commit hook and native CLAUDE.md integration, For --update and --cluster-only, /graphify, Honesty Rules, Interpreter guard for subcommands, Part A - Structural extraction for code files (+16 more)
 
-### Community 65 - "Arsitektur KIREI FE"
-Cohesion: 0.25
-Nodes (7): 1. Prinsip, 3. Aturan dependensi, 4. Pola utama, 5. Penamaan, 6. Urutan pembangunan yang disarankan, 7. Kapan struktur ini ditinjau ulang, Arsitektur KIREI FE
+### Community 65 - "UserManagement.tsx"
+Cohesion: 0.26
+Nodes (11): TABLE, TABLE_CELL, TABLE_HEAD_CELL, TABLE_ROW, UserDetailDialog(), Email(), TODO: PATCH the status and PUT the new password through the orval client; the…, TODO: POST the account (with its password) through the orval client; the… (+3 more)
 
 ### Community 66 - "Group 1: Hard Gate (absolute, no exceptions)"
 Cohesion: 0.10
 Nodes (20): Group 1: Hard Gate (absolute, no exceptions), R-02 — Copywriting, R-03 — Mobile Responsiveness, R-17 — Data & Numbers, R-18 — Testimonials, R-23 — Clarification & Visual Assets, R-24 — Navigation, R-25 — Color Contrast (+12 more)
 
-### Community 67 - "RoomReservationForm"
-Cohesion: 0.21
-Nodes (23): A. Pemohon (`organisasi` dan `dosen`), Komponen `shared/` dan pemakainya, InternalReservationForm(), FloorPlan(), getRoomReservationOptions(), getSportsHallReservationOptions(), getVehicleReservationOptions(), LetterField() (+15 more)
+### Community 67 - "SportsHallReservationForm.tsx"
+Cohesion: 0.10
+Nodes (34): 1. Tabel Pemetaan Halaman dan Komponen Utama, 4. Perbedaan dengan Vault dan Keputusan, A. Pemohon (`organisasi` dan `dosen`), Mapping Antarmuka dan Alur Kerja Reservasi (Pemohon hingga Persetujuan Admin), Komponen `shared/` dan pemakainya, @hookform/resolvers, LetterField(), LetterFieldProps (+26 more)
 
 ### Community 68 - "Comments That Add Nothing"
 Cohesion: 0.11
 Nodes (17): antislop-code, Code Comment Checklist, Comments That Add Nothing, Decorative Emoji, Decorative Separators, Empty Labels, End Markers, How It Should Read (+9 more)
 
-### Community 69 - "react"
-Cohesion: 0.19
-Nodes (13): react, ResultDialog(), ResultDialogProps, ModalProps, useModalDialog(), changePassword(), MIN_PASSWORD_LENGTH, PasswordChange (+5 more)
-
-### Community 70 - "QuickLogin.tsx"
-Cohesion: 0.33
-Nodes (7): QuickLogin(), QuickLoginProps, ROLE_LABEL, roleLabel(), ProfilePageProps, CurrentUser, UserRole
-
-### Community 71 - "laravel.ts"
+### Community 69 - "laravel.ts"
 Cohesion: 0.27
 Nodes (12): callLaravel(), decode(), fetchApiUser(), LaravelCookie, LaravelResponse, parseApiUser(), parseSetCookie(), userSchema (+4 more)
+
+### Community 70 - "LoginPage.tsx"
+Cohesion: 0.20
+Nodes (13): metadata, Page(), getSessionUser, getDemoAccounts(), LoginForm(), LoginPage(), QuickLogin(), QuickLoginProps (+5 more)
+
+### Community 71 - "ContactPage.tsx"
+Cohesion: 0.31
+Nodes (7): metadata, Page(), CONTACT, TODO: replace the Figma placeholders with the real Sarpras Udinus contacts…, ComplaintForm(), ChannelIcon(), ContactPage()
 
 ### Community 72 - "KIREI FE"
 Cohesion: 0.12
 Nodes (15): antislop, Aturan bisnis: sumber di vault Obsidian, Aturan wajib, Keamanan dan data, Keputusan yang sudah diambil (jangan diusulkan ulang), KIREI FE, Kode, Penamaan (+7 more)
 
-### Community 73 - "reservations.ts"
-Cohesion: 0.16
-Nodes (19): BOOKER, buildFacilityRequestsMock(), buildReservationHistoryMock(), buildReservationsMock(), FACILITY_ROWS, FacilityRow, PAST_STATUSES, pastRecords() (+11 more)
+### Community 73 - "dependencies"
+Cohesion: 0.25
+Nodes (8): dependencies, framer-motion, @hookform/resolvers, next, react, react-dom, react-hook-form, zod
 
-### Community 74 - "devDependencies"
-Cohesion: 0.14
-Nodes (14): devDependencies, eslint, eslint-config-next, jsdom, orval, tailwindcss, @tailwindcss/turbopack, @testing-library/dom (+6 more)
+### Community 74 - "scripts"
+Cohesion: 0.25
+Nodes (8): scripts, api:generate, build, dev, lint, start, test, typecheck
+
+### Community 75 - "VehicleReservationForm.tsx"
+Cohesion: 0.16
+Nodes (16): react-hook-form, createReservation(), ReservationSubmitDialogProps, SubmissionFields, ReservationIntent, FieldError(), SUMMARY_INPUT, SUMMARY_LABEL (+8 more)
 
 ### Community 76 - "Group 2: Purpose-Gate (technique allowed, purpose required)"
 Cohesion: 0.15
 Nodes (13): Group 2: Purpose-Gate (technique allowed, purpose required), R-01 — Color & Gradients, R-04 — Icons, R-06 — Typography, R-07 — Background, R-08 — Button Arrows, R-09 — Badges, R-10 — Glassmorphism (+5 more)
 
+### Community 77 - "eslint.config.mjs"
+Cohesion: 0.40
+Nodes (3): eslintConfig, eslint, eslint-config-next
+
 ### Community 78 - "OrmawaShell.tsx"
-Cohesion: 0.07
-Nodes (41): AdminFakultasLayout(), AdminUniversitasLayout(), OperatorLayout(), metadata, Page(), OrmawaLayout(), AppBrand(), isActive() (+33 more)
+Cohesion: 0.06
+Nodes (46): AdminGedungLayout(), AdminUniversitasLayout(), src_app_globals, inter, metadata, poppins, OperatorLayout(), metadata (+38 more)
 
 ### Community 79 - "Decorative Elements"
 Cohesion: 0.17
@@ -489,9 +506,9 @@ Nodes (5): For /graphify explain, For /graphify path, graphify reference: query,
 Cohesion: 0.33
 Nodes (5): For /graphify explain, For /graphify path, graphify reference: query, path, explain, Step 0 — Constrained query expansion (REQUIRED before traversal), Step 1 — Traversal
 
-### Community 94 - "Field.tsx"
-Cohesion: 0.24
-Nodes (13): Field(), FieldProps, INPUT_CLASS, SelectInput(), SelectInputProps, AddUserDialog(), CreateAnnouncementDialog(), CreateAnnouncementDialogProps (+5 more)
+### Community 94 - "LoginForm.tsx"
+Cohesion: 0.26
+Nodes (8): INPUT_CLASS, applyFormErrors(), FormErrorEntry, isLaravelValidationError(), fieldMap, toFormErrors(), loginSchema, LoginValues
 
 ### Community 95 - "Delivery Gate (Mandatory)"
 Cohesion: 0.40
@@ -533,57 +550,69 @@ Nodes (3): For --cluster-only, For --update (incremental re-extraction), graphif
 Cohesion: 0.50
 Nodes (3): Deploy on Vercel, Getting Started, Learn More
 
-### Community 115 - "mutator.test.ts"
+### Community 115 - "vehicleAvailability.ts"
+Cohesion: 0.16
+Nodes (16): 3. Titik Integrasi Mock untuk Prototipe, buildRoomBookingsMock(), VehicleReservationOptions, HOLDING_STATUSES, passengerSeats(), BUS, ELF, HIACE (+8 more)
+
+### Community 116 - "gedung/dashboard/page.tsx"
+Cohesion: 0.19
+Nodes (9): metadata, Page(), metadata, Page(), metadata, Page(), RESERVATION_TAB_LINKS, ADMIN_GEDUNG_ROUTES (+1 more)
+
+### Community 117 - "AnnouncementManager"
+Cohesion: 0.26
+Nodes (10): metadata, Page(), metadata, Page(), metadata, Page(), buildAnnouncementsMock(), AnnouncementManager() (+2 more)
+
+### Community 118 - "Button.tsx"
+Cohesion: 0.31
+Nodes (4): RouteError(), RouteErrorProps, ButtonProps, VARIANT_STYLES
+
+### Community 119 - "userSchema.ts"
+Cohesion: 0.18
+Nodes (11): IssueSink, managedUsersSchema, NewUserInput, passwordResetSchema, PasswordResetValues, passwordShape, requireMatchingPassword(), NO_FLOOR (+3 more)
+
+### Community 120 - "getManagedUsers.ts"
+Cohesion: 0.21
+Nodes (11): ADMIN_GEDUNG, DOSEN, MOCK_MANAGED_USERS, OPERATORS, ORMAWA, demoAccountUsers(), getManagedUsers(), isManagedRole() (+3 more)
+
+### Community 121 - "mutator.test.ts"
 Cohesion: 0.24
 Nodes (7): API_URL, CSRF_METHODS, customFetch(), readBody(), readXsrfToken(), Result, toApiUrl()
 
-### Community 119 - "UserDashboard.tsx"
-Cohesion: 0.14
-Nodes (19): metadata, Page(), buildDashboardMock(), DashboardHero(), DashboardHeroProps, getUserDashboard(), TODO: replace with the orval client for the dashboard endpoint (no-store) once…, LatestAnnouncementsCard() (+11 more)
+### Community 122 - "vitest"
+Cohesion: 0.24
+Nodes (5): ref_node_url, vitest, usePagination(), Page, paginate()
 
-### Community 120 - "2. Alur Tindakan Pengguna (User Flow)"
-Cohesion: 0.20
-Nodes (8): 1. Tabel Pemetaan Halaman dan Komponen Utama, 2. Alur Tindakan Pengguna (User Flow), 4. Perbedaan dengan Vault dan Keputusan, A. Alur Pengajuan Reservasi Ruangan (pemohon), B. Alur Draft (khusus `organisasi`), C. Alur Persetujuan (admin), D. Alur Penolakan (admin), Mapping Antarmuka dan Alur Kerja Reservasi (Pemohon hingga Persetujuan Admin)
+### Community 123 - "LiveUserDashboard.tsx"
+Cohesion: 0.31
+Nodes (7): metadata, Page(), getUserDashboard(), LiveUserDashboard(), UserDashboardProps, announcementsSchema, LIVE_NAMES
 
-### Community 122 - "LoginPage.tsx"
-Cohesion: 0.17
-Nodes (11): src_app_globals, inter, metadata, poppins, metadata, Page(), SITE, getSessionUser (+3 more)
+### Community 124 - "ReservationStatusBadge.tsx"
+Cohesion: 0.31
+Nodes (7): Badge(), BadgeProps, BadgeTone, SIZE_STYLES, TONE_STYLES, StatusBadge(), RESERVATION_STATUS
 
-### Community 123 - "ContactPage.tsx"
-Cohesion: 0.33
-Nodes (6): metadata, Page(), CONTACT, TODO: replace the Figma placeholders with the real Sarpras Udinus contacts…, ChannelIcon(), ContactPage()
-
-### Community 124 - "dependencies"
-Cohesion: 0.25
-Nodes (8): dependencies, framer-motion, @hookform/resolvers, next, react, react-dom, react-hook-form, zod
-
-### Community 125 - "scripts"
-Cohesion: 0.25
-Nodes (8): scripts, api:generate, build, dev, lint, start, test, typecheck
-
-### Community 126 - "eslint.config.mjs"
+### Community 125 - "2. Alur Tindakan Pengguna (User Flow)"
 Cohesion: 0.40
-Nodes (3): eslintConfig, eslint, eslint-config-next
+Nodes (5): 2. Alur Tindakan Pengguna (User Flow), A. Alur Pengajuan Reservasi Ruangan (pemohon), B. Alur Draft (khusus `organisasi`), C. Alur Persetujuan (admin), D. Alur Penolakan (admin)
 
 ## Knowledge Gaps
-- **680 isolated node(s):** `eslintConfig`, `nextConfig`, `name`, `version`, `private` (+675 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 810 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **20 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **685 isolated node(s):** `eslintConfig`, `nextConfig`, `name`, `version`, `private` (+680 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 814 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **19 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `next` connect `next` to `auth/actions.ts`, `types/reservation.ts`, `toWibDateKey`, `DraftCard.tsx`, `RoomReservationForm.tsx`, `RoomManager.tsx`, `UserManagement.tsx`, `FloorPlanEditor.tsx`, `SportsHallReservationForm.tsx`, `Card`, `AnnouncementManager.tsx`, `Button`, `getAnnouncements.ts`, `package.json`, `getDataMode.ts`, `pengguna/page.tsx`, `CreateReservationBreadcrumb.tsx`, `content.ts`, `facility.ts`, `getUniversityDashboard.ts`, `ReservationLogCalendar.tsx`, `requireRole`, `[tipe]/persetujuan/page.tsx`, `LecturerScheduleUpload.tsx`, `getCurrentUser.ts`, `getManagedUsers.ts`, `ReservationType`, `getCurrentUser`, `ReservationRequest`, `RoomReservationForm`, `react`, `laravel.ts`, `OrmawaShell.tsx`, `Field.tsx`, `UserDashboard.tsx`, `LoginPage.tsx`, `ContactPage.tsx`?**
-  _High betweenness centrality (0.173) - this node is a cross-community bridge._
-- **Why does `react` connect `react` to `types/reservation.ts`, `toWibDateKey`, `DraftCard.tsx`, `RoomReservationForm.tsx`, `TimeWheel.tsx`, `RoomManager.tsx`, `AddUserDialog.tsx`, `UserManagement.tsx`, `FloorPlanEditor.tsx`, `ReportFilterForm.tsx`, `SportsHallReservationForm.tsx`, `Card`, `useLiveData.ts`, `AnnouncementManager.tsx`, `Button`, `CreateReservationPanel.tsx`, `VehicleReservationForm.tsx`, `package.json`, `getDataMode.ts`, `pengguna/page.tsx`, `useLiveFacilities.ts`, `content.ts`, `ReservationLogCalendar.tsx`, `ComplaintForm.tsx`, `LecturerScheduleUpload.tsx`, `getCurrentUser.ts`, `RoomReservationForm`, `QuickLogin.tsx`, `OrmawaShell.tsx`, `Field.tsx`, `UserDashboard.tsx`, `LoginPage.tsx`?**
-  _High betweenness centrality (0.094) - this node is a cross-community bridge._
-- **Why does `vitest` connect `types/reservation.ts` to `toWibDateKey`, `DraftCard.tsx`, `RoomReservationForm.tsx`, `TimeWheel.tsx`, `scheduleCsv.ts`, `RoomManager.tsx`, `AddUserDialog.tsx`, `FloorPlanEditor.tsx`, `ReportFilterForm.tsx`, `SportsHallReservationForm.tsx`, `useLiveData.ts`, `AnnouncementManager.tsx`, `schema.ts`, `VehicleReservationForm.tsx`, `package.json`, `date.ts`, `pengguna/page.tsx`, `CreateReservationBreadcrumb.tsx`, `content.ts`, `createReservation.ts`, `facility.ts`, `getUniversityDashboard.ts`, `ReservationLogCalendar.tsx`, `ComplaintForm.tsx`, `[tipe]/persetujuan/page.tsx`, `getCurrentUser.ts`, `ReservationRequest`, `react`, `laravel.ts`, `OrmawaShell.tsx`, `mutator.test.ts`?**
-  _High betweenness centrality (0.067) - this node is a cross-community bridge._
+- **Why does `next` connect `next` to `requireRole.ts`, `OperatorFloorPage.tsx`, `DraftCard.tsx`, `RoomReservationForm.tsx`, `LecturerScheduleUpload.tsx`, `RoomManager.tsx`, `ReservationHistoryTable.tsx`, `FloorPlanEditor.tsx`, `Card`, `types/reservation.ts`, `getUniversityDashboard.ts`, `AddUserDialog.tsx`, `UserDashboard.tsx`, `ReservationFormPage.tsx`, `package.json`, `getDataMode.ts`, `UniversityDashboard.tsx`, `react`, `content.ts`, `toWibDateKey`, `reservations.ts`, `ReservationLogCalendar.tsx`, `AnnouncementManager.tsx`, `query.ts`, `requireRole`, `UserReportList.tsx`, `getCurrentUser`, `auth/actions.ts`, `ActiveReservationCard.tsx`, `admin-universitas/routes.ts`, `UserManagement.tsx`, `SportsHallReservationForm.tsx`, `laravel.ts`, `LoginPage.tsx`, `ContactPage.tsx`, `VehicleReservationForm.tsx`, `OrmawaShell.tsx`, `gedung/dashboard/page.tsx`, `AnnouncementManager`, `getManagedUsers.ts`, `LiveUserDashboard.tsx`?**
+  _High betweenness centrality (0.159) - this node is a cross-community bridge._
+- **Why does `react` connect `react` to `requireRole.ts`, `OperatorFloorPage.tsx`, `reservationStore.ts`, `DraftCard.tsx`, `RoomReservationForm.tsx`, `TimeWheel.tsx`, `LecturerScheduleUpload.tsx`, `RoomManager.tsx`, `UserDetailDialog.tsx`, `ReservationHistoryTable.tsx`, `FloorPlanEditor.tsx`, `liveDashboard.ts`, `next`, `DeadlineTimer.tsx`, `useLiveData.ts`, `Button`, `types/reservation.ts`, `AddUserDialog.tsx`, `package.json`, `getDataMode.ts`, `UniversityDashboard.tsx`, `content.ts`, `toWibDateKey`, `ReservationLogCalendar.tsx`, `ComplaintForm.tsx`, `AnnouncementManager.tsx`, `query.ts`, `UserReportList.tsx`, `UserManagement.tsx`, `SportsHallReservationForm.tsx`, `LoginPage.tsx`, `VehicleReservationForm.tsx`, `OrmawaShell.tsx`, `Button.tsx`, `vitest`, `LiveUserDashboard.tsx`?**
+  _High betweenness centrality (0.106) - this node is a cross-community bridge._
+- **Why does `vitest` connect `vitest` to `requireRole.ts`, `OperatorFloorPage.tsx`, `reservationStore.ts`, `DraftCard.tsx`, `RoomReservationForm.tsx`, `TimeWheel.tsx`, `LecturerScheduleUpload.tsx`, `RoomManager.tsx`, `ReservationHistoryTable.tsx`, `FloorPlanEditor.tsx`, `liveDashboard.ts`, `next`, `DeadlineTimer.tsx`, `useLiveData.ts`, `Button`, `types/reservation.ts`, `getUniversityDashboard.ts`, `schema.ts`, `package.json`, `date.ts`, `UniversityDashboard.tsx`, `react`, `content.ts`, `createReservation.ts`, `toWibDateKey`, `ReservationLogCalendar.tsx`, `ComplaintForm.tsx`, `AnnouncementManager.tsx`, `query.ts`, `UserReportList.tsx`, `getCurrentUser`, `ActiveReservationCard.tsx`, `SportsHallReservationForm.tsx`, `laravel.ts`, `OrmawaShell.tsx`, `LoginForm.tsx`, `vehicleAvailability.ts`, `userSchema.ts`, `mutator.test.ts`?**
+  _High betweenness centrality (0.053) - this node is a cross-community bridge._
 - **What connects `eslintConfig`, `nextConfig`, `name` to the rest of the system?**
-  _680 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `types/reservation.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.05133599831685252 - nodes in this community are weakly interconnected._
-- **Should `toWibDateKey` be split into smaller, more focused modules?**
-  _Cohesion score 0.0547008547008547 - nodes in this community are weakly interconnected._
+  _685 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `OperatorFloorPage.tsx` be split into smaller, more focused modules?**
+  _Cohesion score 0.05350877192982456 - nodes in this community are weakly interconnected._
+- **Should `reservationStore.ts` be split into smaller, more focused modules?**
+  _Cohesion score 0.11742424242424243 - nodes in this community are weakly interconnected._
 - **Should `DraftCard.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.0880503144654088 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09855072463768116 - nodes in this community are weakly interconnected._

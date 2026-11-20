@@ -16,5 +16,4 @@ export const ADMIN_UNIVERSITAS_NAV: NavLinkConfig[][] = [
     { label: "Kelola Pengguna", href: ADMIN_UNIVERSITAS_ROUTES.users, iconSrc: "/icons/nav/manage-users.svg" },
     { label: "Pengumuman", href: ADMIN_UNIVERSITAS_ROUTES.announcements, iconSrc: "/icons/nav/announcements.svg", iconSize: 20 },
   ],
-  [{ label: "Profil", href: ADMIN_UNIVERSITAS_ROUTES.profile, iconSrc: "/icons/nav/profile.svg" }],
 ];

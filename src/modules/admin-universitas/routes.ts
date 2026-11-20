@@ -10,7 +10,6 @@ export const ADMIN_UNIVERSITAS_ROUTES = {
   floorPlans: "/admin/denah",
   users: "/admin/pengguna",
   announcements: "/admin/pengumuman",
-  profile: "/admin/profil",
 } as const;
 
 export function internalReservationRoute(tipe: ReservationType) {

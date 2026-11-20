@@ -2,11 +2,12 @@
 
 import Image from "next/image";
 import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Pagination } from "@/components/ui/Pagination";
 import { TABLE, TABLE_CELL, TABLE_HEAD_CELL, TABLE_ROW } from "@/components/ui/table";
 import { usePagination } from "@/hooks/usePagination";
-import { formatTimeWIB } from "@/lib/date";
+import { formatTimeWIB, toWibDateKey } from "@/lib/date";
 import { ReservationDetailDialog } from "@/shared/reservation/ReservationDetailDialog";
 import { ReservationStatusBadge } from "@/shared/reservation/ReservationStatusBadge";
 import { isWholeDayType, reservationDateShort } from "@/shared/reservation/reservationTime";
@@ -14,10 +15,13 @@ import { RESERVATION_TYPE_LABEL } from "@/shared/reservation/reservationTypes";
 import { decideMockReservation, mergeAdminRequests, type MockDecision } from "@/shared/reservation-store/reservationStore";
 import { useMockReservations } from "@/shared/reservation-store/useMockReservations";
 import type { ReservationRequest, ReservationType } from "@/types/reservation";
+import type { Staff } from "@/types/staff";
 import { requestsForTab, type ReservationTab } from "./requestTabs";
 import { ApproveReservationDialog } from "./ApproveReservationDialog";
 import { RejectReservationDialog } from "./RejectReservationDialog";
 import { TYPE_COLUMNS } from "./typeColumns";
+import { VehicleCrewPanel } from "./VehicleCrewPanel";
+import { vehicleHistoryCsv } from "./vehicleReport";
 
 export interface ReservationTableProps {
   tipe: ReservationType;
@@ -28,6 +32,11 @@ export interface ReservationTableProps {
   roomCodes: string[] | null;
   /** Buildings in the admin's scope, so a room added later in Kelola Denah still counts. */
   buildingNames?: string[];
+  /**
+   * Drivers for vehicle requests. When set, the detail of a vehicle request shows the Sopir and Uang
+   * cards, and the vehicle history gets an "Ekspor Laporan" button.
+   */
+  staff?: Staff[];
 }
 
 const TH = `${TABLE_HEAD_CELL} text-left`;
@@ -47,7 +56,7 @@ const EMPTY_TEXT: Record<ReservationTab, string> = {
 };
 
 /** Reservations table for both tabs: approval actions on "persetujuan", status on "riwayat". */
-export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, buildingNames }: ReservationTableProps) {
+export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, buildingNames, staff }: ReservationTableProps) {
   const store = useMockReservations();
   // Decisions this browser could not store (e.g. private mode) still apply until the page reloads.
   const [unsaved, setUnsaved] = useState<Record<string, MockDecision>>({});
@@ -71,6 +80,19 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, b
   // Extra type columns need more room, so the card list stays on until xl.
   const layout = columns.length > 1 ? WIDE_LAYOUT : DEFAULT_LAYOUT;
 
+  const vehicleCrew = tipe === "kendaraan" && staff ? staff : null;
+
+  const exportReport = () => {
+    if (!vehicleCrew) return;
+    const csv = vehicleHistoryCsv(reservations, store.assignments ?? {}, vehicleCrew);
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    link.download = `riwayat-kendaraan-${toWibDateKey(new Date())}.csv`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+    setNotice(`Laporan ${reservations.length} reservasi kendaraan diunduh.`);
+  };
+
   const resolve = (reservation: ReservationRequest, decision: Omit<MockDecision, "decidedAt">, message: string) => {
     // TODO: POST approve/reject through the orval client, then refetch. Until then the demo store keeps it.
     if (!decideMockReservation(reservation.id, decision)) {
@@ -79,28 +101,48 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, b
     setNotice(message);
   };
 
-  const renderActions = (reservation: ReservationRequest) => (
+  // History rows have one action, shaped like the decision: a check opens the details, a cross opens
+  // them with the rejection reason.
+  const renderHistoryAction = (reservation: ReservationRequest) => {
+    const rejected = reservation.status === "ditolak";
+    return (
+      <button
+        type="button"
+        onClick={() => setViewing(reservation)}
+        aria-label={`${rejected ? "Lihat alasan penolakan" : "Lihat detail"} reservasi ${reservation.borrowerName}`}
+        className={`${ICON_BUTTON} ${
+          rejected
+            ? "border-danger-soft hover:border-danger-strong hover:bg-danger-soft"
+            : "border-transparent bg-success-soft hover:border-success"
+        }`}
+      >
+        {rejected ? (
+          <Image src="/icons/admin/reject.svg" alt="" width={7} height={7} />
+        ) : (
+          <Image src="/icons/admin/approve.svg" alt="" width={10} height={7} />
+        )}
+      </button>
+    );
+  };
+
+  const renderApprovalActions = (reservation: ReservationRequest) => (
     <div className="flex items-center gap-2">
-      {isApproval && (
-        <>
-          <button
-            type="button"
-            onClick={() => setApproving(reservation)}
-            aria-label={`Setujui reservasi ${reservation.borrowerName}`}
-            className={`${ICON_BUTTON} border-transparent bg-success-soft hover:border-success`}
-          >
-            <Image src="/icons/admin/approve.svg" alt="" width={10} height={7} />
-          </button>
-          <button
-            type="button"
-            onClick={() => setRejecting(reservation)}
-            aria-label={`Tolak reservasi ${reservation.borrowerName}`}
-            className={`${ICON_BUTTON} border-danger-soft hover:border-danger-strong hover:bg-danger-soft`}
-          >
-            <Image src="/icons/admin/reject.svg" alt="" width={7} height={7} />
-          </button>
-        </>
-      )}
+      <button
+        type="button"
+        onClick={() => setApproving(reservation)}
+        aria-label={`Setujui reservasi ${reservation.borrowerName}`}
+        className={`${ICON_BUTTON} border-transparent bg-success-soft hover:border-success`}
+      >
+        <Image src="/icons/admin/approve.svg" alt="" width={10} height={7} />
+      </button>
+      <button
+        type="button"
+        onClick={() => setRejecting(reservation)}
+        aria-label={`Tolak reservasi ${reservation.borrowerName}`}
+        className={`${ICON_BUTTON} border-danger-soft hover:border-danger-strong hover:bg-danger-soft`}
+      >
+        <Image src="/icons/admin/reject.svg" alt="" width={7} height={7} />
+      </button>
       <button
         type="button"
         onClick={() => setViewing(reservation)}
@@ -112,12 +154,23 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, b
     </div>
   );
 
+  const renderActions = (reservation: ReservationRequest) =>
+    isApproval ? renderApprovalActions(reservation) : renderHistoryAction(reservation);
+
   return (
     <Card className="flex flex-col gap-6 p-4">
       {/* Read out to screen readers only; the row leaving the list shows the result. */}
       <p role="status" className="sr-only">
         {notice}
       </p>
+
+      {vehicleCrew && !isApproval && reservations.length > 0 && (
+        <div className="flex justify-end">
+          <Button variant="primary-outline" onClick={exportReport}>
+            Ekspor Laporan
+          </Button>
+        </div>
+      )}
 
       {reservations.length === 0 ? (
         <p className="py-12 text-center text-sm text-muted">{EMPTY_TEXT[tab]}</p>
@@ -225,7 +278,14 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, b
         onPageSizeChange={paging.setPageSize}
       />
 
-      {viewing && <ReservationDetailDialog reservation={viewing} onClose={() => setViewing(null)} />}
+      {viewing && (
+        <ReservationDetailDialog
+          reservation={viewing}
+          onClose={() => setViewing(null)}
+          // a rejected trip needs no drivers or costs
+          aside={vehicleCrew && viewing.status !== "ditolak" ? <VehicleCrewPanel reservation={viewing} staff={vehicleCrew} /> : undefined}
+        />
+      )}
       {approving && (
         <ApproveReservationDialog
           reservation={approving}

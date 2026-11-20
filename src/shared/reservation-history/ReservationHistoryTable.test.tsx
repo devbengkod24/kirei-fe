@@ -54,4 +54,24 @@ describe("ReservationHistoryTable for vehicles", () => {
     expect(screen.getAllByText("12 – 14 Nov 2026")).toHaveLength(2);
     expect(screen.queryByText(/00\.00/)).toBeNull();
   });
+
+  it("lists the vehicle, destinations, and trip kind in both layouts", () => {
+    const withDetails: ReservationRecord = {
+      ...trip,
+      unitName: "Bus Udinus, 2 unit",
+      trip: {
+        destination: "Bandung, Garut",
+        participants: 50,
+        destinations: ["Bandung", "Garut"],
+        vehicle: { id: "vehicle-bus", name: "Bus Udinus", units: 2 },
+        kind: "menginap",
+      },
+    };
+    render(
+      <ReservationHistoryTable tipe="kendaraan" items={[withDetails]} page={1} perPage={10} totalPages={1} prevHref={null} nextHref={null} baseParams={{}} />,
+    );
+    expect(screen.getAllByText("Bus Udinus, 2 unit")).toHaveLength(2);
+    expect(screen.getAllByText("Bandung, Garut")).toHaveLength(2);
+    expect(screen.getAllByText("Menginap, 50 orang")).toHaveLength(2);
+  });
 });

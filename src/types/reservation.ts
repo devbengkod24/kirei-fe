@@ -41,13 +41,15 @@ export interface ReservationRecord {
   endsAt: string;
   bookerName: string;
   bookerEmail: string;
-  /** Room code, vehicle name, or GOR name. */
+  /** Room code, vehicle type and units, or GOR name. */
   unitName: string;
   purpose: string;
   /** Filled when the reservation was cancelled, e.g. by an admin after approval. */
   cancellationReason: string | null;
   /** Written by the approving admin when the reservation was rejected; null for other statuses. */
   rejectionReason: string | null;
+  /** Kendaraan only: destinations, group size, vehicle type, and trip kind. */
+  trip?: VehicleTrip;
 }
 
 /** A saved reservation still waiting for its loan letter. */
@@ -55,6 +57,21 @@ export interface ReservationDraft extends ReservationRecord {
   status: "draft";
   /** ISO 8601 (UTC), set by the API. The letter must be uploaded before this moment. */
   letterDeadline: string;
+}
+
+/** Whether the group stays overnight or is only dropped off and picked up. */
+export type TripKind = "menginap" | "antar_jemput";
+
+/** A vehicle request. Fields after `participants` are missing on requests made before they existed. */
+export interface VehicleTrip {
+  /** Every destination joined with ", ", for places that show one line. */
+  destination: string;
+  participants: number;
+  /** In the order the borrower listed them. */
+  destinations?: string[];
+  /** The vehicle type asked for and how many units of it; the admin still assigns the actual units. */
+  vehicle?: { id: string; name: string; units: number };
+  kind?: TripKind;
 }
 
 /** A reservation as an admin sees it: who booked, for what, and the uploaded letter. */
@@ -69,8 +86,8 @@ export interface ReservationRequest extends ReservationSummary {
   letterFileName: string | null;
   /** Where the uploaded letter can be opened; null when none was uploaded. */
   letterUrl: string | null;
-  /** Kendaraan only: where the trip goes and how many people ride. */
-  trip?: { destination: string; participants: number };
+  /** Kendaraan only: where the trip goes, how many people ride, and the vehicle type asked for. */
+  trip?: VehicleTrip;
   /** GOR only: the sport or event, e.g. "Badminton". */
   activity?: string;
   /** Written by the approving admin when the reservation was rejected; null for other statuses. */
