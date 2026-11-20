@@ -1,18 +1,20 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { Field, INPUT_CLASS, SelectInput } from "@/components/form/Field";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { ROOM_PHOTO_MAX_SIZE_MB } from "@/config/reservation";
-import type { Building, Room, RoomType } from "@/types/room";
-import { ROOM_TYPE_LABEL } from "./room-labels";
+import type { Building, Room, RoomManagedBy } from "@/types/room";
+import { managedByLabel, ROOM_TYPE_LABEL, roomManagedBy } from "./room-labels";
+import { RoomPhotoImage } from "./RoomPhotoImage";
 import { ROOM_PHOTO_ACCEPT, roomPhotoSchema, type RoomPhotoChange } from "./roomPhoto";
 
 export interface EditRoomDialogProps {
   room: Room;
   buildings: Building[];
+  /** Without it "Dikelola oleh" is shown but cannot be changed. */
+  canChangeManager: boolean;
   /** Codes of the other rooms, to reject duplicates before the API does. */
   takenCodes: string[];
   onClose: () => void;
@@ -25,7 +27,7 @@ const STATUS_OPTIONS = [
 ];
 
 /** Mounted only while open, so the form always starts from the selected room. */
-export function EditRoomDialog({ room, buildings, takenCodes, onClose, onSave }: EditRoomDialogProps) {
+export function EditRoomDialog({ room, buildings, canChangeManager, takenCodes, onClose, onSave }: EditRoomDialogProps) {
   const [draft, setDraft] = useState(room);
   const [error, setError] = useState<string>();
   const [photo, setPhoto] = useState<RoomPhotoChange>({ kind: "keep" });
@@ -44,7 +46,8 @@ export function EditRoomDialog({ room, buildings, takenCodes, onClose, onSave }:
     setPhoto({ kind: "replace", file: parsed.data });
   };
 
-  const floors = buildings.find((building) => building.id === draft.buildingId)?.floors ?? [];
+  const draftBuilding = buildings.find((building) => building.id === draft.buildingId);
+  const managedBy = roomManagedBy(draft, draftBuilding);
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -76,12 +79,7 @@ export function EditRoomDialog({ room, buildings, takenCodes, onClose, onSave }:
         <fieldset className="flex flex-col gap-2">
           <legend className="mb-1 text-xs text-primary">Foto Ruangan</legend>
           <div className="relative aspect-[339/189] overflow-hidden rounded-md border border-border bg-page">
-            {previewUrl ? (
-              // a new photo is a local blob URL, which the image optimizer cannot fetch
-              <Image src={previewUrl} alt={`Foto ${draft.code}`} fill sizes="(min-width: 640px) 400px, 100vw" unoptimized={previewUrl.startsWith("blob:")} className="object-cover" />
-            ) : (
-              <p className="flex size-full items-center justify-center text-xs text-muted">Belum ada foto ruangan</p>
-            )}
+            <RoomPhotoImage url={previewUrl} alt={`Foto ${draft.code}`} sizes="(min-width: 640px) 400px, 100vw" />
           </div>
           <div className="flex flex-wrap gap-2">
             <label className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-md border border-primary bg-surface px-4 text-sm font-medium text-primary hover:bg-primary-soft has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-border-focus">
@@ -132,48 +130,42 @@ export function EditRoomDialog({ room, buildings, takenCodes, onClose, onSave }:
             className={INPUT_CLASS}
           />
         </Field>
-        <Field label="Tipe Ruangan" htmlFor="room-type">
-          <SelectInput
-            id="room-type"
-            value={draft.type}
-            onChange={(event) => setDraft({ ...draft, type: event.target.value as RoomType })}
-          >
-            {Object.entries(ROOM_TYPE_LABEL).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </SelectInput>
-        </Field>
-        <Field label="Gedung" htmlFor="room-building">
-          <SelectInput
-            id="room-building"
-            value={draft.buildingId}
-            onChange={(event) => {
-              const building = buildings.find((item) => item.id === event.target.value);
-              setDraft({ ...draft, buildingId: event.target.value, floor: building?.floors[0] ?? draft.floor });
-            }}
-          >
-            {buildings.map((building) => (
-              <option key={building.id} value={building.id}>
-                {building.name}
-              </option>
-            ))}
-          </SelectInput>
-        </Field>
-        <Field label="Lantai" htmlFor="room-floor">
-          <SelectInput
-            id="room-floor"
-            value={draft.floor}
-            onChange={(event) => setDraft({ ...draft, floor: Number(event.target.value) })}
-          >
-            {floors.map((floor) => (
-              <option key={floor} value={floor}>
-                {floor}
-              </option>
-            ))}
-          </SelectInput>
-        </Field>
+        {/* Type, building, and floor place the room on the floor plan, so they are not edited here. */}
+        <div className="flex flex-col gap-1">
+          <dl className="grid grid-cols-3 gap-2 rounded-md bg-page px-3 py-2">
+            <div className="flex min-w-0 flex-col">
+              <dt className="text-xs text-primary">Tipe Ruangan</dt>
+              <dd className="text-sm break-words">{ROOM_TYPE_LABEL[draft.type]}</dd>
+            </div>
+            <div className="flex min-w-0 flex-col">
+              <dt className="text-xs text-primary">Gedung</dt>
+              <dd className="text-sm break-words">{draftBuilding?.name ?? "-"}</dd>
+            </div>
+            <div className="flex min-w-0 flex-col">
+              <dt className="text-xs text-primary">Lantai</dt>
+              <dd className="text-sm">{draft.floor}</dd>
+            </div>
+          </dl>
+          <p className="text-[11px] text-muted">Tipe, gedung, dan lantai mengikuti denah, jadi tidak bisa diubah di sini.</p>
+        </div>
+        {canChangeManager ? (
+          <Field label="Dikelola oleh" htmlFor="room-manager">
+            <SelectInput
+              id="room-manager"
+              value={managedBy}
+              onChange={(event) => setDraft({ ...draft, managedBy: event.target.value as RoomManagedBy })}
+            >
+              <option value="gedung">{managedByLabel("gedung", draftBuilding?.name ?? "gedung")}</option>
+              <option value="universitas">{managedByLabel("universitas", "")}</option>
+            </SelectInput>
+          </Field>
+        ) : (
+          <div className="flex flex-col gap-1">
+            <p className="text-xs text-primary">Dikelola oleh</p>
+            <p className="text-sm">{managedByLabel(managedBy, draftBuilding?.name ?? "gedung")}</p>
+            <p className="text-[11px] text-muted">Pengelola ruangan diatur oleh Admin Universitas.</p>
+          </div>
+        )}
         <fieldset className="flex flex-col gap-1">
           <legend className="mb-1 text-xs text-primary">Status</legend>
           <div className="grid grid-cols-2 gap-1 rounded-md border border-border p-1">

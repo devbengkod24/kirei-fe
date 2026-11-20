@@ -6,6 +6,7 @@ export const ADMIN_UNIVERSITAS_ROUTES = {
   /** Base paths of the pages with a [tipe] segment; each opens Ruangan. */
   internalReservation: "/admin/reservasi-internal",
   reservations: "/admin/reservasi",
+  rooms: "/admin/ruangan",
   floorPlans: "/admin/denah",
   users: "/admin/pengguna",
   announcements: "/admin/pengumuman",
