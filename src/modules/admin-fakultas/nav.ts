@@ -15,5 +15,4 @@ export const ADMIN_FAKULTAS_NAV: NavLinkConfig[][] = [
     { label: "Laporan Pengguna", href: ADMIN_FAKULTAS_ROUTES.reports, iconSrc: "/icons/nav/user-reports.svg" },
     { label: "Pengumuman", href: ADMIN_FAKULTAS_ROUTES.announcements, iconSrc: "/icons/nav/announcements.svg", iconSize: 20 },
   ],
-  [{ label: "Profil", href: ADMIN_FAKULTAS_ROUTES.profile, iconSrc: "/icons/nav/profile.svg" }],
 ];

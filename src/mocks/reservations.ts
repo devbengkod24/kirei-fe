@@ -11,7 +11,7 @@ const BOOKER ={ bookerName: "Dian Nuswantoro Computer Club", bookerEmail: "nurud
 
 const UNITS: Record<ReservationType, string[]> = {
   ruangan: ["H.5.2", "H.4.6", "H.2.12", "H.6.7", "H.3.7"],
-  kendaraan: ["Hiace", "Bus", "Mobil"],
+  kendaraan: ["Toyota Hiace, 1 unit", "Bus Udinus, 1 unit", "Toyota Innova, 2 unit"],
   gor: ["GOR Udinus"],
 };
 
@@ -53,9 +53,24 @@ function record(
   };
 }
 
+// Past trips in the borrower's history; unitName matches the vehicle and units, as the demo store writes it.
+const PAST_TRIPS: { unitName: string; trip: VehicleTrip }[] = [
+  { unitName: "Bus Udinus, 1 unit", trip: { destination: "Kudus, Pati", participants: 35, destinations: ["Kudus", "Pati"], vehicle: { id: "vehicle-bus", name: "Bus Udinus", units: 1 }, kind: "antar_jemput" } },
+  { unitName: "Toyota Hiace, 2 unit", trip: { destination: "Yogyakarta", participants: 25, destinations: ["Yogyakarta"], vehicle: { id: "vehicle-hiace", name: "Toyota Hiace", units: 2 }, kind: "menginap" } },
+  { unitName: "Toyota Innova, 1 unit", trip: { destination: "Salatiga", participants: 5, destinations: ["Salatiga"], vehicle: { id: "vehicle-innova", name: "Toyota Innova", units: 1 }, kind: "antar_jemput" } },
+  { unitName: "Bus Udinus, 2 unit", trip: { destination: "Bandungan, Ambarawa, Semarang", participants: 70, destinations: ["Bandungan", "Ambarawa", "Semarang"], vehicle: { id: "vehicle-bus", name: "Bus Udinus", units: 2 }, kind: "menginap" } },
+];
+
 function pastRecords(type: ReservationType, todayKey: string, count: number) {
   return Array.from({ length: count }, (_, index) =>
-    record(type, todayKey, -(index * 3 + 2), ["08:00", "10:00"], PAST_STATUSES[index % PAST_STATUSES.length]),
+    record(
+      type,
+      todayKey,
+      -(index * 3 + 2),
+      ["08:00", "10:00"],
+      PAST_STATUSES[index % PAST_STATUSES.length],
+      type === "kendaraan" ? PAST_TRIPS[index % PAST_TRIPS.length] : {},
+    ),
   );
 }
 

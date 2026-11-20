@@ -32,8 +32,8 @@ Dokumen untuk issue #13. Isinya memetakan halaman dan komponen yang dipakai saat
 | Draft Reservasi (`src/app/(ormawa)/reservasi/draft/page.tsx`) | `DraftReservationsPage`, `DraftList`, `DraftCard` (`src/modules/ormawa/drafts/`) | Khusus `organisasi` (dosen dikembalikan ke dashboard). Draft dibaca dari localStorage browser (`src/shared/reservation-draft/draftStorage.ts`). Setiap kartu: Email, Nama Pemesan, Waktu Reservasi, Tipe Reservasi, Dipinjam, unggah surat, tombol Batal dan Pesan. |
 | | `DeadlineTimer` | Hitung mundur batas unggah surat: 24 jam sejak draft disimpan, atau jam mulai reservasi bila lebih dulu (`DRAFT_LETTER_HOURS`). Setelah lewat, unggah dan Pesan dinonaktifkan. |
 | Reservasi & Riwayat (`src/app/(ormawa)/reservasi/riwayat/page.tsx`) | `ReservationHistoryPage` (`src/shared/reservation-history/`) | Tab jenis (Ruangan, Kendaraan, GOR) dan tab Aktif / Riwayat, disimpan di URL (`?tipe=`, `?tampilan=riwayat`). |
-| | `ActiveReservationList` | Tab Aktif: reservasi `menunggu_persetujuan` dan `disetujui`, dikelompokkan "Hari ini" dan "Akan datang". |
-| | `ReservationHistoryTable` | Tab Riwayat: kolom Tanggal, Nama Pemesan, unit, Waktu (WIB), Keperluan, Alasan Ditolak, Status. Alasan ditolak hanya tampil di kolomnya; di bawah Keperluan hanya alasan pembatalan. |
+| | `ActiveReservationList` | Tab Aktif: reservasi `menunggu_persetujuan` dan `disetujui`, dikelompokkan "Hari ini" dan "Akan datang". Kartu kendaraan (`ActiveReservationCard`) menampilkan Dipinjam (jenis dan jumlah unit), Tujuan, dan Perjalanan (menginap atau antar jemput, jumlah peserta). |
+| | `ReservationHistoryTable` | Tab Riwayat: kolom Tanggal, Nama Pemesan, unit, Waktu (WIB), Keperluan, Alasan Ditolak, Status. Alasan ditolak hanya tampil di kolomnya; di bawah Keperluan hanya alasan pembatalan. Untuk kendaraan, kolom Kendaraan berisi jenis dan jumlah unit, lalu tujuan dan perjalanan di bawahnya; di layar sempit tampil sebagai baris Tujuan dan Perjalanan di kartu. Permohonan lama tanpa jenis kendaraan tetap tampil sebagai "Kendaraan ke <tujuan>". |
 
 ### B. Pengelola (`admin_fakultas` dan `admin_universitas`)
 

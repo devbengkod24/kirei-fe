@@ -2,6 +2,7 @@ import { z } from "zod";
 import { readBrowserDataMode } from "@/lib/data-mode/dataMode";
 import { liveKey } from "@/lib/data-mode/liveStorage";
 import { toWibDateKey } from "@/lib/date";
+import { vehicleText } from "@/shared/reservation/vehicleTrip";
 import type { UnitBooking } from "@/types/facility";
 import type { ReservationRecord, ReservationRequest, ReservationStatus, ReservationType } from "@/types/reservation";
 
@@ -226,10 +227,14 @@ export function toHistoryRecord(reservation: MockReservation): ReservationRecord
     endsAt: reservation.endsAt,
     bookerName: reservation.borrowerName,
     bookerEmail: reservation.ownerEmail,
-    unitName: reservation.type === "kendaraan" && reservation.trip ? `Kendaraan ke ${reservation.trip.destination}` : reservation.roomName,
+    unitName:
+      reservation.type === "kendaraan" && reservation.trip
+        ? (vehicleText(reservation.trip) ?? `Kendaraan ke ${reservation.trip.destination}`)
+        : reservation.roomName,
     purpose: reservation.purpose,
     cancellationReason: null,
     rejectionReason: reservation.rejectionReason,
+    ...(reservation.trip ? { trip: reservation.trip } : {}),
   };
 }
 
