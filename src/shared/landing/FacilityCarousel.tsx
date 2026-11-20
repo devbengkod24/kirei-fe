@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { FACILITY_SLIDES } from "./content";
 
-const SLIDE_INTERVAL_MS = 4000;
+const SLIDE_INTERVAL_MS = 5000;
 
 export function FacilityCarousel() {
   const [activeIndex, setActiveIndex] = useState(0);

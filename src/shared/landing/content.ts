@@ -45,7 +45,7 @@ export const FACILITY_ITEMS: IconItem[] = [
   {
     iconSrc: "/landing/bus.png",
     title: "Kendaraan Operasional",
-    description: "Ajukan tujuan, tanggal, dan jumlah rombongan tanpa perlu memilih unit atau jam.",
+    description: "Pilih satu jenis kendaraan yang masih tersedia pada tanggal perjalananmu, lalu isi tujuan dan jumlah rombongan.",
   },
   {
     iconSrc: "/icons/calendar-outline.svg",
@@ -64,6 +64,7 @@ export interface FacilitySlide {
 export const FACILITY_SLIDES: FacilitySlide[] = [
   { src: "/landing/facility-classroom.svg", label: "ruang kelas", alt: "Ilustrasi ruang kelas dengan papan tulis dan meja mahasiswa" },
   { src: "/landing/facility-meeting.svg", label: "ruang rapat", alt: "Ilustrasi ruang rapat dengan meja panjang dan layar presentasi" },
+  { src: "/landing/facility-auditorium.svg", label: "auditorium", alt: "Ilustrasi auditorium dengan panggung, layar, dan deretan kursi penonton" },
   { src: "/landing/facility-sports-hall.svg", label: "GOR", alt: "Ilustrasi lapangan basket di dalam gedung olahraga" },
   { src: "/landing/facility-vehicle.svg", label: "kendaraan operasional", alt: "Ilustrasi bus operasional di depan gedung kampus" },
 ];
@@ -78,13 +79,13 @@ export interface RuleTab {
 const LETTER_RULE: IconItem = {
   iconSrc: "/icons/sticky-note.svg",
   title: "Surat Peminjaman",
-  description: "Ormawa dan UKM wajib mengunggah surat PDF paling lambat 1 hari kerja. Reservasi dosen tidak memerlukan surat.",
+  description: "Ormawa dan UKM wajib melampirkan surat PDF. Belum punya surat? Simpan sebagai draft dan unggah dalam 24 jam. Dosen tidak memerlukan surat.",
 };
 
 const BOOKING_WINDOW_RULE: IconItem = {
   iconSrc: "/icons/calendar-clock.svg",
   title: "Batas Pemesanan",
-  description: "Ormawa dan UKM tidak dapat memesan untuk besok (H-1) maupun hari ini (H-0).",
+  description: "Ormawa dan UKM paling cepat memesan untuk lusa. Hari ini (H-0) dan besok (H-1) tidak bisa dipesan.",
 };
 
 /** Rules per facility type, shown as tabs in the Peraturan section. */
@@ -97,7 +98,7 @@ export const RULE_TABS: RuleTab[] = [
       {
         iconSrc: "/icons/clock.svg",
         title: "Jam Operasional",
-        description: "Ruangan dapat dipesan pukul 07.00 sampai 20.00 WIB dengan slot kelipatan 10 menit.",
+        description: "Pukul 07.00 sampai 20.00 WIB. Jam mulai dan selesai dipilih per 10 menit.",
       },
       LETTER_RULE,
       BOOKING_WINDOW_RULE,
@@ -116,14 +117,14 @@ export const RULE_TABS: RuleTab[] = [
       {
         iconSrc: "/icons/clock.svg",
         title: "Durasi Pemakaian",
-        description: "GOR dapat dipesan maksimal 2 jam per pemesanan, di antara pukul 07.00 dan 20.00 WIB.",
+        description: "Maksimal 2 jam per pemesanan, dalam slot 1 jam antara pukul 07.00 dan 22.00 WIB.",
       },
       LETTER_RULE,
       BOOKING_WINDOW_RULE,
       {
         iconSrc: "/icons/slot-check.svg",
         title: "Persetujuan",
-        description: "Semua pemesanan GOR dari dosen, ormawa, dan UKM disetujui oleh admin universitas.",
+        description: "Semua pemesanan GOR diperiksa admin universitas.",
       },
     ],
   },
@@ -133,24 +134,24 @@ export const RULE_TABS: RuleTab[] = [
     iconSrc: "/landing/bus.png",
     rules: [
       {
-        iconSrc: "/icons/sticky-note.svg",
+        iconSrc: "/icons/notes.svg",
         title: "Data Permohonan",
-        description: "Isi tujuan, tanggal mulai dan selesai, jumlah rombongan, serta kontak penanggung jawab.",
+        description: "Isi No HP, tanggal mulai dan selesai, jumlah rombongan, dan tujuan. Tujuan boleh lebih dari satu. Pilih juga menginap atau antar jemput.",
       },
       {
         iconSrc: "/landing/bus.png",
-        title: "Tanpa Pilih Unit",
-        description: "Cukup ajukan kebutuhan perjalananmu. Kamu tidak memilih unit mobil maupun slot jam.",
-      },
-      {
-        iconSrc: "/icons/slot-check.svg",
-        title: "Persetujuan",
-        description: "Semua permohonan kendaraan disetujui atau ditolak oleh admin universitas.",
+        title: "Satu Jenis Kendaraan",
+        description: "Satu permohonan untuk satu jenis kendaraan. Pilihan yang muncul hanya jenis yang masih tersedia pada tanggalmu.",
       },
       {
         iconSrc: "/icons/contact-mail.svg",
-        title: "Pemberitahuan",
-        description: "Keputusan atas permohonanmu dikirim lewat email dan dapat dilihat di Reservasi & Riwayat.",
+        title: "Tanya BIUM Dulu",
+        description: "Ormawa dan UKM sebaiknya menanyakan ke BIUM kendaraan mana yang tersedia sebelum mengajukan.",
+      },
+      {
+        iconSrc: "/icons/slot-check.svg",
+        title: "Surat dan Persetujuan",
+        description: "Wajib melampirkan surat PDF, termasuk dosen. Admin universitas memutuskan, dan hasilnya tampil di Reservasi & Riwayat.",
       },
     ],
   },

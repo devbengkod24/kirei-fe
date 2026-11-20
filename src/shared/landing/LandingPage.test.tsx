@@ -48,6 +48,11 @@ describe("LandingPage", () => {
     expect(signInLinks.map((link) => link.getAttribute("href"))).toEqual(signInLinks.map(() => "/login"));
   });
 
+  it("cycles five facility slides", () => {
+    render(<LandingPage />);
+    expect(screen.getAllByRole("button", { name: /^Tampilkan / })).toHaveLength(5);
+  });
+
   it("shows the rules of the chosen facility type", () => {
     render(<LandingPage />);
     const tablist = screen.getByRole("tablist", { name: "Jenis fasilitas" });
@@ -58,7 +63,7 @@ describe("LandingPage", () => {
     expect(screen.getByText("Durasi Pemakaian")).toBeTruthy();
 
     fireEvent.click(within(tablist).getByRole("tab", { name: "Kendaraan" }));
-    expect(screen.getByText("Tanpa Pilih Unit")).toBeTruthy();
+    expect(screen.getByText("Satu Jenis Kendaraan")).toBeTruthy();
     expect(screen.queryByText("Jam Operasional")).toBeNull();
   });
 
