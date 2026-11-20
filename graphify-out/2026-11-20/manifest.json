@@ -59,120 +59,6 @@
     "ast_hash": "701bbec92164ec277e846127fa6fbce1",
     "semantic_hash": ""
   },
-  "src/app/(admin-fakultas)/error.tsx": {
-    "mtime": 1793371148.1465926,
-    "seen": 1794818106.5108883,
-    "ast_hash": "974c0714526c707c273c2b5a2b9dff6d",
-    "semantic_hash": ""
-  },
-  "src/app/(admin-fakultas)/fakultas/dashboard/loading.tsx": {
-    "mtime": 1793371148.1475868,
-    "seen": 1794818106.5108883,
-    "ast_hash": "56e49102c29a633028a01a6957b4e899",
-    "semantic_hash": ""
-  },
-  "src/app/(admin-fakultas)/fakultas/dashboard/page.tsx": {
-    "mtime": 1795142956.3602774,
-    "seen": 1795143029.1846364,
-    "ast_hash": "3db1dc0973a2746b1eb682db24db0c4d",
-    "semantic_hash": ""
-  },
-  "src/app/(admin-fakultas)/fakultas/jadwal-dosen/loading.tsx": {
-    "mtime": 1793808195.8991647,
-    "seen": 1794818106.5108883,
-    "ast_hash": "2fff6d21266c92c3a158fd89a3635f0d",
-    "semantic_hash": ""
-  },
-  "src/app/(admin-fakultas)/fakultas/jadwal-dosen/page.tsx": {
-    "mtime": 1794882513.9991477,
-    "seen": 1795143029.1846364,
-    "ast_hash": "ed52fac76480f5342e268e8888b70478",
-    "semantic_hash": ""
-  },
-  "src/app/(admin-fakultas)/fakultas/laporan/loading.tsx": {
-    "mtime": 1793371148.1475868,
-    "seen": 1794818106.5108883,
-    "ast_hash": "2fff6d21266c92c3a158fd89a3635f0d",
-    "semantic_hash": ""
-  },
-  "src/app/(admin-fakultas)/fakultas/laporan/page.tsx": {
-    "mtime": 1793371148.1485868,
-    "seen": 1794818106.5108883,
-    "ast_hash": "11b5c88d3c710c76e701fa9c9bf3529f",
-    "semantic_hash": ""
-  },
-  "src/app/(admin-fakultas)/fakultas/pengumuman/loading.tsx": {
-    "mtime": 1793371148.1485868,
-    "seen": 1794818106.5108883,
-    "ast_hash": "2fff6d21266c92c3a158fd89a3635f0d",
-    "semantic_hash": ""
-  },
-  "src/app/(admin-fakultas)/fakultas/pengumuman/page.tsx": {
-    "mtime": 1793377452.8055673,
-    "seen": 1794818106.5108883,
-    "ast_hash": "770789177a95f80b15c7a769a0328c6c",
-    "semantic_hash": ""
-  },
-  "src/app/(admin-fakultas)/fakultas/reservasi-internal/loading.tsx": {
-    "mtime": 1793371148.1495857,
-    "seen": 1794818106.5108883,
-    "ast_hash": "2fff6d21266c92c3a158fd89a3635f0d",
-    "semantic_hash": ""
-  },
-  "src/app/(admin-fakultas)/fakultas/reservasi-internal/page.tsx": {
-    "mtime": 1795142956.415277,
-    "seen": 1795143029.1846364,
-    "ast_hash": "04ecf9d416b13a702f0bc44658684e9f",
-    "semantic_hash": ""
-  },
-  "src/app/(admin-fakultas)/fakultas/reservasi/page.tsx": {
-    "mtime": 1793371148.1505854,
-    "seen": 1794818106.5108883,
-    "ast_hash": "a98197698da961dfcf2813235cb2bf14",
-    "semantic_hash": ""
-  },
-  "src/app/(admin-fakultas)/fakultas/reservasi/persetujuan/loading.tsx": {
-    "mtime": 1793371148.1515856,
-    "seen": 1794818106.5108883,
-    "ast_hash": "2fff6d21266c92c3a158fd89a3635f0d",
-    "semantic_hash": ""
-  },
-  "src/app/(admin-fakultas)/fakultas/reservasi/persetujuan/page.tsx": {
-    "mtime": 1794882514.0001476,
-    "seen": 1795143029.1846364,
-    "ast_hash": "36a49340044f04e50452532f65467bf6",
-    "semantic_hash": ""
-  },
-  "src/app/(admin-fakultas)/fakultas/reservasi/riwayat/loading.tsx": {
-    "mtime": 1793371148.1515856,
-    "seen": 1794818106.5108883,
-    "ast_hash": "2fff6d21266c92c3a158fd89a3635f0d",
-    "semantic_hash": ""
-  },
-  "src/app/(admin-fakultas)/fakultas/reservasi/riwayat/page.tsx": {
-    "mtime": 1794882514.0001476,
-    "seen": 1795143029.1846364,
-    "ast_hash": "fafab5bfca68dfd5b396f02e52c9bc50",
-    "semantic_hash": ""
-  },
-  "src/app/(admin-fakultas)/fakultas/ruangan/loading.tsx": {
-    "mtime": 1793371148.152586,
-    "seen": 1794818106.5108883,
-    "ast_hash": "2fff6d21266c92c3a158fd89a3635f0d",
-    "semantic_hash": ""
-  },
-  "src/app/(admin-fakultas)/fakultas/ruangan/page.tsx": {
-    "mtime": 1793371148.152586,
-    "seen": 1794818106.5108883,
-    "ast_hash": "2267b2f5819a21ce6ef34e99297f4ddb",
-    "semantic_hash": ""
-  },
-  "src/app/(admin-fakultas)/layout.tsx": {
-    "mtime": 1793371148.1535869,
-    "seen": 1794818106.5108883,
-    "ast_hash": "90991ae8e396835b6833414922e5aee3",
-    "semantic_hash": ""
-  },
   "src/app/(admin-universitas)/admin/dashboard/loading.tsx": {
     "mtime": 1793449834.8522835,
     "seen": 1794818106.5108883,
@@ -690,9 +576,9 @@
     "semantic_hash": ""
   },
   "src/lib/auth/actions.test.ts": {
-    "mtime": 1794387713.8951912,
-    "seen": 1794818106.5108883,
-    "ast_hash": "3021aec9d1681ae4c780c3761123a500",
+    "mtime": 1795143427.01573,
+    "seen": 1795143472.2146688,
+    "ast_hash": "58e7aec495df678068e7a7d5dbdde971",
     "semantic_hash": ""
   },
   "src/lib/auth/actions.ts": {
@@ -738,9 +624,9 @@
     "semantic_hash": "7ad5d57f3b063eccaaa0e8fe6f1202cd"
   },
   "src/lib/auth/session.ts": {
-    "mtime": 1794387713.8981984,
-    "seen": 1794818106.5108883,
-    "ast_hash": "cdd421bbe14257368c15890e0591c73f",
+    "mtime": 1795143426.9907293,
+    "seen": 1795143472.2146688,
+    "ast_hash": "4e582fddf1c3ab39e489d3a6eae78fdc",
     "semantic_hash": ""
   },
   "src/lib/csv.test.ts": {
@@ -858,69 +744,15 @@
     "semantic_hash": ""
   },
   "src/mocks/user.ts": {
-    "mtime": 1794208882.7765937,
-    "seen": 1794818106.5108883,
-    "ast_hash": "a0cd80f328ae0b0bd8c4dafa8fab6bb4",
+    "mtime": 1795143422.4921813,
+    "seen": 1795143472.2146688,
+    "ast_hash": "24e488425b7ac3b4712129f38859ad45",
     "semantic_hash": ""
   },
   "src/mocks/users.ts": {
-    "mtime": 1795142893.4504201,
-    "seen": 1795143029.1846364,
-    "ast_hash": "95eb94c5da3663bb32ffa9a7c7a89ab3",
-    "semantic_hash": ""
-  },
-  "src/modules/admin-fakultas/AdminFakultasShell.tsx": {
-    "mtime": 1793371148.1775882,
-    "seen": 1794818106.5108883,
-    "ast_hash": "8db39df193c45a4a656a4bfe40faeeb2",
-    "semantic_hash": ""
-  },
-  "src/modules/admin-fakultas/lecturer-schedule/LecturerScheduleUpload.tsx": {
-    "mtime": 1794882514.0031474,
-    "seen": 1795143029.1846364,
-    "ast_hash": "125d6c4cd3b9d58ed4d40f861fdb2b2f",
-    "semantic_hash": ""
-  },
-  "src/modules/admin-fakultas/lecturer-schedule/actions.ts": {
-    "mtime": 1795142956.4603162,
-    "seen": 1795143029.1846364,
-    "ast_hash": "b2843a75be53b35e1d39f468f708782c",
-    "semantic_hash": ""
-  },
-  "src/modules/admin-fakultas/lecturer-schedule/getLecturerSchedule.ts": {
-    "mtime": 1794882514.004148,
-    "seen": 1795143029.1846364,
-    "ast_hash": "801d75e3a09a976ac21194e9bb7ff89b",
-    "semantic_hash": ""
-  },
-  "src/modules/admin-fakultas/lecturer-schedule/scheduleCsv.test.ts": {
-    "mtime": 1793808195.9027624,
-    "seen": 1794818106.5108883,
-    "ast_hash": "4697f073e3f4f611e3132ab6ed01568d",
-    "semantic_hash": ""
-  },
-  "src/modules/admin-fakultas/lecturer-schedule/scheduleCsv.ts": {
-    "mtime": 1793808195.9037623,
-    "seen": 1794818106.5108883,
-    "ast_hash": "a3765d1a53826cd963c2fa148c11cecb",
-    "semantic_hash": ""
-  },
-  "src/modules/admin-fakultas/nav.ts": {
-    "mtime": 1795142931.255053,
-    "seen": 1795143029.1846364,
-    "ast_hash": "88532471670fc499b51abbd198c13e72",
-    "semantic_hash": ""
-  },
-  "src/modules/admin-fakultas/reservation-tabs.ts": {
-    "mtime": 1793371148.1775882,
-    "seen": 1794818106.5108883,
-    "ast_hash": "529f6dbff48d634966f291230433a3cc",
-    "semantic_hash": ""
-  },
-  "src/modules/admin-fakultas/routes.ts": {
-    "mtime": 1795142931.084676,
-    "seen": 1795143029.1846364,
-    "ast_hash": "cf07ce0c27e5f3b4bc402797c927d735",
+    "mtime": 1795143427.0397294,
+    "seen": 1795143472.2146688,
+    "ast_hash": "b450f6d8fe0915974fc2a871b1b576f5",
     "semantic_hash": ""
   },
   "src/modules/admin-universitas/AdminUniversitasShell.tsx": {
@@ -1260,9 +1092,9 @@
     "semantic_hash": ""
   },
   "src/proxy.test.ts": {
-    "mtime": 1794882514.012148,
-    "seen": 1795143029.1846364,
-    "ast_hash": "1da3fb855fc685fef4333bf27c422842",
+    "mtime": 1795143422.5210521,
+    "seen": 1795143472.2146688,
+    "ast_hash": "59c942ec7923cf1426ce26bccbb9bd71",
     "semantic_hash": ""
   },
   "src/proxy.ts": {
@@ -2406,21 +2238,21 @@
     "semantic_hash": ""
   },
   "docs/architecture.md": {
-    "mtime": 1794882513.9451485,
-    "seen": 1795143029.1846364,
-    "ast_hash": "7e47caea4a77bdd27e22373b4831e8b4",
+    "mtime": 1795143441.0240693,
+    "seen": 1795143472.2146688,
+    "ast_hash": "6f4ad0ec2a9c5322672949bb25bdca9c",
     "semantic_hash": ""
   },
   "docs/flow-reservasi.md": {
-    "mtime": 1794465305.8135417,
-    "seen": 1794818106.5108883,
-    "ast_hash": "fa6c208b9a00f436c5e9fd15fab3fb13",
+    "mtime": 1795143441.049075,
+    "seen": 1795143472.2146688,
+    "ast_hash": "e48fbd1af1cf85703458dbad0e28231e",
     "semantic_hash": ""
   },
   "docs/roles-and-pages.md": {
-    "mtime": 1795142975.6067538,
-    "seen": 1795143029.1846364,
-    "ast_hash": "dac68892cf08e19229ebb381d540c68c",
+    "mtime": 1795143446.634186,
+    "seen": 1795143472.2146688,
+    "ast_hash": "5e15b51f89be03942dfa50cfc818e52d",
     "semantic_hash": ""
   },
   "public/samples/surat-peminjaman.pdf": {
@@ -3099,6 +2931,174 @@
     "mtime": 1794882514.0341518,
     "seen": 1795143029.1846364,
     "ast_hash": "941435741ee372d17b80b368cc7970c4",
+    "semantic_hash": ""
+  },
+  "src/app/(admin-gedung)/error.tsx": {
+    "mtime": 1793371148.1465926,
+    "seen": 1795143472.2146688,
+    "ast_hash": "974c0714526c707c273c2b5a2b9dff6d",
+    "semantic_hash": ""
+  },
+  "src/app/(admin-gedung)/gedung/dashboard/loading.tsx": {
+    "mtime": 1793371148.1475868,
+    "seen": 1795143472.2146688,
+    "ast_hash": "56e49102c29a633028a01a6957b4e899",
+    "semantic_hash": ""
+  },
+  "src/app/(admin-gedung)/gedung/dashboard/page.tsx": {
+    "mtime": 1795143422.431787,
+    "seen": 1795143472.2146688,
+    "ast_hash": "0224da296f009e800ddd214f01bf6282",
+    "semantic_hash": ""
+  },
+  "src/app/(admin-gedung)/gedung/jadwal-dosen/loading.tsx": {
+    "mtime": 1793808195.8991647,
+    "seen": 1795143472.2146688,
+    "ast_hash": "2fff6d21266c92c3a158fd89a3635f0d",
+    "semantic_hash": ""
+  },
+  "src/app/(admin-gedung)/gedung/jadwal-dosen/page.tsx": {
+    "mtime": 1795143422.4390862,
+    "seen": 1795143472.2146688,
+    "ast_hash": "da35c543d7f820386cfddcb62fe3117a",
+    "semantic_hash": ""
+  },
+  "src/app/(admin-gedung)/gedung/laporan/loading.tsx": {
+    "mtime": 1793371148.1475868,
+    "seen": 1795143472.2146688,
+    "ast_hash": "2fff6d21266c92c3a158fd89a3635f0d",
+    "semantic_hash": ""
+  },
+  "src/app/(admin-gedung)/gedung/laporan/page.tsx": {
+    "mtime": 1793371148.1485868,
+    "seen": 1795143472.2146688,
+    "ast_hash": "11b5c88d3c710c76e701fa9c9bf3529f",
+    "semantic_hash": ""
+  },
+  "src/app/(admin-gedung)/gedung/pengumuman/loading.tsx": {
+    "mtime": 1793371148.1485868,
+    "seen": 1795143472.2146688,
+    "ast_hash": "2fff6d21266c92c3a158fd89a3635f0d",
+    "semantic_hash": ""
+  },
+  "src/app/(admin-gedung)/gedung/pengumuman/page.tsx": {
+    "mtime": 1793377452.8055673,
+    "seen": 1795143472.2146688,
+    "ast_hash": "770789177a95f80b15c7a769a0328c6c",
+    "semantic_hash": ""
+  },
+  "src/app/(admin-gedung)/gedung/reservasi-internal/loading.tsx": {
+    "mtime": 1793371148.1495857,
+    "seen": 1795143472.2146688,
+    "ast_hash": "2fff6d21266c92c3a158fd89a3635f0d",
+    "semantic_hash": ""
+  },
+  "src/app/(admin-gedung)/gedung/reservasi-internal/page.tsx": {
+    "mtime": 1795143422.463357,
+    "seen": 1795143472.2146688,
+    "ast_hash": "e84a2c274682eb9302face350f83daa6",
+    "semantic_hash": ""
+  },
+  "src/app/(admin-gedung)/gedung/reservasi/page.tsx": {
+    "mtime": 1795143422.446179,
+    "seen": 1795143472.2146688,
+    "ast_hash": "0d08dfe3272e2373d8937ef9a1487c58",
+    "semantic_hash": ""
+  },
+  "src/app/(admin-gedung)/gedung/reservasi/persetujuan/loading.tsx": {
+    "mtime": 1793371148.1515856,
+    "seen": 1795143472.2146688,
+    "ast_hash": "2fff6d21266c92c3a158fd89a3635f0d",
+    "semantic_hash": ""
+  },
+  "src/app/(admin-gedung)/gedung/reservasi/persetujuan/page.tsx": {
+    "mtime": 1795143422.4512792,
+    "seen": 1795143472.2146688,
+    "ast_hash": "ec8ab81852478a095e1df99ca0a28178",
+    "semantic_hash": ""
+  },
+  "src/app/(admin-gedung)/gedung/reservasi/riwayat/loading.tsx": {
+    "mtime": 1793371148.1515856,
+    "seen": 1795143472.2146688,
+    "ast_hash": "2fff6d21266c92c3a158fd89a3635f0d",
+    "semantic_hash": ""
+  },
+  "src/app/(admin-gedung)/gedung/reservasi/riwayat/page.tsx": {
+    "mtime": 1795143422.4572976,
+    "seen": 1795143472.2146688,
+    "ast_hash": "5ae384ed0d4bbde8ca72dbb3bad73769",
+    "semantic_hash": ""
+  },
+  "src/app/(admin-gedung)/gedung/ruangan/loading.tsx": {
+    "mtime": 1793371148.152586,
+    "seen": 1795143472.2146688,
+    "ast_hash": "2fff6d21266c92c3a158fd89a3635f0d",
+    "semantic_hash": ""
+  },
+  "src/app/(admin-gedung)/gedung/ruangan/page.tsx": {
+    "mtime": 1793371148.152586,
+    "seen": 1795143472.2146688,
+    "ast_hash": "2267b2f5819a21ce6ef34e99297f4ddb",
+    "semantic_hash": ""
+  },
+  "src/app/(admin-gedung)/layout.tsx": {
+    "mtime": 1795143422.4700756,
+    "seen": 1795143472.2146688,
+    "ast_hash": "431fd42cd2acc4d73bb6cae29b6ec400",
+    "semantic_hash": ""
+  },
+  "src/modules/admin-gedung/AdminGedungShell.tsx": {
+    "mtime": 1795143422.4991667,
+    "seen": 1795143472.2146688,
+    "ast_hash": "734c5401b123c432cb42565bd4f1e2a9",
+    "semantic_hash": ""
+  },
+  "src/modules/admin-gedung/lecturer-schedule/LecturerScheduleUpload.tsx": {
+    "mtime": 1795143436.7995186,
+    "seen": 1795143472.2146688,
+    "ast_hash": "29b7d03ed2e7ad4e6056d1d46fbf9a48",
+    "semantic_hash": ""
+  },
+  "src/modules/admin-gedung/lecturer-schedule/actions.ts": {
+    "mtime": 1795143436.7745187,
+    "seen": 1795143472.2146688,
+    "ast_hash": "e8074f1f1b675cbc16d2c89815757614",
+    "semantic_hash": ""
+  },
+  "src/modules/admin-gedung/lecturer-schedule/getLecturerSchedule.ts": {
+    "mtime": 1794882514.004148,
+    "seen": 1795143472.2146688,
+    "ast_hash": "801d75e3a09a976ac21194e9bb7ff89b",
+    "semantic_hash": ""
+  },
+  "src/modules/admin-gedung/lecturer-schedule/scheduleCsv.test.ts": {
+    "mtime": 1795143436.834517,
+    "seen": 1795143472.2146688,
+    "ast_hash": "1f2e95172408e76562fd1deb25820280",
+    "semantic_hash": ""
+  },
+  "src/modules/admin-gedung/lecturer-schedule/scheduleCsv.ts": {
+    "mtime": 1795143436.8255172,
+    "seen": 1795143472.2146688,
+    "ast_hash": "e615e4a7111adf15dc1d4ba2ee47cf76",
+    "semantic_hash": ""
+  },
+  "src/modules/admin-gedung/nav.ts": {
+    "mtime": 1795143422.5070517,
+    "seen": 1795143472.2146688,
+    "ast_hash": "4958f6499a0ce2e42ab458030bb88560",
+    "semantic_hash": ""
+  },
+  "src/modules/admin-gedung/reservation-tabs.ts": {
+    "mtime": 1795143422.5120513,
+    "seen": 1795143472.2146688,
+    "ast_hash": "4e7da43da59d13880aa5ed3e8c593502",
+    "semantic_hash": ""
+  },
+  "src/modules/admin-gedung/routes.ts": {
+    "mtime": 1795143426.9842172,
+    "seen": 1795143472.2146688,
+    "ast_hash": "78b06e4c2164dc6b55503dfd464a9065",
     "semantic_hash": ""
   }
 }

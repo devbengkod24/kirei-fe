@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { formatTimeWIB } from "@/lib/date";
 import { isWholeDayType, reservationDateLong } from "@/shared/reservation/reservationTime";
+import { TRIP_KIND_LABEL, vehicleText } from "@/shared/reservation/vehicleTrip";
 import type { ReservationRequest, ReservationType } from "@/types/reservation";
 import { CAPS_LABEL_CLASS } from "@/components/form/Field";
 
@@ -24,9 +25,12 @@ const READONLY_BOX = "flex min-h-10 items-center rounded-md border border-border
 /** Details that depend on what is reserved, shown under the time. Rooms show their place inline instead. */
 const TYPE_DETAILS: Record<ReservationType, (reservation: ReservationRequest) => { label: string; value: string }[]> = {
   ruangan: () => [],
-  kendaraan: (reservation) => [
-    { label: "Tujuan", value: reservation.trip?.destination ?? "-" },
-    { label: "Jumlah peserta", value: reservation.trip ? `${reservation.trip.participants} orang` : "-" },
+  kendaraan: ({ trip }) => [
+    { label: "Tujuan", value: trip?.destination ?? "-" },
+    { label: "Jumlah peserta", value: trip ? `${trip.participants} orang` : "-" },
+    // Requests made before vehicle choice existed have no type; the admin picks one as before.
+    ...(trip?.vehicle ? [{ label: "Kendaraan", value: vehicleText(trip) ?? "-" }] : []),
+    ...(trip?.kind ? [{ label: "Perjalanan", value: TRIP_KIND_LABEL[trip.kind] }] : []),
   ],
   gor: (reservation) => [
     { label: "Tempat", value: reservation.roomName },

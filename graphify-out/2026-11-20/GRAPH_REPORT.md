@@ -1,7 +1,7 @@
 # Graph Report - kirei-fe  (2026-11-20)
 
 ## Corpus Check
-- 418 files · ~240,407 words
+- 418 files · ~240,416 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 12 file(s) not represented in the graph (top: (none) 8, .example 1, .csv 1)
 
@@ -436,7 +436,7 @@ Nodes (3): eslintConfig, eslint, eslint-config-next
 
 ### Community 78 - "OrmawaShell.tsx"
 Cohesion: 0.08
-Nodes (38): AdminFakultasLayout(), AdminUniversitasLayout(), OperatorLayout(), metadata, Page(), OrmawaLayout(), isActive(), NavItem (+30 more)
+Nodes (38): AdminGedungLayout(), AdminUniversitasLayout(), OperatorLayout(), metadata, Page(), OrmawaLayout(), isActive(), NavItem (+30 more)
 
 ### Community 79 - "Decorative Elements"
 Cohesion: 0.17

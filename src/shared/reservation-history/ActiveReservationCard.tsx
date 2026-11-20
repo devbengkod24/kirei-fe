@@ -3,10 +3,11 @@ import { formatDateLongWIB, formatDayRangeWIB, formatTimeRangeWIB } from "@/lib/
 import type { ReservationRecord } from "@/types/reservation";
 import { ReservationStatusBadge } from "@/shared/reservation/ReservationStatusBadge";
 import { RESERVATION_TYPE_LABEL } from "@/shared/reservation/reservationTypes";
+import { tripText } from "@/shared/reservation/vehicleTrip";
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children, className = "" }: { label: string; children: React.ReactNode; className?: string }) {
   return (
-    <div className="flex min-w-0 flex-col gap-1">
+    <div className={`flex min-w-0 flex-col gap-1 ${className}`}>
       <dt className="text-primary">{label}</dt>
       <dd className="break-words">{children}</dd>
     </div>
@@ -47,6 +48,14 @@ export function ActiveReservationCard({ reservation }: { reservation: Reservatio
           </div>
         ) : (
           <Field label="Dipinjam">{reservation.unitName}</Field>
+        )}
+        {reservation.trip && (
+          <>
+            <Field label="Tujuan" className="col-span-2">
+              {reservation.trip.destination}
+            </Field>
+            <Field label="Perjalanan">{tripText(reservation.trip)}</Field>
+          </>
         )}
       </dl>
     </Card>
