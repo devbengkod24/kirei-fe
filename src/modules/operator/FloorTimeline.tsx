@@ -9,21 +9,28 @@ import type { ClassSchedule } from "@/types/schedule";
 import { buildTimeline, nowOffset, rulerTicks, segmentSpan, toMinutes } from "./slots";
 import { itemKey, type TimelineItem } from "./timelineDetail";
 
+/** A track on the timeline; any page's rooms fit, not only the operator's floor. */
+export type TimelineRoom = Pick<FloorPlanRoom, "id" | "code">;
+
 export interface FloorTimelineProps {
-  rooms: FloorPlanRoom[];
+  /** One track per room, in this order. */
+  rooms: TimelineRoom[];
+  /** The WIB day shown, "YYYY-MM-DD". */
   dateKey: string;
-  /** WIB "HH:mm" bounds of the filtered hours. */
+  /** WIB "HH:mm" bounds of the hours shown; the page owns the filter. */
   from: string;
   to: string;
+  /** Places the "now" marker; it is hidden on another day or outside `from`–`to`. */
   now: Date;
+  /** Clips are matched to a track by `unitName` and to the day by `startsAt`. */
   reservations: ReservationRecord[];
   schedules: ClassSchedule[];
-  canCreate: boolean;
   /** itemKey of the clip whose detail popover is open. */
   activeKey: string | null;
   /** Opens the detail popover beside the clicked clip, which sits inside the scrolling `container`. */
   onOpen: (item: TimelineItem, anchor: HTMLElement, container: HTMLElement) => void;
-  onCreate: (roomId: string, range: TimeSlot) => void;
+  /** Turns free gaps into "create a reservation" buttons; without it gaps are plain labels. */
+  onCreate?: (roomId: string, range: TimeSlot) => void;
 }
 
 // 10 minutes is 44px wide, the smallest touch target, so the shortest clip stays tappable.
@@ -49,8 +56,14 @@ const ROOMY_PX = 120;
 const displayTime = (time: string) => time.replace(":", ".");
 const rangeLabel = (segment: TimeSlot) => `${displayTime(segment.start)} - ${displayTime(segment.end)} WIB`;
 const px = (minutes: number) => minutes * PX_PER_MINUTE;
+// The tracks area right of the room column, minus the end padding; positions are a share of it.
+const TRACK_AREA = "absolute inset-y-0 left-0 right-6";
 
-/** Every room on the floor as a track on one time axis, like a video editor: Siadin classes, reservations, and free gaps. */
+/**
+ * Rooms as tracks on one time axis, like a video editor: Siadin classes, reservations, and free gaps.
+ * The axis is at least 4.4px a minute and stretches to fill a wider card, so a short range leaves no
+ * empty space on the right.
+ */
 export function FloorTimeline({
   rooms,
   dateKey,
@@ -59,13 +72,13 @@ export function FloorTimeline({
   now,
   reservations,
   schedules,
-  canCreate,
   activeKey,
   onOpen,
   onCreate,
 }: FloorTimelineProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const total = toMinutes(to) - toMinutes(from);
+  const at = (minutes: number) => `${(minutes / total) * 100}%`;
   const ticks = rulerTicks(from, to);
   const current = nowOffset(now, dateKey, from, to);
   const nowLabel = current === null ? null : `${String(Math.floor((toMinutes(from) + current) / 60)).padStart(2, "0")}.${String((toMinutes(from) + current) % 60).padStart(2, "0")}`;
@@ -96,28 +109,30 @@ export function FloorTimeline({
       </div>
 
       <div ref={scrollerRef} data-timeline-scroller className="overflow-x-auto border-y border-border">
-        <div className="relative" style={{ width: HEAD_PX + px(total) + END_PAD_PX }}>
+        <div className="relative w-full" style={{ minWidth: HEAD_PX + px(total) + END_PAD_PX }}>
           <div aria-hidden="true" className="flex h-10 border-b border-border">
             <div className="sticky left-0 z-20 w-20 shrink-0 border-r border-border bg-surface" />
             <div className="relative flex-1">
-              {ticks.map((tick) => (
-                <span
-                  key={tick.offset}
-                  className={`absolute bottom-0 w-px ${tick.label ? "h-2.5 bg-muted" : "h-1 bg-border"}`}
-                  style={{ left: px(tick.offset) }}
-                />
-              ))}
-              {ticks
-                .filter((tick) => tick.label)
-                .map((tick) => (
+              <div className={TRACK_AREA}>
+                {ticks.map((tick) => (
                   <span
-                    key={tick.label}
-                    className={`absolute top-2 text-[11px] leading-4 text-muted ${tick.offset === 0 ? "pl-1" : "-translate-x-1/2"}`}
-                    style={{ left: px(tick.offset) }}
-                  >
-                    {tick.label}
-                  </span>
+                    key={tick.offset}
+                    className={`absolute bottom-0 w-px ${tick.label ? "h-2.5 bg-muted" : "h-1 bg-border"}`}
+                    style={{ left: at(tick.offset) }}
+                  />
                 ))}
+                {ticks
+                  .filter((tick) => tick.label)
+                  .map((tick) => (
+                    <span
+                      key={tick.label}
+                      className={`absolute top-2 text-[11px] leading-4 whitespace-nowrap text-muted ${tick.offset === 0 ? "pl-1" : "-translate-x-1/2"}`}
+                      style={{ left: at(tick.offset) }}
+                    >
+                      {tick.label}
+                    </span>
+                  ))}
+              </div>
             </div>
           </div>
 
@@ -130,16 +145,20 @@ export function FloorTimeline({
                     <span className="truncate rounded-md border border-border bg-surface px-2 py-1 text-xs font-semibold">{room.code}</span>
                   </div>
                   <div className="relative h-[72px] flex-1 bg-page">
-                    {ticks
-                      .filter((tick) => tick.label && tick.offset > 0)
-                      .map((tick) => (
-                        <span key={tick.offset} aria-hidden="true" className="absolute inset-y-0 w-px bg-border" style={{ left: px(tick.offset) }} />
-                      ))}
-                    <ol aria-label={`Jadwal ${room.code}`} className="absolute inset-0">
+                    <div aria-hidden="true" className={TRACK_AREA}>
+                      {ticks
+                        .filter((tick) => tick.label && tick.offset > 0)
+                        .map((tick) => (
+                          <span key={tick.offset} className="absolute inset-y-0 w-px bg-border" style={{ left: at(tick.offset) }} />
+                        ))}
+                    </div>
+                    <ol aria-label={`Jadwal ${room.code}`} className={TRACK_AREA}>
                       {segments.map((segment) => {
                         const span = segmentSpan(segment, from);
-                        const position = { left: px(span.offset) + 2, width: px(span.length) - 4 };
-                        const roomy = position.width >= ROOMY_PX;
+                        // A 2px gap on each side keeps neighbouring clips apart.
+                        const position = { left: `calc(${at(span.offset)} + 2px)`, width: `calc(${at(span.length)} - 4px)` };
+                        // Measured at the narrowest scale; a stretched axis only makes clips wider.
+                        const roomy = px(span.length) - 4 >= ROOMY_PX;
                         const range = rangeLabel(segment);
                         const ongoing = current !== null && span.offset <= current && current < span.offset + span.length;
                         const tone = ongoing ? "border-primary bg-primary-soft" : "border-border bg-surface shadow-xs";
@@ -218,7 +237,7 @@ export function FloorTimeline({
                         const free = `${CARD} justify-center gap-1 border-dashed border-border text-muted`;
                         return (
                           <li key={`free-${segment.start}`} className="contents">
-                            {canCreate ? (
+                            {onCreate ? (
                               <button
                                 type="button"
                                 onClick={() => onCreate(room.id, { start: segment.start, end: segment.end })}
@@ -249,7 +268,11 @@ export function FloorTimeline({
 
           {current !== null && (
             // The playhead from video editors, used here as "now"; it moves once a minute, never animated.
-            <div aria-hidden="true" className="pointer-events-none absolute top-0 bottom-0 z-10" style={{ left: HEAD_PX + px(current) }}>
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute top-0 bottom-0 z-10"
+              style={{ left: `calc(${HEAD_PX}px + (100% - ${HEAD_PX + END_PAD_PX}px) * ${current / total})` }}
+            >
               <span className="absolute top-7 bottom-0 left-0 w-px -translate-x-1/2 bg-primary" />
               <span className="absolute top-1.5 left-0 -translate-x-1/2 rounded-full bg-primary px-2 text-[11px] leading-5 font-semibold text-on-primary tabular-nums">
                 {nowLabel}

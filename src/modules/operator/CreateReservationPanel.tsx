@@ -21,7 +21,7 @@ import { SLOT_TIMES } from "./slots";
 
 export interface CreateReservationPanelProps {
   rooms: FloorPlanRoom[];
-  /** Prefilled room, e.g. the track of the free gap the operator clicked. */
+  /** Prefilled room, e.g. the track of the free gap the operator clicked; "" shows "Pilih ruangan". */
   roomId: string;
   dateKey: string;
   /** Prefilled times, e.g. from a free slot the operator clicked. */
@@ -51,8 +51,9 @@ export function CreateReservationPanel({
     defaultValues: { roomId, bookerName: "", purpose: "", startTime, endTime },
   });
   const { errors, isSubmitting } = form.formState;
-  // The panel may open far from the slot that was clicked (above the list on phones).
-  useEffect(() => form.setFocus("bookerName"), [form]);
+  // The panel may open far from the slot that was clicked (above the list on phones). Without a room
+  // the operator picks one first.
+  useEffect(() => form.setFocus(roomId ? "bookerName" : "roomId"), [form, roomId]);
   const invalid = (field: keyof OperatorReservationValues) =>
     errors[field] ? { "aria-invalid": true, "aria-describedby": `operator-${field}-error` } : {};
 
@@ -105,6 +106,9 @@ export function CreateReservationPanel({
 
           <Field label="Ruangan" htmlFor="operator-roomId" error={errors.roomId?.message}>
             <SelectInput id="operator-roomId" {...form.register("roomId")} {...invalid("roomId")}>
+              <option value="" disabled>
+                Pilih ruangan
+              </option>
               {rooms.map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.code}
