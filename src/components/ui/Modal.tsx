@@ -10,14 +10,21 @@ export interface ModalProps {
   children: React.ReactNode;
   /** Buttons row under the content, right-aligned. */
   footer?: React.ReactNode;
+  /** "wide" fits side-by-side panels. */
+  size?: "default" | "wide";
   className?: string;
 }
+
+const WIDTH = {
+  default: "w-[min(29rem,calc(100vw-2rem))]",
+  wide: "w-[min(56rem,calc(100vw-2rem))]",
+};
 
 /**
  * Controlled modal on the native <dialog>: focus stays inside, Escape closes it, and the
  * opener gets focus back on close. Clicking the backdrop closes it too.
  */
-export function Modal({ open, onClose, title, children, footer, className = "" }: ModalProps) {
+export function Modal({ open, onClose, title, children, footer, size = "default", className = "" }: ModalProps) {
   const ref = useModalDialog(open, onClose);
   const titleId = useId();
 
@@ -28,7 +35,7 @@ export function Modal({ open, onClose, title, children, footer, className = "" }
       onClick={(event) => {
         if (event.target === ref.current) onClose();
       }}
-      className={`m-auto max-h-[calc(100dvh-2rem)] w-[min(29rem,calc(100vw-2rem))] rounded-lg border border-border bg-surface p-0 text-ink backdrop:bg-ink/40 ${className}`}
+      className={`m-auto max-h-[calc(100dvh-2rem)] ${WIDTH[size]} rounded-lg border border-border bg-surface p-0 text-ink backdrop:bg-ink/40 ${className}`}
     >
       <div className="flex flex-col gap-4 p-5">
         <div className="flex items-start justify-between gap-2 border-b border-border pb-3">

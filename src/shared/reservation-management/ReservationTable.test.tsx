@@ -78,9 +78,61 @@ describe("ReservationTable history", () => {
     expect(within(table).queryByRole("columnheader", { name: "Keperluan" })?.textContent).toBe("Keperluan");
   });
 
+  it("has one action per row shaped like the decision, and a cross opens the details with the reason", () => {
+    render(<ReservationTable tipe="kendaraan" tab="riwayat" reservations={[rejected, done]} roomCodes={null} />);
+    const table = screen.getByRole("table");
+    expect(within(table).queryByRole("button", { name: /^Lihat detail reservasi .*/ })).toBeTruthy();
+    expect(within(table).getAllByRole("button")).toHaveLength(2);
+
+    fireEvent.click(within(table).getByRole("button", { name: `Lihat alasan penolakan reservasi ${TRIP.borrowerName}` }));
+    const dialog = screen.getByRole("dialog", { name: "Detail Reservasi" });
+    expect(within(dialog).getByText("Alasan penolakan")).toBeTruthy();
+    expect(within(dialog).getByText("Jadwal bentrok dengan kegiatan fakultas.")).toBeTruthy();
+  });
+
   it("has no reason column while approving", () => {
     render(<ReservationTable tipe="kendaraan" tab="persetujuan" reservations={[TRIP]} roomCodes={null} />);
     expect(within(screen.getByRole("table")).queryByRole("columnheader", { name: "Alasan Ditolak" })).toBeNull();
+  });
+});
+
+describe("ReservationTable vehicle drivers and report", () => {
+  const STAFF = [
+    { id: "staff-1", name: "Slamet Riyadi", phone: "081234500011", licenseNumber: "1", licenseExpiresOn: "2028-03-14", role: "sopir" as const },
+  ];
+  const approved: ReservationRequest = { ...TRIP, id: "res-kendaraan-4", status: "disetujui" };
+
+  it("offers the report only on vehicle history when drivers are given", () => {
+    const { rerender } = render(<ReservationTable tipe="kendaraan" tab="riwayat" reservations={[approved]} roomCodes={null} staff={STAFF} />);
+    expect(screen.getByRole("button", { name: "Ekspor Laporan" })).toBeTruthy();
+
+    rerender(<ReservationTable tipe="kendaraan" tab="persetujuan" reservations={[TRIP]} roomCodes={null} staff={STAFF} />);
+    expect(screen.queryByRole("button", { name: "Ekspor Laporan" })).toBeNull();
+
+    rerender(<ReservationTable tipe="kendaraan" tab="riwayat" reservations={[approved]} roomCodes={null} />);
+    expect(screen.queryByRole("button", { name: "Ekspor Laporan" })).toBeNull();
+  });
+
+  it("saves the driver and costs from the detail of an approved trip", () => {
+    render(<ReservationTable tipe="kendaraan" tab="riwayat" reservations={[approved]} roomCodes={null} staff={STAFF} />);
+    fireEvent.click(within(screen.getByRole("table")).getByRole("button", { name: `Lihat detail reservasi ${TRIP.borrowerName}` }));
+    const dialog = screen.getByRole("dialog", { name: "Detail Reservasi" });
+
+    fireEvent.change(within(dialog).getByLabelText("Sopir utama"), { target: { value: "staff-1" } });
+    fireEvent.change(within(dialog).getByLabelText("Uang jalan (Rp)"), { target: { value: "300000" } });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Simpan" }));
+
+    return screen.findByText("Sopir dan biaya tersimpan.").then(() => {
+      const stored = JSON.parse(window.localStorage.getItem("kirei:mock-reservations") ?? "{}");
+      expect(stored.assignments["res-kendaraan-4"]).toMatchObject({ driverId: "staff-1", coDriverId: null, travelAllowance: 300000 });
+    });
+  });
+
+  it("leaves the drivers and costs out of a rejected trip", () => {
+    const rejected = { ...TRIP, id: "res-kendaraan-5", status: "ditolak" as const, rejectionReason: "Bentrok" };
+    render(<ReservationTable tipe="kendaraan" tab="riwayat" reservations={[rejected]} roomCodes={null} staff={STAFF} />);
+    fireEvent.click(within(screen.getByRole("table")).getByRole("button", { name: `Lihat alasan penolakan reservasi ${TRIP.borrowerName}` }));
+    expect(within(screen.getByRole("dialog", { name: "Detail Reservasi" })).queryByText("Uang")).toBeNull();
   });
 });
 
