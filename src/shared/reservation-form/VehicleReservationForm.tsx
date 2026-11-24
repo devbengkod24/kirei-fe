@@ -268,12 +268,6 @@ export function VehicleReservationForm({
             Data dan Tanggal Reservasi
           </PanelHeading>
 
-          {mode === "request" && (
-            <p className="rounded-md bg-primary-soft px-3 py-2 text-xs text-primary">
-              Tanyakan dulu ke BIUM kendaraan mana yang tersedia, lalu ajukan di sini.
-            </p>
-          )}
-
           <div className="grid gap-x-3 gap-y-3 sm:grid-cols-2">
             <div
               className={`flex flex-col gap-1 ${askPhone ? "" : "sm:col-span-2"}`}

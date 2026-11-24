@@ -85,6 +85,10 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, b
   const [browserStaff] = useStaff(staff ?? []);
   const vehicleCrew = tipe === "kendaraan" && staff ? browserStaff : null;
 
+  // Sopir and Uang beside every vehicle request the admin opens; a rejected trip needs no drivers or costs.
+  const crewPanel = (reservation: ReservationRequest) =>
+    vehicleCrew && reservation.status !== "ditolak" ? <VehicleCrewPanel reservation={reservation} staff={vehicleCrew} /> : undefined;
+
   const exportReport = () => {
     if (!vehicleCrew) return;
     const csv = vehicleHistoryCsv(reservations, store.assignments ?? {}, vehicleCrew);
@@ -145,14 +149,6 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, b
         className={`${ICON_BUTTON} border-danger-soft hover:border-danger-strong hover:bg-danger-soft`}
       >
         <Image src="/icons/admin/reject.svg" alt="" width={7} height={7} />
-      </button>
-      <button
-        type="button"
-        onClick={() => setViewing(reservation)}
-        aria-label={`Lihat detail reservasi ${reservation.borrowerName}`}
-        className={`${ICON_BUTTON} border-border hover:bg-page`}
-      >
-        <Image src="/icons/admin/view.svg" alt="" width={14} height={11} />
       </button>
     </div>
   );
@@ -285,13 +281,13 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, b
         <ReservationDetailDialog
           reservation={viewing}
           onClose={() => setViewing(null)}
-          // a rejected trip needs no drivers or costs
-          aside={vehicleCrew && viewing.status !== "ditolak" ? <VehicleCrewPanel reservation={viewing} staff={vehicleCrew} /> : undefined}
+          aside={crewPanel(viewing)}
         />
       )}
       {approving && (
         <ApproveReservationDialog
           reservation={approving}
+          aside={crewPanel(approving)}
           onClose={() => setApproving(null)}
           onApprove={() => {
             resolve(approving, { status: "disetujui", rejectionReason: null }, `Reservasi ${approving.borrowerName} disetujui.`);
@@ -302,6 +298,7 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, b
       {rejecting && (
         <RejectReservationDialog
           reservation={rejecting}
+          aside={crewPanel(rejecting)}
           onClose={() => setRejecting(null)}
           onReject={(reason) => {
             resolve(

@@ -18,6 +18,8 @@ export interface ReservationDetailDialogProps {
   footer?: React.ReactNode;
   /** Shown above the details, e.g. a confirmation question. */
   intro?: React.ReactNode;
+  /** Shown under the details, e.g. the rejection reason field. */
+  outro?: React.ReactNode;
   /** Panels beside the details on wide screens, below them on narrow ones, e.g. drivers and costs. */
   aside?: React.ReactNode;
 }
@@ -40,7 +42,7 @@ const TYPE_DETAILS: Record<ReservationType, (reservation: ReservationRequest) =>
   ],
 };
 
-export function ReservationDetailDialog({ reservation, onClose, title = "Detail Reservasi", footer, intro, aside }: ReservationDetailDialogProps) {
+export function ReservationDetailDialog({ reservation, onClose, title = "Detail Reservasi", footer, intro, outro, aside }: ReservationDetailDialogProps) {
   const details = TYPE_DETAILS[reservation.type](reservation);
   const wholeDays = isWholeDayType(reservation.type);
 
@@ -180,6 +182,7 @@ export function ReservationDetailDialog({ reservation, onClose, title = "Detail 
       ) : (
         content
       )}
+      {outro}
     </Modal>
   );
 }

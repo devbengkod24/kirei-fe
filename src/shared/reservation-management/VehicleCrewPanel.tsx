@@ -7,6 +7,7 @@ import { z } from "zod";
 import { CAPS_LABEL_CLASS, INPUT_CLASS, SelectInput } from "@/components/form/Field";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { RequiredMark } from "@/shared/reservation-form/summaryParts";
 import { assignVehicleCrew, type VehicleAssignment } from "@/shared/reservation-store/reservationStore";
 import { useMockReservations } from "@/shared/reservation-store/useMockReservations";
 import type { ReservationRequest } from "@/types/reservation";
@@ -24,7 +25,7 @@ const money = z.coerce
   .min(0, "Tidak boleh kurang dari 0.");
 
 const crewSchema = z.object({
-  driverId: z.string(),
+  driverId: z.string().min(1, "Pilih sopir."),
   coDriverId: z.string(),
   travelAllowance: money,
   fuelAndToll: money,
@@ -99,8 +100,14 @@ export function VehicleCrewPanel({ reservation, staff }: VehicleCrewPanelProps) 
         <div className="flex flex-col gap-1">
           <label htmlFor={fieldId("driver")} className={CAPS_LABEL_CLASS}>
             Sopir utama
+            <RequiredMark />
           </label>
-          <SelectInput id={fieldId("driver")} {...register("driverId")}>
+          <SelectInput
+            id={fieldId("driver")}
+            aria-invalid={formState.errors.driverId ? true : undefined}
+            aria-describedby={formState.errors.driverId ? `${fieldId("driver")}-error` : undefined}
+            {...register("driverId")}
+          >
             <option value="">Belum dipilih</option>
             {drivers.map((member) => (
               <option key={member.id} value={member.id}>
@@ -108,13 +115,18 @@ export function VehicleCrewPanel({ reservation, staff }: VehicleCrewPanelProps) 
               </option>
             ))}
           </SelectInput>
+          {formState.errors.driverId && (
+            <p id={`${fieldId("driver")}-error`} className="text-[11px] text-danger">
+              {formState.errors.driverId.message}
+            </p>
+          )}
         </div>
         <div className="flex flex-col gap-1">
           <label htmlFor={fieldId("co-driver")} className={CAPS_LABEL_CLASS}>
-            Co-sopir
+            Kenek
           </label>
           <SelectInput id={fieldId("co-driver")} {...register("coDriverId")}>
-            <option value="">Tanpa co-sopir</option>
+            <option value="">Tanpa kenek</option>
             {coDrivers.map((member) => (
               <option key={member.id} value={member.id}>
                 {label(member)}

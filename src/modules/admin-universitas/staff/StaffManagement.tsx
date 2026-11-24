@@ -87,7 +87,7 @@ export function StaffManagement({ staff: initial, now }: StaffManagementProps) {
       <Card as="section" aria-labelledby="staff-title" className="flex flex-col gap-4 p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 id="staff-title" className="text-base font-semibold">
-            Sopir dan Co-sopir
+            Sopir dan Kenek
           </h2>
           <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
             <label htmlFor={searchId} className="sr-only">
@@ -114,12 +114,12 @@ export function StaffManagement({ staff: initial, now }: StaffManagementProps) {
 
         {visible.length === 0 ? (
           <p className="py-12 text-center text-sm text-muted">
-            {staff.length === 0 ? "Belum ada sopir atau co-sopir." : `Tidak ada staf yang cocok dengan "${query.trim()}".`}
+            {staff.length === 0 ? "Belum ada sopir atau kenek." : `Tidak ada staf yang cocok dengan "${query.trim()}".`}
           </p>
         ) : (
           <>
             <table className={`hidden ${TABLE} text-left lg:table`}>
-              <caption className="sr-only">Daftar sopir dan co-sopir</caption>
+              <caption className="sr-only">Daftar sopir dan kenek</caption>
               <thead>
                 <tr className={TABLE_ROW}>
                   <th scope="col" className={TH}>No</th>

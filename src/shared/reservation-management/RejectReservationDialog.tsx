@@ -3,15 +3,15 @@
 import { useState } from "react";
 import { Field, INPUT_CLASS } from "@/components/form/Field";
 import { Button } from "@/components/ui/Button";
-import { Modal } from "@/components/ui/Modal";
-import { reservationDateShort } from "@/shared/reservation/reservationTime";
+import { ReservationDetailDialog } from "@/shared/reservation/ReservationDetailDialog";
 import type { ReservationRequest, ReservationType } from "@/types/reservation";
-import { describeReservationUnit } from "./typeColumns";
 
 export interface RejectReservationDialogProps {
   reservation: ReservationRequest;
   onClose: () => void;
   onReject: (reason: string) => void;
+  /** Panels beside the details, e.g. drivers and costs of a vehicle request. */
+  aside?: React.ReactNode;
 }
 
 const REASON_EXAMPLE: Record<ReservationType, string> = {
@@ -20,7 +20,8 @@ const REASON_EXAMPLE: Record<ReservationType, string> = {
   kendaraan: "Contoh: Semua kendaraan sudah terpakai pada tanggal itu.",
 };
 
-export function RejectReservationDialog({ reservation, onClose, onReject }: RejectReservationDialogProps) {
+/** The full reservation details, like the approve dialog, with the reason the borrower will receive. */
+export function RejectReservationDialog({ reservation, onClose, onReject, aside }: RejectReservationDialogProps) {
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string>();
 
@@ -31,10 +32,31 @@ export function RejectReservationDialog({ reservation, onClose, onReject }: Reje
   };
 
   return (
-    <Modal
-      open
+    <ReservationDetailDialog
+      reservation={reservation}
       onClose={onClose}
       title="Tolak Reservasi"
+      aside={aside}
+      intro={<p className="text-sm">Periksa detail pesanan, lalu tulis alasan penolakannya.</p>}
+      outro={
+        <form id="reject-reservation-form" onSubmit={submit} noValidate>
+          <Field label="Alasan penolakan" htmlFor="reject-reason" error={error}>
+            <textarea
+              id="reject-reason"
+              rows={3}
+              value={reason}
+              onChange={(event) => {
+                setReason(event.target.value);
+                setError(undefined);
+              }}
+              placeholder={REASON_EXAMPLE[reservation.type]}
+              aria-invalid={error ? true : undefined}
+              aria-describedby={error ? "reject-reason-error" : undefined}
+              className={INPUT_CLASS}
+            />
+          </Field>
+        </form>
+      }
       footer={
         <>
           <Button variant="outline" onClick={onClose}>
@@ -45,28 +67,6 @@ export function RejectReservationDialog({ reservation, onClose, onReject }: Reje
           </Button>
         </>
       }
-    >
-      <p className="text-sm">
-        Reservasi <span className="font-semibold">{describeReservationUnit(reservation)}</span> oleh{" "}
-        <span className="font-semibold">{reservation.borrowerName}</span> pada {reservationDateShort(reservation)}.
-      </p>
-      <form id="reject-reservation-form" onSubmit={submit} noValidate>
-        <Field label="Alasan penolakan" htmlFor="reject-reason" error={error}>
-          <textarea
-            id="reject-reason"
-            rows={3}
-            value={reason}
-            onChange={(event) => {
-              setReason(event.target.value);
-              setError(undefined);
-            }}
-            placeholder={REASON_EXAMPLE[reservation.type]}
-            aria-invalid={error ? true : undefined}
-            aria-describedby={error ? "reject-reason-error" : undefined}
-            className={INPUT_CLASS}
-          />
-        </Field>
-      </form>
-    </Modal>
+    />
   );
 }
