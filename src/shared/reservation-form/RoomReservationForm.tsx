@@ -48,6 +48,7 @@ import {
 } from "./schema";
 import {
   FieldError,
+  RequiredMark,
   SUMMARY_INPUT,
   SUMMARY_LABEL,
   SummaryValue,
@@ -473,7 +474,7 @@ export function RoomReservationForm({
                 htmlFor="reservation-building"
                 className="shrink-0 text-xs"
               >
-                Lokasi :
+                Lokasi<RequiredMark /> :
               </label>
               <div className="relative flex-1">
                 <select
@@ -508,7 +509,7 @@ export function RoomReservationForm({
             </div>
             <div className={FIELD_ROW}>
               <label htmlFor="reservation-floor" className="shrink-0 text-xs">
-                Lantai
+                Lantai<RequiredMark />
               </label>
               <div className="relative flex-1">
                 <select
@@ -546,7 +547,7 @@ export function RoomReservationForm({
             className="order-1 flex flex-col gap-2 p-3 lg:order-none"
           >
             <PanelHeading id="panel-date" iconSrc="/icons/calendar-outline.svg">
-              <label htmlFor="reservation-date">Tanggal Reservasi</label>
+              <label htmlFor="reservation-date">Tanggal Reservasi<RequiredMark /></label>
             </PanelHeading>
             <input
               id="reservation-date"
@@ -577,7 +578,7 @@ export function RoomReservationForm({
                   htmlFor="reservation-start"
                   className="text-[9px] font-semibold tracking-wide text-plan-selected"
                 >
-                  Mulai
+                  Mulai<RequiredMark />
                 </label>
                 <Controller
                   control={control}
@@ -608,7 +609,7 @@ export function RoomReservationForm({
                   htmlFor="reservation-end"
                   className="text-[9px] font-semibold tracking-wide text-plan-selected"
                 >
-                  Selesai
+                  Selesai<RequiredMark />
                 </label>
                 <Controller
                   control={control}
@@ -680,7 +681,7 @@ export function RoomReservationForm({
             {askPhone && (
               <div className="flex flex-col gap-1">
                 <label htmlFor="reservation-phone" className={SUMMARY_LABEL}>
-                  No HP
+                  No HP<RequiredMark />
                 </label>
                 <input
                   id="reservation-phone"
@@ -717,7 +718,7 @@ export function RoomReservationForm({
             />
             <div className="flex flex-col gap-1">
               <label htmlFor="reservation-purpose" className={SUMMARY_LABEL}>
-                Keperluan
+                Keperluan<RequiredMark />
               </label>
               <textarea
                 id="reservation-purpose"

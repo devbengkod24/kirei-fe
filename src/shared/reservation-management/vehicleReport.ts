@@ -23,7 +23,7 @@ const HEADERS = [
   "Status",
   "Alasan Ditolak",
   "Sopir",
-  "Co-sopir",
+  "Kenek",
   "Uang Jalan",
   "BBM dan Tol",
   "Honor Sopir",

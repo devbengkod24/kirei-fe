@@ -4,7 +4,7 @@ import type { Staff, StaffRole } from "@/types/staff";
 
 export const STAFF_ROLE_LABEL: Record<StaffRole, string> = {
   sopir: "Sopir",
-  co_sopir: "Co-sopir",
+  co_sopir: "Kenek",
 };
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;

@@ -25,15 +25,18 @@ import {
   type VehicleReservationInput,
   type VehicleReservationValues,
 } from "./schema";
-import { FieldError, SummaryRow } from "./summaryParts";
+import { FieldError, RequiredMark, SummaryRow } from "./summaryParts";
 import { useReservationSubmit } from "./useReservationSubmit";
 import {
   passengerSeats,
   tripRange,
+  unitsNeeded,
   vehicleBookings,
   vehicleOptions,
   type VehicleBooking,
+  type VehicleOption,
 } from "./vehicleAvailability";
+import { VehicleIcon } from "./VehicleIcon";
 
 export interface VehicleReservationFormProps {
   /** ISO 8601 server time */
@@ -73,6 +76,36 @@ const INPUT =
 const CHOICE =
   "flex min-h-11 items-center gap-2 rounded-md border border-border px-3 text-xs has-[:checked]:border-primary has-[:checked]:bg-primary-soft has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-border-focus";
 
+// A small tile per vehicle type: icon and name. The color says whether it seats the group; the checked one gets the primary outline.
+const TILE =
+  "flex flex-col items-center gap-1 rounded-md border px-2 py-2.5 text-center has-[:checked]:border-primary has-[:checked]:bg-primary-soft has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-border-focus";
+
+type TileState = "waiting" | "available" | "short" | "belowMin" | "gone";
+
+const TILE_STYLE: Record<TileState, string> = {
+  waiting: "cursor-not-allowed border-border bg-page text-muted",
+  available: "cursor-pointer border-success bg-success-soft",
+  short: "cursor-pointer border-border bg-surface",
+  belowMin: "cursor-not-allowed border-border bg-page text-muted",
+  gone: "cursor-not-allowed border-danger-soft bg-danger-soft text-muted",
+};
+
+/** Read out with the tile, so the state is not told by color alone. */
+const TILE_STATE_TEXT: Record<TileState, string> = {
+  waiting: "isi jumlah peserta dulu",
+  available: "tersedia untuk semua peserta",
+  short: "unit kurang untuk semua peserta",
+  belowMin: "peserta di bawah minimal",
+  gone: "habis pada tanggal ini",
+};
+
+function tileState(option: VehicleOption, hasGroup: boolean): TileState {
+  if (!hasGroup) return "waiting";
+  if (option.reason) return "gone";
+  if (option.belowMin) return "belowMin";
+  return option.fits ? "available" : "short";
+}
+
 const dayLabel = (dateKey: string) =>
   formatFullDateWIB(wibToIso(dateKey, "12:00"));
 
@@ -101,13 +134,21 @@ export function VehicleReservationForm({
 
   // Rebuilt when the bookings change; useForm picks up the new resolver on the next render.
   const schema = useMemo(() => {
-    const vehicleIssue: VehicleIssue = ({ vehicleId, units, startDate, endDate }) => {
-      const option = vehicleOptions(vehicles, bookings, tripRange(startDate, endDate), null).find(
+    const vehicleIssue: VehicleIssue = ({ vehicleId, units, participants, startDate, endDate }) => {
+      const group = Number.isInteger(participants) && participants > 0 ? participants : null;
+      const option = vehicleOptions(vehicles, bookings, tripRange(startDate, endDate), group).find(
         (item) => item.vehicle.id === vehicleId,
       );
       if (!option) return { field: "vehicleId", message: "Kendaraan ini tidak bisa dipesan." };
       if (option.reason) return { field: "vehicleId", message: option.reason };
+      if (option.belowMin) {
+        return { field: "vehicleId", message: `${option.vehicle.name} minimal untuk ${option.vehicle.minPassengers} orang.` };
+      }
       if (units > option.free) return { field: "units", message: `Tersisa ${option.free} unit pada tanggal ini.` };
+      if (group && units > unitsNeeded(option.vehicle, group)) {
+        const enough = unitsNeeded(option.vehicle, group);
+        return { field: "units", message: `${group} orang cukup dengan ${enough} unit ${option.vehicle.name}.` };
+      }
       return null;
     };
     return createVehicleReservationSchema(() => todayKey, mode, vehicleIssue);
@@ -159,6 +200,8 @@ export function VehicleReservationForm({
   });
 
   const groupSize = Number(participants);
+  // Vehicles are picked for a group, so the choice opens once the group size is filled in.
+  const hasGroup = Number.isInteger(groupSize) && groupSize > 0;
   const options = vehicleOptions(
     vehicles,
     bookings,
@@ -167,8 +210,8 @@ export function VehicleReservationForm({
   );
   const chosen = options.find((option) => option.vehicle.id === vehicleId);
   const unitCount = Number(units);
-  const seats = chosen && Number.isInteger(unitCount) && unitCount > 0 ? unitCount * passengerSeats(chosen.vehicle) : null;
-  const leftOver = seats !== null && groupSize > seats ? groupSize - seats : 0;
+  // No more units than the group fills: 10 people take 1 Hiace (14 seats), 15 people may take 2.
+  const maxUnits = chosen && hasGroup ? Math.min(chosen.free, unitsNeeded(chosen.vehicle, groupSize)) : 1;
   const changeUnits = (next: number) => {
     setValue("units", String(next), { shouldValidate: true });
   };
@@ -182,10 +225,16 @@ export function VehicleReservationForm({
 
   // Drop the chosen vehicle once new dates or a bigger group make it unavailable. Not after sending:
   // the sent request now holds the units, and the result dialog still names it.
-  const selectionLost = Boolean(vehicleId) && !flow.result && Boolean(!chosen || chosen.reason);
+  const selectionLost = Boolean(vehicleId) && !flow.result && Boolean(!hasGroup || !chosen || chosen.reason || chosen.belowMin);
   useEffect(() => {
     if (selectionLost) setValue("vehicleId", "");
   }, [selectionLost, setValue]);
+
+  // A smaller group needs fewer units, so a count above the new limit comes down to it.
+  const unitsTooMany = Boolean(chosen) && !flow.result && unitCount > maxUnits;
+  useEffect(() => {
+    if (unitsTooMany) setValue("units", String(maxUnits), { shouldValidate: true });
+  }, [unitsTooMany, maxUnits, setValue]);
 
   const destinationNames = (destinations ?? []).map((item) => item.name.trim()).filter(Boolean);
   const destinationError = errors.destinations?.message ?? errors.destinations?.root?.message;
@@ -219,12 +268,6 @@ export function VehicleReservationForm({
             Data dan Tanggal Reservasi
           </PanelHeading>
 
-          {mode === "request" && (
-            <p className="rounded-md bg-primary-soft px-3 py-2 text-xs text-primary">
-              Tanyakan dulu ke BIUM kendaraan mana yang tersedia, lalu ajukan di sini.
-            </p>
-          )}
-
           <div className="grid gap-x-3 gap-y-3 sm:grid-cols-2">
             <div
               className={`flex flex-col gap-1 ${askPhone ? "" : "sm:col-span-2"}`}
@@ -237,7 +280,7 @@ export function VehicleReservationForm({
             {askPhone && (
               <div className="flex flex-col gap-1">
                 <label htmlFor="vehicle-phone" className={LABEL}>
-                  No HP
+                  No HP<RequiredMark />
                 </label>
                 <input
                   type="tel"
@@ -256,7 +299,7 @@ export function VehicleReservationForm({
 
             <div className="flex flex-col gap-1">
               <label htmlFor="vehicle-startDate" className={LABEL}>
-                Mulai
+                Mulai<RequiredMark />
               </label>
               <input
                 type="date"
@@ -271,7 +314,7 @@ export function VehicleReservationForm({
             </div>
             <div className="flex flex-col gap-1">
               <label htmlFor="vehicle-endDate" className={LABEL}>
-                Selesai
+                Selesai<RequiredMark />
               </label>
               <input
                 type="date"
@@ -289,7 +332,7 @@ export function VehicleReservationForm({
               className="flex flex-col gap-1 sm:col-span-2"
               aria-describedby={errors.tripKind ? "vehicle-tripKind-error" : undefined}
             >
-              <legend className={`${LABEL} mb-1`}>Jenis Perjalanan</legend>
+              <legend className={`${LABEL} mb-1`}>Jenis Perjalanan<RequiredMark /></legend>
               <div className="grid grid-cols-2 gap-2">
                 {TRIP_KINDS.map((kind) => (
                   <label key={kind} className={CHOICE}>
@@ -311,7 +354,7 @@ export function VehicleReservationForm({
 
             <div className="flex flex-col gap-1 sm:col-span-2">
               <label htmlFor="vehicle-participants" className={LABEL}>
-                Jumlah Peserta
+                Jumlah Peserta<RequiredMark />
               </label>
               <input
                 type="number"
@@ -332,32 +375,52 @@ export function VehicleReservationForm({
               className="flex flex-col gap-1 sm:col-span-2"
               aria-describedby={errors.vehicleId ? "vehicle-vehicleId-error" : undefined}
             >
-              <legend className={`${LABEL} mb-1`}>Kendaraan</legend>
-              <p className="text-[11px] text-muted">
-                Pilih satu jenis, lalu atur jumlah unitnya.
-              </p>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {options.map(({ vehicle, free, reason }) => (
-                  <label
-                    key={vehicle.id}
-                    className={`${CHOICE} min-h-16 items-start py-2 ${reason ? "cursor-not-allowed bg-page text-muted" : "cursor-pointer"}`}
-                  >
-                    <input
-                      type="radio"
-                      value={vehicle.id}
-                      disabled={reason !== null}
-                      className="mt-0.5 size-4 accent-primary"
-                      {...register("vehicleId", { onChange: pickVehicle })}
-                    />
-                    <span className="flex flex-col gap-0.5">
-                      <span className="font-medium text-ink">{vehicle.name}</span>
-                      <span>{passengerSeats(vehicle)} penumpang per unit</span>
-                      <span>
-                        {reason ?? `${free} unit tersedia`}
+              <legend className={`${LABEL} mb-1`}>Kendaraan<RequiredMark /></legend>
+              {hasGroup ? (
+                <p className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted">
+                  <span className="flex items-center gap-1">
+                    <span aria-hidden="true" className="size-2.5 rounded-full border border-success bg-success-soft" />
+                    Cukup untuk semua peserta
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span aria-hidden="true" className="size-2.5 rounded-full border border-border bg-surface" />
+                    Unit kurang
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span aria-hidden="true" className="size-2.5 rounded-full border border-border bg-page" />
+                    Di bawah minimal
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span aria-hidden="true" className="size-2.5 rounded-full bg-danger-soft" />
+                    Habis
+                  </span>
+                </p>
+              ) : (
+                <p className="text-[11px] text-muted">Isi jumlah peserta dulu untuk memilih kendaraan.</p>
+              )}
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {options.map((option) => {
+                  const state = tileState(option, hasGroup);
+                  const locked = state === "waiting" || state === "belowMin" || state === "gone";
+                  const min = option.vehicle.minPassengers ?? 1;
+                  return (
+                    <label key={option.vehicle.id} className={`${TILE} ${TILE_STYLE[state]}`}>
+                      <input
+                        type="radio"
+                        value={option.vehicle.id}
+                        disabled={locked}
+                        className="sr-only"
+                        {...register("vehicleId", { onChange: pickVehicle })}
+                      />
+                      <VehicleIcon vehicle={option.vehicle} className={`h-7 w-9 ${locked ? "text-muted" : "text-primary"}`} />
+                      <span className={`text-xs font-medium ${locked ? "" : "text-ink"}`}>
+                        {option.vehicle.name}
+                        <span className="sr-only">, {TILE_STATE_TEXT[state]}</span>
                       </span>
-                    </span>
-                  </label>
-                ))}
+                      {min > 1 && <span className="text-[10px] text-muted">min. {min} orang</span>}
+                    </label>
+                  );
+                })}
               </div>
               <FieldError
                 id="vehicle-vehicleId-error"
@@ -367,8 +430,12 @@ export function VehicleReservationForm({
 
             {chosen && !chosen.reason && (
               <div className="flex flex-col gap-1 sm:col-span-2">
+                <p className="text-xs text-ink">
+                  <span className="font-medium">{chosen.vehicle.name}</span> · {passengerSeats(chosen.vehicle)} kursi per unit ·{" "}
+                  {chosen.free} unit tersisa
+                </p>
                 <label htmlFor="vehicle-units" className={LABEL}>
-                  Jumlah Unit {chosen.vehicle.name}
+                  Jumlah Unit<RequiredMark />
                 </label>
                 <div className="flex items-center gap-2">
                   <button
@@ -384,7 +451,7 @@ export function VehicleReservationForm({
                     type="number"
                     inputMode="numeric"
                     min={1}
-                    max={chosen.free}
+                    max={maxUnits}
                     step={1}
                     {...field("units", errors.units?.message)}
                     className={`${INPUT} max-w-20 text-center`}
@@ -393,26 +460,19 @@ export function VehicleReservationForm({
                   <button
                     type="button"
                     onClick={() => changeUnits(unitCount + 1)}
-                    disabled={!(unitCount < chosen.free)}
+                    disabled={!(unitCount < maxUnits)}
                     aria-label="Tambah unit"
                     className="flex min-h-11 min-w-11 items-center justify-center rounded-md border border-border text-sm text-primary hover:bg-primary-soft disabled:text-muted disabled:hover:bg-transparent"
                   >
                     +
                   </button>
-                  <span className="text-[11px] text-muted">dari {chosen.free} tersedia</span>
                 </div>
-                {seats !== null && (
-                  <p className="text-[11px] text-muted">
-                    {seats} kursi penumpang.
-                    {leftOver > 0 && ` ${leftOver} peserta lainnya berangkat dengan kendaraan sendiri.`}
-                  </p>
-                )}
                 <FieldError id="vehicle-units-error" message={errors.units?.message} />
               </div>
             )}
 
             <fieldset className="flex flex-col gap-2 sm:col-span-2">
-              <legend className={`${LABEL} mb-1`}>Tujuan</legend>
+              <legend className={`${LABEL} mb-1`}>Tujuan<RequiredMark /></legend>
               {destinationFields.fields.map((item, index) => {
                 const error = errors.destinations?.[index]?.name?.message;
                 return (
@@ -454,7 +514,7 @@ export function VehicleReservationForm({
 
             <div className="flex flex-col gap-1 sm:col-span-2">
               <label htmlFor="vehicle-activity" className={LABEL}>
-                Keterangan Kegiatan
+                Keterangan Kegiatan<RequiredMark />
               </label>
               <input
                 type="text"

@@ -100,10 +100,38 @@ describe("vehicle options", () => {
     expect(tooBig).toMatchObject({ suggested: 2, free: 2, reason: null });
   });
 
+  it("puts the types that seat the whole group first, and the used-up ones last", () => {
+    // 50 people: 2 buses seat 78, 3 Hiace seat 42
+    const order = (participants: number | null, bookings = [] as typeof busBooked) =>
+      vehicleOptions(VEHICLES, bookings, DAY_20, participants).map((option) => [option.vehicle.id, option.fits, option.maxPeople]);
+    expect(order(50)).toEqual([
+      ["vehicle-bus", true, 78],
+      ["vehicle-hiace", false, 42],
+    ]);
+    expect(order(null)).toEqual([
+      ["vehicle-hiace", true, 42],
+      ["vehicle-bus", true, 78],
+    ]);
+    const busesGone = [...busBooked, { ...busBooked[0] }];
+    expect(order(10, busesGone).map(([id]) => id)).toEqual(["vehicle-hiace", "vehicle-bus"]);
+  });
+
+  it("marks a group smaller than a type's minimum, and puts that type after the usable ones", () => {
+    const withMin = [HIACE, { ...BUS, minPassengers: 25 }];
+    const small = vehicleOptions(withMin, [], DAY_20, 10);
+    expect(small.map((option) => [option.vehicle.id, option.belowMin])).toEqual([
+      ["vehicle-hiace", false],
+      ["vehicle-bus", true],
+    ]);
+    expect(vehicleOptions(withMin, [], DAY_20, 25).find((option) => option.vehicle.id === "vehicle-bus")?.belowMin).toBe(false);
+    // no group yet: nothing is below the minimum
+    expect(vehicleOptions(withMin, [], DAY_20, null).every((option) => !option.belowMin)).toBe(true);
+  });
+
   it("suggests enough units for the group, capped at what is free", () => {
     const [, bus] = vehicleOptions(VEHICLES, busBooked, DAY_20, 60);
     expect(bus).toMatchObject({ suggested: 1, free: 1 });
-    expect(vehicleOptions(VEHICLES, [], DAY_20, 60)[1].suggested).toBe(2);
+    expect(vehicleOptions(VEHICLES, [], DAY_20, 60).find((option) => option.vehicle.id === "vehicle-bus")?.suggested).toBe(2);
     expect(vehicleOptions(VEHICLES, [], null, null)[0]).toMatchObject({ suggested: 1, free: 3, reason: null });
   });
 });

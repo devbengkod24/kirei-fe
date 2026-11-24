@@ -35,7 +35,7 @@ import {
   type SlotSelection,
   type SlotStatus,
 } from "./sportsHallSlots";
-import { SummaryValue, SummaryWhen } from "./summaryParts";
+import { RequiredMark, SummaryValue, SummaryWhen } from "./summaryParts";
 import { useReservationSubmit } from "./useReservationSubmit";
 import { heldBookings, type ReservationOwner } from "@/shared/reservation-store/reservationStore";
 import { useMockReservations } from "@/shared/reservation-store/useMockReservations";
@@ -347,7 +347,7 @@ export function SportsHallReservationForm({
                 htmlFor="reservation-activity"
                 className="shrink-0 text-xs"
               >
-                Kegiatan :
+                Kegiatan<RequiredMark /> :
               </label>
               <div className="relative flex-1">
                 <select

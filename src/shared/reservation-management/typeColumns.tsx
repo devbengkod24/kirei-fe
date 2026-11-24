@@ -30,9 +30,3 @@ export const TYPE_COLUMNS: Record<ReservationType, TypeColumn[]> = {
   // One venue, so the sport takes the unit column's place.
   gor: [{ header: "Kegiatan", cell: (reservation) => reservation.activity ?? "-" }],
 };
-
-/** What the reservation is for, in a sentence: "H.5.1", "GOR Udinus", "kendaraan ke Kudus". */
-export function describeReservationUnit(reservation: ReservationRequest) {
-  if (reservation.type !== "kendaraan") return reservation.roomName;
-  return reservation.trip ? `kendaraan ke ${reservation.trip.destination}` : "kendaraan";
-}

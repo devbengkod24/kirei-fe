@@ -7,6 +7,18 @@ import { CAPS_LABEL_CLASS, INPUT_CLASS } from "@/components/form/Field";
 export const SUMMARY_LABEL = CAPS_LABEL_CLASS;
 export const SUMMARY_INPUT = INPUT_CLASS;
 
+/** Red star after the label of a field that must be filled in; screen readers hear "wajib". */
+export function RequiredMark() {
+  return (
+    <>
+      <span aria-hidden="true" className="text-danger">
+        {" "}*
+      </span>
+      <span className="sr-only"> (wajib)</span>
+    </>
+  );
+}
+
 export function FieldError({ id, message }: { id: string; message?: string }) {
   if (!message) return null;
   return (

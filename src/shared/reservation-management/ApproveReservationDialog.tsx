@@ -8,15 +8,18 @@ export interface ApproveReservationDialogProps {
   reservation: ReservationRequest;
   onClose: () => void;
   onApprove: () => void;
+  /** Panels beside the details, e.g. drivers and costs of a vehicle request. */
+  aside?: React.ReactNode;
 }
 
 /** The full reservation details with one more check before approving, since the borrower is notified right away. */
-export function ApproveReservationDialog({ reservation, onClose, onApprove }: ApproveReservationDialogProps) {
+export function ApproveReservationDialog({ reservation, onClose, onApprove, aside }: ApproveReservationDialogProps) {
   return (
     <ReservationDetailDialog
       reservation={reservation}
       onClose={onClose}
       title="Setujui Reservasi"
+      aside={aside}
       intro={<p className="text-sm">Periksa detail pesanan sebelum menyetujui.</p>}
       footer={
         <>

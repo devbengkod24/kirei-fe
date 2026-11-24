@@ -147,8 +147,8 @@ export function buildSportsHallBookingsMock(now: Date): UnitBooking[] {
 }
 
 export const MOCK_VEHICLES: Vehicle[] = [
-  { id: "vehicle-hiace", name: "Toyota Hiace", capacity: 15, unitCount: 3, isActive: true, minPassengers: 6 },
-  { id: "vehicle-bus", name: "Bus Udinus", capacity: 40, unitCount: 2, isActive: true, minPassengers: 20 },
-  { id: "vehicle-innova", name: "Toyota Innova", capacity: 7, unitCount: 4, isActive: true, minPassengers: 3 },
-  { id: "vehicle-elf", name: "Isuzu Elf", capacity: 19, unitCount: 1, isActive: false, minPassengers: 8 },
+  { id: "vehicle-hiace", name: "Toyota Hiace", capacity: 15, unitCount: 3, isActive: true, minPassengers: 8 },
+  { id: "vehicle-bus", name: "Bus Udinus", capacity: 40, unitCount: 2, isActive: true, minPassengers: 25 },
+  { id: "vehicle-innova", name: "Toyota Innova", capacity: 7, unitCount: 4, isActive: true, minPassengers: 4 },
+  { id: "vehicle-elf", name: "Isuzu Elf", capacity: 19, unitCount: 1, isActive: false, minPassengers: 10 },
 ];
