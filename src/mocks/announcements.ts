@@ -20,7 +20,7 @@ export function buildAnnouncementsMock(now: Date): Announcement[] {
       title: "Perbaikan AC lantai 5",
       category: "pemeliharaan",
       body: "AC di seluruh ruang kelas lantai 5 Gedung H diperbaiki hari Sabtu pukul 08.00 - 12.00 WIB. Ruangan tidak bisa dipesan selama perbaikan.",
-      authorName: "Adhitya Nugraha S.Kom, M.CS",
+      authorName: "Sapto",
       publishedAt: wibDateTime(todayKey, -1, "10:15"),
     },
     {
@@ -28,7 +28,7 @@ export function buildAnnouncementsMock(now: Date): Announcement[] {
       title: "Surat peminjaman wajib PDF",
       category: "informasi",
       body: "Mulai bulan ini surat peminjaman hanya diterima dalam format PDF. Unggah surat sebelum tenggat yang tertera di halaman reservasi.",
-      authorName: "Adhitya Nugraha S.Kom, M.CS",
+      authorName: "Sapto",
       publishedAt: wibDateTime(todayKey, -6, "09:00"),
     },
     {

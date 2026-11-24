@@ -13,7 +13,7 @@ export const MOCK_CURRENT_USER: CurrentUser = {
 
 export const MOCK_ADMIN_GEDUNG: CurrentUser = {
   id: "usr-100231",
-  name: "Adhitya Nugraha S.Kom, M.CS",
+  name: "Sapto",
   email: "admin.fik@dinus.ac.id",
   role: "admin_fakultas",
   fakultasId: "fik",
