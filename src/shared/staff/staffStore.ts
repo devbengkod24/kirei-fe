@@ -20,8 +20,8 @@ export const staffListSchema = z.array(
     id: z.string(),
     name: z.string(),
     phone: z.string(),
-    licenseNumber: z.string(),
-    licenseExpiresOn: z.string(),
+    // lists saved before the licence class existed keep their drivers, with no class yet
+    licenseClass: z.string().default(""),
     role: z.enum(["sopir", "co_sopir"]),
     isActive: z.boolean(),
   }),

@@ -9,17 +9,14 @@ import { Card } from "@/components/ui/Card";
 import { Pagination } from "@/components/ui/Pagination";
 import { TABLE, TABLE_CELL, TABLE_HEAD_CELL, TABLE_ROW } from "@/components/ui/table";
 import { usePagination } from "@/hooks/usePagination";
-import { formatDateShortWIB, toWibDateKey, wibToIso } from "@/lib/date";
 import { useStaff } from "@/shared/staff/useStaff";
 import type { Staff } from "@/types/staff";
 import { UserTabsNav } from "../users/UserTabsNav";
 import { StaffDialog } from "./StaffDialog";
-import { STAFF_ROLE_LABEL, searchStaff, type StaffValues } from "./staffSchema";
+import { STAFF_ROLE_LABEL, licenseLabel, searchStaff, type StaffValues } from "./staffSchema";
 
 export interface StaffManagementProps {
   staff: Staff[];
-  /** ISO 8601 server time, for "today" in WIB. */
-  now: string;
 }
 
 const TH = `${TABLE_HEAD_CELL} text-left`;
@@ -34,27 +31,15 @@ function StatusBadge({ isActive, size = "md" }: { isActive: boolean; size?: "sm"
 }
 
 /** Staf tab of Kelola Pengguna: drivers and co-drivers of the campus vehicles. Search, add, change, and switch off. */
-export function StaffManagement({ staff: initial, now }: StaffManagementProps) {
+export function StaffManagement({ staff: initial }: StaffManagementProps) {
   const [staff, setStaff] = useStaff(initial);
   const [query, setQuery] = useState("");
   // undefined: no dialog; null: adding; a driver: editing them.
   const [editing, setEditing] = useState<Staff | null | undefined>(undefined);
   const [notice, setNotice] = useState("");
   const searchId = useId();
-  const today = toWibDateKey(new Date(now));
   const visible = searchStaff(staff, query);
   const paging = usePagination(visible, 10);
-
-  const expiry = (member: Staff) => (
-    <span className="flex flex-col gap-1">
-      {formatDateShortWIB(wibToIso(member.licenseExpiresOn, "12:00"))}
-      {member.licenseExpiresOn < today && (
-        <Badge tone="warning" size="sm">
-          Kedaluwarsa
-        </Badge>
-      )}
-    </span>
-  );
 
   const editButton = (member: Staff) => (
     <button
@@ -101,7 +86,7 @@ export function StaffManagement({ staff: initial, now }: StaffManagementProps) {
                 setQuery(event.target.value);
                 paging.setPage(1);
               }}
-              placeholder="Cari nama, no telp, atau nomor SIM"
+              placeholder="Cari nama atau no telp"
               className={`${INPUT_CLASS} min-w-0 flex-1 sm:w-72`}
             />
             <Button onClick={() => setEditing(null)}>+ Tambah Staf</Button>
@@ -125,8 +110,7 @@ export function StaffManagement({ staff: initial, now }: StaffManagementProps) {
                   <th scope="col" className={TH}>No</th>
                   <th scope="col" className={TH}>Nama</th>
                   <th scope="col" className={TH}>No Telp</th>
-                  <th scope="col" className={TH}>Nomor SIM</th>
-                  <th scope="col" className={TH}>Berlaku Sampai</th>
+                  <th scope="col" className={TH}>SIM</th>
                   <th scope="col" className={TH}>Tipe</th>
                   <th scope="col" className={TH}>Status</th>
                   <th scope="col" className={TH}>Aksi</th>
@@ -138,8 +122,7 @@ export function StaffManagement({ staff: initial, now }: StaffManagementProps) {
                     <td className={TD}>{(paging.page - 1) * paging.pageSize + index + 1}</td>
                     <td className={TD}>{member.name}</td>
                     <td className={`${TD} tabular-nums`}>{member.phone}</td>
-                    <td className={`${TD} tabular-nums`}>{member.licenseNumber}</td>
-                    <td className={TD}>{expiry(member)}</td>
+                    <td className={TD}>{licenseLabel(member)}</td>
                     <td className={TD}>{STAFF_ROLE_LABEL[member.role]}</td>
                     <td className={TD}>
                       <StatusBadge isActive={member.isActive} />
@@ -159,14 +142,7 @@ export function StaffManagement({ staff: initial, now }: StaffManagementProps) {
                     <span className="text-xs text-muted">
                       {STAFF_ROLE_LABEL[member.role]} · {member.phone}
                     </span>
-                    <span className="flex flex-wrap items-center gap-2 text-xs text-muted">
-                      SIM {member.licenseNumber}, berlaku sampai {formatDateShortWIB(wibToIso(member.licenseExpiresOn, "12:00"))}
-                      {member.licenseExpiresOn < today && (
-                        <Badge tone="warning" size="sm">
-                          Kedaluwarsa
-                        </Badge>
-                      )}
-                    </span>
+                    <span className="text-xs text-muted">{licenseLabel(member)}</span>
                     <StatusBadge isActive={member.isActive} size="sm" />
                   </div>
                   {editButton(member)}
@@ -185,7 +161,7 @@ export function StaffManagement({ staff: initial, now }: StaffManagementProps) {
         />
 
         {editing !== undefined && (
-          <StaffDialog staff={editing} existing={staff} today={today} onClose={() => setEditing(undefined)} onSave={save} />
+          <StaffDialog staff={editing} onClose={() => setEditing(undefined)} onSave={save} />
         )}
       </Card>
     </div>

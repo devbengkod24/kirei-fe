@@ -14,8 +14,7 @@ const DRIVER: Staff = {
   id: "staff-1",
   name: "Slamet Riyadi",
   phone: "081234500011",
-  licenseNumber: "1234-5678-000011",
-  licenseExpiresOn: "2028-03-14",
+  licenseClass: "B1 Umum",
   role: "sopir",
   isActive: true,
 };
@@ -36,5 +35,12 @@ describe("staff store", () => {
     storage.setItem(MOCK_STAFF_KEY, '[{"id":1}]');
     expect(readStoredStaff(storage)).toBeNull();
     expect(saveStaff([DRIVER], null)).toBe(false);
+  });
+
+  it("keeps drivers saved with a licence number, without a class yet", () => {
+    const storage = memoryStorage();
+    const old = { id: DRIVER.id, name: DRIVER.name, phone: DRIVER.phone, role: DRIVER.role, isActive: DRIVER.isActive };
+    storage.setItem(MOCK_STAFF_KEY, JSON.stringify([{ ...old, licenseNumber: "1234", licenseExpiresOn: "2028-03-14" }]));
+    expect(readStoredStaff(storage)).toEqual([{ ...DRIVER, licenseClass: "" }]);
   });
 });

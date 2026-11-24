@@ -74,7 +74,9 @@ export function VehicleCrewPanel({ reservation, staff }: VehicleCrewPanelProps) 
     staff.filter((member) => member.role === role && (member.isActive || member.id === assigned));
   const drivers = offered("sopir", values.driverId);
   const coDrivers = offered("co_sopir", values.coDriverId);
-  const label = (member: Staff) => (member.isActive ? member.name : `${member.name} (tidak aktif)`);
+  // the licence class tells the admin who may drive this vehicle
+  const label = (member: Staff) =>
+    `${member.name}${member.licenseClass ? ` · SIM ${member.licenseClass}` : ""}${member.isActive ? "" : " (tidak aktif)"}`;
   const fieldId = (name: string) => `crew-${reservation.id}-${name}`;
 
   const save = handleSubmit((crew) => {
