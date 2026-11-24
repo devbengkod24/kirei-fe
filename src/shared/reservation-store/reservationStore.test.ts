@@ -12,6 +12,7 @@ import {
   parseState,
   readSnapshot,
   resetMockReservations,
+  withDrivers,
   type MockReservation,
 } from "./reservationStore";
 
@@ -176,6 +177,24 @@ describe("borrower history", () => {
     const trip = created({ id: "mock-trip", type: "kendaraan", roomName: "", trip: details });
     const [record] = mergeOwnHistory([], { created: [trip], decisions: {} }, "kendaraan", "usr-ormawa");
     expect(record).toMatchObject({ unitName: "Bus Udinus, 2 unit", trip: details });
+  });
+});
+
+describe("drivers on the borrower's trips", () => {
+  const trip = { id: "res-trip", type: "kendaraan" } as ReservationRecord;
+  const room = { id: "res-room", type: "ruangan" } as ReservationRecord;
+  const staff = [{ id: "staff-1", name: "Slamet Riyadi", phone: "081234500011" }];
+  const assignment = { driverId: "staff-1", coDriverId: null, travelAllowance: 0, fuelAndToll: 0, driverFee: 0 };
+
+  it("names the assigned driver on vehicle trips only", () => {
+    const [withDriver, untouched] = withDrivers([trip, room], { "res-trip": assignment }, staff);
+    expect(withDriver.driver).toEqual({ name: "Slamet Riyadi", phone: "081234500011" });
+    expect(untouched).toBe(room);
+  });
+
+  it("leaves null while no driver is assigned or the driver is gone", () => {
+    expect(withDrivers([trip], {}, staff)[0].driver).toBeNull();
+    expect(withDrivers([trip], { "res-trip": { ...assignment, driverId: "staff-x" } }, staff)[0].driver).toBeNull();
   });
 });
 

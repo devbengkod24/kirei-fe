@@ -50,6 +50,9 @@ export interface ReservationRecord {
   rejectionReason: string | null;
   /** Kendaraan only: destinations, group size, vehicle type, and trip kind. */
   trip?: VehicleTrip;
+  // TODO(api): the driver comes from the admin's crew assignment; kirei-api does not send it yet.
+  /** Kendaraan only: the main driver the admin assigned; null while none is assigned. */
+  driver?: { name: string; phone: string } | null;
 }
 
 /** A saved reservation still waiting for its loan letter. */

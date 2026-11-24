@@ -7,16 +7,12 @@ import { RadioRow } from "@/components/form/ChoiceGroups";
 import { Field, INPUT_CLASS, SelectInput } from "@/components/form/Field";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
-import type { Staff, StaffRole } from "@/types/staff";
+import { LICENSE_CLASSES, type Staff, type StaffRole } from "@/types/staff";
 import { STAFF_ROLE_LABEL, createStaffSchema, type StaffInput, type StaffValues } from "./staffSchema";
 
 export interface StaffDialogProps {
   /** The driver being edited; null to add a new one. */
   staff: Staff | null;
-  /** Every driver in the list, to catch a licence number already in use. */
-  existing: Staff[];
-  /** "YYYY-MM-DD" in WIB */
-  today: string;
   onClose: () => void;
   onSave: (values: StaffValues) => void;
 }
@@ -25,12 +21,12 @@ const ROLES = Object.keys(STAFF_ROLE_LABEL) as StaffRole[];
 
 const toInput = (staff: Staff | null): StaffInput =>
   staff
-    ? { ...staff }
-    : { name: "", phone: "", licenseNumber: "", licenseExpiresOn: "", role: "", isActive: true };
+    ? { name: staff.name, phone: staff.phone, licenseClass: staff.licenseClass, role: staff.role, isActive: staff.isActive }
+    : { name: "", phone: "", licenseClass: "", role: "", isActive: true };
 
 /** Add a driver, or change one: details, licence, type, and whether they still drive. */
-export function StaffDialog({ staff, existing, today, onClose, onSave }: StaffDialogProps) {
-  const schema = useMemo(() => createStaffSchema(existing, today, staff?.id ?? null), [existing, today, staff]);
+export function StaffDialog({ staff, onClose, onSave }: StaffDialogProps) {
+  const schema = useMemo(() => createStaffSchema(), []);
   const form = useForm<StaffInput, unknown, StaffValues>({ resolver: zodResolver(schema), defaultValues: toInput(staff) });
   const { errors } = form.formState;
   const described = (field: keyof StaffInput) =>
@@ -68,27 +64,18 @@ export function StaffDialog({ staff, existing, today, onClose, onSave }: StaffDi
             className={INPUT_CLASS}
           />
         </Field>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Nomor SIM" htmlFor="staff-licenseNumber" error={errors.licenseNumber?.message}>
-            <input
-              id="staff-licenseNumber"
-              inputMode="numeric"
-              placeholder="1234-5678-000011"
-              {...form.register("licenseNumber")}
-              {...described("licenseNumber")}
-              className={INPUT_CLASS}
-            />
-          </Field>
-          <Field label="Masa berlaku SIM" htmlFor="staff-licenseExpiresOn" error={errors.licenseExpiresOn?.message}>
-            <input
-              id="staff-licenseExpiresOn"
-              type="date"
-              {...form.register("licenseExpiresOn")}
-              {...described("licenseExpiresOn")}
-              className={INPUT_CLASS}
-            />
-          </Field>
-        </div>
+        <Field label="Golongan SIM" htmlFor="staff-licenseClass" error={errors.licenseClass?.message}>
+          <SelectInput id="staff-licenseClass" {...form.register("licenseClass")} {...described("licenseClass")}>
+            <option value="" disabled>
+              Pilih golongan SIM
+            </option>
+            {LICENSE_CLASSES.map((licenseClass) => (
+              <option key={licenseClass} value={licenseClass}>
+                SIM {licenseClass}
+              </option>
+            ))}
+          </SelectInput>
+        </Field>
         <Field label="Tipe" htmlFor="staff-role" error={errors.role?.message}>
           <SelectInput id="staff-role" {...form.register("role")} {...described("role")}>
             <option value="" disabled>

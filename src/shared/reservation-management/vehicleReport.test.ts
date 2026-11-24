@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { ReservationRequest } from "@/types/reservation";
 import type { Staff } from "@/types/staff";
-import { vehicleHistoryCsv } from "./vehicleReport";
+import { facilityHistoryCsv, vehicleHistoryCsv } from "./vehicleReport";
 
 const STAFF: Staff[] = [
-  { id: "staff-1", name: "Slamet Riyadi", phone: "081234500011", licenseNumber: "1", licenseExpiresOn: "2028-03-14", role: "sopir", isActive: true },
-  { id: "staff-4", name: "Dedi Kurniawan", phone: "081234500014", licenseNumber: "4", licenseExpiresOn: "2027-11-30", role: "co_sopir", isActive: true },
+  { id: "staff-1", name: "Slamet Riyadi", phone: "081234500011", licenseClass: "B1 Umum", role: "sopir", isActive: true },
+  { id: "staff-4", name: "Dedi Kurniawan", phone: "081234500014", licenseClass: "B1 Umum", role: "co_sopir", isActive: true },
 ];
 
 // 12-14 Nov 2026 as whole WIB days
@@ -79,5 +79,38 @@ describe("vehicle history CSV", () => {
     expect(cells[11]).toBe("Ditolak");
     expect(cells[12]).toBe('"Surat ""belum"" ditandatangani"');
     expect(cells.slice(13)).toEqual(["", "", "", "", "", ""]);
+  });
+});
+
+describe("room and GOR history CSV", () => {
+  // 09.00-11.00 WIB on 12 Nov 2026
+  const room: ReservationRequest = {
+    ...trip,
+    id: "res-2",
+    type: "ruangan",
+    status: "ditolak",
+    startsAt: "2026-11-12T02:00:00.000Z",
+    endsAt: "2026-11-12T04:00:00.000Z",
+    buildingName: "Gedung H",
+    roomName: "H.5.1",
+    purpose: "Rapat",
+    rejectionReason: "Dipakai ujian",
+    trip: undefined,
+  };
+
+  it("writes the room columns, times, and the rejection reason", () => {
+    const [header, row] = lines(facilityHistoryCsv("ruangan", [room]));
+    expect(header.split(";")).toEqual([
+      "Tanggal", "Jam Mulai", "Jam Selesai", "Nama Pemesan", "Keterangan Pemesan", "No HP",
+      "Gedung", "Ruangan", "Keperluan", "Status", "Alasan Ditolak",
+    ]);
+    expect(row).toBe("2026-11-12;09.00;11.00;HMTI;Ormawa;081234567890;Gedung H;H.5.1;Rapat;Ditolak;Dipakai ujian");
+  });
+
+  it("puts the activity in the GOR report", () => {
+    const gor = { ...room, type: "gor" as const, buildingName: "GOR Udinus", roomName: "", activity: "Badminton", status: "disetujui" as const };
+    const [header, row] = lines(facilityHistoryCsv("gor", [gor]));
+    expect(header).toContain("GOR;Kegiatan");
+    expect(row).toContain("GOR Udinus;Badminton;Rapat;Disetujui;");
   });
 });

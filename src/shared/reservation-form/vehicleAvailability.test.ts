@@ -78,25 +78,25 @@ describe("vehicle bookings", () => {
 
 describe("vehicle options", () => {
   const busBooked = [{ vehicleId: "vehicle-bus", units: 1, ...DAY_20 }];
+  const bus = (options: ReturnType<typeof vehicleOptions>) => options.find((option) => option.vehicle.id === "vehicle-bus");
 
   it("offers only active types", () => {
-    expect(vehicleOptions(VEHICLES, [], DAY_20, 10).map((option) => option.vehicle.id)).toEqual(["vehicle-hiace", "vehicle-bus"]);
+    expect(vehicleOptions(VEHICLES, [], DAY_20, 10).map((option) => option.vehicle.id)).toEqual(["vehicle-bus", "vehicle-hiace"]);
   });
 
   it("subtracts units held on overlapping days only", () => {
-    const [, bus] = vehicleOptions(VEHICLES, busBooked, DAY_20, 30);
-    expect(bus).toMatchObject({ suggested: 1, free: 1, reason: null });
+    expect(bus(vehicleOptions(VEHICLES, busBooked, DAY_20, 30))).toMatchObject({ suggested: 1, free: 1, reason: null });
 
-    const nextDay = vehicleOptions(VEHICLES, busBooked, tripRange("2026-11-21", "2026-11-21"), 30)[1];
+    const nextDay = bus(vehicleOptions(VEHICLES, busBooked, tripRange("2026-11-21", "2026-11-21"), 30));
     expect(nextDay).toMatchObject({ free: 2, reason: null });
   });
 
   it("closes a type only when no unit is left", () => {
-    const allTaken = vehicleOptions(VEHICLES, [...busBooked, { ...busBooked[0] }], DAY_20, 10)[1];
+    const allTaken = bus(vehicleOptions(VEHICLES, [...busBooked, { ...busBooked[0] }], DAY_20, 10));
     expect(allTaken).toMatchObject({ free: 0, reason: "Semua unit sudah dipesan pada tanggal ini." });
 
     // 100 people would need 3 buses; the borrower can still take the 2 the campus has
-    const tooBig = vehicleOptions(VEHICLES, [], DAY_20, 100)[1];
+    const tooBig = bus(vehicleOptions(VEHICLES, [], DAY_20, 100));
     expect(tooBig).toMatchObject({ suggested: 2, free: 2, reason: null });
   });
 
@@ -108,9 +108,10 @@ describe("vehicle options", () => {
       ["vehicle-bus", true, 78],
       ["vehicle-hiace", false, 42],
     ]);
+    // equal rank: biggest type first
     expect(order(null)).toEqual([
-      ["vehicle-hiace", true, 42],
       ["vehicle-bus", true, 78],
+      ["vehicle-hiace", true, 42],
     ]);
     const busesGone = [...busBooked, { ...busBooked[0] }];
     expect(order(10, busesGone).map(([id]) => id)).toEqual(["vehicle-hiace", "vehicle-bus"]);
@@ -129,9 +130,8 @@ describe("vehicle options", () => {
   });
 
   it("suggests enough units for the group, capped at what is free", () => {
-    const [, bus] = vehicleOptions(VEHICLES, busBooked, DAY_20, 60);
-    expect(bus).toMatchObject({ suggested: 1, free: 1 });
-    expect(vehicleOptions(VEHICLES, [], DAY_20, 60).find((option) => option.vehicle.id === "vehicle-bus")?.suggested).toBe(2);
-    expect(vehicleOptions(VEHICLES, [], null, null)[0]).toMatchObject({ suggested: 1, free: 3, reason: null });
+    expect(bus(vehicleOptions(VEHICLES, busBooked, DAY_20, 60))).toMatchObject({ suggested: 1, free: 1 });
+    expect(bus(vehicleOptions(VEHICLES, [], DAY_20, 60))?.suggested).toBe(2);
+    expect(vehicleOptions(VEHICLES, [], null, null)[1]).toMatchObject({ suggested: 1, free: 3, reason: null });
   });
 });

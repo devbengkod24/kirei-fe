@@ -135,27 +135,30 @@ export function ReservationDetailDialog({ reservation, onClose, title = "Detail 
         </div>
       )}
 
-      <div className="flex flex-col gap-1">
-        <dt className={CAPS_LABEL_CLASS}>Surat peminjaman</dt>
-        <dd className={READONLY_BOX}>
-          {/* TODO: letterUrl becomes a short-lived signed URL from the API. */}
-          {reservation.letterFileName && reservation.letterUrl ? (
-            <span className="flex w-full flex-wrap items-center justify-between gap-2">
-              <span className="break-all">{reservation.letterFileName}</span>
-              <a
-                href={reservation.letterUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium text-primary underline-offset-2 hover:underline"
-              >
-                Lihat surat<span className="sr-only"> (membuka tab baru)</span>
-              </a>
-            </span>
-          ) : (
-            <span className="text-muted">Belum ada surat yang diunggah.</span>
-          )}
-        </dd>
-      </div>
+      {/* A request sent without a letter never needed one (dosen), so the block shows only with a letter. */}
+      {reservation.letterFileName && (
+        <div className="flex flex-col gap-1">
+          <dt className={CAPS_LABEL_CLASS}>Surat peminjaman</dt>
+          <dd className={READONLY_BOX}>
+            {/* TODO: letterUrl becomes a short-lived signed URL from the API. */}
+            {reservation.letterFileName && reservation.letterUrl ? (
+              <span className="flex w-full flex-wrap items-center justify-between gap-2">
+                <span className="break-all">{reservation.letterFileName}</span>
+                <a
+                  href={reservation.letterUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-primary underline-offset-2 hover:underline"
+                >
+                  Lihat surat<span className="sr-only"> (membuka tab baru)</span>
+                </a>
+              </span>
+            ) : (
+              <span className="text-muted">Belum ada surat yang diunggah.</span>
+            )}
+          </dd>
+        </div>
+      )}
     </dl>
   );
 

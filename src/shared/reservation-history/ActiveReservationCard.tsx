@@ -14,6 +14,10 @@ function Field({ label, children, className = "" }: { label: string; children: R
   );
 }
 
+/** The driver shows once a trip is approved; until the admin assigns one it says so. */
+export const hasDriverInfo = (reservation: ReservationRecord) =>
+  reservation.type === "kendaraan" && (reservation.status === "disetujui" || reservation.status === "selesai");
+
 export function ActiveReservationCard({ reservation }: { reservation: ReservationRecord }) {
   return (
     <Card as="article" className="flex flex-col gap-2 p-3">
@@ -55,6 +59,22 @@ export function ActiveReservationCard({ reservation }: { reservation: Reservatio
               {reservation.trip.destination}
             </Field>
             <Field label="Perjalanan">{tripText(reservation.trip)}</Field>
+          </>
+        )}
+        {hasDriverInfo(reservation) && (
+          <>
+            <Field label="Nama Sopir" className="col-span-2">
+              {reservation.driver?.name ?? "Belum ditentukan"}
+            </Field>
+            <Field label="No HP Sopir">
+              {reservation.driver ? (
+                <a href={`tel:${reservation.driver.phone}`} className="text-primary underline-offset-2 hover:underline">
+                  {reservation.driver.phone}
+                </a>
+              ) : (
+                "Belum ditentukan"
+              )}
+            </Field>
           </>
         )}
       </dl>

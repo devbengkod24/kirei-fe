@@ -6,12 +6,10 @@ import { ORGANISATION_MIN_DAYS_AHEAD } from "@/config/reservation";
  *   for the admin of the building's faculty.
  * - "request_without_letter": a borrower who needs no loan letter; still waits for approval, and
  *   has no draft, since a draft only waits for the letter.
- * - "request_without_draft": a borrower who must send the loan letter with the request but has no
- *   drafts, e.g. a dosen booking a vehicle.
  * - "internal": an admin books for the campus (Reservasi Internal); no phone, letter, draft, or
  *   approval, the reservation is created right away.
  */
-export type BookingMode = "request" | "request_without_letter" | "request_without_draft" | "internal";
+export type BookingMode = "request" | "request_without_letter" | "internal";
 
 export interface BookingModeSettings {
   askPhone: boolean;
@@ -38,8 +36,6 @@ export const BOOKING_MODES: Record<BookingMode, BookingModeSettings> = {
     minDaysAhead: ORGANISATION_MIN_DAYS_AHEAD,
   },
   request_without_letter: { askPhone: true, withLetter: false, withDraft: false, needsApproval: true, requesterLabel: "Peminjam", minDaysAhead: 0 },
-  // dosen booking a vehicle: letter required, no draft, and no H-0/H-1 rule
-  request_without_draft: { askPhone: true, withLetter: true, withDraft: false, needsApproval: true, requesterLabel: "Peminjam", minDaysAhead: 0 },
   internal: {
     askPhone: false,
     withLetter: false,

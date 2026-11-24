@@ -13,7 +13,7 @@ export default async function Page() {
       tipe="kendaraan"
       requester={{ name: user.name, fakultasId: user.fakultasId }}
       owner={borrowerOwner(user)}
-      {...borrowerBooking(user.role, "kendaraan")}
+      {...borrowerBooking(user.role)}
     />
   );
 }

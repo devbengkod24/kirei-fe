@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useMemo } from "react";
 import { FormProvider, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { Card } from "@/components/ui/Card";
-import { formatFullDateWIB, toWibDateKey, wibToIso } from "@/lib/date";
+import { formatDayRangeShortWIB, toWibDateKey, wibToIso } from "@/lib/date";
 import { withDecision, type ReservationOwner } from "@/shared/reservation-store/reservationStore";
 import { useMockReservations } from "@/shared/reservation-store/useMockReservations";
 import type { Vehicle } from "@/types/facility";
@@ -36,6 +36,7 @@ import {
   type VehicleBooking,
   type VehicleOption,
 } from "./vehicleAvailability";
+import { VehicleFleetInfo } from "./VehicleFleetInfo";
 import { VehicleIcon } from "./VehicleIcon";
 
 export interface VehicleReservationFormProps {
@@ -106,8 +107,6 @@ function tileState(option: VehicleOption, hasGroup: boolean): TileState {
   return option.fits ? "available" : "short";
 }
 
-const dayLabel = (dateKey: string) =>
-  formatFullDateWIB(wibToIso(dateKey, "12:00"));
 
 export function VehicleReservationForm({
   now,
@@ -376,28 +375,32 @@ export function VehicleReservationForm({
               aria-describedby={errors.vehicleId ? "vehicle-vehicleId-error" : undefined}
             >
               <legend className={`${LABEL} mb-1`}>Kendaraan<RequiredMark /></legend>
-              {hasGroup ? (
-                <p className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted">
-                  <span className="flex items-center gap-1">
-                    <span aria-hidden="true" className="size-2.5 rounded-full border border-success bg-success-soft" />
-                    Cukup untuk semua peserta
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span aria-hidden="true" className="size-2.5 rounded-full border border-border bg-surface" />
-                    Unit kurang
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span aria-hidden="true" className="size-2.5 rounded-full border border-border bg-page" />
-                    Di bawah minimal
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span aria-hidden="true" className="size-2.5 rounded-full bg-danger-soft" />
-                    Habis
-                  </span>
-                </p>
-              ) : (
-                <p className="text-[11px] text-muted">Isi jumlah peserta dulu untuk memilih kendaraan.</p>
-              )}
+              <div className="flex items-start justify-between gap-2">
+                {hasGroup ? (
+                  <p className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted">
+                    <span className="flex items-center gap-1">
+                      <span aria-hidden="true" className="size-2.5 rounded-full border border-success bg-success-soft" />
+                      Cukup untuk semua peserta
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span aria-hidden="true" className="size-2.5 rounded-full border border-border bg-surface" />
+                      Unit kurang
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span aria-hidden="true" className="size-2.5 rounded-full border border-border bg-page" />
+                      Di bawah minimal
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span aria-hidden="true" className="size-2.5 rounded-full bg-danger-soft" />
+                      Habis
+                    </span>
+                  </p>
+                ) : (
+                  <p className="text-[11px] text-muted">Isi jumlah peserta dulu untuk memilih kendaraan.</p>
+                )}
+                {/* borrowers only; admins booking internally see the fleet in Kelola Kendaraan */}
+                {mode !== "internal" && <VehicleFleetInfo vehicles={vehicles} bookings={serverBookings} now={now} />}
+              </div>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {options.map((option) => {
                   const state = tileState(option, hasGroup);
@@ -551,7 +554,7 @@ export function VehicleReservationForm({
           open={flow.dialogOpen}
           onClose={flow.close}
           title="Informasi Reservasi"
-          subject={`Reservasi kendaraan ke ${destinationNames[0] ?? "tujuan"}`}
+          subject="Reservasi kendaraan"
           approver={null}
           submitting={formState.isSubmitting}
           onSubmit={flow.submit}
@@ -566,9 +569,7 @@ export function VehicleReservationForm({
             <SummaryRow label={requesterLabel}>{requester.name}</SummaryRow>
             {askPhone && <SummaryRow label="No HP">{phone}</SummaryRow>}
             <SummaryRow label="Tanggal">
-              {startDate === endDate
-                ? dayLabel(startDate)
-                : `${dayLabel(startDate)} sampai ${dayLabel(endDate)}`}
+              {formatDayRangeShortWIB(wibToIso(startDate, "12:00"), wibToIso(endDate, "12:00"))}
             </SummaryRow>
             {(tripKind === "menginap" || tripKind === "antar_jemput") && (
               <SummaryRow label="Perjalanan">{TRIP_KIND_LABEL[tripKind]}</SummaryRow>

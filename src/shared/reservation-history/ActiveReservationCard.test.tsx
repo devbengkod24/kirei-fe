@@ -64,4 +64,20 @@ describe("ActiveReservationCard", () => {
     expect(terms()).not.toContain("Dipinjam");
     expect(screen.queryByText("GOR Udinus")).toBeNull();
   });
+
+  it("shows the driver of an approved trip, or that none is assigned yet", () => {
+    const trip: ReservationRecord = { ...room, type: "kendaraan", driver: { name: "Slamet Riyadi", phone: "081234500011" } };
+    const { unmount } = render(<ActiveReservationCard reservation={trip} />);
+    expect(screen.getByText("Slamet Riyadi")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "081234500011" }).getAttribute("href")).toBe("tel:081234500011");
+    unmount();
+
+    render(<ActiveReservationCard reservation={{ ...trip, driver: null }} />);
+    expect(screen.getAllByText("Belum ditentukan")).toHaveLength(2);
+  });
+
+  it("shows no driver while the trip waits for approval", () => {
+    render(<ActiveReservationCard reservation={{ ...room, type: "kendaraan", status: "menunggu_persetujuan", driver: null }} />);
+    expect(screen.queryByText("Nama Sopir")).toBeNull();
+  });
 });

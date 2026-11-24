@@ -199,10 +199,9 @@ describe("vehicle reservation schema", () => {
     expect(vehicleIssues({ ...validVehicle, startDate: "2026-10-29" })).toMatchObject({ startDate: "Tanggal mulai sudah lewat." });
   });
 
-  it("asks a borrower without drafts for the letter without offering a draft", () => {
-    const noDraft = createVehicleReservationSchema(() => "2026-10-30", "request_without_draft");
-    const result = noDraft.safeParse({ ...validVehicle, letter: null });
-    expect(result.error?.issues.map((issue) => issue.message)).toEqual(["Unggah surat peminjaman untuk memesan."]);
+  it("lets a dosen send a vehicle request without a letter, and offers ormawa a draft instead", () => {
+    const dosen = createVehicleReservationSchema(() => "2026-10-30", "request_without_letter");
+    expect(dosen.safeParse({ ...validVehicle, letter: null }).success).toBe(true);
     expect(vehicleIssues({ ...validVehicle, letter: null })).toMatchObject({
       letter: "Unggah surat peminjaman untuk memesan, atau simpan sebagai draft dan unggah nanti.",
     });

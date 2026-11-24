@@ -80,6 +80,8 @@ const LEGEND = [
 ] as const;
 
 const ERROR = "text-[11px] text-danger";
+const WEEK_ARROW =
+  "flex size-9 shrink-0 items-center justify-center rounded-md hover:bg-primary-soft disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent";
 
 export function SportsHallReservationForm({
   hall,
@@ -142,11 +144,17 @@ export function SportsHallReservationForm({
   });
 
   const [selection, setSelection] = useState<SlotSelection | null>(null);
+  const [week, setWeek] = useState(0);
+  const lastWeek = Math.max(0, Math.ceil(days.length / 7) - 1);
+  const weekDays = days.slice(week * 7, week * 7 + 7);
   const flow = useReservationSubmit(form, {
     defaults,
     toRequest: (values) => toSportsHallReservationRequest(values, hall.id),
     fieldMap: SPORTS_HALL_RESERVATION_FIELD_MAP,
-    onReset: () => setSelection(null),
+    onReset: () => {
+      setSelection(null);
+      setWeek(0);
+    },
     toDraft: (values) => ({
       unitName: hall.name,
       purpose: values.notes ? `${values.activity}: ${values.notes}` : values.activity,
@@ -200,35 +208,55 @@ export function SportsHallReservationForm({
 
           <fieldset>
             <legend className="sr-only">Tanggal reservasi</legend>
-            <div className="grid grid-cols-7 sm:gap-2 lg:px-16">
-              {days.map((day) => {
-                const active = day.dateKey === date;
-                return (
-                  <button
-                    key={day.dateKey}
-                    type="button"
-                    aria-pressed={active}
-                    aria-label={formatDateLongWIB(
-                      wibToIso(day.dateKey, "12:00"),
-                    )}
-                    onClick={() => chooseDay(day.dateKey)}
-                    className={`flex min-h-16 flex-col items-center justify-center rounded-md py-2 ${
-                      active
-                        ? "bg-primary text-on-primary"
-                        : "text-ink hover:bg-primary-soft"
-                    }`}
-                  >
-                    <span
-                      className={`text-[11px] font-semibold uppercase ${active ? "" : "text-muted"}`}
+            <div className="flex items-center gap-1 sm:gap-2">
+              <button
+                type="button"
+                onClick={() => setWeek(week - 1)}
+                disabled={week === 0}
+                aria-label="Minggu sebelumnya"
+                className={WEEK_ARROW}
+              >
+                <Image src="/icons/page-prev.svg" alt="" width={20} height={20} />
+              </button>
+              <div className="grid flex-1 grid-cols-7 sm:gap-2 lg:px-8">
+                {weekDays.map((day) => {
+                  const active = day.dateKey === date;
+                  return (
+                    <button
+                      key={day.dateKey}
+                      type="button"
+                      aria-pressed={active}
+                      aria-label={formatDateLongWIB(
+                        wibToIso(day.dateKey, "12:00"),
+                      )}
+                      onClick={() => chooseDay(day.dateKey)}
+                      className={`flex min-h-16 flex-col items-center justify-center rounded-md py-2 ${
+                        active
+                          ? "bg-primary text-on-primary"
+                          : "text-ink hover:bg-primary-soft"
+                      }`}
                     >
-                      {day.weekday}
-                    </span>
-                    <span className="text-xl leading-7 font-extrabold">
-                      {day.day}
-                    </span>
-                  </button>
-                );
-              })}
+                      <span
+                        className={`text-[11px] font-semibold uppercase ${active ? "" : "text-muted"}`}
+                      >
+                        {day.weekday}
+                      </span>
+                      <span className="text-xl leading-7 font-extrabold">
+                        {day.day}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              <button
+                type="button"
+                onClick={() => setWeek(week + 1)}
+                disabled={week === lastWeek}
+                aria-label="Minggu berikutnya"
+                className={WEEK_ARROW}
+              >
+                <Image src="/icons/page-next.svg" alt="" width={20} height={20} />
+              </button>
             </div>
           </fieldset>
 
@@ -450,7 +478,6 @@ export function SportsHallReservationForm({
                 },
               ]}
             />
-            <SummaryValue label="Lapangan">Satu lapangan penuh</SummaryValue>
             <SummaryValue label="Jenis Kegiatan">{activity}</SummaryValue>
             {notes.trim() && (
               <SummaryValue label="Keterangan">{notes}</SummaryValue>

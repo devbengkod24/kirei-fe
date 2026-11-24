@@ -90,8 +90,8 @@ export function vehicleOptions(
       return { vehicle, suggested: Math.max(1, Math.min(needed, free)), free, maxPeople, fits, belowMin, reason };
     })
     // types that seat everyone first, then the rest, then too-small groups, then the ones with nothing left;
-    // ties keep the list order
-    .sort((a, b) => rank(a) - rank(b));
+    // ties go biggest first (bus, Hiace, Innova)
+    .sort((a, b) => rank(a) - rank(b) || passengerSeats(b.vehicle) - passengerSeats(a.vehicle));
 }
 
 const rank = (option: VehicleOption) => (option.reason ? 3 : option.belowMin ? 2 : option.fits ? 0 : 1);

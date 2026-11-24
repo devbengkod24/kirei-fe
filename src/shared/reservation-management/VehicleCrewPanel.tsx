@@ -17,6 +17,8 @@ export interface VehicleCrewPanelProps {
   reservation: ReservationRequest;
   /** Drivers and co-drivers the admin can pick from. */
   staff: Staff[];
+  /** When true, renders a single read-only card displaying assigned crew and budget history instead of editable inputs. */
+  readOnly?: boolean;
 }
 
 const money = z.coerce
@@ -51,14 +53,85 @@ const toInput = (assignment: VehicleAssignment | undefined): CrewInput => ({
   driverFee: String(assignment?.driverFee ?? 0),
 });
 
-/** Sopir and Uang cards beside a vehicle request: the admin picks the drivers and sets the trip costs. */
-export function VehicleCrewPanel({ reservation, staff }: VehicleCrewPanelProps) {
+const staffLabel = (member: Staff) =>
+  `${member.name}${member.licenseClass ? ` · SIM ${member.licenseClass}` : ""}${member.isActive ? "" : " (tidak aktif)"}`;
+
+/** Read-only history card combining Sopir and Anggaran into a single section for the Riwayat tab. */
+function VehicleCrewHistoryCard({ reservation, staff }: { reservation: ReservationRequest; staff: Staff[] }) {
+  const store = useMockReservations();
+  const stored = store.assignments?.[reservation.id];
+  const driver = staff.find((member) => member.id === stored?.driverId);
+  const coDriver = staff.find((member) => member.id === stored?.coDriverId);
+  const travelAllowance = stored?.travelAllowance ?? 0;
+  const fuelAndToll = stored?.fuelAndToll ?? 0;
+  const driverFee = stored?.driverFee ?? 0;
+  const total = travelAllowance + fuelAndToll + driverFee;
+  const fieldId = (name: string) => `crew-history-${reservation.id}-${name}`;
+
+  return (
+    <Card as="section" aria-labelledby={fieldId("title")} className="flex flex-col gap-3 p-3">
+      <h3 id={fieldId("title")} className="text-sm font-semibold">
+        Sopir & Anggaran
+      </h3>
+
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-0.5">
+          <span className={CAPS_LABEL_CLASS}>Sopir utama</span>
+          <p className="text-xs font-medium text-ink">{driver ? staffLabel(driver) : "-"}</p>
+          {driver?.phone && (
+            <p className="text-[11px] text-muted">
+              No HP:{" "}
+              <a href={`tel:${driver.phone}`} className="font-medium text-primary hover:underline">
+                {driver.phone}
+              </a>
+            </p>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-0.5">
+          <span className={CAPS_LABEL_CLASS}>Kenek</span>
+          <p className="text-xs font-medium text-ink">{coDriver ? staffLabel(coDriver) : "Tanpa kenek"}</p>
+          {coDriver?.phone && (
+            <p className="text-[11px] text-muted">
+              No HP:{" "}
+              <a href={`tel:${coDriver.phone}`} className="font-medium text-primary hover:underline">
+                {coDriver.phone}
+              </a>
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2 border-t border-border pt-3">
+        <span className={CAPS_LABEL_CLASS}>Rincian anggaran</span>
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-muted">Uang jalan</span>
+          <span className="font-medium text-ink">{rupiah.format(travelAllowance)}</span>
+        </div>
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-muted">BBM dan tol</span>
+          <span className="font-medium text-ink">{rupiah.format(fuelAndToll)}</span>
+        </div>
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-muted">Honor sopir</span>
+          <span className="font-medium text-ink">{rupiah.format(driverFee)}</span>
+        </div>
+        <div className="flex items-center justify-between border-t border-border pt-2 text-sm font-semibold">
+          <span>Total</span>
+          <span className="text-primary font-semibold">{rupiah.format(total)}</span>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+/** Form for picking drivers and setting trip costs during reservation approval. */
+function VehicleCrewForm({ reservation, staff }: { reservation: ReservationRequest; staff: Staff[] }) {
   const store = useMockReservations();
   const stored = store.assignments?.[reservation.id];
   const values = useMemo(() => toInput(stored), [stored]);
   const form = useForm<CrewInput, unknown, CrewValues>({
     resolver: zodResolver(crewSchema),
-    // the store is read after mount, so the saved values arrive after the first render
     values,
   });
   const { register, handleSubmit, control, formState } = form;
@@ -69,16 +142,13 @@ export function VehicleCrewPanel({ reservation, staff }: VehicleCrewPanelProps) 
     return Number.isFinite(amount) && amount > 0 ? sum + amount : sum;
   }, 0);
 
-  // An inactive driver is not offered again, but stays listed where this trip already has them.
   const offered = (role: Staff["role"], assigned: string) =>
     staff.filter((member) => member.role === role && (member.isActive || member.id === assigned));
   const drivers = offered("sopir", values.driverId);
   const coDrivers = offered("co_sopir", values.coDriverId);
-  const label = (member: Staff) => (member.isActive ? member.name : `${member.name} (tidak aktif)`);
   const fieldId = (name: string) => `crew-${reservation.id}-${name}`;
 
   const save = handleSubmit((crew) => {
-    // TODO: PUT the drivers and costs through the orval client. Until then the demo store keeps them.
     const saved = assignVehicleCrew(reservation.id, {
       ...crew,
       driverId: crew.driverId || null,
@@ -111,7 +181,7 @@ export function VehicleCrewPanel({ reservation, staff }: VehicleCrewPanelProps) 
             <option value="">Belum dipilih</option>
             {drivers.map((member) => (
               <option key={member.id} value={member.id}>
-                {label(member)}
+                {staffLabel(member)}
               </option>
             ))}
           </SelectInput>
@@ -129,7 +199,7 @@ export function VehicleCrewPanel({ reservation, staff }: VehicleCrewPanelProps) 
             <option value="">Tanpa kenek</option>
             {coDrivers.map((member) => (
               <option key={member.id} value={member.id}>
-                {label(member)}
+                {staffLabel(member)}
               </option>
             ))}
           </SelectInput>
@@ -181,4 +251,16 @@ export function VehicleCrewPanel({ reservation, staff }: VehicleCrewPanelProps) 
       </Card>
     </form>
   );
+}
+
+/**
+ * Sopir and Uang panel beside a vehicle request.
+ * When `readOnly` is true (Riwayat tab), renders a single combined history card.
+ * When `readOnly` is false (approval flow), renders editable forms for picking drivers and trip costs.
+ */
+export function VehicleCrewPanel({ reservation, staff, readOnly = false }: VehicleCrewPanelProps) {
+  if (readOnly) {
+    return <VehicleCrewHistoryCard reservation={reservation} staff={staff} />;
+  }
+  return <VehicleCrewForm reservation={reservation} staff={staff} />;
 }

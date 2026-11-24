@@ -5,6 +5,7 @@ import { toWibDateKey } from "@/lib/date";
 import { vehicleText } from "@/shared/reservation/vehicleTrip";
 import type { UnitBooking } from "@/types/facility";
 import type { ReservationRecord, ReservationRequest, ReservationStatus, ReservationType } from "@/types/reservation";
+import type { Staff } from "@/types/staff";
 
 /*
  * Demo-only reservation store for running the whole flow without kirei-api: a borrower's request,
@@ -252,6 +253,22 @@ export function mergeAdminRequests(
 }
 
 /** What the borrower's history shows for a request they created. */
+/**
+ * Vehicle trips get the main driver the admin assigned (demo store), by reservation id; other
+ * records pass through. A trip without an assignment, or whose driver is gone, gets null.
+ */
+export function withDrivers(
+  records: ReservationRecord[],
+  assignments: Record<string, VehicleAssignment>,
+  staff: Pick<Staff, "id" | "name" | "phone">[],
+): ReservationRecord[] {
+  return records.map((record) => {
+    if (record.type !== "kendaraan" || record.driver !== undefined) return record;
+    const driver = staff.find((member) => member.id === assignments[record.id]?.driverId);
+    return { ...record, driver: driver ? { name: driver.name, phone: driver.phone } : null };
+  });
+}
+
 export function toHistoryRecord(reservation: MockReservation): ReservationRecord {
   return {
     id: reservation.id,
