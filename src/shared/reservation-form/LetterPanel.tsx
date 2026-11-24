@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { LetterField } from "./LetterField";
 import { PanelHeading } from "./PanelHeading";
+import { RequiredMark } from "./summaryParts";
 
 export interface LetterPanelProps {
   file: File | null;
@@ -20,7 +21,7 @@ export function LetterPanel({ file, onChange, error, onReview, className = "" }:
     <>
       <Card as="section" aria-labelledby="panel-letter" className={`flex flex-col gap-2 p-3 ${className}`}>
         <PanelHeading id="panel-letter" iconSrc="/icons/sticky-note.svg">
-          Upload Surat Peminjaman
+          Upload Surat Peminjaman<RequiredMark />
         </PanelHeading>
         <LetterField variant="dropzone" file={file} onChange={onChange} error={error} />
       </Card>

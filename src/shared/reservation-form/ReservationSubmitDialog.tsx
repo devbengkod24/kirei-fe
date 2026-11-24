@@ -7,7 +7,7 @@ import { Modal } from "@/components/ui/Modal";
 import { DRAFT_LETTER_HOURS } from "@/config/reservation";
 import { LetterField } from "./LetterField";
 import type { ReservationIntent } from "./schema";
-import { SUMMARY_LABEL } from "./summaryParts";
+import { RequiredMark, SUMMARY_LABEL } from "./summaryParts";
 
 /** Where the result dialog sends the user next. */
 export interface ReservationLinks {
@@ -104,7 +104,7 @@ export function ReservationSubmitDialog({
 
         {withLetter && (
           <div className="flex flex-col gap-1">
-            <p className={SUMMARY_LABEL}>Surat Peminjaman</p>
+            <p className={SUMMARY_LABEL}>Surat Peminjaman<RequiredMark /></p>
             <LetterField
               variant="inline"
               file={letter ?? null}

@@ -281,6 +281,7 @@ export { TRIP_KIND_LABEL } from "@/shared/reservation/vehicleTrip";
 export type VehicleIssue = (values: {
   vehicleId: string;
   units: number;
+  participants: number;
   startDate: string;
   endDate: string;
 }) => { field: "vehicleId" | "units"; message: string } | null;
@@ -345,7 +346,7 @@ export function createVehicleReservationSchema(
       }
       const units = Number(values.units);
       if (values.vehicleId && Number.isInteger(units) && units > 0) {
-        const issue = vehicleIssue({ ...values, units });
+        const issue = vehicleIssue({ ...values, units, participants: Number(values.participants) });
         if (issue) ctx.addIssue({ code: "custom", path: [issue.field], message: issue.message });
       }
       if (withLetter) requireLetterToSubmit(values, ctx, withDraft);
