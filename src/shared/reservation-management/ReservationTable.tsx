@@ -22,7 +22,7 @@ import { ApproveReservationDialog } from "./ApproveReservationDialog";
 import { RejectReservationDialog } from "./RejectReservationDialog";
 import { TYPE_COLUMNS } from "./typeColumns";
 import { VehicleCrewPanel } from "./VehicleCrewPanel";
-import { vehicleHistoryCsv } from "./vehicleReport";
+import { facilityHistoryCsv, vehicleHistoryCsv } from "./vehicleReport";
 
 export interface ReservationTableProps {
   tipe: ReservationType;
@@ -34,8 +34,8 @@ export interface ReservationTableProps {
   /** Buildings in the admin's scope, so a room added later in Kelola Denah still counts. */
   buildingNames?: string[];
   /**
-   * Drivers for vehicle requests. When set, the detail of a vehicle request shows the Sopir and Uang
-   * cards, and the vehicle history gets an "Ekspor Laporan" button.
+   * Drivers for vehicle requests. When set, the approve and detail dialogs of a vehicle request show
+   * the Sopir and Uang cards, and the vehicle report lists the drivers.
    */
   staff?: Staff[];
 }
@@ -90,14 +90,24 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, b
     vehicleCrew && reservation.status !== "ditolak" ? <VehicleCrewPanel reservation={reservation} staff={vehicleCrew} /> : undefined;
 
   const exportReport = () => {
-    if (!vehicleCrew) return;
-    const csv = vehicleHistoryCsv(reservations, store.assignments ?? {}, vehicleCrew);
+    const csv =
+      tipe === "kendaraan"
+        ? vehicleHistoryCsv(reservations, store.assignments ?? {}, vehicleCrew ?? [])
+        : facilityHistoryCsv(tipe, reservations);
+    const label = RESERVATION_TYPE_LABEL[tipe].toLowerCase();
     const link = document.createElement("a");
     link.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
-    link.download = `riwayat-kendaraan-${toWibDateKey(new Date())}.csv`;
+    link.download = `riwayat-${label}-${toWibDateKey(new Date())}.csv`;
     link.click();
     URL.revokeObjectURL(link.href);
-    setNotice(`Laporan ${reservations.length} reservasi kendaraan diunduh.`);
+    setNotice(`Laporan ${reservations.length} reservasi ${label} diunduh.`);
+  };
+
+  // Vehicle history shows who drives instead of the rejection reason; the reason stays in the detail.
+  const driverName = (reservation: ReservationRequest) => {
+    if (reservation.status === "ditolak") return "-";
+    const driverId = store.assignments?.[reservation.id]?.driverId;
+    return browserStaff.find((member) => member.id === driverId)?.name ?? "-";
   };
 
   const resolve = (reservation: ReservationRequest, decision: Omit<MockDecision, "decidedAt">, message: string) => {
@@ -108,29 +118,17 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, b
     setNotice(message);
   };
 
-  // History rows have one action, shaped like the decision: a check opens the details, a cross opens
-  // them with the rejection reason.
-  const renderHistoryAction = (reservation: ReservationRequest) => {
-    const rejected = reservation.status === "ditolak";
-    return (
-      <button
-        type="button"
-        onClick={() => setViewing(reservation)}
-        aria-label={`${rejected ? "Lihat alasan penolakan" : "Lihat detail"} reservasi ${reservation.borrowerName}`}
-        className={`${ICON_BUTTON} ${
-          rejected
-            ? "border-danger-soft hover:border-danger-strong hover:bg-danger-soft"
-            : "border-transparent bg-success-soft hover:border-success"
-        }`}
-      >
-        {rejected ? (
-          <Image src="/icons/admin/reject.svg" alt="" width={7} height={7} />
-        ) : (
-          <Image src="/icons/admin/approve.svg" alt="" width={10} height={7} />
-        )}
-      </button>
-    );
-  };
+  // History rows have one action: the eye opens the details; the badge already shows the decision.
+  const renderHistoryAction = (reservation: ReservationRequest) => (
+    <button
+      type="button"
+      onClick={() => setViewing(reservation)}
+      aria-label={`Lihat detail reservasi ${reservation.borrowerName}`}
+      className={`${ICON_BUTTON} border-border hover:bg-primary-soft`}
+    >
+      <Image src="/icons/admin/view.svg" alt="" width={14} height={11} />
+    </button>
+  );
 
   const renderApprovalActions = (reservation: ReservationRequest) => (
     <div className="flex items-center gap-2">
@@ -163,7 +161,7 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, b
         {notice}
       </p>
 
-      {vehicleCrew && !isApproval && reservations.length > 0 && (
+      {!isApproval && reservations.length > 0 && (
         <div className="flex justify-end">
           <Button variant="primary-outline" onClick={exportReport}>
             Ekspor Laporan
@@ -188,7 +186,7 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, b
                 ))}
                 {!wholeDays && <th scope="col" className={TH}>Waktu</th>}
                 <th scope="col" className={TH}>Keperluan</th>
-                {!isApproval && <th scope="col" className={TH}>Alasan Ditolak</th>}
+                {!isApproval && <th scope="col" className={TH}>{wholeDays ? "Nama Supir" : "Alasan Ditolak"}</th>}
                 {!isApproval && <th scope="col" className={TH}>Status</th>}
                 <th scope="col" className={TH}>Aksi</th>
               </tr>
@@ -209,11 +207,14 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, b
                     </td>
                   )}
                   <td className={TD}>{reservation.purpose}</td>
-                  {!isApproval && (
-                    <td className={`${TD} max-w-56 ${reservation.status === "ditolak" ? "text-danger" : "text-muted"}`}>
-                      {rejectionText(reservation)}
-                    </td>
-                  )}
+                  {!isApproval &&
+                    (wholeDays ? (
+                      <td className={TD}>{driverName(reservation)}</td>
+                    ) : (
+                      <td className={`${TD} max-w-56 ${reservation.status === "ditolak" ? "text-danger" : "text-muted"}`}>
+                        {rejectionText(reservation)}
+                      </td>
+                    ))}
                   {!isApproval && (
                     <td className={TD}>
                       <ReservationStatusBadge status={reservation.status} />
@@ -243,7 +244,7 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, b
                 </div>
                 {!isApproval && <ReservationStatusBadge status={reservation.status} size="sm" />}
               </div>
-              {!isApproval && reservation.status === "ditolak" && (
+              {!isApproval && !wholeDays && reservation.status === "ditolak" && (
                 <p className="mb-2 rounded-md bg-danger-soft px-2 py-1 text-xs text-danger">
                   <span className="font-semibold">Alasan ditolak:</span> {rejectionText(reservation)}
                 </p>
@@ -259,6 +260,12 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, b
                 ))}
                 <dt className="text-primary">Keperluan</dt>
                 <dd className="break-words">{reservation.purpose}</dd>
+                {!isApproval && wholeDays && (
+                  <>
+                    <dt className="text-primary">Nama Supir</dt>
+                    <dd className="break-words">{driverName(reservation)}</dd>
+                  </>
+                )}
               </dl>
               <div className="mt-2 flex justify-end">
                 {renderActions(reservation)}
@@ -298,7 +305,6 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, b
       {rejecting && (
         <RejectReservationDialog
           reservation={rejecting}
-          aside={crewPanel(rejecting)}
           onClose={() => setRejecting(null)}
           onReject={(reason) => {
             resolve(

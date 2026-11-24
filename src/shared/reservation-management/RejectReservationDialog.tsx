@@ -10,8 +10,6 @@ export interface RejectReservationDialogProps {
   reservation: ReservationRequest;
   onClose: () => void;
   onReject: (reason: string) => void;
-  /** Panels beside the details, e.g. drivers and costs of a vehicle request. */
-  aside?: React.ReactNode;
 }
 
 const REASON_EXAMPLE: Record<ReservationType, string> = {
@@ -20,8 +18,8 @@ const REASON_EXAMPLE: Record<ReservationType, string> = {
   kendaraan: "Contoh: Semua kendaraan sudah terpakai pada tanggal itu.",
 };
 
-/** The full reservation details, like the approve dialog, with the reason the borrower will receive. */
-export function RejectReservationDialog({ reservation, onClose, onReject, aside }: RejectReservationDialogProps) {
+/** The reservation details with the reason the borrower will receive; no driver or cost panels. */
+export function RejectReservationDialog({ reservation, onClose, onReject }: RejectReservationDialogProps) {
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string>();
 
@@ -36,7 +34,6 @@ export function RejectReservationDialog({ reservation, onClose, onReject, aside 
       reservation={reservation}
       onClose={onClose}
       title="Tolak Reservasi"
-      aside={aside}
       intro={<p className="text-sm">Periksa detail pesanan, lalu tulis alasan penolakannya.</p>}
       outro={
         <form id="reject-reservation-form" onSubmit={submit} noValidate>

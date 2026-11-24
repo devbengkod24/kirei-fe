@@ -1,8 +1,8 @@
-import { toWibDateKey } from "@/lib/date";
+import { formatTimeWIB, toWibDateKey } from "@/lib/date";
 import { reservationStatusLabel } from "@/shared/reservation/ReservationStatusBadge";
 import { TRIP_KIND_LABEL } from "@/shared/reservation/vehicleTrip";
 import type { VehicleAssignment } from "@/shared/reservation-store/reservationStore";
-import type { ReservationRequest } from "@/types/reservation";
+import type { ReservationRequest, ReservationType } from "@/types/reservation";
 import type { Staff } from "@/types/staff";
 
 // Excel set to Indonesian uses ";" as its list separator, so a comma file would open in one column.
@@ -78,4 +78,49 @@ export function vehicleHistoryCsv(
       .join(SEPARATOR);
   });
   return `﻿${[HEADERS.join(SEPARATOR), ...lines].join("\r\n")}\r\n`;
+}
+
+const FACILITY_COLUMNS: Record<Exclude<ReservationType, "kendaraan">, [string, (reservation: ReservationRequest) => string | null | undefined][]> = {
+  ruangan: [
+    ["Gedung", (reservation) => reservation.buildingName],
+    ["Ruangan", (reservation) => reservation.roomName],
+  ],
+  gor: [
+    ["GOR", (reservation) => reservation.buildingName],
+    ["Kegiatan", (reservation) => reservation.activity],
+  ],
+};
+
+/** Room or GOR history as CSV for Excel, with the same columns as the history table. */
+export function facilityHistoryCsv(tipe: Exclude<ReservationType, "kendaraan">, rows: ReservationRequest[]): string {
+  const columns = FACILITY_COLUMNS[tipe];
+  const headers = [
+    "Tanggal",
+    "Jam Mulai",
+    "Jam Selesai",
+    "Nama Pemesan",
+    "Keterangan Pemesan",
+    "No HP",
+    ...columns.map(([header]) => header),
+    "Keperluan",
+    "Status",
+    "Alasan Ditolak",
+  ];
+  const lines = rows.map((reservation) =>
+    [
+      toWibDateKey(reservation.startsAt),
+      formatTimeWIB(reservation.startsAt),
+      formatTimeWIB(reservation.endsAt),
+      reservation.borrowerName,
+      reservation.borrowerDetail,
+      reservation.phone,
+      ...columns.map(([, value]) => value(reservation)),
+      reservation.purpose,
+      reservationStatusLabel(reservation.status),
+      reservation.status === "ditolak" ? reservation.rejectionReason : null,
+    ]
+      .map(cell)
+      .join(SEPARATOR),
+  );
+  return `﻿${[headers.join(SEPARATOR), ...lines].join("\r\n")}\r\n`;
 }
