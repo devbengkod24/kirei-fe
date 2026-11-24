@@ -10,13 +10,14 @@ export interface ModalProps {
   children: React.ReactNode;
   /** Buttons row under the content, right-aligned. */
   footer?: React.ReactNode;
-  /** "wide" fits side-by-side panels. */
-  size?: "default" | "wide";
+  /** "medium" fits a two-column form; "wide" fits side-by-side panels. */
+  size?: "default" | "medium" | "wide";
   className?: string;
 }
 
 const WIDTH = {
   default: "w-[min(29rem,calc(100vw-2rem))]",
+  medium: "w-[min(40rem,calc(100vw-2rem))]",
   wide: "w-[min(56rem,calc(100vw-2rem))]",
 };
 

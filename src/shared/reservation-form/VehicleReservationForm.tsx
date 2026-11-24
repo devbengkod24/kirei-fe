@@ -142,7 +142,7 @@ export function VehicleReservationForm({
       if (!option) return { field: "vehicleId", message: "Kendaraan ini tidak bisa dipesan." };
       if (option.reason) return { field: "vehicleId", message: option.reason };
       if (option.belowMin) {
-        return { field: "vehicleId", message: `${option.vehicle.name} minimal untuk ${option.vehicle.minParticipants} orang.` };
+        return { field: "vehicleId", message: `${option.vehicle.name} minimal untuk ${option.vehicle.minPassengers} orang.` };
       }
       if (units > option.free) return { field: "units", message: `Tersisa ${option.free} unit pada tanggal ini.` };
       if (group && units > unitsNeeded(option.vehicle, group)) {
@@ -402,7 +402,7 @@ export function VehicleReservationForm({
                 {options.map((option) => {
                   const state = tileState(option, hasGroup);
                   const locked = state === "waiting" || state === "belowMin" || state === "gone";
-                  const min = option.vehicle.minParticipants ?? 1;
+                  const min = option.vehicle.minPassengers ?? 1;
                   return (
                     <label key={option.vehicle.id} className={`${TILE} ${TILE_STYLE[state]}`}>
                       <input

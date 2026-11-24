@@ -69,7 +69,7 @@ export interface Vehicle {
   capacity: number;
   /** Units the campus owns of this kind. */
   unitCount: number;
-  /** Smallest group this kind is lent for, e.g. a bus from 25 people; 1 when unset. */
-  minParticipants?: number;
   isActive: boolean;
+  /** Fewest passengers a request for this kind must list. */
+  minPassengers?: number;
 }

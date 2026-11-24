@@ -117,7 +117,7 @@ describe("vehicle options", () => {
   });
 
   it("marks a group smaller than a type's minimum, and puts that type after the usable ones", () => {
-    const withMin = [HIACE, { ...BUS, minParticipants: 25 }];
+    const withMin = [HIACE, { ...BUS, minPassengers: 25 }];
     const small = vehicleOptions(withMin, [], DAY_20, 10);
     expect(small.map((option) => [option.vehicle.id, option.belowMin])).toEqual([
       ["vehicle-hiace", false],

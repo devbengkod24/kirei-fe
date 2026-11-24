@@ -22,7 +22,7 @@ export interface VehicleOption {
   maxPeople: number;
   /** The free units seat the whole group; true while the group size is not filled in. */
   fits: boolean;
-  /** The group is smaller than this kind is lent for (`minParticipants`); false while the group size is not filled in. */
+  /** The group is smaller than this kind is lent for (`minPassengers`); false while the group size is not filled in. */
   belowMin: boolean;
   /** Why it cannot be picked; null when it can. */
   reason: string | null;
@@ -59,6 +59,13 @@ export function vehicleBookings(reservations: ReservationRequest[], vehicles: Ve
   });
 }
 
+/** Units of one vehicle type held by bookings that touch `range`. */
+export function unitsHeld(vehicleId: string, bookings: VehicleBooking[], range: { startsAt: string; endsAt: string }) {
+  return bookings
+    .filter((booking) => booking.vehicleId === vehicleId && rangesOverlap(booking.startsAt, booking.endsAt, range.startsAt, range.endsAt))
+    .reduce((sum, booking) => sum + booking.units, 0);
+}
+
 /**
  * Active vehicle types with how many units are free on the chosen days and how many would seat the group.
  * shortcut: every booking that touches the range counts against it, even two that fall on different
@@ -73,17 +80,13 @@ export function vehicleOptions(
   return vehicles
     .filter((vehicle) => vehicle.isActive)
     .map((vehicle) => {
-      const used = range
-        ? bookings
-            .filter((booking) => booking.vehicleId === vehicle.id && rangesOverlap(booking.startsAt, booking.endsAt, range.startsAt, range.endsAt))
-            .reduce((sum, booking) => sum + booking.units, 0)
-        : 0;
+      const used = range ? unitsHeld(vehicle.id, bookings, range) : 0;
       const free = Math.max(0, vehicle.unitCount - used);
       const needed = participants && participants > 0 ? unitsNeeded(vehicle, participants) : 1;
       const reason = free === 0 ? "Semua unit sudah dipesan pada tanggal ini." : null;
       const maxPeople = free * passengerSeats(vehicle);
       const fits = !participants || participants <= maxPeople;
-      const belowMin = Boolean(participants && participants < (vehicle.minParticipants ?? 1));
+      const belowMin = Boolean(participants && participants < (vehicle.minPassengers ?? 1));
       return { vehicle, suggested: Math.max(1, Math.min(needed, free)), free, maxPeople, fits, belowMin, reason };
     })
     // types that seat everyone first, then the rest, then too-small groups, then the ones with nothing left;
