@@ -1,13 +1,11 @@
 import type { AdminScope } from "@/shared/admin-scope";
-import { getVehicleReservationOptions } from "@/shared/reservation-form/getReservationOptions";
 import { getReservationCandidates, type ReservationTab } from "@/shared/reservation-management/getReservationRequests";
 import { ReservationManagement } from "@/shared/reservation-management/ReservationManagement";
 import type { Fakultas } from "@/types/fakultas";
 import type { ReservationType } from "@/types/reservation";
 import { ADMIN_UNIVERSITAS_ROUTES, reservationsRoute } from "../routes";
 import { TypeTabs } from "../TypeTabs";
-import { getStaff } from "../staff/getStaff";
-import { VehicleFleetInfo } from "./VehicleFleetInfo";
+import { getStaff } from "@/shared/staff/getStaff";
 
 export interface UniversityReservationsProps {
   tipe: ReservationType;
@@ -34,7 +32,7 @@ export async function UniversityReservations({ tipe, tab }: UniversityReservatio
     );
   }
 
-  const [fleet, staff] = await Promise.all([getVehicleReservationOptions(), getStaff()]);
+  const staff = await getStaff();
   return (
     <ReservationManagement
       tipe={tipe}
@@ -42,12 +40,7 @@ export async function UniversityReservations({ tipe, tab }: UniversityReservatio
       links={{ persetujuan: reservationsRoute(tipe, "persetujuan"), riwayat: reservationsRoute(tipe, "riwayat") }}
       {...candidates}
       heading={null}
-      leading={
-        <div className="flex items-center gap-2">
-          {tabs}
-          <VehicleFleetInfo vehicles={fleet.vehicles} bookings={fleet.bookings} now={fleet.now} />
-        </div>
-      }
+      leading={tabs}
       staff={staff}
     />
   );

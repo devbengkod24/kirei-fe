@@ -9,7 +9,7 @@ import {
   vehicleBookings,
   vehicleOptions,
   type VehicleBooking,
-} from "@/shared/reservation-form/vehicleAvailability";
+} from "./vehicleAvailability";
 import { withDecision } from "@/shared/reservation-store/reservationStore";
 import { useMockReservations } from "@/shared/reservation-store/useMockReservations";
 import type { Vehicle } from "@/types/facility";
@@ -22,7 +22,7 @@ export interface VehicleFleetInfoProps {
   now: string;
 }
 
-/** (i) button beside the type tabs: the campus vehicles and how many units are taken today. */
+/** (i) button beside the vehicle picker for borrowers: the campus vehicles and how many units are taken today. */
 export function VehicleFleetInfo({ vehicles, bookings: serverBookings, now }: VehicleFleetInfoProps) {
   const [open, setOpen] = useState(false);
   const store = useMockReservations();
