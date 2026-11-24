@@ -70,4 +70,6 @@ export interface Vehicle {
   /** Units the campus owns of this kind. */
   unitCount: number;
   isActive: boolean;
+  /** Fewest passengers a request for this kind must list. */
+  minPassengers?: number;
 }

@@ -53,6 +53,13 @@ export function vehicleBookings(reservations: ReservationRequest[], vehicles: Ve
   });
 }
 
+/** Units of one vehicle type held by bookings that touch `range`. */
+export function unitsHeld(vehicleId: string, bookings: VehicleBooking[], range: { startsAt: string; endsAt: string }) {
+  return bookings
+    .filter((booking) => booking.vehicleId === vehicleId && rangesOverlap(booking.startsAt, booking.endsAt, range.startsAt, range.endsAt))
+    .reduce((sum, booking) => sum + booking.units, 0);
+}
+
 /**
  * Active vehicle types with how many units are free on the chosen days and how many would seat the group.
  * shortcut: every booking that touches the range counts against it, even two that fall on different
@@ -67,11 +74,7 @@ export function vehicleOptions(
   return vehicles
     .filter((vehicle) => vehicle.isActive)
     .map((vehicle) => {
-      const used = range
-        ? bookings
-            .filter((booking) => booking.vehicleId === vehicle.id && rangesOverlap(booking.startsAt, booking.endsAt, range.startsAt, range.endsAt))
-            .reduce((sum, booking) => sum + booking.units, 0)
-        : 0;
+      const used = range ? unitsHeld(vehicle.id, bookings, range) : 0;
       const free = Math.max(0, vehicle.unitCount - used);
       const needed = participants && participants > 0 ? unitsNeeded(vehicle, participants) : 1;
       const reason = free === 0 ? "Semua unit sudah dipesan pada tanggal ini." : null;
