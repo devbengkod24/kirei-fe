@@ -16,7 +16,7 @@ export interface ReservationFormPageProps {
   owner?: ReservationOwner;
   /** For admins later: allows picking a booked room. Only applies to `ruangan`. */
   canUseBookedSlot?: boolean;
-  /** "request_without_letter": no letter step and no drafts; "request_without_draft": letter required, no drafts. */
+  /** "request_without_letter": no letter step and no drafts (dosen). */
   mode?: BookingMode;
   links: { history: string; drafts?: string };
 }
