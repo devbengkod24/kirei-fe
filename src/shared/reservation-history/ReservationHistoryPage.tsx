@@ -1,6 +1,7 @@
 import { SegmentedNav } from "@/components/ui/SegmentedNav";
 import { RESERVATION_TYPES, type ReservationScope, type ReservationType } from "@/types/reservation";
 import { RESERVATION_TYPE_LABEL } from "@/shared/reservation/reservationTypes";
+import { getStaff } from "@/shared/staff/getStaff";
 import { getHistoryRecords } from "./getReservationHistory";
 import { historyHref, type HistoryQuery, type HistoryView } from "./query";
 import { ReservationHistoryView } from "./ReservationHistoryView";
@@ -36,7 +37,11 @@ export async function ReservationHistoryPage({
   createHref,
 }: ReservationHistoryPageProps) {
   const query: HistoryQuery = { tipe, view, page, perPage };
-  const { records, now } = await getHistoryRecords(tipe, scope);
+  const [{ records, now }, staff] = await Promise.all([
+    getHistoryRecords(tipe, scope),
+    // drivers only matter for vehicle trips
+    tipe === "kendaraan" ? getStaff() : Promise.resolve([]),
+  ]);
   const href = (next: Partial<HistoryQuery>) => historyHref(basePath, { ...query, ...next }, showTypeTabs);
 
   return (
@@ -68,6 +73,7 @@ export async function ReservationHistoryPage({
         query={query}
         records={records}
         now={now}
+        staff={staff}
         ownerId={"mine" in scope ? ownerId : undefined}
         basePath={basePath}
         showTypeTabs={showTypeTabs}

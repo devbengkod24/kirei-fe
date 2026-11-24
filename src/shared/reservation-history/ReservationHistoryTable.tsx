@@ -7,7 +7,21 @@ import type { ReservationRecord, ReservationType } from "@/types/reservation";
 import { ReservationStatusBadge } from "@/shared/reservation/ReservationStatusBadge";
 import { RESERVATION_TYPE_LABEL, RESERVATION_UNIT_LABEL } from "@/shared/reservation/reservationTypes";
 import { tripText } from "@/shared/reservation/vehicleTrip";
+import { hasDriverInfo } from "./ActiveReservationCard";
 import { HISTORY_PARAMS, PER_PAGE_OPTIONS } from "./query";
+
+/** "Slamet Riyadi · 0812…" with a call link, or "Belum ditentukan" before the admin assigns one. */
+function DriverText({ reservation }: { reservation: ReservationRecord }) {
+  if (!reservation.driver) return <span>Sopir: Belum ditentukan</span>;
+  return (
+    <span>
+      Sopir: {reservation.driver.name} ·{" "}
+      <a href={`tel:${reservation.driver.phone}`} className="text-primary underline-offset-2 hover:underline">
+        {reservation.driver.phone}
+      </a>
+    </span>
+  );
+}
 
 export interface ReservationHistoryTableProps {
   tipe: ReservationType;
@@ -95,6 +109,7 @@ export function ReservationHistoryTable({
                         <span className="mt-0.5 flex flex-col text-[11px] text-muted">
                           <span>{reservation.trip.destination}</span>
                           <span>{tripText(reservation.trip)}</span>
+                          {hasDriverInfo(reservation) && <DriverText reservation={reservation} />}
                         </span>
                       )}
                     </td>
@@ -148,6 +163,14 @@ export function ReservationHistoryTable({
                       <dd className="break-words">{reservation.trip.destination}</dd>
                       <dt className="text-primary">Perjalanan</dt>
                       <dd>{tripText(reservation.trip)}</dd>
+                    </>
+                  )}
+                  {hasDriverInfo(reservation) && (
+                    <>
+                      <dt className="text-primary">Sopir</dt>
+                      <dd>
+                        <DriverText reservation={reservation} />
+                      </dd>
                     </>
                   )}
                   <dt className="text-primary">Keperluan</dt>
