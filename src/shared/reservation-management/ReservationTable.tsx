@@ -85,9 +85,11 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, b
   const [browserStaff] = useStaff(staff ?? []);
   const vehicleCrew = tipe === "kendaraan" && staff ? browserStaff : null;
 
-  // Sopir and Uang beside every vehicle request the admin opens; a rejected trip needs no drivers or costs.
-  const crewPanel = (reservation: ReservationRequest) =>
-    vehicleCrew && reservation.status !== "ditolak" ? <VehicleCrewPanel reservation={reservation} staff={vehicleCrew} /> : undefined;
+  // Sopir and Uang beside every vehicle request: read-only in Riwayat, editable in Persetujuan.
+  const crewPanel = (reservation: ReservationRequest, readOnly = false) =>
+    vehicleCrew && reservation.status !== "ditolak" ? (
+      <VehicleCrewPanel reservation={reservation} staff={vehicleCrew} readOnly={readOnly} />
+    ) : undefined;
 
   const exportReport = () => {
     const csv =
@@ -288,7 +290,7 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, b
         <ReservationDetailDialog
           reservation={viewing}
           onClose={() => setViewing(null)}
-          aside={crewPanel(viewing)}
+          aside={crewPanel(viewing, true)}
         />
       )}
       {approving && (
