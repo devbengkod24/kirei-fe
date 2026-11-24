@@ -24,7 +24,7 @@ export function buildDashboardMock(now: Date) {
       title: "Ini judul pengumumannya",
       category: "informasi",
       body: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sodales Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sodales.",
-      authorName: "Adhitya Nugraha S.Kom, M.CS",
+      authorName: "Sapto",
       publishedAt: wibDateTime(todayKey, -2, "13:45"),
     },
     {
@@ -33,7 +33,7 @@ export function buildDashboardMock(now: Date) {
       category: "pemberitahuan",
       body: "Halo, reservasi kamu terpaksa kami batalkan karena alasan berikut:",
       quote: "Meja-K01 akan dipakai untuk keperluan prodi pada pukul 08.00 WIB - selesai. Untuk berjaga-jaga, ...",
-      authorName: "Adhitya Nugraha S.Kom, M.CS",
+      authorName: "Sapto",
       publishedAt: wibDateTime(todayKey, -3, "13:45"),
     },
     {
@@ -41,7 +41,7 @@ export function buildDashboardMock(now: Date) {
       title: "Ini judul pengumumannya",
       category: "informasi",
       body: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sodales Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sodales.",
-      authorName: "Adhitya Nugraha S.Kom, M.CS",
+      authorName: "Sapto",
       publishedAt: wibDateTime(todayKey, -5, "13:45"),
     },
   ];
