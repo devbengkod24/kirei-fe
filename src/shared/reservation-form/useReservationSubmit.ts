@@ -73,7 +73,9 @@ export function useReservationSubmit<TInput extends FieldValues, TOutput>(
         return;
       }
       const listing = owner && toDraft ? { owner, approved: approvedOnSubmit, ...toDraft(values) } : undefined;
-      const response = await createReservation(toRequest(values), listing);
+      const baseRequest = toRequest(values);
+      const request = approvedOnSubmit ? { ...baseRequest, status: "disetujui" } : baseRequest;
+      const response = await createReservation(request, listing);
       if (response.ok) {
         setResult(response.intent);
       } else if ("validation" in response) {

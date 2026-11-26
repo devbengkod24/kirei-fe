@@ -21,7 +21,21 @@ const schedule = (entries: LecturerSchedule["entries"]): LecturerSchedule => ({
 describe("lecturerScheduleBookings", () => {
   it("books the room on that weekday every week of the semester, in WIB", () => {
     const bookings = lecturerScheduleBookings(
-      [schedule([{ day: 1, startTime: "08:00", endTime: "10:00", roomCode: "H.5.1", courseName: "Basis Data", lecturerName: "Rina" }])],
+      [
+        schedule([
+          {
+            day: 1,
+            sksSlot: 2,
+            sksCount: 2,
+            startTime: "08:00",
+            endTime: "10:00",
+            roomCode: "H.5.1",
+            courseName: "Basis Data",
+            lecturerName: "Rina",
+            classGroup: "A11.4301",
+          },
+        ]),
+      ],
       BUILDINGS,
       "2026-10-01",
     );
@@ -38,8 +52,28 @@ describe("lecturerScheduleBookings", () => {
     const bookings = lecturerScheduleBookings(
       [
         schedule([
-          { day: 7, startTime: "08:00", endTime: "10:00", roomCode: "H.5.1", courseName: "Seminar", lecturerName: "Rina" },
-          { day: 1, startTime: "08:00", endTime: "10:00", roomCode: "E.2.1", courseName: "Akuntansi", lecturerName: "Budi" },
+          {
+            day: 7,
+            sksSlot: 2,
+            sksCount: 2,
+            startTime: "08:00",
+            endTime: "10:00",
+            roomCode: "H.5.1",
+            courseName: "Seminar",
+            lecturerName: "Rina",
+            classGroup: "A11.4301",
+          },
+          {
+            day: 1,
+            sksSlot: 2,
+            sksCount: 2,
+            startTime: "08:00",
+            endTime: "10:00",
+            roomCode: "E.2.1",
+            courseName: "Akuntansi",
+            lecturerName: "Budi",
+            classGroup: "B11.4101",
+          },
         ]),
       ],
       BUILDINGS,

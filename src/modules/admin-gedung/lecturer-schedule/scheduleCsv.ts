@@ -1,16 +1,18 @@
 import { z } from "zod";
+import { SKS_SLOTS, sksRangeToTimes } from "@/config/sks";
 import { parseCsv } from "@/lib/csv";
 import type { LecturerScheduleEntry, Weekday } from "@/types/schedule";
 
 /*
- * Client-side checks so the admin can fix the file before saving. Laravel validates the upload
- * again. TODO: kirei-api must apply the same rules and own the semester dates.
+ * Client-side checks so the admin gedung can fix the file before saving. Laravel validates the upload
+ * again. TODO: kirei-api must apply the same SKS slot rules and own the semester dates.
  */
 
-export const SCHEDULE_COLUMNS = ["hari", "jam_mulai", "jam_selesai", "ruangan", "mata_kuliah", "dosen"] as const;
+export const SCHEDULE_COLUMNS = ["hari", "slot_sks", "jumlah_sks", "ruangan", "mata_kuliah", "dosen", "kelompok"] as const;
 
 /** Upper bound so a wrong file cannot freeze the page. */
 export const SCHEDULE_MAX_ROWS = 2000;
+export const MAX_SKS_PER_ENTRY = 6;
 
 const DAYS: Record<string, Weekday> = {
   senin: 1,
@@ -36,22 +38,19 @@ export const DAY_LABEL: Record<Weekday, string> = {
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
-/** "7.30", "07.30", and "7:30" all become "07:30". */
-function normalizeTime(value: string) {
-  const match = value.trim().match(/^(\d{1,2})[.:](\d{2})$/);
-  return match ? `${match[1].padStart(2, "0")}:${match[2]}` : value.trim();
-}
+const text = (label: string, maxLength = 255) =>
+  z.string().trim().min(1, `${label} wajib diisi.`).max(maxLength, `${label} maksimal ${maxLength} karakter.`);
 
-const time = (label: string) =>
+const positiveInt = (label: string, max: number, hint: string) =>
   z
     .string()
-    .transform(normalizeTime)
-    .pipe(z.string().regex(TIME, `${label} harus berformat JJ:MM, misalnya 07:30.`));
+    .trim()
+    .min(1, `${label} wajib diisi.`)
+    .refine((value) => /^\d+$/.test(value), `${label} harus berupa angka bulat (${hint}).`)
+    .transform(Number)
+    .refine((value) => value >= 1 && value <= max, `${label} harus antara 1 sampai ${max}.`);
 
-const text = (label: string) =>
-  z.string().trim().min(1, `${label} wajib diisi.`).max(255, `${label} maksimal 255 karakter.`);
-
-/** One CSV row, with the faculty's room codes to check against. */
+/** One CSV row, with the building's room codes to check against. */
 function rowSchema(roomCodes: Map<string, string>) {
   return z
     .object({
@@ -61,8 +60,8 @@ function rowSchema(roomCodes: Map<string, string>) {
         .toLowerCase()
         .refine((value) => value in DAYS, "Hari harus Senin, Selasa, Rabu, Kamis, Jumat, Sabtu, atau Minggu.")
         .transform((value) => DAYS[value]),
-      jam_mulai: time("Jam mulai"),
-      jam_selesai: time("Jam selesai"),
+      slot_sks: positiveInt("Slot SKS", SKS_SLOTS.length, `1-${SKS_SLOTS.length}`),
+      jumlah_sks: positiveInt("Jumlah SKS", MAX_SKS_PER_ENTRY, `1-${MAX_SKS_PER_ENTRY}`),
       ruangan: z
         .string()
         .trim()
@@ -71,22 +70,37 @@ function rowSchema(roomCodes: Map<string, string>) {
         .transform((code) => roomCodes.get(code.toUpperCase()) ?? code),
       mata_kuliah: text("Mata kuliah"),
       dosen: text("Nama dosen"),
+      kelompok: text("Kelompok", 100),
     })
-    // Zod runs this even when a time is malformed, so compare only two well-formed times.
-    .refine((row) => !TIME.test(row.jam_mulai) || !TIME.test(row.jam_selesai) || row.jam_selesai > row.jam_mulai, {
-      message: "Jam selesai harus setelah jam mulai.",
-      path: ["jam_selesai"],
+    .superRefine((row, ctx) => {
+      if (
+        Number.isInteger(row.slot_sks) &&
+        Number.isInteger(row.jumlah_sks) &&
+        row.slot_sks >= 1 &&
+        row.jumlah_sks >= 1 &&
+        !sksRangeToTimes(row.slot_sks, row.jumlah_sks)
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["jumlah_sks"],
+          message: `Slot SKS melebihi batas jam operasional (maksimal slot ${SKS_SLOTS.length}).`,
+        });
+      }
     })
-    .transform(
-      (row): LecturerScheduleEntry => ({
+    .transform((row): LecturerScheduleEntry => {
+      const range = sksRangeToTimes(row.slot_sks, row.jumlah_sks) ?? { startTime: "07:00", endTime: "07:50" };
+      return {
         day: row.hari,
-        startTime: row.jam_mulai,
-        endTime: row.jam_selesai,
+        sksSlot: row.slot_sks,
+        sksCount: row.jumlah_sks,
+        startTime: range.startTime,
+        endTime: range.endTime,
         roomCode: row.ruangan,
         courseName: row.mata_kuliah,
         lecturerName: row.dosen,
-      }),
-    );
+        classGroup: row.kelompok,
+      };
+    });
 }
 
 export interface ScheduleRowError {
@@ -101,11 +115,14 @@ export interface ParsedSchedule {
 }
 
 const overlaps = (a: LecturerScheduleEntry, b: LecturerScheduleEntry) =>
-  a.day === b.day && a.roomCode === b.roomCode && a.startTime < b.endTime && b.startTime < a.endTime;
+  a.day === b.day &&
+  a.roomCode === b.roomCode &&
+  a.sksSlot < b.sksSlot + b.sksCount &&
+  b.sksSlot < a.sksSlot + a.sksCount;
 
 /**
- * Reads the schedule CSV. Every problem is reported with its row, so the admin can fix all of them
- * in one pass; nothing is saved while any row has an error.
+ * Reads the SKS-based schedule CSV. Every problem is reported with its row, so the admin can fix
+ * all of them in one pass; nothing is saved while any row has an error.
  */
 export function parseScheduleCsv(csv: string, roomCodes: string[]): ParsedSchedule {
   const [header, ...rows] = parseCsv(csv);
@@ -136,7 +153,7 @@ export function parseScheduleCsv(csv: string, roomCodes: string[]): ParsedSchedu
     }
     const clash = entries.findIndex((entry) => overlaps(entry, parsed.data));
     if (clash !== -1) {
-      errors.push({ row: rowNumber, messages: [`Bentrok dengan baris ${entryRows[clash]}: ruangan dan jam yang sama.`] });
+      errors.push({ row: rowNumber, messages: [`Bentrok dengan baris ${entryRows[clash]}: ruangan dan slot SKS yang sama.`] });
       return;
     }
     entries.push(parsed.data);
@@ -165,11 +182,14 @@ export const lecturerScheduleInputSchema = z.object({
     .array(
       z.object({
         day: z.number().int().min(1).max(7),
+        sksSlot: z.number().int().min(1).max(SKS_SLOTS.length),
+        sksCount: z.number().int().min(1).max(MAX_SKS_PER_ENTRY),
         startTime: z.string().regex(TIME),
         endTime: z.string().regex(TIME),
         roomCode: z.string().min(1),
         courseName: z.string().min(1).max(255),
         lecturerName: z.string().min(1).max(255),
+        classGroup: z.string().min(1).max(100),
       }),
     )
     .min(1)

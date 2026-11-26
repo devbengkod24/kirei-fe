@@ -28,7 +28,6 @@ import {
   toIsoRange,
 } from "./availability";
 import { toRoomReservationRequest } from "./createReservation";
-import { FloorPlan } from "./FloorPlan";
 import { ROOM_CATEGORY_LABEL, ROOM_STATUS_LABEL } from "./labels";
 import { LetterPanel, ReviewButton } from "./LetterPanel";
 import { PanelHeading } from "./PanelHeading";
@@ -37,6 +36,7 @@ import {
   ReservationSubmitDialog,
   type ReservationLinks,
 } from "./ReservationSubmitDialog";
+import { RoomBookingCalendar } from "./RoomBookingCalendar";
 import { RoomPreview } from "./RoomPreview";
 import { TimeWheel } from "./TimeWheel";
 import {
@@ -81,12 +81,6 @@ export interface RoomReservationFormProps {
 }
 
 const CATEGORIES = Object.keys(ROOM_CATEGORY_LABEL) as RoomCategory[];
-const LEGEND = [
-  { status: "selected", dot: "bg-plan-selected" },
-  { status: "booked", dot: "bg-plan-booked" },
-  { status: "available", dot: "bg-border" },
-  { status: "filtered", dot: "bg-plan-filtered opacity-40" },
-] as const;
 
 const FIELD_ROW =
   "flex min-h-11 items-center gap-2 rounded-md border border-border px-2.5";
@@ -214,9 +208,6 @@ export function RoomReservationForm({
     building && needsApproval
       ? crossFacultyApprover(requester.fakultasId, building)
       : null;
-  const selectableRooms = (floor?.rooms ?? []).filter(
-    (room) => statuses.get(room.id)?.selectable,
-  );
 
   // Reason panel for a room that cannot be picked; it closes once that room becomes pickable again.
   const [inspectedRoomId, setInspectedRoomId] = useState<string | null>(null);
@@ -238,6 +229,17 @@ export function RoomReservationForm({
     setValue("roomId", room.id === roomId ? "" : room.id, {
       shouldValidate: Boolean(errors.roomId),
     });
+  };
+
+  const pickRoomGap = (room: FloorPlanRoom, nextStart: string, nextEnd: string) => {
+    setInspectedRoomId(null);
+    if (nextStart !== startTime) {
+      setValue("startTime", nextStart, { shouldValidate: Boolean(errors.startTime) });
+    }
+    if (nextEnd !== endTime) {
+      setValue("endTime", nextEnd, { shouldValidate: Boolean(errors.endTime) });
+    }
+    setValue("roomId", room.id, { shouldValidate: Boolean(errors.roomId) });
   };
 
   if (buildings.length === 0) {
@@ -270,163 +272,109 @@ export function RoomReservationForm({
           />
           <hr className="border-border" />
 
-          <div className="grid gap-3.5 xl:grid-cols-[minmax(0,471fr)_minmax(0,356fr)]">
-            <div className="flex flex-col gap-2">
-              <div className="rounded-lg border border-border p-2">
-                {floor && floor.rooms.length > 0 ? (
-                  <FloorPlan
-                    floor={floor}
-                    statuses={statuses}
-                    onSelect={selectRoom}
-                    onInspect={(room) =>
-                      setInspectedRoomId(
-                        room.id === inspectedRoomId ? null : room.id,
-                      )
-                    }
-                    inspectedRoomId={inspectedRoom?.id ?? null}
-                    legendId="floor-plan-legend"
-                  />
-                ) : (
-                  <p className="flex aspect-[3/2] items-center justify-center px-6 text-center text-xs text-muted">
-                    Denah untuk lantai ini belum tersedia. Pilih lantai atau
-                    gedung lain.
-                  </p>
-                )}
-              </div>
-              <ul
-                id="floor-plan-legend"
-                className="flex flex-wrap gap-x-4 gap-y-1 px-2 text-[11px]"
-              >
-                {LEGEND.map((item) => (
-                  <li key={item.status} className="flex items-center gap-2">
-                    <span
-                      aria-hidden="true"
-                      className={`size-3 rounded-full ${item.dot}`}
-                    />
-                    {ROOM_STATUS_LABEL[item.status]}
-                  </li>
-                ))}
-              </ul>
-              {!range && (
-                <p className="px-2 text-[11px] text-muted">
-                  Pilih tanggal dan jam untuk melihat ruangan yang tersedia.
-                </p>
-              )}
-              {range &&
-                !inspectedRoom &&
-                floor &&
-                floor.rooms.length > selectableRooms.length && (
-                  <p className="px-2 text-[11px] text-muted">
-                    Klik ruangan yang tidak tersedia untuk melihat alasannya.
-                  </p>
-                )}
-              {inspectedRoom && inspectedStatus && (
-                <div
-                  aria-live="polite"
-                  className="mx-2 flex flex-col gap-1 rounded-md border border-border bg-page p-2.5 text-[11px]"
+          <div
+            role="group"
+            aria-label="Filter jenis ruangan"
+            className="flex flex-wrap gap-2"
+          >
+            {CATEGORIES.map((option) => {
+              const active = option === category;
+              return (
+                <button
+                  key={option}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setCategory(active ? null : option)}
+                  className={`min-h-11 cursor-pointer rounded-inner px-2.5 text-[11px] font-medium tracking-wide sm:min-h-8 ${
+                    active
+                      ? "bg-primary-soft text-primary"
+                      : "bg-chip text-muted hover:bg-border"
+                  }`}
                 >
-                  <p className="flex items-start justify-between gap-2">
-                    <span className="font-semibold">
-                      {inspectedRoom.code}: {ROOM_STATUS_LABEL[inspectedStatus]}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setInspectedRoomId(null)}
-                      className="-my-2 -mr-1 flex min-h-11 min-w-11 items-center justify-center text-primary underline-offset-4 hover:underline"
-                    >
-                      Tutup
-                    </button>
-                  </p>
-                  {inspectedStatus === "filtered" ? (
-                    <p>
-                      Ruangan ini {ROOM_CATEGORY_LABEL[inspectedRoom.category]},
-                      bukan {category ? ROOM_CATEGORY_LABEL[category] : ""}.
-                      Ganti filter jenis ruangan untuk memilihnya.
-                    </p>
-                  ) : (
-                    <>
-                      <p>
-                        Sudah dipesan pada jam yang Anda pilih (
-                        {startTime.replace(":", ".")} -{" "}
-                        {endTime.replace(":", ".")} WIB). Pilih jam lain atau
-                        ruangan lain.
-                      </p>
-                      {inspectedBookings.length > 0 && (
-                        <p className="text-muted">
-                          Terpakai pada{" "}
-                          {formatDateLongWIB(wibToIso(date, "12:00"))}:{" "}
-                          {inspectedBookings
-                            .map(
-                              (booking) =>
-                                `${formatTimeSpanWIB(booking.startsAt, booking.endsAt)} WIB${booking.label ? ` (${booking.label})` : ""}`,
-                            )
-                            .join(", ")}
-                          .
-                        </p>
-                      )}
-                    </>
-                  )}
-                </div>
-              )}
-              {errors.roomId && (
-                <p role="alert" className={`px-2 ${ERROR}`}>
-                  {errors.roomId.message}
-                </p>
-              )}
+                  {ROOM_CATEGORY_LABEL[option]}
+                </button>
+              );
+            })}
+          </div>
 
-              {selectableRooms.length > 0 && (
-                <fieldset className="flex flex-col gap-1 px-2 md:hidden">
-                  <legend className="mb-1 text-[11px] text-muted">
-                    Atau pilih dari daftar ruangan yang bisa dipesan:
-                  </legend>
-                  <div className="flex flex-wrap gap-1.5">
-                    {selectableRooms.map((room) => (
-                      <button
-                        key={room.id}
-                        type="button"
-                        aria-pressed={room.id === roomId}
-                        onClick={() => selectRoom(room)}
-                        className={`min-h-11 min-w-16 rounded-md border px-3 text-xs ${
-                          room.id === roomId
-                            ? "border-plan-selected bg-plan-selected text-on-primary"
-                            : "border-border bg-surface hover:bg-primary-soft"
-                        }`}
-                      >
-                        {room.code}
-                      </button>
-                    ))}
-                  </div>
-                </fieldset>
-              )}
-            </div>
+          <div className="flex flex-col gap-3">
+            {floor && floor.rooms.length > 0 ? (
+              <RoomBookingCalendar
+                rooms={floor.rooms}
+                bookings={bookings}
+                dateKey={date}
+                startTime={startTime}
+                endTime={endTime}
+                statuses={statuses}
+                selectedRoomId={roomId}
+                onSelectRoom={selectRoom}
+                onPickGap={pickRoomGap}
+                onInspect={(room) =>
+                  setInspectedRoomId(room.id === inspectedRoomId ? null : room.id)
+                }
+              />
+            ) : (
+              <p className="flex min-h-48 items-center justify-center rounded-lg border border-border px-6 text-center text-xs text-muted">
+                Belum ada ruangan untuk lantai ini. Pilih lantai atau gedung lain.
+              </p>
+            )}
 
-            <div className="flex flex-col gap-2">
+            {inspectedRoom && inspectedStatus && (
               <div
-                role="group"
-                aria-label="Filter jenis ruangan"
-                className="flex flex-wrap gap-2"
+                aria-live="polite"
+                className="flex flex-col gap-1 rounded-md border border-border bg-page p-2.5 text-[11px]"
               >
-                {CATEGORIES.map((option) => {
-                  const active = option === category;
-                  return (
-                    <button
-                      key={option}
-                      type="button"
-                      aria-pressed={active}
-                      onClick={() => setCategory(active ? null : option)}
-                      className={`min-h-11 rounded-inner px-2 text-[11px] font-medium tracking-wide sm:min-h-8 ${
-                        active
-                          ? "bg-primary-soft text-primary"
-                          : "bg-chip text-muted hover:bg-border"
-                      }`}
-                    >
-                      {ROOM_CATEGORY_LABEL[option]}
-                    </button>
-                  );
-                })}
+                <p className="flex items-start justify-between gap-2">
+                  <span className="font-semibold">
+                    {inspectedRoom.code}: {ROOM_STATUS_LABEL[inspectedStatus]}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setInspectedRoomId(null)}
+                    className="-my-2 -mr-1 flex min-h-11 min-w-11 cursor-pointer items-center justify-center text-primary underline-offset-4 hover:underline"
+                  >
+                    Tutup
+                  </button>
+                </p>
+                {inspectedStatus === "filtered" ? (
+                  <p>
+                    Ruangan ini {ROOM_CATEGORY_LABEL[inspectedRoom.category]},
+                    bukan {category ? ROOM_CATEGORY_LABEL[category] : ""}.
+                    Ganti filter jenis ruangan untuk memilihnya.
+                  </p>
+                ) : (
+                  <>
+                    <p>
+                      Sudah dipesan pada jam yang Anda pilih (
+                      {startTime.replace(":", ".")} -{" "}
+                      {endTime.replace(":", ".")} WIB). Pilih jam lain atau
+                      ruangan lain.
+                    </p>
+                    {inspectedBookings.length > 0 && (
+                      <p className="text-muted">
+                        Terpakai pada{" "}
+                        {formatDateLongWIB(wibToIso(date, "12:00"))}:{" "}
+                        {inspectedBookings
+                          .map(
+                            (booking) =>
+                              `${formatTimeSpanWIB(booking.startsAt, booking.endsAt)} WIB${booking.label ? ` (${booking.label})` : ""}`,
+                          )
+                          .join(", ")}
+                        .
+                      </p>
+                    )}
+                  </>
+                )}
               </div>
-              <RoomPreview room={selectedRoom} approver={approver} />
-            </div>
+            )}
+
+            {errors.roomId && (
+              <p role="alert" className={ERROR}>
+                {errors.roomId.message}
+              </p>
+            )}
+
+            <RoomPreview room={selectedRoom} approver={approver} />
           </div>
 
           {rules.length > 0 && (

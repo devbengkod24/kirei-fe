@@ -4,7 +4,7 @@ export function ReservationFormSkeleton() {
   return (
     <div aria-busy="true" className="flex flex-col gap-2 lg:grid lg:grid-cols-[minmax(0,1fr)_16rem]">
       <p className="sr-only" role="status">
-        Memuat denah dan jadwal...
+        Memuat kalender dan jadwal...
       </p>
       <div className={`h-[580px] ${BLOCK}`} />
       <div className="flex flex-col gap-2">

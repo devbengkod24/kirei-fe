@@ -19,9 +19,11 @@ export type CreateReservationResult =
 // Request bodies in API terms; the letter goes as multipart form data.
 // TODO: match the request keys and the status field to the OpenAPI spec.
 
-const status = (intent: ReservationIntent) => (intent === "draft" ? "draft" : "menunggu_persetujuan");
+// TODO: kirei-api: backend wajib memverifikasi role admin_universitas / sekretariat sebelum menerima status "disetujui" langsung tanpa alur persetujuan biasa.
+const status = (intent: ReservationIntent, approved = false) =>
+  intent === "draft" ? "draft" : approved ? "disetujui" : "menunggu_persetujuan";
 
-export function toRoomReservationRequest(values: RoomReservationValues) {
+export function toRoomReservationRequest(values: RoomReservationValues, approved = false) {
   return {
     type: "ruangan" as const,
     building_id: values.buildingId,
@@ -30,12 +32,12 @@ export function toRoomReservationRequest(values: RoomReservationValues) {
     ends_at: wibToIso(values.date, values.endTime),
     phone: values.phone,
     purpose: values.purpose,
-    status: status(values.intent),
+    status: status(values.intent, approved),
     letter: values.letter,
   };
 }
 
-export function toSportsHallReservationRequest(values: SportsHallReservationValues, hallId: string) {
+export function toSportsHallReservationRequest(values: SportsHallReservationValues, hallId: string, approved = false) {
   return {
     type: "gor" as const,
     hall_id: hallId,
@@ -43,13 +45,13 @@ export function toSportsHallReservationRequest(values: SportsHallReservationValu
     ends_at: wibToIso(values.date, values.endTime),
     activity: values.activity,
     notes: values.notes,
-    status: status(values.intent),
+    status: status(values.intent, approved),
     letter: values.letter,
   };
 }
 
 /** Whole days: from 00:00 WIB on the first day to 00:00 WIB after the last day. `vehicles` gives the chosen type's name. */
-export function toVehicleReservationRequest(values: VehicleReservationValues, vehicles: Vehicle[] = []) {
+export function toVehicleReservationRequest(values: VehicleReservationValues, vehicles: Vehicle[] = [], approved = false) {
   // The schema has already rejected reversed dates.
   const range = tripRange(values.startDate, values.endDate) ?? { startsAt: "", endsAt: "" };
   const vehicle = vehicles.find((item) => item.id === values.vehicleId);
@@ -68,7 +70,7 @@ export function toVehicleReservationRequest(values: VehicleReservationValues, ve
     destination: destinations.join(", "),
     participants: values.participants,
     activity: values.activity,
-    status: status(values.intent),
+    status: status(values.intent, approved),
     letter: values.letter,
   };
 }
@@ -141,6 +143,7 @@ export function toMockReservation(request: ReservationRequest, listing: Reservat
     ...(request.type === "kendaraan" ? withTrip(request) : {}),
     ...(request.type === "gor" && activity ? { activity } : {}),
     rejectionReason: null,
+    hardCopySubmitted: false,
     ownerId: listing.owner.id,
     ownerEmail: listing.owner.email,
     createdAt: now.toISOString(),

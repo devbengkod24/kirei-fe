@@ -46,7 +46,7 @@ export function ResetMockReservationsButton({ mode = "sample" }: ResetMockReserv
         </button>
       )}
       <p role="status" className="text-[11px] text-muted">
-        {result === "confirming" && "Reservasi, draft, pengumuman, laporan, denah, dan pengguna yang Anda buat akan hilang dan tidak bisa dikembalikan."}
+        {result === "confirming" && "Reservasi, draft, pengumuman, laporan, dan pengguna yang Anda buat akan hilang dan tidak bisa dikembalikan."}
         {result === "done" && text.done}
         {result === "failed" && FAILED}
       </p>

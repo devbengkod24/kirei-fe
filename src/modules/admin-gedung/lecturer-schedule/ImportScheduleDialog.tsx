@@ -119,8 +119,9 @@ export function ImportScheduleDialog({ roomCodes, semester: current, templateHre
           />
         </Field>
         <p id="schedule-format" className="text-[11px] text-muted">
-          Kolom: <code className="break-words">{SCHEDULE_COLUMNS.join(", ")}</code>. Hari ditulis Senin sampai Minggu, jam dalam
-          WIB seperti 07:30. Pemisah koma atau titik koma.{" "}
+          Kolom: <code className="break-words">{SCHEDULE_COLUMNS.join(", ")}</code>. Hari ditulis Senin sampai Minggu,
+          <code className="mx-1">slot_sks</code> dimulai dari 1 (07.00 WIB, 50 menit per SKS), dan
+          <code className="mx-1">kelompok</code> berisi kelas seperti A11.4301. Pemisah koma atau titik koma.{" "}
           <a href={templateHref} download className="font-medium text-primary underline-offset-2 hover:underline">
             Unduh contoh CSV
           </a>

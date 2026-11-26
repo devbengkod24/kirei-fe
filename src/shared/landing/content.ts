@@ -98,7 +98,7 @@ export const RULE_TABS: RuleTab[] = [
       {
         iconSrc: "/icons/clock.svg",
         title: "Jam Operasional",
-        description: "Pukul 07.00 sampai 20.00 WIB. Jam mulai dan selesai dipilih per 10 menit.",
+        description: "Pukul 07.00 sampai 21.00 WIB. Jam mulai dan selesai dipilih per 10 menit.",
       },
       LETTER_RULE,
       BOOKING_WINDOW_RULE,

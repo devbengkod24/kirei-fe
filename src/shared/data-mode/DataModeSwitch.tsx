@@ -15,7 +15,7 @@ const MODES: { value: DataMode; label: string; description: string }[] = [
     value: "empty",
     label: "Tanpa data dummy",
     description:
-      "Semua daftar mulai kosong. Akun demo, gedung, denah, GOR, dan kendaraan tetap ada. Yang Anda buat tersimpan di browser ini, juga setelah halaman dimuat ulang atau ganti akun.",
+      "Semua daftar mulai kosong. Akun demo, gedung, ruangan, GOR, dan kendaraan tetap ada. Yang Anda buat tersimpan di browser ini, juga setelah halaman dimuat ulang atau ganti akun.",
   },
 ];
 

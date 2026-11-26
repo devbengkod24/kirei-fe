@@ -13,8 +13,9 @@ import type { UserReport } from "@/types/report";
 import { useLiveReports } from "./liveReports";
 import { DEFAULT_REPORT_FILTER, filterReports, isDefaultReportFilter } from "./filterReports";
 import { ReportFilterForm } from "./ReportFilterForm";
-import { REPORT_CATEGORY_LABEL } from "./report-labels";
+import { REPORT_CATEGORY_LABEL, REPORTER_TYPE_LABEL } from "./report-labels";
 import { ReportDetailDialog } from "./ReportDetailDialog";
+import { ReportQrDialog } from "./ReportQrDialog";
 
 export interface UserReportListProps {
   reports: UserReport[];
@@ -27,13 +28,15 @@ export const FILTER_BUTTON =
 
 const TH = `${TABLE_HEAD_CELL} text-left`;
 const TD = TABLE_CELL;
-const VIEW_BUTTON = "flex h-11 w-11 items-center justify-center rounded-md border border-border transition-colors hover:bg-page";
+const VIEW_BUTTON =
+  "flex h-11 w-11 cursor-pointer items-center justify-center rounded-md border border-border transition-colors hover:bg-page";
 
 export function UserReportList({ reports: serverReports, loadedAt }: UserReportListProps) {
-  // "Empty" data mode: reports sent from the borrower's Hubungi Kami form in this browser.
+  // Includes reports submitted via the borrower Hubungi Kami form and public QR /lapor form in this browser.
   const reports = useLiveReports(serverReports);
   const [filter, setFilter] = useState(DEFAULT_REPORT_FILTER);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [showingQr, setShowingQr] = useState(false);
   const [viewing, setViewing] = useState<UserReport | null>(null);
   const visible = filterReports(reports, filter, loadedAt);
   const paging = usePagination(visible, 10);
@@ -56,28 +59,37 @@ export function UserReportList({ reports: serverReports, loadedAt }: UserReportL
         <h2 id="reports-title" className="text-base font-semibold tracking-[0.05em]">
           Laporan Pengguna
         </h2>
-        <Popover
-          open={filterOpen}
-          onOpenChange={setFilterOpen}
-          label="Filter laporan"
-          triggerClassName={FILTER_BUTTON}
-          trigger={
-            <>
-              <Image src="/icons/admin/filter.svg" alt="" width={14} height={14} />
-              Filter{filtered && <span className="sr-only"> (aktif)</span>}
-              {filtered && <span aria-hidden="true" className="ml-1 rounded-sm bg-surface px-1 text-[10px] text-primary">aktif</span>}
-            </>
-          }
-        >
-          <ReportFilterForm
-            value={filter}
-            onApply={(next) => {
-              setFilter(next);
-              paging.setPage(1);
-              setFilterOpen(false);
-            }}
-          />
-        </Popover>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="primary-outline" onClick={() => setShowingQr(true)}>
+            Generate QR Pengaduan
+          </Button>
+          <Popover
+            open={filterOpen}
+            onOpenChange={setFilterOpen}
+            label="Filter laporan"
+            triggerClassName={FILTER_BUTTON}
+            trigger={
+              <>
+                <Image src="/icons/admin/filter.svg" alt="" width={14} height={14} />
+                Filter{filtered && <span className="sr-only"> (aktif)</span>}
+                {filtered && (
+                  <span aria-hidden="true" className="ml-1 rounded-sm bg-surface px-1 text-[10px] text-primary">
+                    aktif
+                  </span>
+                )}
+              </>
+            }
+          >
+            <ReportFilterForm
+              value={filter}
+              onApply={(next) => {
+                setFilter(next);
+                paging.setPage(1);
+                setFilterOpen(false);
+              }}
+            />
+          </Popover>
+        </div>
       </div>
 
       {visible.length === 0 ? (
@@ -102,6 +114,7 @@ export function UserReportList({ reports: serverReports, loadedAt }: UserReportL
                 <th scope="col" className={TH}>Pelapor</th>
                 <th scope="col" className={TH}>Kategori</th>
                 <th scope="col" className={TH}>Ruangan</th>
+                <th scope="col" className={TH}>Foto</th>
                 <th scope="col" className={TH}>Aksi</th>
               </tr>
             </thead>
@@ -112,9 +125,28 @@ export function UserReportList({ reports: serverReports, loadedAt }: UserReportL
                   <td className={`${TD} whitespace-nowrap`}>
                     <time dateTime={report.createdAt}>{formatTimeWIB(report.createdAt)} WIB</time>
                   </td>
-                  <td className={TD}>{report.authorName}</td>
+                  <td className={TD}>
+                    <span>{report.authorName}</span>
+                    {report.reporterType && (
+                      <span className="block text-[11px] text-muted">{REPORTER_TYPE_LABEL[report.reporterType]}</span>
+                    )}
+                  </td>
                   <td className={`${TD} whitespace-nowrap font-medium text-primary`}>{REPORT_CATEGORY_LABEL[report.category]}</td>
                   <td className={`${TD} whitespace-nowrap`}>{report.roomCode ?? "-"}</td>
+                  <td className={TD}>
+                    {report.photoUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- supports uploaded data URLs and API image URLs
+                      <img
+                        src={report.photoUrl}
+                        alt={`Foto laporan ${report.roomCode ?? report.authorName}`}
+                        width={40}
+                        height={40}
+                        className="size-10 rounded-sm border border-border object-cover"
+                      />
+                    ) : (
+                      <span className="text-muted">-</span>
+                    )}
+                  </td>
                   <td className={TD}>{renderViewButton(report)}</td>
                 </tr>
               ))}
@@ -134,9 +166,27 @@ export function UserReportList({ reports: serverReports, loadedAt }: UserReportL
                 </div>
                 <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
                   <dt className="text-primary">Pelapor</dt>
-                  <dd className="break-words">{report.authorName}</dd>
+                  <dd className="break-words">
+                    {report.authorName}
+                    {report.reporterType ? ` (${REPORTER_TYPE_LABEL[report.reporterType]})` : ""}
+                  </dd>
                   <dt className="text-primary">Ruangan</dt>
                   <dd>{report.roomCode ?? "-"}</dd>
+                  {report.photoUrl && (
+                    <>
+                      <dt className="text-primary">Foto</dt>
+                      <dd>
+                        {/* eslint-disable-next-line @next/next/no-img-element -- supports uploaded data URLs and API image URLs */}
+                        <img
+                          src={report.photoUrl}
+                          alt={`Foto laporan ${report.roomCode ?? report.authorName}`}
+                          width={64}
+                          height={48}
+                          className="h-12 w-16 rounded-sm border border-border object-cover"
+                        />
+                      </dd>
+                    </>
+                  )}
                 </dl>
                 <div className="mt-2 flex justify-end">{renderViewButton(report)}</div>
               </li>
@@ -154,6 +204,7 @@ export function UserReportList({ reports: serverReports, loadedAt }: UserReportL
       />
 
       {viewing && <ReportDetailDialog report={viewing} onClose={() => setViewing(null)} />}
+      {showingQr && <ReportQrDialog onClose={() => setShowingQr(false)} />}
     </Card>
   );
 }

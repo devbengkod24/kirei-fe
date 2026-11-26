@@ -146,7 +146,7 @@ export function EditRoomDialog({ room, buildings, canChangeManager, takenCodes, 
               <dd className="text-sm">{draft.floor}</dd>
             </div>
           </dl>
-          <p className="text-[11px] text-muted">Tipe, gedung, dan lantai mengikuti denah, jadi tidak bisa diubah di sini.</p>
+          <p className="text-[11px] text-muted">Tipe, gedung, dan lantai mengikuti data master ruangan, jadi tidak bisa diubah di sini.</p>
         </div>
         {canChangeManager ? (
           <Field label="Dikelola oleh" htmlFor="room-manager">

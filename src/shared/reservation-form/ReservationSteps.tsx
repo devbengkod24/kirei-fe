@@ -15,7 +15,7 @@ export const STEPS_BY_TYPE = {
   ruangan: [
     { label: "Pilih lokasi & tanggal", ...DATE },
     { label: "Pilih waktu reservasi", ...TIME },
-    { label: "Pilih ruangan yang tersedia pada denah", icon: "/icons/classroom.svg", size: 19 },
+    { label: "Pilih ruangan yang tersedia pada kalender", icon: "/icons/classroom.svg", size: 19 },
     UPLOAD,
   ],
   gor: [

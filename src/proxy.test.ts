@@ -40,6 +40,11 @@ describe("proxy", () => {
   it("lets a signed-in user through to other pages", () => {
     expect(location(proxy(request("/pengumuman", MOCK_CURRENT_USER.id)))).toBeNull();
   });
+
+  it("allows public access to the QR damage report page with or without a session", () => {
+    expect(location(proxy(request("/lapor?ruangan=room-h-5-1")))).toBeNull();
+    expect(location(proxy(request("/lapor?ruangan=room-h-5-1", MOCK_CURRENT_USER.id)))).toBeNull();
+  });
 });
 
 describe("proxy with AUTH_MODE=api", () => {
@@ -58,9 +63,10 @@ describe("proxy with AUTH_MODE=api", () => {
     expect(location(proxy(apiRequest("/dashboard", SESSION_COOKIE)))).toBe("http://localhost:3000/login");
   });
 
-  it("lets a visitor open the landing and login pages, and a session through to the pages", () => {
+  it("lets a visitor open the landing, login, and public report pages, and a session through to the pages", () => {
     expect(location(proxy(apiRequest("/")))).toBeNull();
     expect(location(proxy(apiRequest("/login")))).toBeNull();
+    expect(location(proxy(apiRequest("/lapor?ruangan=room-h-5-1")))).toBeNull();
     expect(location(proxy(apiRequest("/login", "kirei_session")))).toBeNull();
     expect(location(proxy(apiRequest("/pengumuman", "kirei_session")))).toBeNull();
   });

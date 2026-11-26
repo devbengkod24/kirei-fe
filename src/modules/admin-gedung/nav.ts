@@ -5,7 +5,6 @@ export const ADMIN_GEDUNG_NAV: NavLinkConfig[][] = [
   [
     { label: "Dashboard", href: ADMIN_GEDUNG_ROUTES.dashboard, iconSrc: "/icons/nav/dashboard.svg" },
     { label: "Kelola Ruangan", href: ADMIN_GEDUNG_ROUTES.rooms, iconSrc: "/icons/nav/manage-rooms.svg" },
-    { label: "Kelola Denah", href: ADMIN_GEDUNG_ROUTES.floorPlan, iconSrc: "/icons/nav/floor-plan.svg" },
     { label: "Kelola Jadwal", href: ADMIN_GEDUNG_ROUTES.lecturerSchedule, iconSrc: "/icons/nav/reservation-history.svg" },
     {
       label: "Reservasi Internal",

@@ -1,3 +1,4 @@
+import { formatSksSlotRange } from "@/config/sks";
 import { formatDateLongWIB, formatTimeRangeWIB } from "@/lib/date";
 import { reservationStatusLabel } from "@/shared/reservation/ReservationStatusBadge";
 import type { ReservationRecord } from "@/types/reservation";
@@ -42,15 +43,20 @@ export function timelineDetail(item: TimelineItem): TimelineDetail {
 
   const { schedule } = item;
   const date = formatDateLongWIB(schedule.startsAt);
+  const timeText =
+    schedule.sksSlot && schedule.sksCount
+      ? `${formatTimeRangeWIB(schedule.startsAt, schedule.endsAt)} (${formatSksSlotRange(schedule.sksSlot, schedule.sksCount)})`
+      : formatTimeRangeWIB(schedule.startsAt, schedule.endsAt);
   return {
     title: "Jadwal Siadin",
     subtitle: `${schedule.unitName} · ${date}`,
     rows: [
       { label: "Mata kuliah", value: schedule.courseName },
       { label: "Dosen", value: schedule.lecturerName },
+      ...(schedule.classGroup ? [{ label: "Kelompok", value: schedule.classGroup }] : []),
       { label: "Ruangan", value: schedule.unitName },
       { label: "Tanggal", value: date },
-      { label: "Waktu", value: `${formatTimeRangeWIB(schedule.startsAt, schedule.endsAt)}` },
+      { label: "Waktu", value: timeText },
       { label: "Sumber", value: "Siadin" },
     ],
   };

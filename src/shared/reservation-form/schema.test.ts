@@ -39,7 +39,7 @@ describe("room reservation schema", () => {
   });
 
   it("requires a room and a later end time", () => {
-    expect(issues({ ...valid, roomId: "" })).toMatchObject({ roomId: "Pilih ruangan pada denah." });
+    expect(issues({ ...valid, roomId: "" })).toMatchObject({ roomId: "Pilih ruangan pada kalender." });
     expect(issues({ ...valid, endTime: "09:00" })).toMatchObject({ endTime: "Jam selesai harus setelah jam mulai." });
   });
 
@@ -48,11 +48,17 @@ describe("room reservation schema", () => {
     expect(issues({ ...valid, date: "2026-10-29" })).toHaveProperty("startTime");
   });
 
-  it("keeps room bookings within 07.00 to 20.00 WIB", () => {
-    const message = "Ruangan hanya bisa dipesan pukul 07.00 sampai 20.00 WIB.";
+  it("keeps room bookings within 07.00 to 21.00 WIB", () => {
+    const message = "Ruangan hanya bisa dipesan pukul 07.00 sampai 21.00 WIB.";
     expect(issues({ ...valid, startTime: "06:50", endTime: "08:00" })).toMatchObject({ startTime: message });
-    expect(issues({ ...valid, startTime: "19:00", endTime: "20:10" })).toMatchObject({ endTime: message });
-    expect(issues({ ...valid, startTime: "07:00", endTime: "20:00" })).toEqual({});
+    expect(issues({ ...valid, startTime: "20:00", endTime: "21:10" })).toMatchObject({ endTime: message });
+    expect(issues({ ...valid, startTime: "07:00", endTime: "21:00" })).toEqual({});
+  });
+
+  it("lets ormawa and UKM pick free hourly durations without SKS boundaries", () => {
+    expect(issues({ ...valid, startTime: "09:00", endTime: "10:00" })).toEqual({});
+    expect(issues({ ...valid, startTime: "14:00", endTime: "16:00" })).toEqual({});
+    expect(issues({ ...valid, startTime: "19:00", endTime: "21:00" })).toEqual({});
   });
 
   it("keeps ormawa and UKM off today and tomorrow (H-0, H-1)", () => {

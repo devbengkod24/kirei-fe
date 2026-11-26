@@ -111,6 +111,9 @@ export function ReservationSubmitDialog({
               onChange={(file) => setValue("letter", file, { shouldValidate: true })}
               error={errors.letter?.message}
             />
+            <p className="text-[11px] text-muted">
+              Berkas fisik (hard copy) surat diserahkan ke admin; status penyerahan dicatat saat verifikasi.
+            </p>
           </div>
         )}
 

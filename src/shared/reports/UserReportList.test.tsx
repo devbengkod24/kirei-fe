@@ -10,6 +10,8 @@ const REPORT: UserReport = {
   body: "Proyektor mati di H.5.6",
   roomCode: "H.5.6",
   authorName: "Erdin Purwa Putra",
+  reporterType: "mahasiswa",
+  photoUrl: "/images/rooms/sample-room.png",
   createdAt: "2026-10-30T00:20:00Z",
 };
 
@@ -26,17 +28,21 @@ beforeAll(() => {
 afterEach(cleanup);
 
 describe("UserReportList", () => {
-  it("keeps the description out of the table and shows it in the detail dialog", () => {
+  it("keeps the description out of the table and shows photo, reporter type, and description in the detail dialog", () => {
     render(<UserReportList reports={[REPORT]} loadedAt="2026-10-30T03:00:00Z" />);
 
     const table = screen.getByRole("table");
     expect(within(table).queryByText(REPORT.body)).toBeNull();
+    expect(within(table).getByText("Mahasiswa")).toBeTruthy();
+    expect(within(table).getByAltText("Foto laporan H.5.6")).toBeTruthy();
 
     fireEvent.click(within(table).getByRole("button", { name: "Lihat detail laporan Erdin Purwa Putra" }));
 
     const dialog = screen.getByRole("dialog", { name: "Detail Laporan" });
     expect(within(dialog).getByText(REPORT.body)).toBeTruthy();
     expect(within(dialog).getByText("Kerusakan Alat")).toBeTruthy();
+    expect(within(dialog).getByText("Mahasiswa")).toBeTruthy();
+    expect(within(dialog).getByAltText("Foto kerusakan laporan dari Erdin Purwa Putra")).toBeTruthy();
     expect(within(dialog).getByText("07.20 WIB", { exact: false })).toBeTruthy();
   });
 });

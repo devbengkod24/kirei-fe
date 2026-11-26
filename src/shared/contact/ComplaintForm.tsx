@@ -8,17 +8,20 @@ import { Field, INPUT_CLASS, SelectInput } from "@/components/form/Field";
 import { Button } from "@/components/ui/Button";
 import { applyFormErrors } from "@/lib/api/form-errors";
 import { REPORT_CATEGORY_LABEL } from "@/shared/reports/report-labels";
+import type { ReporterType } from "@/types/report";
 import { COMPLAINT_FIELD_MAP, complaintSchema, type ComplaintInput, type ComplaintValues } from "./complaintSchema";
 import { sendComplaint } from "./sendComplaint";
 
 const DEFAULTS = { category: "", body: "" } as unknown as ComplaintInput;
 
 export interface ComplaintFormProps {
-  /** The signed-in borrower, shown to the admin as the reporter. */
+  /** The signed-in user, shown as the reporter in Laporan Pengguna. */
   authorName: string;
+  /** Optional reporter classification (Staf / Mahasiswa). */
+  reporterType?: ReporterType;
 }
 
-export function ComplaintForm({ authorName }: ComplaintFormProps) {
+export function ComplaintForm({ authorName, reporterType }: ComplaintFormProps) {
   const [result, setResult] = useState<"sent" | "failed" | null>(null);
   const form = useForm<ComplaintInput, unknown, ComplaintValues>({
     resolver: zodResolver(complaintSchema),
@@ -28,7 +31,7 @@ export function ComplaintForm({ authorName }: ComplaintFormProps) {
   const category = useWatch({ control: form.control, name: "category" });
 
   const submit = form.handleSubmit(async (values) => {
-    const response = await sendComplaint(values, authorName);
+    const response = await sendComplaint(values, authorName, reporterType);
     if (response.ok) {
       form.reset(DEFAULTS);
       setResult("sent");
@@ -87,7 +90,7 @@ export function ComplaintForm({ authorName }: ComplaintFormProps) {
       >
         {result === "failed"
           ? "Terjadi kesalahan saat mengirim laporan. Silakan coba lagi dalam beberapa saat."
-          : "Terima kasih. Admin akan meninjau laporan Anda."}
+          : "Terima kasih. Laporan Anda sudah tercatat di Laporan Pengguna."}
       </ResultDialog>
     </section>
   );

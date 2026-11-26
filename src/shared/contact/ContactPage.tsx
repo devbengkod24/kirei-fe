@@ -1,7 +1,13 @@
 import Image from "next/image";
 import { Card } from "@/components/ui/Card";
 import { CONTACT } from "@/config/contact";
+import type { ReporterType } from "@/types/report";
 import { ComplaintForm } from "./ComplaintForm";
+
+export interface ContactPageProps {
+  authorName: string;
+  reporterType?: ReporterType;
+}
 
 const CHANNEL = "flex gap-3 rounded-md border border-border bg-surface p-4";
 const CHANNEL_LINK = `${CHANNEL} hover:border-primary/50 focus-visible:border-primary`;
@@ -15,11 +21,11 @@ function ChannelIcon({ src, width, height }: { src: string; width: number; heigh
   );
 }
 
-/** Complaint form for the admin, next to the Sarpras contact channels. */
-export function ContactPage({ authorName }: { authorName: string }) {
+/** Shared complaint form next to the Sarpras contact channels. Used by borrowers and admin gedung. */
+export function ContactPage({ authorName, reporterType }: ContactPageProps) {
   return (
     <Card className="flex flex-col gap-10 p-6 md:p-10 lg:flex-row lg:justify-between">
-      <ComplaintForm authorName={authorName} />
+      <ComplaintForm authorName={authorName} reporterType={reporterType} />
 
       <section aria-label="Kontak Sarpras" className="flex w-full flex-col gap-3 lg:max-w-[326px]">
         <a href={CONTACT.whatsapp.href} target="_blank" rel="noopener noreferrer" className={`${CHANNEL_LINK} items-center`}>

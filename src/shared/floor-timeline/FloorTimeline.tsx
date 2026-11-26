@@ -1,93 +1,90 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { MaskIcon } from "@/components/ui/MaskIcon";
 import type { TimeSlot } from "@/shared/reservation-form/sportsHallSlots";
 import type { FloorPlanRoom } from "@/types/facility";
 import type { ReservationRecord } from "@/types/reservation";
 import type { ClassSchedule } from "@/types/schedule";
-import { buildTimeline, nowOffset, rulerTicks, segmentSpan, toMinutes } from "./slots";
+import { buildTimeline, segmentSpan, toMinutes } from "./slots";
 import { itemKey, type TimelineItem } from "./timelineDetail";
 
-/** A track on the timeline; any page's rooms fit, not only the operator's floor. */
+/** A room row on the calendar; any page's rooms fit, not only the operator's floor. */
 export type TimelineRoom = Pick<FloorPlanRoom, "id" | "code">;
 
 export interface FloorTimelineProps {
-  /** One track per room, in this order. */
+  /** One horizontal row per room, in this order. */
   rooms: TimelineRoom[];
   /** The WIB day shown, "YYYY-MM-DD". */
   dateKey: string;
   /** WIB "HH:mm" bounds of the hours shown; the page owns the filter. */
   from: string;
   to: string;
-  /** Places the "now" marker; it is hidden on another day or outside `from`–`to`. */
-  now: Date;
-  /** Clips are matched to a track by `unitName` and to the day by `startsAt`. */
+  /** Kept optional for caller compatibility; current-time indicator line is intentionally omitted. */
+  now?: Date;
+  /** Events are matched to a row by `unitName` and to the day by `startsAt`. */
   reservations: ReservationRecord[];
   schedules: ClassSchedule[];
-  /** itemKey of the clip whose detail popover is open. */
+  /** itemKey of the event whose detail popover is open. */
   activeKey: string | null;
-  /** Opens the detail popover beside the clicked clip, which sits inside the scrolling `container`. */
+  /** Opens the detail popover beside the clicked event, which sits inside the scrolling `container`. */
   onOpen: (item: TimelineItem, anchor: HTMLElement, container: HTMLElement) => void;
-  /** Turns free gaps into "create a reservation" buttons; without it gaps are plain labels. */
+  /** Turns free gaps into clickable "create a reservation" areas; without it, empty grid cells stay clean. */
   onCreate?: (roomId: string, range: TimeSlot) => void;
 }
 
-// 10 minutes is 44px wide, the smallest touch target, so the shortest clip stays tappable.
-const PX_PER_MINUTE = 4.4;
-// Matches w-20 on the sticky room column.
-const HEAD_PX = 80;
-// Room for the last ruler label, which is centred on the end of the range.
-const END_PAD_PX = 24;
+// 2.4px per minute = 144px per hour (1 SKS 50m = 120px, 3 SKS 150m = 360px), smooth horizontal scroll across hours.
+const PX_PER_MINUTE = 2.4;
+const ROOM_COL_PX = 88;
+const END_PAD_PX = 36;
+const ROW_HEIGHT_PX = 76;
 
 const LEGEND = [
-  { label: "Jadwal Siadin", className: "border-border border-l-[3px] border-l-warning-strong bg-surface" },
-  { label: "Reservasi", className: "border-border border-l-[3px] border-l-primary bg-surface" },
-  { label: "Berlangsung", className: "border-primary bg-primary-soft" },
-  { label: "Kosong", className: "border-dashed border-muted" },
+  { label: "Jadwal Siadin", className: "border-warning/40 border-l-[3px] border-l-warning-strong bg-warning-soft" },
+  { label: "Reservasi", className: "border-primary/30 border-l-[3px] border-l-primary bg-primary-soft" },
 ];
 
-// Clips are white cards like a week calendar; the coloured left edge, icon, and type label tell them apart.
-const CARD = "absolute inset-y-1.5 flex min-w-0 items-center gap-2 overflow-hidden rounded-lg border px-2 text-left";
-const ACCENT = { siadin: "border-l-[3px] border-l-warning-strong", reservasi: "border-l-[3px] border-l-primary" } as const;
-// Below this width only the title and time fit, so the icon and the detail are left out.
-const ROOMY_PX = 120;
-
+const pad = (value: number) => String(value).padStart(2, "0");
 const displayTime = (time: string) => time.replace(":", ".");
-const rangeLabel = (segment: TimeSlot) => `${displayTime(segment.start)} - ${displayTime(segment.end)} WIB`;
+const rangeLabel = (segment: TimeSlot) => `${displayTime(segment.start)} - ${displayTime(segment.end)}`;
 const px = (minutes: number) => minutes * PX_PER_MINUTE;
-// The tracks area right of the room column, minus the end padding; positions are a share of it.
-const TRACK_AREA = "absolute inset-y-0 left-0 right-6";
+
+function buildHourGrid(from: string, to: string) {
+  const startMin = toMinutes(from);
+  const endMin = toMinutes(to);
+  const lines: { offset: number; label: string | null; major: boolean }[] = [];
+  for (let minute = startMin; minute <= endMin; minute += 30) {
+    const major = minute % 60 === 0;
+    lines.push({
+      offset: minute - startMin,
+      label: major ? `${pad(Math.floor(minute / 60))}.${pad(minute % 60)}` : null,
+      major,
+    });
+  }
+  return lines;
+}
 
 /**
- * Rooms as tracks on one time axis, like a video editor: Siadin classes, reservations, and free gaps.
- * The axis is at least 4.4px a minute and stretches to fill a wider card, so a short range leaves no
- * empty space on the right.
+ * Google Calendar-style horizontal multi-room grid: sticky room column on the left, sticky WIB
+ * hour axis across the top (scroll right to inspect later hours), and clean event cards per room.
  */
 export function FloorTimeline({
   rooms,
   dateKey,
   from,
   to,
-  now,
   reservations,
   schedules,
   activeKey,
   onOpen,
   onCreate,
 }: FloorTimelineProps) {
-  const scrollerRef = useRef<HTMLDivElement>(null);
-  const total = toMinutes(to) - toMinutes(from);
-  const at = (minutes: number) => `${(minutes / total) * 100}%`;
-  const ticks = rulerTicks(from, to);
-  const current = nowOffset(now, dateKey, from, to);
-  const nowLabel = current === null ? null : `${String(Math.floor((toMinutes(from) + current) / 60)).padStart(2, "0")}.${String((toMinutes(from) + current) % 60).padStart(2, "0")}`;
+  const totalMinutes = Math.max(60, toMinutes(to) - toMinutes(from));
+  const timelineWidth = px(totalMinutes);
+  const gridLines = buildHourGrid(from, to);
 
-  // Bring the "now" marker into view when the range changes; the operator mostly cares about what is happening now.
-  useEffect(() => {
-    if (scrollerRef.current) scrollerRef.current.scrollLeft = current === null ? 0 : Math.max(0, px(current) - 40);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only on range changes, not every minute tick
-  }, [from, to]);
+  const openPopover = (item: TimelineItem) => (event: React.MouseEvent<HTMLButtonElement>) => {
+    const container = event.currentTarget.closest<HTMLElement>("[data-timeline-scroller]");
+    if (container) onOpen(item, event.currentTarget, container);
+  };
 
   return (
     <div className="flex flex-col gap-3">
@@ -100,223 +97,196 @@ export function FloorTimeline({
             </li>
           ))}
         </ul>
-        {nowLabel && (
-          <p className="flex items-center gap-1.5 text-[11px]">
-            <span aria-hidden="true" className="h-3 w-0.5 bg-info" />
-            Sekarang {nowLabel} WIB
-          </p>
+        {onCreate && (
+          <p className="text-[11px] text-muted">Klik area kosong di baris kelas untuk membuat reservasi.</p>
         )}
       </div>
 
-      <div ref={scrollerRef} data-timeline-scroller className="overflow-x-auto border-y border-border">
-        <div className="relative w-full" style={{ minWidth: HEAD_PX + px(total) + END_PAD_PX }}>
-          <div aria-hidden="true" className="flex h-10 border-b border-border">
-            <div className="sticky left-0 z-20 w-20 shrink-0 border-r border-border bg-surface" />
-            <div className="relative flex-1">
-              <div className={TRACK_AREA}>
-                {ticks.map((tick) => (
+      <div
+        data-timeline-scroller
+        className="max-h-[70vh] overflow-auto border-y border-border bg-surface"
+      >
+        <div
+          className="relative"
+          style={{ width: ROOM_COL_PX + timelineWidth + END_PAD_PX, minWidth: "100%" }}
+        >
+          {/* Sticky top time header row: scroll right to see later hours */}
+          <div className="sticky top-0 z-30 flex h-11 border-b border-border bg-surface">
+            <div
+              style={{ width: ROOM_COL_PX }}
+              className="sticky left-0 z-40 flex shrink-0 items-center justify-center border-r border-border bg-surface text-[11px] font-medium text-muted"
+            >
+              Kelas
+            </div>
+            <div aria-hidden="true" className="relative flex-1" style={{ width: timelineWidth + END_PAD_PX }}>
+              {gridLines.map((line) => (
+                <div
+                  key={line.offset}
+                  className="absolute inset-y-0"
+                  style={{ left: px(line.offset) }}
+                >
                   <span
-                    key={tick.offset}
-                    className={`absolute bottom-0 w-px ${tick.label ? "h-2.5 bg-muted" : "h-1 bg-border"}`}
-                    style={{ left: at(tick.offset) }}
+                    className={`absolute bottom-0 w-px ${line.major ? "h-2.5 bg-border" : "h-1.5 bg-border/60"}`}
                   />
-                ))}
-                {ticks
-                  .filter((tick) => tick.label)
-                  .map((tick) => (
+                  {line.label && (
                     <span
-                      key={tick.label}
-                      className={`absolute top-2 text-[11px] leading-4 whitespace-nowrap text-muted ${tick.offset === 0 ? "pl-1" : "-translate-x-1/2"}`}
-                      style={{ left: at(tick.offset) }}
+                      className={`absolute top-2.5 text-[11px] leading-none whitespace-nowrap text-muted tabular-nums ${
+                        line.offset === 0 ? "left-1.5" : "-translate-x-1/2"
+                      }`}
                     >
-                      {tick.label}
+                      {line.label}
                     </span>
-                  ))}
-              </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
 
-          <ul aria-label={`Jadwal ruangan, ${displayTime(from)} - ${displayTime(to)} WIB`}>
+          {/* Room rows: sticky room code on the left, horizontal schedule track on the right */}
+          <div
+            role="region"
+            aria-label={`Kalender jadwal kelas, ${displayTime(from)} - ${displayTime(to)} WIB`}
+          >
             {rooms.map((room) => {
               const segments = buildTimeline(dateKey, room.code, from, to, reservations, schedules);
               return (
-                <li key={room.id} className="flex border-b border-border last:border-b-0">
-                  <div className="sticky left-0 z-20 flex w-20 shrink-0 items-center border-r border-border bg-surface px-2">
-                    <span className="truncate rounded-md border border-border bg-surface px-2 py-1 text-xs font-semibold">{room.code}</span>
+                <div
+                  key={room.id}
+                  style={{ height: ROW_HEIGHT_PX }}
+                  className="flex border-b border-border last:border-b-0"
+                >
+                  {/* Sticky left room label */}
+                  <div
+                    style={{ width: ROOM_COL_PX }}
+                    className="sticky left-0 z-20 flex shrink-0 items-center justify-center border-r border-border bg-surface px-2"
+                  >
+                    <span className="truncate text-xs font-semibold text-ink">{room.code}</span>
                   </div>
-                  <div className="relative h-[72px] flex-1 bg-page">
-                    <div aria-hidden="true" className={TRACK_AREA}>
-                      {ticks
-                        .filter((tick) => tick.label && tick.offset > 0)
-                        .map((tick) => (
-                          <span key={tick.offset} className="absolute inset-y-0 w-px bg-border" style={{ left: at(tick.offset) }} />
-                        ))}
+
+                  {/* Horizontal calendar track */}
+                  <div
+                    aria-label={`Jadwal ${room.code}`}
+                    className="relative flex-1"
+                    style={{ width: timelineWidth + END_PAD_PX }}
+                  >
+                    {/* Vertical hour and half-hour gridlines */}
+                    <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+                      {gridLines.map((line) => (
+                        <div
+                          key={line.offset}
+                          className={`absolute inset-y-0 border-l ${
+                            line.major ? "border-border" : "border-dashed border-border/50"
+                          }`}
+                          style={{ left: px(line.offset) }}
+                        />
+                      ))}
                     </div>
-                    <ol aria-label={`Jadwal ${room.code}`} className={TRACK_AREA}>
-                      {segments.map((segment) => {
-                        const span = segmentSpan(segment, from);
-                        // A 2px gap on each side keeps neighbouring clips apart.
-                        const position = { left: `calc(${at(span.offset)} + 2px)`, width: `calc(${at(span.length)} - 4px)` };
-                        // Measured at the narrowest scale; a stretched axis only makes clips wider.
-                        const roomy = px(span.length) - 4 >= ROOMY_PX;
-                        const range = rangeLabel(segment);
-                        const ongoing = current !== null && span.offset <= current && current < span.offset + span.length;
-                        const tone = ongoing ? "border-primary bg-primary-soft" : "border-border bg-surface shadow-xs";
-                        const open = (item: TimelineItem) => (event: React.MouseEvent<HTMLButtonElement>) => {
-                          const container = event.currentTarget.closest<HTMLElement>("[data-timeline-scroller]");
-                          if (container) onOpen(item, event.currentTarget, container);
-                        };
-                        // The clip whose popover is open, like the selected card in a week calendar.
-                        const activeRing = "border-primary ring-2 ring-primary ring-offset-1";
 
-                        if (segment.kind === "siadin") {
-                          const { courseName, lecturerName } = segment.schedule;
-                          const item: TimelineItem = { kind: "siadin", schedule: segment.schedule };
-                          const active = itemKey(item) === activeKey;
-                          return (
-                            <li key={`siadin-${segment.schedule.id}`} className="contents">
-                              <button
-                                type="button"
-                                onClick={open(item)}
-                                aria-haspopup="dialog"
-                                aria-expanded={active}
-                                aria-label={`${room.code}, Jadwal Siadin ${range}${ongoing ? ", sedang berlangsung" : ""}: ${courseName}, ${lecturerName}. Lihat detail`}
-                                title={`${courseName}, ${lecturerName} (${range})`}
-                                className={`${CARD} ${tone} ${ACCENT.siadin} transition-colors hover:bg-warning-soft ${active ? activeRing : ""}`}
-                                style={position}
-                              >
-                                <ClipBody
-                                  icon="/icons/notes.svg"
-                                  iconClass="bg-warning-soft text-warning"
-                                  title={courseName}
-                                  range={range}
-                                  kindLabel="Siadin"
-                                  detail={lecturerName}
-                                  ongoing={ongoing}
-                                  roomy={roomy}
-                                />
-                              </button>
-                            </li>
-                          );
-                        }
+                    {segments.map((segment) => {
+                      const span = segmentSpan(segment, from);
+                      const left = px(span.offset) + 2;
+                      const width = Math.max(px(span.length) - 4, 36);
+                      const range = rangeLabel(segment);
+                      const showDetail = width >= 110;
+                      const showTime = width >= 72;
+                      const activeRing = "ring-2 ring-primary ring-offset-1";
 
-                        if (segment.kind === "reservasi") {
-                          const { reservation } = segment;
-                          const item: TimelineItem = { kind: "reservasi", reservation };
-                          const active = itemKey(item) === activeKey;
-                          return (
-                            <li key={`reservasi-${reservation.id}`} className="contents">
-                              <button
-                                type="button"
-                                onClick={open(item)}
-                                aria-haspopup="dialog"
-                                aria-expanded={active}
-                                aria-label={`${room.code}, reservasi ${range} oleh ${reservation.bookerName}${ongoing ? ", sedang berlangsung" : ""}. Lihat detail`}
-                                title={`${reservation.bookerName} (${range})`}
-                                className={`${CARD} ${tone} ${ACCENT.reservasi} transition-colors hover:border-primary hover:bg-primary-soft ${
-                                  active ? activeRing : ""
-                                }`}
-                                style={position}
-                              >
-                                <ClipBody
-                                  icon="/icons/calendar-clock.svg"
-                                  iconClass="bg-primary-soft text-primary"
-                                  title={reservation.bookerName}
-                                  range={range}
-                                  kindLabel="Reservasi"
-                                  detail={reservation.purpose}
-                                  ongoing={ongoing}
-                                  roomy={roomy}
-                                />
-                              </button>
-                            </li>
-                          );
-                        }
+                      if (segment.kind === "siadin") {
+                        const { courseName, lecturerName, classGroup } = segment.schedule;
+                        const item: TimelineItem = { kind: "siadin", schedule: segment.schedule };
+                        const active = itemKey(item) === activeKey;
+                        const meta = classGroup ? `${lecturerName} · ${classGroup}` : lecturerName;
 
-                        const gapLabel = `${room.code} kosong ${range}`;
-                        const free = `${CARD} justify-center gap-1 border-dashed border-border text-muted`;
                         return (
-                          <li key={`free-${segment.start}`} className="contents">
-                            {onCreate ? (
-                              <button
-                                type="button"
-                                onClick={() => onCreate(room.id, { start: segment.start, end: segment.end })}
-                                aria-label={`${gapLabel}. Buat reservasi`}
-                                title={range}
-                                className={`${free} transition-colors hover:border-primary hover:bg-primary-soft hover:text-primary`}
-                                style={position}
-                              >
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true" className="shrink-0">
-                                  <path strokeLinecap="round" d="M12 5v14M5 12h14" />
-                                </svg>
-                                <span className="truncate text-[11px]">Kosong</span>
-                              </button>
-                            ) : (
-                              <span aria-label={gapLabel} className={`${free} text-[11px]`} style={position}>
-                                <span className="truncate">Kosong</span>
+                          <button
+                            key={`siadin-${segment.schedule.id}`}
+                            type="button"
+                            onClick={openPopover(item)}
+                            aria-haspopup="dialog"
+                            aria-expanded={active}
+                            aria-label={`${room.code}, Jadwal Siadin ${range} WIB: ${courseName}, ${meta}. Lihat detail`}
+                            title={`${courseName} (${range} WIB) - ${meta}`}
+                            style={{ left, width }}
+                            className={`absolute inset-y-1.5 z-10 flex cursor-pointer flex-col justify-center overflow-hidden rounded-md border border-warning/30 border-l-[3px] border-l-warning-strong bg-warning-soft/80 px-2.5 py-1 text-left transition-colors hover:bg-warning-soft ${
+                              active ? activeRing : ""
+                            }`}
+                          >
+                            <span className="truncate text-xs font-semibold leading-tight text-ink">
+                              {courseName}
+                            </span>
+                            {showTime && (
+                              <span className="truncate text-[11px] leading-tight text-muted tabular-nums">
+                                {range} WIB
                               </span>
                             )}
-                          </li>
+                            {showDetail && (
+                              <span className="truncate text-[11px] leading-tight text-muted">
+                                {meta}
+                              </span>
+                            )}
+                          </button>
                         );
-                      })}
-                    </ol>
+                      }
+
+                      if (segment.kind === "reservasi") {
+                        const { reservation } = segment;
+                        const item: TimelineItem = { kind: "reservasi", reservation };
+                        const active = itemKey(item) === activeKey;
+
+                        return (
+                          <button
+                            key={`reservasi-${reservation.id}`}
+                            type="button"
+                            onClick={openPopover(item)}
+                            aria-haspopup="dialog"
+                            aria-expanded={active}
+                            aria-label={`${room.code}, reservasi ${range} WIB oleh ${reservation.bookerName}. Lihat detail`}
+                            title={`${reservation.bookerName} (${range} WIB) - ${reservation.purpose}`}
+                            style={{ left, width }}
+                            className={`absolute inset-y-1.5 z-10 flex cursor-pointer flex-col justify-center overflow-hidden rounded-md border border-primary/25 border-l-[3px] border-l-primary bg-primary-soft px-2.5 py-1 text-left transition-colors hover:bg-primary-tint ${
+                              active ? activeRing : ""
+                            }`}
+                          >
+                            <span className="truncate text-xs font-semibold leading-tight text-ink">
+                              {reservation.bookerName}
+                            </span>
+                            {showTime && (
+                              <span className="truncate text-[11px] leading-tight text-muted tabular-nums">
+                                {range} WIB
+                              </span>
+                            )}
+                            {showDetail && (
+                              <span className="truncate text-[11px] leading-tight text-muted">
+                                {reservation.purpose}
+                              </span>
+                            )}
+                          </button>
+                        );
+                      }
+
+                      // Free gap: clickable on Operator page, clean empty grid on read-only views.
+                      if (!onCreate) return null;
+                      return (
+                        <button
+                          key={`free-${segment.start}`}
+                          type="button"
+                          onClick={() => onCreate(room.id, { start: segment.start, end: segment.end })}
+                          aria-label={`${room.code} kosong ${range} WIB. Buat reservasi`}
+                          title={`Buat reservasi ${room.code} (${range} WIB)`}
+                          style={{ left, width }}
+                          className="absolute inset-y-1.5 flex cursor-pointer items-center justify-center rounded-md border border-transparent text-[11px] text-transparent transition-colors hover:border-dashed hover:border-primary/50 hover:bg-primary-soft/60 hover:text-primary focus-visible:border-dashed focus-visible:border-primary focus-visible:bg-primary-soft/60 focus-visible:text-primary"
+                        >
+                          <span className="truncate px-1 font-medium">+ Buat reservasi</span>
+                        </button>
+                      );
+                    })}
                   </div>
-                </li>
+                </div>
               );
             })}
-          </ul>
-
-          {current !== null && (
-            // The playhead from video editors, used here as "now"; it moves once a minute, never animated.
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute top-0 bottom-0 z-10"
-              style={{ left: `calc(${HEAD_PX}px + (100% - ${HEAD_PX + END_PAD_PX}px) * ${current / total})` }}
-            >
-              <span className="absolute top-7 bottom-0 left-0 w-px -translate-x-1/2 bg-primary" />
-              <span className="absolute top-1.5 left-0 -translate-x-1/2 rounded-full bg-primary px-2 text-[11px] leading-5 font-semibold text-on-primary tabular-nums">
-                {nowLabel}
-              </span>
-            </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
-  );
-}
-
-interface ClipBodyProps {
-  icon: string;
-  iconClass: string;
-  title: string;
-  range: string;
-  /** "Siadin" or "Reservasi", always shown so the type does not rely on colour. */
-  kindLabel: string;
-  /** One short detail after the type, e.g. the lecturer or the purpose. */
-  detail: string;
-  ongoing: boolean;
-  roomy: boolean;
-}
-
-/** Inside of a Siadin or reservation card: icon, bold title, time, and the type label. */
-function ClipBody({ icon, iconClass, title, range, kindLabel, detail, ongoing, roomy }: ClipBodyProps) {
-  return (
-    <>
-      {roomy && (
-        <span className={`flex size-7 shrink-0 items-center justify-center rounded-md ${iconClass}`}>
-          <MaskIcon src={icon} size={14} />
-        </span>
-      )}
-      <span className="flex min-w-0 flex-1 flex-col">
-        <span className="flex min-w-0 items-center gap-1.5">
-          <span className="truncate text-xs font-semibold text-ink">{title}</span>
-          {ongoing && roomy && (
-            <span className="shrink-0 rounded-full bg-primary px-1.5 text-[10px] leading-4 font-medium text-on-primary">Berlangsung</span>
-          )}
-        </span>
-        <span className="truncate text-[11px] text-muted">{range}</span>
-        <span className="truncate text-[11px] text-muted">{roomy ? `${kindLabel} · ${detail}` : kindLabel}</span>
-      </span>
-    </>
   );
 }

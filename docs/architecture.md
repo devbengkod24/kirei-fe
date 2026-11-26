@@ -20,7 +20,7 @@ kirei-fe/
 └─ src/
    ├─ app/
    ├─ mocks/
-   ├─ shared/
+   ├─ shared/git add .
    ├─ modules/
    ├─ components/
    ├─ lib/

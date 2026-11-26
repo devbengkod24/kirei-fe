@@ -5,12 +5,12 @@ const ACTIVE_STATUSES = new Set<ReservationRecord["status"]>(["menunggu_persetuj
 
 export type ReservationHistoryResult =
   | { view: "aktif"; today: ReservationRecord[]; upcoming: ReservationRecord[] }
-  | { view: "riwayat"; items: ReservationRecord[]; page: number; totalPages: number };
+  | { view: "riwayat"; items: ReservationRecord[]; allItems: ReservationRecord[]; page: number; totalPages: number };
 
 /**
  * Active reservations grouped by day, or one page of past ones, newest first. Laravel will filter
  * and paginate; until then this imitates it, on the server and again in the browser when the demo
- * store adds the borrower's own requests.
+ * store adds the borrower's own requests. `allItems` holds every filtered history row for export.
  */
 export function buildHistoryResult(records: ReservationRecord[], query: HistoryQuery, now: Date): ReservationHistoryResult {
   const ofType = records.filter((record) => record.type === query.tipe);
@@ -29,6 +29,7 @@ export function buildHistoryResult(records: ReservationRecord[], query: HistoryQ
   return {
     view: "riwayat",
     items: past.slice((page - 1) * query.perPage, page * query.perPage),
+    allItems: past,
     page,
     totalPages,
   };

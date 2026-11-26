@@ -11,21 +11,33 @@ export interface ClassSchedule {
   endsAt: string;
   courseName: string;
   lecturerName: string;
+  /** Class group / cohort label, e.g. "A11.4301". */
+  classGroup?: string;
+  /** 1-based starting SKS slot number. */
+  sksSlot?: number;
+  /** Number of consecutive SKS slots occupied. */
+  sksCount?: number;
 }
 
 /** ISO weekday: 1 is Senin, 7 is Minggu. */
 export type Weekday = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
-/** One weekly lecture from the schedule CSV an admin fakultas uploads. */
+/** One weekly lecture from the schedule CSV an admin gedung uploads. */
 export interface LecturerScheduleEntry {
   day: Weekday;
-  /** WIB wall-clock "HH:mm" */
+  /** 1-based starting SKS slot (50 minutes/SKS starting at 07:00 WIB). */
+  sksSlot: number;
+  /** Number of consecutive SKS slots occupied. */
+  sksCount: number;
+  /** WIB wall-clock "HH:mm" derived from sksSlot and sksCount. */
   startTime: string;
   endTime: string;
   /** Room code, e.g. "H.5.1" */
   roomCode: string;
   courseName: string;
   lecturerName: string;
+  /** Class group / cohort label, e.g. "A11.4301". */
+  classGroup: string;
 }
 
 /** A faculty's weekly lecture schedule. Every entry blocks its room each week of the semester. */

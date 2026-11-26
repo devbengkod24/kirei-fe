@@ -37,6 +37,7 @@ export function ReservationHistoryView({ query, records, now, ownerId, basePath,
     <ReservationHistoryTable
       tipe={query.tipe}
       items={result.items}
+      exportItems={result.allItems}
       page={result.page}
       perPage={query.perPage}
       totalPages={result.totalPages}

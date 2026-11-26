@@ -12,14 +12,17 @@ export const SPORTS_HALL_MAX_MINUTES = 120;
 export const DRAFT_LETTER_HOURS = 24;
 
 /**
- * Rooms can be booked from 07:00 to 20:00 WIB (KONTEKS-DASAR section 6). GOR keeps its own hours on
- * the hall data. TODO: kirei-api must enforce the same window.
+ * Rooms can be booked from 07:00 to 21:00 WIB (operational window after user feedback).
+ * GOR keeps its own hours on the hall data. TODO: kirei-api must enforce the same window.
  */
 export const ROOM_OPEN_TIME = "07:00";
-export const ROOM_CLOSE_TIME = "20:00";
+export const ROOM_CLOSE_TIME = "21:00";
 
 /** Ormawa and UKM may not book for today or tomorrow (H-0, H-1), so the earliest day is the one after. */
 export const ORGANISATION_MIN_DAYS_AHEAD = 2;
 
 /** Largest room photo accepted. TODO: match the upload rule in kirei-api once it is documented. */
 export const ROOM_PHOTO_MAX_SIZE_MB = 2;
+
+/** Largest damage report photo accepted. TODO: kirei-api must enforce the same upload rule. */
+export const REPORT_PHOTO_MAX_SIZE_MB = 2;

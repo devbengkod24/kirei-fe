@@ -128,7 +128,7 @@ export function createRoomReservationSchema(
       date: z.string().regex(DATE, "Pilih tanggal reservasi."),
       startTime: z.string().regex(TIME, "Pilih jam mulai."),
       endTime: z.string().regex(TIME, "Pilih jam selesai."),
-      roomId: z.string().min(1, "Pilih ruangan pada denah."),
+      roomId: z.string().min(1, "Pilih ruangan pada kalender."),
       phone: askPhone ? phoneSchema : z.string(),
       purpose: describe("keperluan", 5),
       ...submissionShape,

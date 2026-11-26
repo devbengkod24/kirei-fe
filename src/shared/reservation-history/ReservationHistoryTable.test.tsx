@@ -30,6 +30,8 @@ describe("ReservationHistoryTable", () => {
     // one in the table column, one in the narrow-screen card; never a third under Keperluan
     expect(screen.getAllByText(/Jadwal bentrok dengan kegiatan fakultas\./)).toHaveLength(2);
     expect(screen.queryByText("Alasan dibatalkan:")).toBeNull();
+    expect(screen.getByRole("button", { name: "Unduh Excel" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Unduh PDF" })).toBeTruthy();
   });
 });
 

@@ -1,10 +1,36 @@
 import { describe, expect, it } from "vitest";
 import type { Vehicle } from "@/types/facility";
-import { toMockReservation, toSportsHallReservationRequest, toVehicleReservationRequest } from "./createReservation";
+import { toMockReservation, toRoomReservationRequest, toSportsHallReservationRequest, toVehicleReservationRequest } from "./createReservation";
 
 const BUS: Vehicle = { id: "vehicle-bus", name: "Bus Udinus", capacity: 40, unitCount: 2, isActive: true };
 
 describe("reservation requests", () => {
+  it("approves internal bookings immediately when approved=true", () => {
+    const request = toRoomReservationRequest(
+      {
+        buildingId: "gedung-h",
+        floorId: "gedung-h-5",
+        date: "2026-10-20",
+        startTime: "08:00",
+        endTime: "10:00",
+        roomId: "room-h-5-1",
+        phone: "",
+        purpose: "Rapat pimpinan universitas",
+        letter: null,
+        intent: "submit",
+      },
+      true,
+    );
+    expect(request.status).toBe("disetujui");
+
+    const owner = { id: "usr-univ", name: "Sekretariat", email: "univ@example.test", detail: "Sekretariat Universitas" };
+    const stored = toMockReservation(
+      request,
+      { owner, unitName: "H.5.1", buildingName: "Gedung H", purpose: "Rapat pimpinan universitas", approved: true },
+      new Date(0),
+    );
+    expect(stored.status).toBe("disetujui");
+  });
   it("sends a vehicle trip as whole WIB days, ending at midnight after the last day", () => {
     const request = toVehicleReservationRequest(
       {

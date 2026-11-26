@@ -106,8 +106,8 @@ export function buildRoomBookingsMock(now: Date): UnitBooking[] {
   });
 
   return [0, 1, 2, 3, 4, 5, 6].flatMap((days) => [
-    booking("H.5.2", days, "07:00", "20:00"),
-    booking("H.5.11", days, "07:00", "20:00"),
+    booking("H.5.2", days, "07:00", "21:00"),
+    booking("H.5.11", days, "07:00", "21:00"),
     booking("H.5.9", days, "08:00", "12:00"),
     booking("H.5.9", days, "13:00", "17:00"),
     booking("H.7", days, "09:00", "11:00"),

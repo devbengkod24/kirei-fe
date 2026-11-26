@@ -49,6 +49,15 @@ describe("timelineDetail", () => {
     ]);
     expect(detail.rows[4].value).toMatch(/^07\.30/);
   });
+
+  it("includes Kelompok and SKS range when present on a Siadin class", () => {
+    const detail = timelineDetail({
+      kind: "siadin",
+      schedule: { ...SCHEDULE, classGroup: "A11.4301", sksSlot: 1, sksCount: 3 },
+    });
+    expect(detail.rows).toContainEqual({ label: "Kelompok", value: "A11.4301" });
+    expect(detail.rows.find((row) => row.label === "Waktu")?.value).toContain("Slot 1-3 (3 SKS)");
+  });
 });
 
 describe("placePopover", () => {

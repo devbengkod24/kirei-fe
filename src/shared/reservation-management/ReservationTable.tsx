@@ -8,11 +8,20 @@ import { Pagination } from "@/components/ui/Pagination";
 import { TABLE, TABLE_CELL, TABLE_HEAD_CELL, TABLE_ROW } from "@/components/ui/table";
 import { usePagination } from "@/hooks/usePagination";
 import { formatTimeWIB, toWibDateKey } from "@/lib/date";
+import { HardCopyBadge } from "@/shared/reservation/HardCopyBadge";
+import { hardCopyLabel, isHardCopySubmitted } from "@/shared/reservation/hardCopy";
 import { ReservationDetailDialog } from "@/shared/reservation/ReservationDetailDialog";
 import { ReservationStatusBadge } from "@/shared/reservation/ReservationStatusBadge";
 import { isWholeDayType, reservationDateShort } from "@/shared/reservation/reservationTime";
 import { RESERVATION_TYPE_LABEL } from "@/shared/reservation/reservationTypes";
-import { decideMockReservation, mergeAdminRequests, type MockDecision } from "@/shared/reservation-store/reservationStore";
+import { ExportHistoryButtons } from "@/shared/reservation-history/ExportHistoryButtons";
+import { exportColumnsForType, mapAdminRequestToRow } from "@/shared/reservation-history/historyExport";
+import {
+  decideMockReservation,
+  mergeAdminRequests,
+  setMockHardCopySubmitted,
+  type MockDecision,
+} from "@/shared/reservation-store/reservationStore";
 import { useMockReservations } from "@/shared/reservation-store/useMockReservations";
 import { useStaff } from "@/shared/staff/useStaff";
 import type { ReservationRequest, ReservationType } from "@/types/reservation";
@@ -42,7 +51,7 @@ export interface ReservationTableProps {
 
 const TH = `${TABLE_HEAD_CELL} text-left`;
 const TD = TABLE_CELL;
-const ICON_BUTTON = "flex h-11 w-11 items-center justify-center rounded-md border transition-colors";
+const ICON_BUTTON = "flex h-11 w-11 cursor-pointer items-center justify-center rounded-md border transition-colors";
 
 const DEFAULT_LAYOUT = { table: "hidden lg:block", list: "flex flex-col lg:hidden" };
 const WIDE_LAYOUT = { table: "hidden overflow-x-auto xl:block", list: "flex flex-col xl:hidden" };
@@ -59,15 +68,26 @@ const EMPTY_TEXT: Record<ReservationTab, string> = {
 /** Reservations table for both tabs: approval actions on "persetujuan", status on "riwayat". */
 export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, buildingNames, staff }: ReservationTableProps) {
   const store = useMockReservations();
-  // Decisions this browser could not store (e.g. private mode) still apply until the page reloads.
+  // Decisions and hard copy flags this browser could not store still apply until the page reloads.
   const [unsaved, setUnsaved] = useState<Record<string, MockDecision>>({});
+  const [unsavedHardCopy, setUnsavedHardCopy] = useState<Record<string, boolean>>({});
   const reservations = useMemo(
     () =>
       requestsForTab(
-        mergeAdminRequests(seeded, { ...store, decisions: { ...store.decisions, ...unsaved } }, tipe, roomCodes, buildingNames),
+        mergeAdminRequests(
+          seeded,
+          {
+            ...store,
+            decisions: { ...store.decisions, ...unsaved },
+            hardCopy: { ...store.hardCopy, ...unsavedHardCopy },
+          },
+          tipe,
+          roomCodes,
+          buildingNames,
+        ),
         tab,
       ),
-    [seeded, store, unsaved, tipe, roomCodes, buildingNames, tab],
+    [seeded, store, unsaved, unsavedHardCopy, tipe, roomCodes, buildingNames, tab],
   );
   const [viewing, setViewing] = useState<ReservationRequest | null>(null);
   const [approving, setApproving] = useState<ReservationRequest | null>(null);
@@ -106,6 +126,19 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, b
       setUnsaved((current) => ({ ...current, [reservation.id]: { ...decision, decidedAt: new Date().toISOString() } }));
     }
     setNotice(message);
+  };
+
+  const updateHardCopy = (reservation: ReservationRequest, submitted: boolean) => {
+    // TODO: PATCH /reservations/{id}/hard-copy through the orval client, then refetch. Until then the demo store keeps it.
+    if (!setMockHardCopySubmitted(reservation.id, submitted)) {
+      setUnsavedHardCopy((current) => ({ ...current, [reservation.id]: submitted }));
+    }
+    const sync = (current: ReservationRequest | null) =>
+      current && current.id === reservation.id ? { ...current, hardCopySubmitted: submitted } : current;
+    setViewing(sync);
+    setApproving(sync);
+    setRejecting(sync);
+    setNotice(`Status hard copy ${reservation.borrowerName} diubah menjadi ${hardCopyLabel(submitted)}.`);
   };
 
   // History rows have one action, shaped like the decision: a check opens the details, a cross opens
@@ -163,11 +196,20 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, b
         {notice}
       </p>
 
-      {vehicleCrew && !isApproval && reservations.length > 0 && (
-        <div className="flex justify-end">
-          <Button variant="primary-outline" onClick={exportReport}>
-            Ekspor Laporan
-          </Button>
+      {!isApproval && reservations.length > 0 && (
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <ExportHistoryButtons
+            tipe={tipe}
+            title={`Riwayat Reservasi ${RESERVATION_TYPE_LABEL[tipe]}`}
+            columns={exportColumnsForType(tipe)}
+            rows={reservations.map((reservation) => mapAdminRequestToRow(reservation, tipe))}
+            dateItems={reservations}
+          />
+          {vehicleCrew && (
+            <Button variant="primary-outline" onClick={exportReport}>
+              Ekspor Laporan
+            </Button>
+          )}
         </div>
       )}
 
@@ -188,6 +230,7 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, b
                 ))}
                 {!wholeDays && <th scope="col" className={TH}>Waktu</th>}
                 <th scope="col" className={TH}>Keperluan</th>
+                {isApproval && <th scope="col" className={TH}>Hard Copy</th>}
                 {!isApproval && <th scope="col" className={TH}>Alasan Ditolak</th>}
                 {!isApproval && <th scope="col" className={TH}>Status</th>}
                 <th scope="col" className={TH}>Aksi</th>
@@ -209,6 +252,11 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, b
                     </td>
                   )}
                   <td className={TD}>{reservation.purpose}</td>
+                  {isApproval && (
+                    <td className={TD}>
+                      <HardCopyBadge submitted={isHardCopySubmitted(reservation)} />
+                    </td>
+                  )}
                   {!isApproval && (
                     <td className={`${TD} max-w-56 ${reservation.status === "ditolak" ? "text-danger" : "text-muted"}`}>
                       {rejectionText(reservation)}
@@ -259,6 +307,14 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, b
                 ))}
                 <dt className="text-primary">Keperluan</dt>
                 <dd className="break-words">{reservation.purpose}</dd>
+                {isApproval && (
+                  <>
+                    <dt className="text-primary">Hard Copy</dt>
+                    <dd>
+                      <HardCopyBadge submitted={isHardCopySubmitted(reservation)} />
+                    </dd>
+                  </>
+                )}
               </dl>
               <div className="mt-2 flex justify-end">
                 {renderActions(reservation)}
@@ -282,12 +338,14 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, b
           reservation={viewing}
           onClose={() => setViewing(null)}
           aside={crewPanel(viewing)}
+          onHardCopyChange={(submitted) => updateHardCopy(viewing, submitted)}
         />
       )}
       {approving && (
         <ApproveReservationDialog
           reservation={approving}
           aside={crewPanel(approving)}
+          onHardCopyChange={(submitted) => updateHardCopy(approving, submitted)}
           onClose={() => setApproving(null)}
           onApprove={() => {
             resolve(approving, { status: "disetujui", rejectionReason: null }, `Reservasi ${approving.borrowerName} disetujui.`);
@@ -299,6 +357,7 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, b
         <RejectReservationDialog
           reservation={rejecting}
           aside={crewPanel(rejecting)}
+          onHardCopyChange={(submitted) => updateHardCopy(rejecting, submitted)}
           onClose={() => setRejecting(null)}
           onReject={(reason) => {
             resolve(

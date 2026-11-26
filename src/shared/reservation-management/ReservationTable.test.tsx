@@ -69,6 +69,30 @@ describe("ReservationTable for vehicles", () => {
     fireEvent.click(within(dialog).getByRole("button", { name: "Setujui reservasi" }));
     expect(screen.getByRole("status").textContent).toBe(`Reservasi ${TRIP.borrowerName} disetujui.`);
   });
+
+  it("shows hard copy status in the approval table, lets admin change it, and allows approving when Belum", () => {
+    render(<ReservationTable tipe="kendaraan" tab="persetujuan" reservations={[{ ...TRIP, hardCopySubmitted: false }]} roomCodes={null} />);
+    const table = screen.getByRole("table");
+    expect(within(table).getByRole("columnheader", { name: "Hard Copy" })).toBeTruthy();
+    expect(within(table).getByText("Belum")).toBeTruthy();
+
+    fireEvent.click(within(table).getByRole("button", { name: `Setujui reservasi ${TRIP.borrowerName}` }));
+    const dialog = screen.getByRole("dialog", { name: "Setujui Reservasi" });
+    expect(within(dialog).getByText("Hard copy sudah diserahkan?")).toBeTruthy();
+
+    const sudahRadio = within(dialog).getByRole("radio", { name: "Sudah" });
+    const belumRadio = within(dialog).getByRole("radio", { name: "Belum" });
+    expect(belumRadio.getAttribute("aria-checked")).toBe("true");
+
+    fireEvent.click(sudahRadio);
+    expect(sudahRadio.getAttribute("aria-checked")).toBe("true");
+
+    fireEvent.click(belumRadio);
+    const approveBtn = within(dialog).getByRole("button", { name: "Setujui reservasi" }) as HTMLButtonElement;
+    expect(approveBtn.disabled).toBe(false);
+    fireEvent.click(approveBtn);
+    expect(screen.queryByRole("table")).toBeNull();
+  });
 });
 
 describe("ReservationTable history", () => {

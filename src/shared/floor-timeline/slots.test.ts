@@ -79,16 +79,17 @@ describe("defaultStartHour", () => {
 
   it("stays inside opening hours early and late in the day", () => {
     expect(defaultStartHour(new Date("2026-10-30T22:00:00Z"))).toBe("07:00");
-    // 19:40 and 21:30 WIB: the last start the filter offers, so the range still runs to 20.00.
+    // 19:40 WIB -> 19:00; 20:40 and 21:30 WIB -> 20:00 (last start before 21.00 closing).
     expect(defaultStartHour(new Date("2026-10-31T12:40:00Z"))).toBe("19:00");
-    expect(defaultStartHour(new Date("2026-10-31T14:30:00Z"))).toBe("19:00");
+    expect(defaultStartHour(new Date("2026-10-31T13:40:00Z"))).toBe("20:00");
+    expect(defaultStartHour(new Date("2026-10-31T14:30:00Z"))).toBe("20:00");
   });
 });
 
 describe("FILTER_START_HOURS", () => {
   it("offers whole hours from opening up to an hour before closing", () => {
     expect(FILTER_START_HOURS[0]).toBe("07:00");
-    expect(FILTER_START_HOURS.at(-1)).toBe("19:00");
+    expect(FILTER_START_HOURS.at(-1)).toBe("20:00");
     expect(FILTER_START_HOURS).not.toContain(CLOSE_TIME);
   });
 });
@@ -96,7 +97,8 @@ describe("FILTER_START_HOURS", () => {
 describe("hourFrom", () => {
   it("gives a one-hour slot, cut off at closing time", () => {
     expect(hourFrom("09:00")).toEqual({ start: "09:00", end: "10:00" });
-    expect(hourFrom("19:30")).toEqual({ start: "19:30", end: "20:00" });
+    expect(hourFrom("19:30")).toEqual({ start: "19:30", end: "20:30" });
+    expect(hourFrom("20:30")).toEqual({ start: "20:30", end: "21:00" });
   });
 });
 

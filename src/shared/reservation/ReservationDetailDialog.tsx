@@ -1,13 +1,15 @@
 "use client";
 
 import Image from "next/image";
+import { CAPS_LABEL_CLASS } from "@/components/form/Field";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { formatDateLongWIB, formatTimeWIB } from "@/lib/date";
+import { HardCopyBadge } from "@/shared/reservation/HardCopyBadge";
+import { isHardCopySubmitted } from "@/shared/reservation/hardCopy";
 import { isWholeDayType, reservationDateLong } from "@/shared/reservation/reservationTime";
 import { TRIP_KIND_LABEL, vehicleText } from "@/shared/reservation/vehicleTrip";
 import type { ReservationRequest, ReservationType } from "@/types/reservation";
-import { CAPS_LABEL_CLASS } from "@/components/form/Field";
 
 export interface ReservationDetailDialogProps {
   reservation: ReservationRequest;
@@ -22,6 +24,8 @@ export interface ReservationDetailDialogProps {
   outro?: React.ReactNode;
   /** Panels beside the details on wide screens, below them on narrow ones, e.g. drivers and costs. */
   aside?: React.ReactNode;
+  /** When set (admin verification), lets the admin mark whether physical hard copy has been handed in. */
+  onHardCopyChange?: (submitted: boolean) => void;
 }
 
 const READONLY_BOX = "flex min-h-10 items-center rounded-md border border-border px-2 py-2 text-xs tracking-[0.05em]";
@@ -42,9 +46,19 @@ const TYPE_DETAILS: Record<ReservationType, (reservation: ReservationRequest) =>
   ],
 };
 
-export function ReservationDetailDialog({ reservation, onClose, title = "Detail Reservasi", footer, intro, outro, aside }: ReservationDetailDialogProps) {
+export function ReservationDetailDialog({
+  reservation,
+  onClose,
+  title = "Detail Reservasi",
+  footer,
+  intro,
+  outro,
+  aside,
+  onHardCopyChange,
+}: ReservationDetailDialogProps) {
   const details = TYPE_DETAILS[reservation.type](reservation);
   const wholeDays = isWholeDayType(reservation.type);
+  const hardCopySubmitted = isHardCopySubmitted(reservation);
 
   const content = (
     <dl className="flex flex-col gap-3">
@@ -153,6 +167,52 @@ export function ReservationDetailDialog({ reservation, onClose, title = "Detail 
             </span>
           ) : (
             <span className="text-muted">Belum ada surat yang diunggah.</span>
+          )}
+        </dd>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <dt className={CAPS_LABEL_CLASS}>Hard copy sudah diserahkan?</dt>
+        <dd className="flex flex-col gap-1.5">
+          {onHardCopyChange ? (
+            <>
+              {/* TODO: kirei-api PATCH /reservations/{id}/hard-copy saat endpoint verifikasi tersedia. */}
+              <div role="radiogroup" aria-label="Hard copy sudah diserahkan?" className="flex gap-2">
+                {(
+                  [
+                    { value: true, label: "Sudah" },
+                    { value: false, label: "Belum" },
+                  ] as const
+                ).map((option) => {
+                  const selected = hardCopySubmitted === option.value;
+                  return (
+                    <button
+                      key={option.label}
+                      type="button"
+                      role="radio"
+                      aria-checked={selected}
+                      onClick={() => onHardCopyChange(option.value)}
+                      className={`min-h-11 flex-1 cursor-pointer rounded-md border px-3 text-xs font-medium transition-colors ${
+                        selected
+                          ? option.value
+                            ? "border-success bg-success-soft text-success"
+                            : "border-primary bg-primary-soft text-primary"
+                          : "border-border bg-surface text-muted hover:bg-page hover:text-ink"
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-[11px] text-muted">
+                Dicatat admin saat verifikasi. Persetujuan tetap dapat dilakukan meski status Belum.
+              </p>
+            </>
+          ) : (
+            <div>
+              <HardCopyBadge submitted={hardCopySubmitted} />
+            </div>
           )}
         </dd>
       </div>

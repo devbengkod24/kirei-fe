@@ -61,6 +61,8 @@ export const reportsSchema: z.ZodType<UserReport[]> = z.array(
     body: z.string(),
     roomCode: z.string().nullable(),
     authorName: z.string(),
+    reporterType: z.enum(["staf", "mahasiswa"]).optional(),
+    photoUrl: z.string().nullable().optional(),
     createdAt: z.string(),
   }),
 );
@@ -75,11 +77,14 @@ export const lecturerSchedulesSchema: z.ZodType<Record<string, LecturerSchedule>
     entries: z.array(
       z.object({
         day: weekdaySchema,
+        sksSlot: z.number().int().min(1),
+        sksCount: z.number().int().min(1),
         startTime: z.string(),
         endTime: z.string(),
         roomCode: z.string(),
         courseName: z.string(),
         lecturerName: z.string(),
+        classGroup: z.string(),
       }),
     ),
     uploadedAt: z.string(),

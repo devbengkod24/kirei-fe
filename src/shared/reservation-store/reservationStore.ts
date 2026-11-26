@@ -62,6 +62,8 @@ export interface MockReservationState {
   decisions: Record<string, MockDecision>;
   /** Missing in stores written before drivers and costs could be set. */
   assignments?: Record<string, VehicleAssignment>;
+  /** Admin verification flag: whether physical hard copy letter has been submitted. */
+  hardCopy?: Record<string, boolean>;
 }
 
 export const EMPTY_STATE: MockReservationState = { created: [], decisions: {} };
@@ -92,6 +94,7 @@ const reservationSchema = z.object({
     .optional(),
   activity: z.string().optional(),
   rejectionReason: z.string().nullable(),
+  hardCopySubmitted: z.boolean().optional(),
   ownerId: z.string(),
   ownerEmail: z.string(),
   createdAt: z.string(),
@@ -119,6 +122,7 @@ const stateSchema = z.object({
       }),
     )
     .optional(),
+  hardCopy: z.record(z.string(), z.boolean()).optional(),
 });
 
 /** Broken or foreign data reads as an empty store instead of crashing the page. */
@@ -207,6 +211,16 @@ export function assignVehicleCrew(
   return write({ ...state, assignments: { ...state.assignments, [id]: assignment } }, storage);
 }
 
+/** Records whether the borrower has submitted their physical hard copy letter. */
+export function setMockHardCopySubmitted(
+  id: string,
+  submitted: boolean,
+  storage: Storage | null = browserStorage(),
+): boolean {
+  const state = parseState(readSnapshot(storage));
+  return write({ ...state, hardCopy: { ...state.hardCopy, [id]: submitted } }, storage);
+}
+
 /** Back to the seeded sample data: forgets created requests and every decision. */
 export function resetMockReservations(storage: Storage | null = browserStorage()): boolean {
   if (!storage) return false;
@@ -248,7 +262,11 @@ export function mergeAdminRequests(
       reservation.type === tipe &&
       (roomCodes === null || inScope.has(reservation.roomName) || buildings.has(reservation.buildingName)),
   );
-  return [...seeded, ...created].map((reservation) => withDecision(reservation, state.decisions));
+  return [...seeded, ...created].map((reservation) => {
+    const decided = withDecision(reservation, state.decisions);
+    const hardCopySubmitted = state.hardCopy?.[reservation.id] ?? decided.hardCopySubmitted ?? false;
+    return { ...decided, hardCopySubmitted };
+  });
 }
 
 /** What the borrower's history shows for a request they created. */

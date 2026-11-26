@@ -7,11 +7,15 @@ import type { ReservationRecord, ReservationType } from "@/types/reservation";
 import { ReservationStatusBadge } from "@/shared/reservation/ReservationStatusBadge";
 import { RESERVATION_TYPE_LABEL, RESERVATION_UNIT_LABEL } from "@/shared/reservation/reservationTypes";
 import { tripText } from "@/shared/reservation/vehicleTrip";
+import { ExportHistoryButtons } from "./ExportHistoryButtons";
+import { exportColumnsForType, mapHistoryRecordToRow } from "./historyExport";
 import { HISTORY_PARAMS, PER_PAGE_OPTIONS } from "./query";
 
 export interface ReservationHistoryTableProps {
   tipe: ReservationType;
   items: ReservationRecord[];
+  /** Full filtered list for Excel/PDF export (all pages, not just the active slice). Defaults to `items`. */
+  exportItems?: ReservationRecord[];
   page: number;
   perPage: number;
   totalPages: number;
@@ -45,6 +49,7 @@ function Purpose({ reservation }: { reservation: ReservationRecord }) {
 export function ReservationHistoryTable({
   tipe,
   items,
+  exportItems = items,
   page,
   perPage,
   totalPages,
@@ -58,12 +63,25 @@ export function ReservationHistoryTable({
   const dateText = (reservation: ReservationRecord) =>
     wholeDays ? formatDayRangeShortWIB(reservation.startsAt, reservation.endsAt) : formatDateShortWIB(reservation.startsAt);
   const title = `Riwayat Reservasi ${RESERVATION_TYPE_LABEL[tipe]}`;
+  const exportColumns = exportColumnsForType(tipe);
+  const exportRows = exportItems.map((record) => mapHistoryRecordToRow(record, tipe));
 
   return (
     <Card as="section" aria-labelledby="history-title" className="flex flex-1 flex-col gap-6 p-4">
-      <h2 id="history-title" className="text-base font-semibold tracking-wide">
-        {title}
-      </h2>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 id="history-title" className="text-base font-semibold tracking-wide">
+          {title}
+        </h2>
+        {exportRows.length > 0 && (
+          <ExportHistoryButtons
+            tipe={tipe}
+            title={title}
+            columns={exportColumns}
+            rows={exportRows}
+            dateItems={exportItems}
+          />
+        )}
+      </div>
 
       {items.length === 0 ? (
         <p className="flex flex-1 items-center justify-center py-8 text-center text-sm text-muted">Belum ada riwayat reservasi {RESERVATION_TYPE_LABEL[tipe]}.</p>

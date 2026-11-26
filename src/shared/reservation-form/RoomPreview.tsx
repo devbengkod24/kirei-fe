@@ -16,7 +16,7 @@ export function RoomPreview({ room, approver }: RoomPreviewProps) {
           <Image src={room.photoUrl} alt={`Foto ruangan ${room.code}`} fill sizes="(min-width: 1280px) 356px, 100vw" className="object-cover" />
         ) : (
           <p className="absolute inset-0 flex items-center justify-center px-6 text-center text-xs text-primary">
-            {room ? "Foto ruangan ini belum tersedia." : "Pilih ruangan pada denah untuk melihat fotonya."}
+            {room ? "Foto ruangan ini belum tersedia." : "Pilih ruangan pada kalender untuk melihat fotonya."}
           </p>
         )}
       </div>

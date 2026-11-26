@@ -146,6 +146,7 @@ export function buildReservationsMock(now: Date): ReservationRequest[] {
     letterFileName: index % 4 === 3 ? null : `Surat Peminjaman Ruang ${row.roomName}.pdf`,
     letterUrl: index % 4 === 3 ? null : SAMPLE_LETTER_URL,
     rejectionReason: rejectionReason(row.status, index),
+    hardCopySubmitted: index % 2 === 0,
   }));
 }
 
@@ -191,6 +192,7 @@ export function buildFacilityRequestsMock(now: Date): ReservationRequest[] {
     letterUrl: SAMPLE_LETTER_URL,
     activity: row.activity,
     rejectionReason: rejectionReason(row.status, index),
+    hardCopySubmitted: index % 2 === 0,
     trip: row.trip,
   }));
 }

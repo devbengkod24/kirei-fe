@@ -22,28 +22,48 @@ export async function InternalReservationForm({ tipe, owner }: InternalReservati
   const requester = { name: owner.name, fakultasId: null };
   const links = { history: reservationsRoute(tipe, "riwayat"), historyLabel: "Buka Kelola Reservasi" };
 
+  const notice = (
+    <p className="rounded-md border border-primary-tint-border bg-primary-soft px-4 py-3 text-xs text-primary">
+      Reservasi pihak universitas diproses langsung oleh sekretariat. Pemesanan dari halaman ini langsung berstatus
+      Disetujui tanpa alur persetujuan biasa.
+    </p>
+  );
+
   switch (tipe) {
     case "ruangan": {
       // No scope: every building, university buildings included. The form's building picker narrows it.
       const options = await getRoomReservationOptions();
       return (
-        <RoomReservationForm
-          {...options}
-          requester={requester}
-          owner={owner}
-          mode="internal"
-          purposePlaceholder="Contoh: Rapat pimpinan universitas"
-          links={links}
-        />
+        <div className="flex flex-col gap-3">
+          {notice}
+          <RoomReservationForm
+            {...options}
+            requester={requester}
+            owner={owner}
+            mode="internal"
+            purposePlaceholder="Contoh: Rapat pimpinan universitas"
+            links={links}
+          />
+        </div>
       );
     }
     case "kendaraan": {
       const options = await getVehicleReservationOptions();
-      return <VehicleReservationForm {...options} requester={requester} owner={owner} mode="internal" links={links} />;
+      return (
+        <div className="flex flex-col gap-3">
+          {notice}
+          <VehicleReservationForm {...options} requester={requester} owner={owner} mode="internal" links={links} />
+        </div>
+      );
     }
     case "gor": {
       const options = await getSportsHallReservationOptions();
-      return <SportsHallReservationForm {...options} requester={requester} owner={owner} mode="internal" links={links} />;
+      return (
+        <div className="flex flex-col gap-3">
+          {notice}
+          <SportsHallReservationForm {...options} requester={requester} owner={owner} mode="internal" links={links} />
+        </div>
+      );
     }
   }
 }

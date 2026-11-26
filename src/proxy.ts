@@ -4,6 +4,11 @@ import { homeFor, LOGIN_PATH, SESSION_COOKIE, userFromSession } from "@/lib/auth
 
 /** The public landing page; open to guests. */
 const LANDING_PATH = "/";
+/** Public QR damage report route; open both without login and while signed in. */
+const PUBLIC_REPORT_PATH = "/lapor";
+
+const isPublicReportPath = (pathname: string) =>
+  pathname === PUBLIC_REPORT_PATH || pathname.startsWith(`${PUBLIC_REPORT_PATH}/`);
 
 /**
  * Optimistic redirects from the session cookie. Pages still check the role with requireRole.
@@ -12,6 +17,8 @@ const LANDING_PATH = "/";
  */
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  if (isPublicReportPath(pathname)) return NextResponse.next();
+
   if (authMode() === "api") {
     const hasSession = request.cookies.has(laravelSessionCookie());
     if (pathname === LANDING_PATH || pathname === LOGIN_PATH || hasSession) return NextResponse.next();

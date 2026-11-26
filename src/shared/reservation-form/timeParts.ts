@@ -23,8 +23,8 @@ export interface HourRange {
 }
 
 /**
- * Moves a part by whole steps, wrapping around: 23 → 00, 50 → 00. Minutes never carry into the hour.
- * With an hour range the hours wrap inside it instead: 20 → 07 for 07–20.
+ * Moves a part by whole steps, wrapping around: 23 -> 00, 50 -> 00. Minutes never carry into the hour.
+ * With an hour range the hours wrap inside it instead: 21 -> 07 for 07-21.
  */
 export function stepPart(part: TimePart, value: number, steps: number, hours?: HourRange): number {
   if (part === "hour" && hours) {

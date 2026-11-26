@@ -10,16 +10,25 @@ export interface ApproveReservationDialogProps {
   onApprove: () => void;
   /** Panels beside the details, e.g. drivers and costs of a vehicle request. */
   aside?: React.ReactNode;
+  /** Lets the admin record physical hard copy submission during verification. */
+  onHardCopyChange?: (submitted: boolean) => void;
 }
 
 /** The full reservation details with one more check before approving, since the borrower is notified right away. */
-export function ApproveReservationDialog({ reservation, onClose, onApprove, aside }: ApproveReservationDialogProps) {
+export function ApproveReservationDialog({
+  reservation,
+  onClose,
+  onApprove,
+  aside,
+  onHardCopyChange,
+}: ApproveReservationDialogProps) {
   return (
     <ReservationDetailDialog
       reservation={reservation}
       onClose={onClose}
       title="Setujui Reservasi"
       aside={aside}
+      onHardCopyChange={onHardCopyChange}
       intro={<p className="text-sm">Periksa detail pesanan sebelum menyetujui.</p>}
       footer={
         <>

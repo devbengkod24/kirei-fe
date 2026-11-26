@@ -12,6 +12,8 @@ export interface RejectReservationDialogProps {
   onReject: (reason: string) => void;
   /** Panels beside the details, e.g. drivers and costs of a vehicle request. */
   aside?: React.ReactNode;
+  /** Lets the admin record physical hard copy submission during verification. */
+  onHardCopyChange?: (submitted: boolean) => void;
 }
 
 const REASON_EXAMPLE: Record<ReservationType, string> = {
@@ -21,7 +23,13 @@ const REASON_EXAMPLE: Record<ReservationType, string> = {
 };
 
 /** The full reservation details, like the approve dialog, with the reason the borrower will receive. */
-export function RejectReservationDialog({ reservation, onClose, onReject, aside }: RejectReservationDialogProps) {
+export function RejectReservationDialog({
+  reservation,
+  onClose,
+  onReject,
+  aside,
+  onHardCopyChange,
+}: RejectReservationDialogProps) {
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string>();
 
@@ -37,6 +45,7 @@ export function RejectReservationDialog({ reservation, onClose, onReject, aside 
       onClose={onClose}
       title="Tolak Reservasi"
       aside={aside}
+      onHardCopyChange={onHardCopyChange}
       intro={<p className="text-sm">Periksa detail pesanan, lalu tulis alasan penolakannya.</p>}
       outro={
         <form id="reject-reservation-form" onSubmit={submit} noValidate>

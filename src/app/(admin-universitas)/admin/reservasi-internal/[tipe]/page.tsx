@@ -17,7 +17,7 @@ export default async function Page({ params }: PageProps<"/admin/reservasi-inter
   return (
     <InternalReservationForm
       tipe={tipe}
-      owner={{ id: user.id, name: user.name, email: user.email, detail: "Admin Universitas" }}
+      owner={{ id: user.id, name: user.name, email: user.email, detail: "Sekretariat Universitas" }}
     />
   );
 }

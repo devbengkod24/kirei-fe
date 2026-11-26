@@ -58,6 +58,9 @@ export function lecturesOnDay(schedules: LecturerSchedule[], roomCodes: string[]
             endsAt: wibToIso(dateKey, entry.endTime),
             courseName: entry.courseName,
             lecturerName: entry.lecturerName,
+            classGroup: entry.classGroup,
+            sksSlot: entry.sksSlot,
+            sksCount: entry.sksCount,
           })),
   );
 }

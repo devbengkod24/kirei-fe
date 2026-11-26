@@ -40,8 +40,7 @@ function AssignedFloor({ data }: { data: OperatorFloorData }) {
   if (floor.rooms.length === 0) {
     return (
       <EmptyState>
-        Belum ada ruangan di {data.buildingName} lantai {floor.number}. Ruangan ditambahkan oleh Admin Universitas lewat Kelola
-        Denah.
+        Belum ada ruangan di {data.buildingName} lantai {floor.number}.
       </EmptyState>
     );
   }

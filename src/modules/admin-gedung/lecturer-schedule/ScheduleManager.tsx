@@ -1,14 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Field, INPUT_CLASS, SelectInput } from "@/components/form/Field";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { MaskIcon } from "@/components/ui/MaskIcon";
 import { useLiveData } from "@/hooks/useLiveData";
 import { formatDateLongWIB, formatDateTimeShortWIB, toWibDateKey, wibToIso } from "@/lib/date";
-import { FloorTimeline } from "@/shared/floor-timeline/FloorTimeline";
-import { CLOSE_TIME, OPEN_TIME } from "@/shared/floor-timeline/slots";
 import { TimelineDetailPopover } from "@/shared/floor-timeline/TimelineDetailPopover";
 import { itemKey, type TimelineItem } from "@/shared/floor-timeline/timelineDetail";
 import { lecturerSchedulesSchema, LIVE_NAMES } from "@/shared/live-data/liveSchemas";
@@ -18,6 +16,7 @@ import { useMockReservations } from "@/shared/reservation-store/useMockReservati
 import type { Building } from "@/types/facility";
 import type { LecturerSchedule } from "@/types/schedule";
 import { ImportScheduleDialog } from "./ImportScheduleDialog";
+import { SksScheduleMatrix } from "./SksScheduleMatrix";
 
 export interface ScheduleManagerProps {
   /** The admin's faculty; the schedule is kept per faculty. */
@@ -33,9 +32,8 @@ export interface ScheduleManagerProps {
 const dayText = (dateKey: string) => formatDateLongWIB(wibToIso(dateKey, "12:00"));
 
 /**
- * Kelola Jadwal: the building's lecture schedule on the operator's timeline, one floor and one day at
- * a time, with the CSV import above it. In the "empty" data mode the schedule and the saved floor
- * plans are kept in this browser.
+ * Kelola Jadwal: displays the building's SKS lecture schedule and approved reservations in a
+ * Google Calendar-style floor grid, one floor and one day at a time, with CSV import above.
  */
 export function ScheduleManager({ fakultasId, building: serverBuilding, schedule: initial, now: renderedAt, templateHref }: ScheduleManagerProps) {
   const live = useLiveData(LIVE_NAMES.lecturerSchedules, lecturerSchedulesSchema);
@@ -44,18 +42,12 @@ export function ScheduleManager({ fakultasId, building: serverBuilding, schedule
   const buildings = useMemo(() => (serverBuilding ? [serverBuilding] : []), [serverBuilding]);
   const building = useLiveBuildings(buildings)[0];
 
-  const [now, setNow] = useState(() => new Date(renderedAt));
   const [dateKey, setDateKey] = useState(() => toWibDateKey(renderedAt));
   const [floorId, setFloorId] = useState(serverBuilding?.floors[0]?.id ?? "");
   const [detail, setDetail] = useState<{ item: TimelineItem; anchor: HTMLElement; container: HTMLElement } | null>(null);
   const [importing, setImporting] = useState(false);
   const [notice, setNotice] = useState("");
   const headingRef = useRef<HTMLHeadingElement>(null);
-
-  useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 60_000);
-    return () => clearInterval(timer);
-  }, []);
 
   const floor = building?.floors.find((item) => item.id === floorId) ?? building?.floors[0];
   const rooms = useMemo(() => floor?.rooms ?? [], [floor]);
@@ -84,7 +76,7 @@ export function ScheduleManager({ fakultasId, building: serverBuilding, schedule
     const { startDate, endDate } = next.semester;
     const shown = dateKey >= startDate && dateKey <= endDate;
     setNotice(
-      `${next.entries.length} jadwal disimpan dan langsung tampil di timeline.${
+      `${next.entries.length} jadwal SKS disimpan dan langsung tampil di kalender.${
         shown ? "" : ` Tanggal yang dipilih di luar semester ${dayText(startDate)} sampai ${dayText(endDate)}, jadi pilih tanggal di dalamnya.`
       }`,
     );
@@ -143,8 +135,8 @@ export function ScheduleManager({ fakultasId, building: serverBuilding, schedule
         </div>
         <p className="text-[11px] text-muted">
           {schedule
-            ? `Jadwal semester ${dayText(schedule.semester.startDate)} sampai ${dayText(schedule.semester.endDate)} · ${schedule.entries.length} jadwal · diimpor ${formatDateTimeShortWIB(schedule.uploadedAt)}.`
-            : "Belum ada jadwal dosen untuk gedung ini. Import berkas CSV untuk menampilkannya di timeline."}
+            ? `Jadwal kuliah berbasis SKS (15 slot, 50 menit per SKS pukul 07.00-21.00 WIB dengan jeda istirahat). Semester ${dayText(schedule.semester.startDate)} sampai ${dayText(schedule.semester.endDate)}, ${schedule.entries.length} jadwal, diimpor ${formatDateTimeShortWIB(schedule.uploadedAt)}.`
+            : "Belum ada jadwal dosen untuk gedung ini. Import berkas CSV (format SKS) untuk menampilkannya di tabel jadwal."}
         </p>
       </Card>
 
@@ -170,12 +162,9 @@ export function ScheduleManager({ fakultasId, building: serverBuilding, schedule
         </p>
 
         {rooms.length > 0 ? (
-          <FloorTimeline
+          <SksScheduleMatrix
             rooms={rooms}
             dateKey={dateKey}
-            from={OPEN_TIME}
-            to={CLOSE_TIME}
-            now={now}
             reservations={reservations}
             schedules={classSchedules}
             activeKey={detail ? itemKey(detail.item) : null}
@@ -186,7 +175,7 @@ export function ScheduleManager({ fakultasId, building: serverBuilding, schedule
           />
         ) : (
           <p className="px-4 py-12 text-center text-sm text-muted">
-            {floor ? `Belum ada ruangan di lantai ${floor.number}. Tambahkan lewat Kelola Denah.` : "Gedung ini belum punya lantai."}
+            {floor ? `Belum ada ruangan di lantai ${floor.number}.` : "Gedung ini belum punya lantai."}
           </p>
         )}
 

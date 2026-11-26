@@ -92,4 +92,6 @@ export interface ReservationRequest extends ReservationSummary {
   activity?: string;
   /** Written by the approving admin when the reservation was rejected; null for other statuses. */
   rejectionReason: string | null;
+  /** Recorded by the admin during verification; does not block approval. TODO: kirei-api store and return hard_copy_submitted. */
+  hardCopySubmitted?: boolean;
 }
