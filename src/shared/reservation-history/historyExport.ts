@@ -115,12 +115,13 @@ function downloadBlob(blob: Blob, filename: string) {
 export async function exportRowsToExcel(options: {
   title: string;
   filename: string;
+  sheetName?: string;
   columns: readonly ExportColumn[];
   rows: readonly ExportRow[];
 }): Promise<void> {
   const ExcelJS = (await import("exceljs")).default;
   const workbook = new ExcelJS.Workbook();
-  const sheet = workbook.addWorksheet("Riwayat Reservasi");
+  const sheet = workbook.addWorksheet(options.sheetName ?? "Riwayat Reservasi");
 
   const titleRow = sheet.addRow([options.title]);
   titleRow.font = { bold: true, size: 13 };

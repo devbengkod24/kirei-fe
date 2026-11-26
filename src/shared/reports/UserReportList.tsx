@@ -12,6 +12,7 @@ import { formatRelativeDayWIB, formatTimeWIB } from "@/lib/date";
 import type { UserReport } from "@/types/report";
 import { useLiveReports } from "./liveReports";
 import { DEFAULT_REPORT_FILTER, filterReports, isDefaultReportFilter } from "./filterReports";
+import { ExportReportButtons } from "./ExportReportButtons";
 import { ReportFilterForm } from "./ReportFilterForm";
 import { REPORT_CATEGORY_LABEL, REPORTER_TYPE_LABEL } from "./report-labels";
 import { ReportDetailDialog } from "./ReportDetailDialog";
@@ -60,6 +61,7 @@ export function UserReportList({ reports: serverReports, loadedAt }: UserReportL
           Laporan Pengguna
         </h2>
         <div className="flex flex-wrap items-center gap-2">
+          <ExportReportButtons reports={visible} />
           <Button variant="primary-outline" onClick={() => setShowingQr(true)}>
             Generate QR Pengaduan
           </Button>
