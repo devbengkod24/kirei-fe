@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import type { UserReport } from "@/types/report";
 import { UserReportList } from "./UserReportList";
@@ -44,5 +44,23 @@ describe("UserReportList", () => {
     expect(within(dialog).getByText("Mahasiswa")).toBeTruthy();
     expect(within(dialog).getByAltText("Foto kerusakan laporan dari Erdin Purwa Putra")).toBeTruthy();
     expect(within(dialog).getByText("07.20 WIB", { exact: false })).toBeTruthy();
+  });
+
+  it("exposes Excel/PDF export buttons and a shared /lapor QR generator modal", async () => {
+    render(<UserReportList reports={[REPORT]} loadedAt="2026-10-30T03:00:00Z" />);
+
+    expect(screen.getByRole("button", { name: "Unduh Excel" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Unduh PDF" })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Generate QR Pengaduan" }));
+
+    const dialog = screen.getByRole("dialog", { name: "QR Formulir Pengaduan" });
+    await waitFor(() => {
+      expect(within(dialog).getByAltText("QR Code Formulir Pengaduan")).toBeTruthy();
+    });
+    const urlText = within(dialog).getByText(/\/lapor$/);
+    expect(urlText.textContent).not.toContain("?ruangan=");
+    expect((within(dialog).getByRole("button", { name: "Unduh QR" }) as HTMLButtonElement).disabled).toBe(false);
+    expect((within(dialog).getByRole("button", { name: "Cetak QR" }) as HTMLButtonElement).disabled).toBe(false);
   });
 });
