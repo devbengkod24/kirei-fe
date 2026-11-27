@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
 import { Card } from "@/components/ui/Card";
+import { MaskIcon } from "@/components/ui/MaskIcon";
 import { ROOM_CLOSE_TIME, ROOM_OPEN_TIME } from "@/config/reservation";
 import {
   addDaysToKey,
@@ -525,6 +526,12 @@ export function RoomReservationForm({
           <div className="flex min-h-0 flex-1 flex-col gap-3 lg:grid lg:grid-cols-[minmax(0,1fr)_20rem]">
             <Card className="flex min-h-0 flex-col gap-3 p-3">
               <ReservationSteps steps={STEPS_BY_TYPE.ruanganInternal} />
+              {/^\d{4}-\d{2}-\d{2}$/.test(date) && (
+                <p className="flex items-center gap-1.5 px-1 text-xs font-semibold">
+                  <MaskIcon src="/icons/calendar-outline.svg" size={14} className="text-muted" />
+                  <time dateTime={date}>{formatDateLongWIB(wibToIso(date, "12:00"))}</time>
+                </p>
+              )}
               {calendar}
               {inspectedPanel}
               {roomError}
