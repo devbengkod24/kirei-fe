@@ -78,6 +78,11 @@ export interface RoomReservationFormProps {
   rules?: string[];
   purposePlaceholder?: string;
   links: ReservationLinks;
+  /**
+   * Internal mode only: height classes that make the form fill the screen below the page header,
+   * so the page itself does not scroll (the calendar scrolls inside).
+   */
+  fitClassName?: string;
 }
 
 const CATEGORIES = Object.keys(ROOM_CATEGORY_LABEL) as RoomCategory[];
@@ -103,9 +108,11 @@ export function RoomReservationForm({
   rules = [],
   purposePlaceholder = "Contoh: Rapat pengurus bulanan",
   links,
+  fitClassName = "lg:h-[calc(100dvh-7.25rem)]",
 }: RoomReservationFormProps) {
   const { askPhone, withLetter, withDraft, needsApproval, requesterLabel, submittedText, minDaysAhead } =
     BOOKING_MODES[mode];
+  const compact = mode === "internal";
   // "Empty" data mode: floor plans saved in Kelola Denah and uploaded lecture schedules live in this browser.
   const buildings = useLiveBuildings(serverBuildings);
   const lectureBookings = useLiveLectureBookings(buildings, now);
@@ -255,6 +262,295 @@ export function RoomReservationForm({
     );
   }
 
+  const buildingSelect = (
+    <div className="relative flex-1">
+      <select
+        id="reservation-building"
+        className={SELECT}
+        {...register("buildingId", {
+          onChange: (event) => {
+            setValue("floorId", firstFloorId(buildings.find((b) => b.id === event.target.value)));
+            setValue("roomId", "");
+          },
+        })}
+      >
+        {buildings.map((option) => (
+          <option key={option.id} value={option.id}>
+            {option.name}
+          </option>
+        ))}
+      </select>
+      <Image
+        src="/icons/caret-down.svg"
+        alt=""
+        width={16}
+        height={16}
+        className="pointer-events-none absolute top-1/2 right-1.5 -translate-y-1/2"
+      />
+    </div>
+  );
+
+  const floorSelect = (
+    <div className="relative flex-1">
+      <select id="reservation-floor" className={SELECT} {...register("floorId", { onChange: () => setValue("roomId", "") })}>
+        {building?.floors.map((option) => (
+          <option key={option.id} value={option.id}>
+            {option.number}
+          </option>
+        ))}
+      </select>
+      <Image
+        src="/icons/caret-down.svg"
+        alt=""
+        width={16}
+        height={16}
+        className="pointer-events-none absolute top-1/2 right-1.5 -translate-y-1/2"
+      />
+    </div>
+  );
+
+  const dateInputProps = {
+    id: "reservation-date",
+    type: "date",
+    min: addDaysToKey(todayKey, minDaysAhead),
+    "aria-invalid": errors.date ? true : undefined,
+    ...register("date"),
+  } as const;
+
+  const categoryFilter = (
+    <div role="group" aria-label="Filter jenis ruangan" className="flex flex-wrap gap-2">
+      {CATEGORIES.map((option) => {
+        const active = option === category;
+        return (
+          <button
+            key={option}
+            type="button"
+            aria-pressed={active}
+            onClick={() => setCategory(active ? null : option)}
+            className={`min-h-11 cursor-pointer rounded-inner px-2.5 text-[11px] font-medium tracking-wide sm:min-h-8 ${
+              active ? "bg-primary-soft text-primary" : "bg-chip text-muted hover:bg-border"
+            }`}
+          >
+            {ROOM_CATEGORY_LABEL[option]}
+          </button>
+        );
+      })}
+    </div>
+  );
+
+  const calendar =
+    floor && floor.rooms.length > 0 ? (
+      <RoomBookingCalendar
+        rooms={floor.rooms}
+        bookings={bookings}
+        dateKey={date}
+        startTime={startTime}
+        endTime={endTime}
+        statuses={statuses}
+        selectedRoomId={roomId}
+        onSelectRoom={selectRoom}
+        onPickGap={pickRoomGap}
+        onInspect={(room) => setInspectedRoomId(room.id === inspectedRoomId ? null : room.id)}
+        fill={compact}
+      />
+    ) : (
+      <p className="flex min-h-48 flex-1 items-center justify-center rounded-lg border border-border px-6 text-center text-xs text-muted">
+        Belum ada ruangan untuk lantai ini. Pilih lantai atau gedung lain.
+      </p>
+    );
+
+  const inspectedPanel = inspectedRoom && inspectedStatus && (
+    <div aria-live="polite" className="flex flex-col gap-1 rounded-md border border-border bg-page p-2.5 text-[11px]">
+      <p className="flex items-start justify-between gap-2">
+        <span className="font-semibold">
+          {inspectedRoom.code}: {ROOM_STATUS_LABEL[inspectedStatus]}
+        </span>
+        <button
+          type="button"
+          onClick={() => setInspectedRoomId(null)}
+          className="-my-2 -mr-1 flex min-h-11 min-w-11 cursor-pointer items-center justify-center text-primary underline-offset-4 hover:underline"
+        >
+          Tutup
+        </button>
+      </p>
+      {inspectedStatus === "filtered" ? (
+        <p>
+          Ruangan ini {ROOM_CATEGORY_LABEL[inspectedRoom.category]}, bukan {category ? ROOM_CATEGORY_LABEL[category] : ""}.
+          Ganti filter jenis ruangan untuk memilihnya.
+        </p>
+      ) : (
+        <>
+          <p>
+            Sudah dipesan pada jam yang Anda pilih ({startTime.replace(":", ".")} - {endTime.replace(":", ".")} WIB). Pilih
+            jam lain atau ruangan lain.
+          </p>
+          {inspectedBookings.length > 0 && (
+            <p className="text-muted">
+              Terpakai pada {formatDateLongWIB(wibToIso(date, "12:00"))}:{" "}
+              {inspectedBookings
+                .map(
+                  (booking) =>
+                    `${formatTimeSpanWIB(booking.startsAt, booking.endsAt)} WIB${booking.label ? ` (${booking.label})` : ""}`,
+                )
+                .join(", ")}
+              .
+            </p>
+          )}
+        </>
+      )}
+    </div>
+  );
+
+  const roomError = errors.roomId && (
+    <p role="alert" className={ERROR}>
+      {errors.roomId.message}
+    </p>
+  );
+
+  const rulesSection = rules.length > 0 && (
+    <section aria-labelledby="reservation-rules-title" className="flex flex-col gap-2 rounded-md bg-primary-soft p-3">
+      <h2 id="reservation-rules-title" className="flex items-center gap-2 text-sm font-semibold tracking-wide">
+        <Image src="/icons/admin/rules.svg" alt="" width={20} height={20} />
+        Peraturan Reservasi
+      </h2>
+      <ol className="list-decimal pl-5 text-[11px] leading-[17px]">
+        {rules.map((rule) => (
+          <li key={rule}>{rule}</li>
+        ))}
+      </ol>
+    </section>
+  );
+
+  const openReview = () => void flow.openSummary([...SCHEDULE_FIELDS]);
+
+  const submitDialog = building && selectedRoom && (
+    <ReservationSubmitDialog
+      open={flow.dialogOpen}
+      onClose={flow.close}
+      title="Detail Pemesanan"
+      subject={`Reservasi ${selectedRoom.code}`}
+      approver={approver}
+      submitting={formState.isSubmitting}
+      onSubmit={flow.submit}
+      result={flow.result}
+      links={links}
+      onCreateAnother={flow.createAnother}
+      withLetter={withLetter}
+      withDraft={withDraft}
+      submittedText={submittedText}
+    >
+      <SummaryValue label={requesterLabel}>{requester.name}</SummaryValue>
+      {askPhone && (
+        <div className="flex flex-col gap-1">
+          <label htmlFor="reservation-phone" className={SUMMARY_LABEL}>
+            No HP<RequiredMark />
+          </label>
+          <input
+            id="reservation-phone"
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            placeholder="081234567890"
+            aria-invalid={errors.phone ? true : undefined}
+            aria-describedby={errors.phone ? "reservation-phone-error" : undefined}
+            className={SUMMARY_INPUT}
+            {...register("phone")}
+          />
+          <FieldError id="reservation-phone-error" message={errors.phone?.message} />
+        </div>
+      )}
+      <SummaryWhen
+        date={formatDateLongWIB(wibToIso(date, startTime))}
+        startTime={startTime}
+        endTime={endTime}
+        places={[
+          { iconSrc: "/icons/building-solid.svg", iconWidth: 13, iconHeight: 15, label: building.name },
+          { iconSrc: "/icons/classroom.svg", label: selectedRoom.code },
+        ]}
+      />
+      <div className="flex flex-col gap-1">
+        <label htmlFor="reservation-purpose" className={SUMMARY_LABEL}>
+          Keperluan<RequiredMark />
+        </label>
+        <textarea
+          id="reservation-purpose"
+          rows={2}
+          placeholder={purposePlaceholder}
+          aria-invalid={errors.purpose ? true : undefined}
+          aria-describedby={errors.purpose ? "reservation-purpose-error" : undefined}
+          className={`${SUMMARY_INPUT} max-h-32 resize-y`}
+          {...register("purpose")}
+        />
+        <FieldError id="reservation-purpose-error" message={errors.purpose?.message} />
+      </div>
+    </ReservationSubmitDialog>
+  );
+
+  if (compact) {
+    // Reservasi Internal: filters on top, calendar and the chosen room side by side, sized to the screen.
+    // The time comes from the slot picked on the calendar, so there is no time picker.
+    return (
+      <FormProvider {...form}>
+        <form noValidate onSubmit={(event) => event.preventDefault()} className={`flex flex-col gap-3 ${fitClassName}`}>
+          <Card as="section" aria-label="Lokasi dan tanggal" className="flex flex-wrap items-center gap-2 p-3">
+            <div className={`${FIELD_ROW} w-full sm:w-56`}>
+              <label htmlFor="reservation-building" className="shrink-0 text-xs">
+                Lokasi<RequiredMark /> :
+              </label>
+              {buildingSelect}
+            </div>
+            <div className={`${FIELD_ROW} w-full sm:w-40`}>
+              <label htmlFor="reservation-floor" className="shrink-0 text-xs">
+                Lantai<RequiredMark />
+              </label>
+              {floorSelect}
+            </div>
+            <div className={`${FIELD_ROW} w-full sm:w-60`}>
+              <label htmlFor="reservation-date" className="shrink-0 text-xs">
+                Tanggal<RequiredMark />
+              </label>
+              <input
+                {...dateInputProps}
+                className="min-h-8 min-w-0 flex-1 rounded-sm bg-primary-soft px-2 text-[11px] font-medium text-primary aria-invalid:outline aria-invalid:outline-danger-strong"
+              />
+            </div>
+            {building?.fakultasName && <p className="text-[11px] text-muted">Milik {building.fakultasName}</p>}
+            <ReviewButton onReview={openReview} className="sm:ml-auto sm:w-auto sm:px-6" />
+            {errors.date && <p className={`${ERROR} w-full`}>{errors.date.message}</p>}
+          </Card>
+
+          <div className="flex min-h-0 flex-1 flex-col gap-3 lg:grid lg:grid-cols-[minmax(0,1fr)_20rem]">
+            <Card className="flex min-h-0 flex-col gap-3 p-3">
+              <ReservationSteps steps={STEPS_BY_TYPE.ruanganInternal} />
+              {categoryFilter}
+              {calendar}
+              {inspectedPanel}
+              {roomError}
+              {(errors.startTime || errors.endTime) && (
+                <p role="alert" className={ERROR}>
+                  {errors.startTime?.message ?? errors.endTime?.message}
+                </p>
+              )}
+            </Card>
+
+            <Card as="section" aria-label="Ruangan dipilih" className="flex min-h-0 flex-col gap-3 overflow-y-auto p-3">
+              <RoomPreview room={selectedRoom} approver={approver} />
+              <p className="text-xs">
+                <span className="font-semibold">Waktu: </span>
+                {selectedRoom
+                  ? `${startTime.replace(":", ".")} - ${endTime.replace(":", ".")} WIB`
+                  : "pilih slot kosong pada kalender"}
+              </p>
+              {rulesSection}
+            </Card>
+          </div>
+
+          {submitDialog}
+        </form>
+      </FormProvider>
+    );
+  }
+
   return (
     <FormProvider {...form}>
       <form
@@ -263,269 +559,63 @@ export function RoomReservationForm({
         className="flex flex-col gap-2 lg:grid lg:grid-cols-[minmax(0,1fr)_16rem] lg:items-start"
       >
         <Card className="order-2 flex flex-col gap-3 p-3 lg:order-none lg:col-start-1 lg:row-start-1">
-          <ReservationSteps
-            steps={
-              withLetter
-                ? STEPS_BY_TYPE.ruangan
-                : STEPS_BY_TYPE.ruangan.slice(0, 3)
-            }
-          />
+          <ReservationSteps steps={withLetter ? STEPS_BY_TYPE.ruangan : STEPS_BY_TYPE.ruangan.slice(0, 3)} />
           <hr className="border-border" />
 
-          <div
-            role="group"
-            aria-label="Filter jenis ruangan"
-            className="flex flex-wrap gap-2"
-          >
-            {CATEGORIES.map((option) => {
-              const active = option === category;
-              return (
-                <button
-                  key={option}
-                  type="button"
-                  aria-pressed={active}
-                  onClick={() => setCategory(active ? null : option)}
-                  className={`min-h-11 cursor-pointer rounded-inner px-2.5 text-[11px] font-medium tracking-wide sm:min-h-8 ${
-                    active
-                      ? "bg-primary-soft text-primary"
-                      : "bg-chip text-muted hover:bg-border"
-                  }`}
-                >
-                  {ROOM_CATEGORY_LABEL[option]}
-                </button>
-              );
-            })}
-          </div>
+          {categoryFilter}
 
           <div className="flex flex-col gap-3">
-            {floor && floor.rooms.length > 0 ? (
-              <RoomBookingCalendar
-                rooms={floor.rooms}
-                bookings={bookings}
-                dateKey={date}
-                startTime={startTime}
-                endTime={endTime}
-                statuses={statuses}
-                selectedRoomId={roomId}
-                onSelectRoom={selectRoom}
-                onPickGap={pickRoomGap}
-                onInspect={(room) =>
-                  setInspectedRoomId(room.id === inspectedRoomId ? null : room.id)
-                }
-              />
-            ) : (
-              <p className="flex min-h-48 items-center justify-center rounded-lg border border-border px-6 text-center text-xs text-muted">
-                Belum ada ruangan untuk lantai ini. Pilih lantai atau gedung lain.
-              </p>
-            )}
-
-            {inspectedRoom && inspectedStatus && (
-              <div
-                aria-live="polite"
-                className="flex flex-col gap-1 rounded-md border border-border bg-page p-2.5 text-[11px]"
-              >
-                <p className="flex items-start justify-between gap-2">
-                  <span className="font-semibold">
-                    {inspectedRoom.code}: {ROOM_STATUS_LABEL[inspectedStatus]}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setInspectedRoomId(null)}
-                    className="-my-2 -mr-1 flex min-h-11 min-w-11 cursor-pointer items-center justify-center text-primary underline-offset-4 hover:underline"
-                  >
-                    Tutup
-                  </button>
-                </p>
-                {inspectedStatus === "filtered" ? (
-                  <p>
-                    Ruangan ini {ROOM_CATEGORY_LABEL[inspectedRoom.category]},
-                    bukan {category ? ROOM_CATEGORY_LABEL[category] : ""}.
-                    Ganti filter jenis ruangan untuk memilihnya.
-                  </p>
-                ) : (
-                  <>
-                    <p>
-                      Sudah dipesan pada jam yang Anda pilih (
-                      {startTime.replace(":", ".")} -{" "}
-                      {endTime.replace(":", ".")} WIB). Pilih jam lain atau
-                      ruangan lain.
-                    </p>
-                    {inspectedBookings.length > 0 && (
-                      <p className="text-muted">
-                        Terpakai pada{" "}
-                        {formatDateLongWIB(wibToIso(date, "12:00"))}:{" "}
-                        {inspectedBookings
-                          .map(
-                            (booking) =>
-                              `${formatTimeSpanWIB(booking.startsAt, booking.endsAt)} WIB${booking.label ? ` (${booking.label})` : ""}`,
-                          )
-                          .join(", ")}
-                        .
-                      </p>
-                    )}
-                  </>
-                )}
-              </div>
-            )}
-
-            {errors.roomId && (
-              <p role="alert" className={ERROR}>
-                {errors.roomId.message}
-              </p>
-            )}
-
+            {calendar}
+            {inspectedPanel}
+            {roomError}
             <RoomPreview room={selectedRoom} approver={approver} />
           </div>
 
-          {rules.length > 0 && (
-            <section
-              aria-labelledby="reservation-rules-title"
-              className="flex flex-col gap-2 rounded-md bg-primary-soft p-3"
-            >
-              <h2
-                id="reservation-rules-title"
-                className="flex items-center gap-2 text-sm font-semibold tracking-wide"
-              >
-                <Image
-                  src="/icons/admin/rules.svg"
-                  alt=""
-                  width={20}
-                  height={20}
-                />
-                Peraturan Reservasi
-              </h2>
-              <ol className="list-decimal pl-5 text-[11px] leading-[17px]">
-                {rules.map((rule) => (
-                  <li key={rule}>{rule}</li>
-                ))}
-              </ol>
-            </section>
-          )}
+          {rulesSection}
         </Card>
 
         <div className="contents lg:col-start-2 lg:row-start-1 lg:flex lg:flex-col lg:gap-2">
-          <Card
-            as="section"
-            aria-labelledby="panel-location"
-            className="order-1 flex flex-col gap-3 p-3 lg:order-none"
-          >
-            <PanelHeading
-              id="panel-location"
-              iconSrc="/icons/building-solid.svg"
-              iconWidth={13}
-              iconHeight={15}
-            >
+          <Card as="section" aria-labelledby="panel-location" className="order-1 flex flex-col gap-3 p-3 lg:order-none">
+            <PanelHeading id="panel-location" iconSrc="/icons/building-solid.svg" iconWidth={13} iconHeight={15}>
               Gedung &amp; Lantai
             </PanelHeading>
             <div className={FIELD_ROW}>
-              <label
-                htmlFor="reservation-building"
-                className="shrink-0 text-xs"
-              >
+              <label htmlFor="reservation-building" className="shrink-0 text-xs">
                 Lokasi<RequiredMark /> :
               </label>
-              <div className="relative flex-1">
-                <select
-                  id="reservation-building"
-                  className={SELECT}
-                  {...register("buildingId", {
-                    onChange: (event) => {
-                      setValue(
-                        "floorId",
-                        firstFloorId(
-                          buildings.find((b) => b.id === event.target.value),
-                        ),
-                      );
-                      setValue("roomId", "");
-                    },
-                  })}
-                >
-                  {buildings.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.name}
-                    </option>
-                  ))}
-                </select>
-                <Image
-                  src="/icons/caret-down.svg"
-                  alt=""
-                  width={16}
-                  height={16}
-                  className="pointer-events-none absolute top-1/2 right-1.5 -translate-y-1/2"
-                />
-              </div>
+              {buildingSelect}
             </div>
             <div className={FIELD_ROW}>
               <label htmlFor="reservation-floor" className="shrink-0 text-xs">
                 Lantai<RequiredMark />
               </label>
-              <div className="relative flex-1">
-                <select
-                  id="reservation-floor"
-                  className={SELECT}
-                  {...register("floorId", {
-                    onChange: () => setValue("roomId", ""),
-                  })}
-                >
-                  {building?.floors.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.number}
-                    </option>
-                  ))}
-                </select>
-                <Image
-                  src="/icons/caret-down.svg"
-                  alt=""
-                  width={16}
-                  height={16}
-                  className="pointer-events-none absolute top-1/2 right-1.5 -translate-y-1/2"
-                />
-              </div>
+              {floorSelect}
             </div>
-            {building?.fakultasName && (
-              <p className="text-[11px] text-muted">
-                Milik {building.fakultasName}
-              </p>
-            )}
+            {building?.fakultasName && <p className="text-[11px] text-muted">Milik {building.fakultasName}</p>}
           </Card>
 
-          <Card
-            as="section"
-            aria-labelledby="panel-date"
-            className="order-1 flex flex-col gap-2 p-3 lg:order-none"
-          >
+          <Card as="section" aria-labelledby="panel-date" className="order-1 flex flex-col gap-2 p-3 lg:order-none">
             <PanelHeading id="panel-date" iconSrc="/icons/calendar-outline.svg">
-              <label htmlFor="reservation-date">Tanggal Reservasi<RequiredMark /></label>
+              <label htmlFor="reservation-date">
+                Tanggal Reservasi<RequiredMark />
+              </label>
             </PanelHeading>
             <input
-              id="reservation-date"
-              type="date"
-              min={addDaysToKey(todayKey, minDaysAhead)}
-              aria-invalid={errors.date ? true : undefined}
+              {...dateInputProps}
               className="min-h-11 w-full rounded-md border border-border px-2 text-xs aria-invalid:border-danger-strong"
-              {...register("date")}
             />
-            {minDaysAhead > 0 && (
-              <p className="text-[11px] text-muted">Ormawa dan UKM memesan paling cepat lusa.</p>
-            )}
+            {minDaysAhead > 0 && <p className="text-[11px] text-muted">Ormawa dan UKM memesan paling cepat lusa.</p>}
             {errors.date && <p className={ERROR}>{errors.date.message}</p>}
           </Card>
 
-          <Card
-            as="section"
-            aria-labelledby="panel-time"
-            className="order-1 flex flex-col gap-3 p-3 lg:order-none"
-          >
+          <Card as="section" aria-labelledby="panel-time" className="order-1 flex flex-col gap-3 p-3 lg:order-none">
             <PanelHeading id="panel-time" iconSrc="/icons/clock-outline.svg">
               Pemilihan Jam Reservasi
             </PanelHeading>
             <div className="flex items-center gap-2 rounded-md border border-border p-2">
               <span className="text-xs">Pukul :</span>
               <div className="flex min-w-0 flex-1 flex-col items-center gap-0.5">
-                <label
-                  htmlFor="reservation-start"
-                  className="text-[9px] font-semibold tracking-wide text-plan-selected"
-                >
+                <label htmlFor="reservation-start" className="text-[9px] font-semibold tracking-wide text-plan-selected">
                   Mulai<RequiredMark />
                 </label>
                 <Controller
@@ -538,8 +628,7 @@ export function RoomReservationForm({
                       value={field.value}
                       onChange={(next) => {
                         field.onChange(next);
-                        if (formState.touchedFields.endTime)
-                          void form.trigger("endTime");
+                        if (formState.touchedFields.endTime) void form.trigger("endTime");
                       }}
                       onBlur={field.onBlur}
                       invalid={Boolean(errors.startTime)}
@@ -553,10 +642,7 @@ export function RoomReservationForm({
                 -
               </span>
               <div className="flex min-w-0 flex-1 flex-col items-center gap-0.5">
-                <label
-                  htmlFor="reservation-end"
-                  className="text-[9px] font-semibold tracking-wide text-plan-selected"
-                >
+                <label htmlFor="reservation-end" className="text-[9px] font-semibold tracking-wide text-plan-selected">
                   Selesai<RequiredMark />
                 </label>
                 <Controller
@@ -569,8 +655,7 @@ export function RoomReservationForm({
                       value={field.value}
                       onChange={(next) => {
                         field.onChange(next);
-                        if (formState.touchedFields.startTime)
-                          void form.trigger("startTime");
+                        if (formState.touchedFields.startTime) void form.trigger("startTime");
                       }}
                       onBlur={field.onBlur}
                       invalid={Boolean(errors.endTime)}
@@ -585,9 +670,7 @@ export function RoomReservationForm({
               Ruangan bisa dipesan pukul {ROOM_OPEN_TIME.replace(":", ".")} sampai {ROOM_CLOSE_TIME.replace(":", ".")} WIB.
             </p>
             {(errors.startTime || errors.endTime) && (
-              <p className={ERROR}>
-                {errors.startTime?.message ?? errors.endTime?.message}
-              </p>
+              <p className={ERROR}>{errors.startTime?.message ?? errors.endTime?.message}</p>
             )}
           </Card>
 
@@ -595,97 +678,16 @@ export function RoomReservationForm({
             <LetterPanel
               className="order-3 lg:order-none"
               file={letter ?? null}
-              onChange={(file) =>
-                setValue("letter", file, { shouldValidate: true })
-              }
+              onChange={(file) => setValue("letter", file, { shouldValidate: true })}
               error={errors.letter?.message}
-              onReview={() => void flow.openSummary([...SCHEDULE_FIELDS])}
+              onReview={openReview}
             />
           ) : (
-            <ReviewButton
-              className="order-3 lg:order-none"
-              onReview={() => void flow.openSummary([...SCHEDULE_FIELDS])}
-            />
+            <ReviewButton className="order-3 lg:order-none" onReview={openReview} />
           )}
         </div>
 
-        {building && selectedRoom && (
-          <ReservationSubmitDialog
-            open={flow.dialogOpen}
-            onClose={flow.close}
-            title="Detail Pemesanan"
-            subject={`Reservasi ${selectedRoom.code}`}
-            approver={approver}
-            submitting={formState.isSubmitting}
-            onSubmit={flow.submit}
-            result={flow.result}
-            links={links}
-            onCreateAnother={flow.createAnother}
-            withLetter={withLetter}
-            withDraft={withDraft}
-            submittedText={submittedText}
-          >
-            <SummaryValue label={requesterLabel}>{requester.name}</SummaryValue>
-            {askPhone && (
-              <div className="flex flex-col gap-1">
-                <label htmlFor="reservation-phone" className={SUMMARY_LABEL}>
-                  No HP<RequiredMark />
-                </label>
-                <input
-                  id="reservation-phone"
-                  type="tel"
-                  inputMode="tel"
-                  autoComplete="tel"
-                  placeholder="081234567890"
-                  aria-invalid={errors.phone ? true : undefined}
-                  aria-describedby={
-                    errors.phone ? "reservation-phone-error" : undefined
-                  }
-                  className={SUMMARY_INPUT}
-                  {...register("phone")}
-                />
-                <FieldError
-                  id="reservation-phone-error"
-                  message={errors.phone?.message}
-                />
-              </div>
-            )}
-            <SummaryWhen
-              date={formatDateLongWIB(wibToIso(date, startTime))}
-              startTime={startTime}
-              endTime={endTime}
-              places={[
-                {
-                  iconSrc: "/icons/building-solid.svg",
-                  iconWidth: 13,
-                  iconHeight: 15,
-                  label: building.name,
-                },
-                { iconSrc: "/icons/classroom.svg", label: selectedRoom.code },
-              ]}
-            />
-            <div className="flex flex-col gap-1">
-              <label htmlFor="reservation-purpose" className={SUMMARY_LABEL}>
-                Keperluan<RequiredMark />
-              </label>
-              <textarea
-                id="reservation-purpose"
-                rows={2}
-                placeholder={purposePlaceholder}
-                aria-invalid={errors.purpose ? true : undefined}
-                aria-describedby={
-                  errors.purpose ? "reservation-purpose-error" : undefined
-                }
-                className={`${SUMMARY_INPUT} max-h-32 resize-y`}
-                {...register("purpose")}
-              />
-              <FieldError
-                id="reservation-purpose-error"
-                message={errors.purpose?.message}
-              />
-            </div>
-          </ReservationSubmitDialog>
-        )}
+        {submitDialog}
       </form>
     </FormProvider>
   );

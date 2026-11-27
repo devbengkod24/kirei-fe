@@ -66,7 +66,7 @@
       "file_type": "code",
       "norm_label": "roomphotofieldprops",
       "source_file": "src/shared/rooms/RoomFormFields.tsx",
-      "source_location": "L9"
+      "source_location": "L13"
     },
     {
       "id": "src_shared_rooms_roomformfields_roomstatusfieldprops",
@@ -79,7 +79,7 @@
       "file_type": "code",
       "norm_label": "roomstatusfieldprops",
       "source_file": "src/shared/rooms/RoomFormFields.tsx",
-      "source_location": "L84"
+      "source_location": "L109"
     },
     {
       "id": "src_shared_rooms_roomphoto_roomphotochange",
@@ -4135,7 +4135,7 @@
       "file_type": "code",
       "norm_label": "roomphotofield()",
       "source_file": "src/shared/rooms/RoomFormFields.tsx",
-      "source_location": "L18"
+      "source_location": "L22"
     },
     {
       "id": "src_shared_rooms_roomformfields_roomstatusfield",
@@ -4147,7 +4147,7 @@
       "file_type": "code",
       "norm_label": "roomstatusfield()",
       "source_file": "src/shared/rooms/RoomFormFields.tsx",
-      "source_location": "L90"
+      "source_location": "L115"
     },
     {
       "id": "src_shared_rooms_roommanager_roommanager",
@@ -12506,7 +12506,7 @@
       "file_type": "code",
       "norm_label": "status_options",
       "source_file": "src/shared/rooms/RoomFormFields.tsx",
-      "source_location": "L79"
+      "source_location": "L104"
     },
     {
       "id": "src_shared_rooms_roomphoto",
@@ -42610,7 +42610,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/shared/rooms/RoomFormFields.tsx",
-      "source_location": "L38",
+      "source_location": "L54",
       "weight": 1.0
     },
     {
@@ -42622,7 +42622,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/shared/rooms/RoomFormFields.tsx",
-      "source_location": "L56",
+      "source_location": "L75",
       "weight": 1.0
     },
     {
@@ -45371,7 +45371,7 @@
       "confidence_score": 1.0,
       "context": "field",
       "source_file": "src/shared/rooms/RoomFormFields.tsx",
-      "source_location": "L12",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -106793,24 +106793,13 @@
     },
     {
       "source": "src_shared_rooms_roomformfields",
-      "target": "src_shared_rooms_roomformfields_roomphotofield",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/shared/rooms/RoomFormFields.tsx",
-      "source_location": "L18",
-      "weight": 1.0
-    },
-    {
-      "source": "src_shared_rooms_roomformfields",
       "target": "src_shared_rooms_roomformfields_status_options",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/shared/rooms/RoomFormFields.tsx",
-      "source_location": "L79",
+      "source_location": "L104",
       "weight": 1.0
     },
     {
@@ -106821,18 +106810,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/shared/rooms/RoomFormFields.tsx",
-      "source_location": "L84",
-      "weight": 1.0
-    },
-    {
-      "source": "src_shared_rooms_roomformfields",
-      "target": "src_shared_rooms_roomformfields_roomphotofieldprops",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/shared/rooms/RoomFormFields.tsx",
-      "source_location": "L9",
+      "source_location": "L109",
       "weight": 1.0
     },
     {
@@ -106843,7 +106821,29 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/shared/rooms/RoomFormFields.tsx",
-      "source_location": "L90",
+      "source_location": "L115",
+      "weight": 1.0
+    },
+    {
+      "source": "src_shared_rooms_roomformfields",
+      "target": "src_shared_rooms_roomformfields_roomphotofieldprops",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/shared/rooms/RoomFormFields.tsx",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "src_shared_rooms_roomformfields",
+      "target": "src_shared_rooms_roomformfields_roomphotofield",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/shared/rooms/RoomFormFields.tsx",
+      "source_location": "L22",
       "weight": 1.0
     },
     {

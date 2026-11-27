@@ -3438,9 +3438,9 @@
     "semantic_hash": ""
   },
   "src/shared/rooms/RoomFormFields.tsx": {
-    "mtime": 1795748150.0517359,
-    "seen": 1795748299.3712664,
-    "ast_hash": "85b13ecdc7dd2c74dfe012b5b5a2767f",
+    "mtime": 1795749672.4898274,
+    "seen": 1795749710.999466,
+    "ast_hash": "60d52a8bf6821a44ab453a86c677e9e2",
     "semantic_hash": ""
   },
   "src/shared/rooms/RoomManager.test.tsx": {

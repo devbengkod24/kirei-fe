@@ -43,6 +43,8 @@ export async function InternalReservationForm({ tipe, owner }: InternalReservati
             mode="internal"
             purposePlaceholder="Contoh: Rapat pimpinan universitas"
             links={links}
+            // the breadcrumb and the notice above take about 6.6rem more than the admin gedung page
+            fitClassName="lg:h-[calc(100dvh-14rem)]"
           />
         </div>
       );

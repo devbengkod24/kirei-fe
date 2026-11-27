@@ -18,6 +18,8 @@ export interface RoomBookingCalendarProps {
   onSelectRoom: (room: FloorPlanRoom) => void;
   onPickGap: (room: FloorPlanRoom, startTime: string, endTime: string) => void;
   onInspect: (room: FloorPlanRoom) => void;
+  /** Grow to the parent's height (a flex column) instead of capping the table at 460px. */
+  fill?: boolean;
 }
 
 const LEGEND = [
@@ -45,9 +47,10 @@ export function RoomBookingCalendar({
   onSelectRoom,
   onPickGap,
   onInspect,
+  fill = false,
 }: RoomBookingCalendarProps) {
   return (
-    <div className="flex flex-col gap-2">
+    <div className={`flex flex-col gap-2 ${fill ? "min-h-0 flex-1" : ""}`}>
       <div className="flex flex-wrap items-center justify-between gap-2 px-1">
         <ul aria-label="Keterangan warna kalender" className="flex flex-wrap gap-x-4 gap-y-1 text-[11px]">
           {LEGEND.map((item) => (
@@ -62,7 +65,9 @@ export function RoomBookingCalendar({
         </p>
       </div>
 
-      <div className="max-h-[460px] overflow-auto rounded-lg border border-border bg-surface">
+      <div
+        className={`overflow-auto rounded-lg border border-border bg-surface ${fill ? "min-h-60 flex-1 lg:min-h-0" : "max-h-[460px]"}`}
+      >
         <table className="w-max min-w-full border-separate border-spacing-0 text-left">
           <caption className="sr-only">Kalender ketersediaan ruangan per slot SKS, 07.00 sampai 21.00 WIB</caption>
           <thead>
