@@ -1,16 +1,17 @@
 "use client";
 
 import { useMemo } from "react";
-import { MaskIcon } from "@/components/ui/MaskIcon";
 import { SKS_SLOTS, type SksSlot } from "@/config/sks";
-import type { TimelineRoom } from "@/shared/floor-timeline/FloorTimeline";
+import { RoomColumnHeader, RoomLabel, SksSlotHeaders } from "@/shared/room-grid/RoomGridHeaders";
+import type { FloorPlanRoom } from "@/types/facility";
 import { itemKey, type TimelineItem } from "@/shared/floor-timeline/timelineDetail";
 import type { ReservationRecord } from "@/types/reservation";
 import type { ClassSchedule } from "@/types/schedule";
 import { buildSksMatrix } from "./sksMatrix";
 
 export interface SksScheduleMatrixProps {
-  rooms: TimelineRoom[];
+  /** Rooms of the floor; the type is shown under the code, as in the booking calendar. */
+  rooms: Pick<FloorPlanRoom, "id" | "code" | "category">[];
   dateKey: string;
   reservations: ReservationRecord[];
   schedules: ClassSchedule[];
@@ -61,9 +62,11 @@ function SlotCard({
         )}
         <span className="truncate text-[11px] leading-tight text-muted">{lecturerName}</span>
         <span className="flex items-center justify-between gap-1 pt-0.5">
-          <span className="rounded-sm bg-warning-soft px-1.5 py-0.5 text-[10px] font-medium text-ink">
-            {sksCount ? `${sksCount} SKS · ${slot.session}` : slot.session}
-          </span>
+          {sksCount ? (
+            <span className="rounded-sm bg-warning-soft px-1.5 py-0.5 text-[10px] font-medium text-ink">{sksCount} SKS</span>
+          ) : (
+            <span />
+          )}
           <span className="text-[10px] font-medium text-primary">Detail</span>
         </span>
       </button>
@@ -127,34 +130,8 @@ export function SksScheduleMatrix({ rooms, dateKey, reservations, schedules, act
           <caption className="sr-only">Matriks jadwal ruangan per slot SKS, 07.00 sampai 21.00 WIB</caption>
           <thead>
             <tr>
-              <th
-                scope="col"
-                className="sticky top-0 left-0 z-30 w-28 min-w-28 border-r border-b border-border bg-page px-3 py-2.5 text-[11px] font-semibold text-primary"
-              >
-                <span className="flex items-center gap-1.5">
-                  <MaskIcon src="/icons/classroom.svg" size={14} />
-                  Ruang
-                </span>
-              </th>
-              {SKS_SLOTS.map((slot) => (
-                <th
-                  key={slot.slot}
-                  scope="col"
-                  className={`sticky top-0 z-20 w-40 min-w-40 border-r border-b border-border bg-page px-2 py-2 text-center align-middle last:border-r-0 ${
-                    slot.afterBreak ? "border-l-2 border-l-border" : ""
-                  }`}
-                >
-                  <div className="flex flex-col items-center gap-0.5">
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-ink tabular-nums">
-                      <MaskIcon src="/icons/clock-outline.svg" size={12} className="text-primary" />
-                      {displayTime(slot.start)} - {displayTime(slot.end)}
-                    </span>
-                    <span className="text-[10px] font-normal text-muted">
-                      Slot {slot.slot} · {slot.session}
-                    </span>
-                  </div>
-                </th>
-              ))}
+              <RoomColumnHeader />
+              <SksSlotHeaders widthClassName="w-40 min-w-40" />
             </tr>
           </thead>
 
@@ -167,15 +144,7 @@ export function SksScheduleMatrix({ rooms, dateKey, reservations, schedules, act
                     scope="row"
                     className="sticky left-0 z-10 w-28 min-w-28 border-r border-b border-border bg-surface px-3 py-3 align-middle"
                   >
-                    <div className="flex items-center gap-2">
-                      <span
-                        aria-hidden="true"
-                        className="flex size-6 shrink-0 items-center justify-center rounded-sm bg-primary-soft text-primary"
-                      >
-                        <MaskIcon src="/icons/room.svg" size={13} />
-                      </span>
-                      <span className="truncate text-xs font-semibold text-ink">{room.code}</span>
-                    </div>
+                    <RoomLabel code={room.code} category={room.category} />
                   </th>
 
                   {SKS_SLOTS.map((slot, index) => {

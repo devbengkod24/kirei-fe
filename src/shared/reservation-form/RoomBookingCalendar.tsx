@@ -1,10 +1,8 @@
 "use client";
 
-import { MaskIcon } from "@/components/ui/MaskIcon";
-import { SKS_SLOTS } from "@/config/sks";
 import type { FloorPlanRoom, UnitBooking } from "@/types/facility";
 import type { RoomStatus } from "./availability";
-import { ROOM_CATEGORY_SHORT } from "./labels";
+import { RoomColumnHeader, RoomLabel, SksSlotHeaders } from "@/shared/room-grid/RoomGridHeaders";
 import { buildRoomSksCells, pickSksSlotRange, slotInChosenRange } from "./roomCalendarSegments";
 
 export interface RoomBookingCalendarProps {
@@ -77,34 +75,8 @@ export function RoomBookingCalendar({
           <caption className="sr-only">Kalender ketersediaan ruangan per slot SKS, 07.00 sampai 21.00 WIB</caption>
           <thead>
             <tr>
-              <th
-                scope="col"
-                className="sticky top-0 left-0 z-30 w-28 min-w-28 border-r border-b border-border bg-page px-3 py-2.5 text-left text-[11px] font-semibold text-primary"
-              >
-                <span className="flex items-center gap-1.5">
-                  <MaskIcon src="/icons/classroom.svg" size={14} />
-                  Kelas
-                </span>
-              </th>
-              {SKS_SLOTS.map((slot) => (
-                <th
-                  key={slot.slot}
-                  scope="col"
-                  className={`sticky top-0 z-20 w-32 min-w-32 border-r border-b border-border bg-page px-2 py-2 text-center align-middle last:border-r-0 ${
-                    slot.afterBreak ? "border-l-2 border-l-border" : ""
-                  }`}
-                >
-                  <div className="flex flex-col items-center gap-0.5">
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-ink tabular-nums">
-                      <MaskIcon src="/icons/clock-outline.svg" size={11} className="text-primary" />
-                      {displayTime(slot.start)} - {displayTime(slot.end)}
-                    </span>
-                    <span className="text-[10px] font-normal text-muted">
-                      Slot {slot.slot} · {slot.session}
-                    </span>
-                  </div>
-                </th>
-              ))}
+              <RoomColumnHeader />
+              <SksSlotHeaders widthClassName="w-32 min-w-32" />
             </tr>
           </thead>
 
@@ -133,14 +105,7 @@ export function RoomBookingCalendar({
                             : "bg-page text-muted hover:bg-danger-soft/40"
                       }`}
                     >
-                      <span className="w-full truncate text-xs font-semibold leading-tight">{room.code}</span>
-                      <span
-                        className={`w-full truncate text-[10px] font-normal leading-tight ${
-                          isSelectedRoom ? "text-on-primary/90" : "text-muted"
-                        }`}
-                      >
-                        {ROOM_CATEGORY_SHORT[room.category]}
-                      </span>
+                      <RoomLabel code={room.code} category={room.category} selected={isSelectedRoom} />
                     </button>
                   </th>
 
@@ -226,11 +191,6 @@ export function RoomBookingCalendar({
                           <span className="truncate text-[11px] font-medium leading-tight">
                             {isPickedCell ? "Dipilih" : `Pilih`}
                           </span>
-                          {isPickedCell && (
-                            <span className="truncate text-[10px] leading-tight text-on-primary/90 tabular-nums">
-                              Slot {slot.slot}
-                            </span>
-                          )}
                         </button>
                       </td>
                     );

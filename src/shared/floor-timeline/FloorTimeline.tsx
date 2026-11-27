@@ -1,5 +1,6 @@
 "use client";
 
+import { RoomColumnLabel, RoomLabel } from "@/shared/room-grid/RoomGridHeaders";
 import type { TimeSlot } from "@/shared/reservation-form/sportsHallSlots";
 import type { FloorPlanRoom } from "@/types/facility";
 import type { ReservationRecord } from "@/types/reservation";
@@ -8,7 +9,7 @@ import { buildTimeline, segmentSpan, toMinutes } from "./slots";
 import { itemKey, type TimelineItem } from "./timelineDetail";
 
 /** A room row on the calendar; any page's rooms fit, not only the operator's floor. */
-export type TimelineRoom = Pick<FloorPlanRoom, "id" | "code">;
+export type TimelineRoom = Pick<FloorPlanRoom, "id" | "code" | "category">;
 
 export interface FloorTimelineProps {
   /** One horizontal row per room, in this order. */
@@ -114,9 +115,9 @@ export function FloorTimeline({
           <div className="sticky top-0 z-30 flex h-11 border-b border-border bg-surface">
             <div
               style={{ width: ROOM_COL_PX }}
-              className="sticky left-0 z-40 flex shrink-0 items-center justify-center border-r border-border bg-surface text-[11px] font-medium text-muted"
+              className="sticky left-0 z-40 flex shrink-0 items-center border-r border-border bg-page px-3"
             >
-              Kelas
+              <RoomColumnLabel />
             </div>
             <div aria-hidden="true" className="relative flex-1" style={{ width: timelineWidth + END_PAD_PX }}>
               {gridLines.map((line) => (
@@ -158,9 +159,9 @@ export function FloorTimeline({
                   {/* Sticky left room label */}
                   <div
                     style={{ width: ROOM_COL_PX }}
-                    className="sticky left-0 z-20 flex shrink-0 items-center justify-center border-r border-border bg-surface px-2"
+                    className="sticky left-0 z-20 flex shrink-0 items-center border-r border-border bg-surface px-3 text-ink"
                   >
-                    <span className="truncate text-xs font-semibold text-ink">{room.code}</span>
+                    <RoomLabel code={room.code} category={room.category} />
                   </div>
 
                   {/* Horizontal calendar track */}

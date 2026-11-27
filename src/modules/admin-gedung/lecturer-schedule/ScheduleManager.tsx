@@ -1,11 +1,12 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { Field, INPUT_CLASS, SelectInput } from "@/components/form/Field";
+import { SelectInput } from "@/components/form/Field";
+import { FILTER_INPUT_CLASS, FILTER_SELECT_CLASS, FilterField } from "@/components/form/FilterField";
 import { Card } from "@/components/ui/Card";
 import { MaskIcon } from "@/components/ui/MaskIcon";
 import { useLiveData } from "@/hooks/useLiveData";
-import { formatDateLongWIB, formatDateTimeShortWIB, toWibDateKey, wibToIso } from "@/lib/date";
+import { formatDateLongWIB, toWibDateKey, wibToIso } from "@/lib/date";
 import { TimelineDetailPopover } from "@/shared/floor-timeline/TimelineDetailPopover";
 import { itemKey, type TimelineItem } from "@/shared/floor-timeline/timelineDetail";
 import { lecturerSchedulesSchema, LIVE_NAMES } from "@/shared/live-data/liveSchemas";
@@ -15,7 +16,7 @@ import { useMockReservations } from "@/shared/reservation-store/useMockReservati
 import type { Building } from "@/types/facility";
 import type { LecturerSchedule } from "@/types/schedule";
 import { ImportScheduleDialog, type ScheduleImportFormat } from "./ImportScheduleDialog";
-import { Popover } from "@/components/ui/Popover";
+import { MenuButton } from "@/components/ui/MenuButton";
 import { SksScheduleMatrix } from "./SksScheduleMatrix";
 
 export interface ScheduleManagerProps {
@@ -51,7 +52,6 @@ export function ScheduleManager({ fakultasId, building: serverBuilding, schedule
   const [floorId, setFloorId] = useState(serverBuilding?.floors[0]?.id ?? "");
   const [detail, setDetail] = useState<{ item: TimelineItem; anchor: HTMLElement; container: HTMLElement } | null>(null);
   const [importFormat, setImportFormat] = useState<ScheduleImportFormat | null>(null);
-  const [importMenuOpen, setImportMenuOpen] = useState(false);
   const [notice, setNotice] = useState("");
   const headingRef = useRef<HTMLHeadingElement>(null);
 
@@ -99,15 +99,15 @@ export function ScheduleManager({ fakultasId, building: serverBuilding, schedule
 
   return (
     <div className="flex flex-col gap-3">
-      <Card as="section" aria-labelledby="schedule-filter-title" className="flex flex-col gap-3 p-4">
+      <Card as="section" aria-labelledby="schedule-filter-title" className="flex flex-col gap-2 p-3">
         <h2 id="schedule-filter-title" className="sr-only">
           Filter jadwal
         </h2>
-        <div className="flex flex-wrap items-end gap-3">
-          <p className="flex min-h-11 items-center text-sm font-medium">{building.name}</p>
-          <Field label="Lantai" htmlFor="schedule-floor" className="w-36">
+        <div className="flex flex-wrap items-center gap-2">
+          <FilterField label="Lantai" htmlFor="schedule-floor">
             <SelectInput
               id="schedule-floor"
+              className={FILTER_SELECT_CLASS}
               value={floor?.id ?? ""}
               onChange={(event) => {
                 setFloorId(event.target.value);
@@ -117,12 +117,12 @@ export function ScheduleManager({ fakultasId, building: serverBuilding, schedule
             >
               {building.floors.map((level) => (
                 <option key={level.id} value={level.id}>
-                  Lantai {level.number}
+                  {level.number}
                 </option>
               ))}
             </SelectInput>
-          </Field>
-          <Field label="Tanggal" htmlFor="schedule-date" className="w-44">
+          </FilterField>
+          <FilterField label="Tanggal" htmlFor="schedule-date">
             <input
               id="schedule-date"
               type="date"
@@ -132,47 +132,26 @@ export function ScheduleManager({ fakultasId, building: serverBuilding, schedule
                 setDateKey(event.target.value);
                 setDetail(null);
               }}
-              className={INPUT_CLASS}
+              className={FILTER_INPUT_CLASS}
             />
-          </Field>
-          <div className="sm:ml-auto">
-            <Popover
-              open={importMenuOpen}
-              onOpenChange={setImportMenuOpen}
-              label="Pilih format import jadwal"
-              triggerClassName="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-on-primary transition-colors hover:bg-primary-hover"
-              trigger={
-                <>
-                  Import Jadwal
-                  <MaskIcon src="/icons/chevron-down-small.svg" size={16} className={importMenuOpen ? "rotate-180" : ""} />
-                </>
-              }
-            >
-              <ul className="-m-3 flex flex-col gap-1">
-                {IMPORT_OPTIONS.map((option) => (
-                  <li key={option.format}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setImportMenuOpen(false);
-                        setImportFormat(option.format);
-                      }}
-                      className="flex min-h-11 w-full flex-col items-start rounded-md px-3 py-2 text-left hover:bg-primary-soft"
-                    >
-                      <span className="text-sm font-medium">{option.label}</span>
-                      <span className="text-[11px] text-muted">{option.hint}</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </Popover>
-          </div>
+          </FilterField>
+          <MenuButton
+            className="sm:ml-auto"
+            label="Import Jadwal"
+            menuLabel="Pilih format import jadwal"
+            options={IMPORT_OPTIONS.map((option) => ({
+              key: option.format,
+              label: option.label,
+              hint: option.hint,
+              onSelect: () => setImportFormat(option.format),
+            }))}
+          />
         </div>
-        <p className="text-[11px] text-muted">
-          {schedule
-            ? `Jadwal kuliah berbasis SKS (15 slot, 50 menit per SKS pukul 07.00-21.00 WIB dengan jeda istirahat). Semester ${dayText(schedule.semester.startDate)} sampai ${dayText(schedule.semester.endDate)}, ${schedule.entries.length} jadwal, diimpor ${formatDateTimeShortWIB(schedule.uploadedAt)}.`
-            : "Belum ada jadwal dosen untuk gedung ini. Import berkas PDF atau CSV (format SKS) untuk menampilkannya di tabel jadwal."}
-        </p>
+        {!schedule && (
+          <p className="text-[11px] text-muted">
+            Belum ada jadwal dosen untuk gedung ini. Import berkas PDF atau CSV (format SKS) untuk menampilkannya di tabel jadwal.
+          </p>
+        )}
       </Card>
 
       <Card as="section" aria-labelledby="schedule-timeline-title" className="flex min-w-0 flex-col gap-3 py-4">

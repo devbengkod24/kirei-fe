@@ -46,11 +46,16 @@ describe("UserReportList", () => {
     expect(within(dialog).getByText("07.20 WIB", { exact: false })).toBeTruthy();
   });
 
-  it("exposes Excel/PDF export buttons and a shared /lapor QR generator modal", async () => {
+  it("offers PDF/Excel export from one menu and a shared /lapor QR generator modal", async () => {
     render(<UserReportList reports={[REPORT]} loadedAt="2026-10-30T03:00:00Z" />);
 
-    expect(screen.getByRole("button", { name: "Unduh Excel" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Unduh PDF" })).toBeTruthy();
+    // Both formats sit behind "Unduh Laporan", like the Import Jadwal menu
+    expect(screen.queryByRole("button", { name: /Unduh PDF/ })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Unduh Laporan" }));
+    const menu = screen.getByRole("dialog", { name: "Pilih format unduhan laporan" });
+    expect(within(menu).getByRole("button", { name: /Unduh PDF/ })).toBeTruthy();
+    expect(within(menu).getByRole("button", { name: /Unduh Excel/ })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Unduh Laporan" }));
 
     fireEvent.click(screen.getByRole("button", { name: "Generate QR Pengaduan" }));
 

@@ -44,8 +44,8 @@ describe("SksScheduleMatrix and Admin Gedung nav", () => {
     render(
       <SksScheduleMatrix
         rooms={[
-          { id: "r1", code: "H.5.1" },
-          { id: "r5", code: "H.5.5" },
+          { id: "r1", code: "H.5.1", category: "kelas" },
+          { id: "r5", code: "H.5.5", category: "lab" },
         ]}
         dateKey="2026-11-26"
         schedules={[SCHEDULE]}
@@ -58,6 +58,10 @@ describe("SksScheduleMatrix and Admin Gedung nav", () => {
     expect(screen.getByText("07.00 - 07.50")).toBeTruthy();
     expect(screen.getByText("12.30 - 13.20")).toBeTruthy();
     expect(screen.getByText("20.10 - 21.00")).toBeTruthy();
+
+    // Each row shows the room type under its code, as in the booking calendar
+    expect(screen.getByRole("rowheader", { name: "H.5.1 Kelas" })).toBeTruthy();
+    expect(screen.getByRole("rowheader", { name: "H.5.5 Lab" })).toBeTruthy();
 
     // 3 SKS lecture appears in slots 4, 5, and 6
     const lectureCards = screen.getAllByText("Kecerdasan Buatan");

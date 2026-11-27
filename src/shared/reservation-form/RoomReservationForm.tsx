@@ -4,6 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
+import { SelectInput } from "@/components/form/Field";
+import { FILTER_INPUT_CLASS, FILTER_SELECT_CLASS, FilterField } from "@/components/form/FilterField";
 import { Card } from "@/components/ui/Card";
 import { MaskIcon } from "@/components/ui/MaskIcon";
 import { ROOM_CLOSE_TIME, ROOM_OPEN_TIME } from "@/config/reservation";
@@ -263,23 +265,28 @@ export function RoomReservationForm({
     );
   }
 
+  const buildingField = register("buildingId", {
+    onChange: (event) => {
+      setValue("floorId", firstFloorId(buildings.find((b) => b.id === event.target.value)));
+      setValue("roomId", "");
+    },
+  });
+  const floorField = register("floorId", { onChange: () => setValue("roomId", "") });
+  const buildingOptions = buildings.map((option) => (
+    <option key={option.id} value={option.id}>
+      {option.name}
+    </option>
+  ));
+  const floorOptions = building?.floors.map((option) => (
+    <option key={option.id} value={option.id}>
+      {option.number}
+    </option>
+  ));
+
   const buildingSelect = (
     <div className="relative flex-1">
-      <select
-        id="reservation-building"
-        className={SELECT}
-        {...register("buildingId", {
-          onChange: (event) => {
-            setValue("floorId", firstFloorId(buildings.find((b) => b.id === event.target.value)));
-            setValue("roomId", "");
-          },
-        })}
-      >
-        {buildings.map((option) => (
-          <option key={option.id} value={option.id}>
-            {option.name}
-          </option>
-        ))}
+      <select id="reservation-building" className={SELECT} {...buildingField}>
+        {buildingOptions}
       </select>
       <Image
         src="/icons/caret-down.svg"
@@ -293,12 +300,8 @@ export function RoomReservationForm({
 
   const floorSelect = (
     <div className="relative flex-1">
-      <select id="reservation-floor" className={SELECT} {...register("floorId", { onChange: () => setValue("roomId", "") })}>
-        {building?.floors.map((option) => (
-          <option key={option.id} value={option.id}>
-            {option.number}
-          </option>
-        ))}
+      <select id="reservation-floor" className={SELECT} {...floorField}>
+        {floorOptions}
       </select>
       <Image
         src="/icons/caret-down.svg"
@@ -497,28 +500,20 @@ export function RoomReservationForm({
           <Card as="section" aria-label="Lokasi dan tanggal" className="flex flex-wrap items-center gap-2 p-3">
             {/* Admin gedung manages one building, so there is nothing to pick; admin universitas picks one. */}
             {buildings.length > 1 && (
-              <div className={`${FIELD_ROW} w-full sm:w-56`}>
-                <label htmlFor="reservation-building" className="shrink-0 text-xs">
-                  Lokasi<RequiredMark /> :
-                </label>
-                {buildingSelect}
-              </div>
+              <FilterField label="Lokasi :" htmlFor="reservation-building">
+                <SelectInput id="reservation-building" className={FILTER_SELECT_CLASS} {...buildingField}>
+                  {buildingOptions}
+                </SelectInput>
+              </FilterField>
             )}
-            <div className={`${FIELD_ROW} w-full sm:w-40`}>
-              <label htmlFor="reservation-floor" className="shrink-0 text-xs">
-                Lantai<RequiredMark />
-              </label>
-              {floorSelect}
-            </div>
-            <div className={`${FIELD_ROW} w-full sm:w-60`}>
-              <label htmlFor="reservation-date" className="shrink-0 text-xs">
-                Tanggal<RequiredMark />
-              </label>
-              <input
-                {...dateInputProps}
-                className="min-h-8 min-w-0 flex-1 rounded-sm bg-primary-soft px-2 text-[11px] font-medium text-primary aria-invalid:outline aria-invalid:outline-danger-strong"
-              />
-            </div>
+            <FilterField label="Lantai" htmlFor="reservation-floor">
+              <SelectInput id="reservation-floor" className={FILTER_SELECT_CLASS} {...floorField}>
+                {floorOptions}
+              </SelectInput>
+            </FilterField>
+            <FilterField label="Tanggal" htmlFor="reservation-date">
+              <input {...dateInputProps} className={FILTER_INPUT_CLASS} />
+            </FilterField>
             <ReviewButton onReview={openReview} className="sm:ml-auto sm:w-auto sm:px-6" />
             {errors.date && <p className={`${ERROR} w-full`}>{errors.date.message}</p>}
           </Card>

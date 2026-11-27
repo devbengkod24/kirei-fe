@@ -8,13 +8,15 @@ export interface PopoverProps {
   /** Content of the toggle button. */
   trigger: React.ReactNode;
   triggerClassName?: string;
+  /** Disables the toggle button. */
+  disabled?: boolean;
   /** Accessible name of the panel. */
   label: string;
   children: React.ReactNode;
 }
 
 /** Button that toggles a panel anchored below it. Closes on Escape and on clicks outside. */
-export function Popover({ open, onOpenChange, trigger, triggerClassName = "", label, children }: PopoverProps) {
+export function Popover({ open, onOpenChange, trigger, triggerClassName = "", disabled = false, label, children }: PopoverProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelId = useId();
@@ -46,6 +48,7 @@ export function Popover({ open, onOpenChange, trigger, triggerClassName = "", la
         type="button"
         aria-expanded={open}
         aria-controls={panelId}
+        disabled={disabled}
         onClick={() => onOpenChange(!open)}
         className={triggerClassName}
       >
