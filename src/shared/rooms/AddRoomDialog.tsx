@@ -10,10 +10,9 @@ import { RoomPhotoField, RoomStatusField } from "./RoomFormFields";
 import type { RoomPhotoChange } from "./roomPhoto";
 
 export interface AddRoomDialogProps {
-  /** Buildings the admin may add rooms to. */
-  buildings: Building[];
-  /** Building and floor picked in the filters, used as the starting values. */
-  initialBuildingId: string;
+  /** The building picked in the Lokasi filter; the new room goes there. */
+  building: Building;
+  /** Floor picked in the filter, used as the starting value. */
   initialFloor: number;
   /** Codes of every room, to reject duplicates before the API does. */
   takenCodes: string[];
@@ -27,16 +26,13 @@ interface Errors {
 }
 
 /** Tambah Ruangan for admin gedung. Mounted only while open, so the form starts empty each time. */
-export function AddRoomDialog({ buildings, initialBuildingId, initialFloor, takenCodes, onClose, onSave }: AddRoomDialogProps) {
+export function AddRoomDialog({ building, initialFloor, takenCodes, onClose, onSave }: AddRoomDialogProps) {
   const [code, setCode] = useState("");
   const [type, setType] = useState<RoomType | "">("");
-  const [buildingId, setBuildingId] = useState(initialBuildingId);
   const [floor, setFloor] = useState(initialFloor);
   const [isActive, setIsActive] = useState(true);
   const [photo, setPhoto] = useState<RoomPhotoChange>({ kind: "keep" });
   const [errors, setErrors] = useState<Errors>({});
-
-  const building = buildings.find((item) => item.id === buildingId);
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -48,7 +44,7 @@ export function AddRoomDialog({ buildings, initialBuildingId, initialFloor, take
     if (next.code || next.type || !type) return setErrors(next);
     // TODO: POST the room through the orval client (multipart with the photo); map 422 with lib/api/form-errors.
     // TODO: align RoomType with the API (kelas, lab, meeting, auditorium, gor).
-    onSave({ id: crypto.randomUUID(), code: trimmed, type, buildingId, floor, isActive, photoUrl: null, plan: null }, photo);
+    onSave({ id: crypto.randomUUID(), code: trimmed, type, buildingId: building.id, floor, isActive, photoUrl: null, plan: null }, photo);
   };
 
   return (
@@ -105,26 +101,13 @@ export function AddRoomDialog({ buildings, initialBuildingId, initialFloor, take
           </SelectInput>
         </Field>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Gedung" htmlFor="new-room-building">
-            <SelectInput
-              id="new-room-building"
-              value={buildingId}
-              onChange={(event) => {
-                const next = buildings.find((item) => item.id === event.target.value);
-                setBuildingId(event.target.value);
-                setFloor(next?.floors[0] ?? 0);
-              }}
-            >
-              {buildings.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name}
-                </option>
-              ))}
-            </SelectInput>
-          </Field>
+          <div className="flex min-w-0 flex-col gap-1">
+            <p className="text-xs text-primary">Gedung</p>
+            <p className="flex min-h-11 items-center rounded-md bg-page px-3 text-sm break-words">{building.name}</p>
+          </div>
           <Field label="Lantai" htmlFor="new-room-floor">
             <SelectInput id="new-room-floor" value={floor} onChange={(event) => setFloor(Number(event.target.value))}>
-              {building?.floors.map((item) => (
+              {building.floors.map((item) => (
                 <option key={item} value={item}>
                   {item}
                 </option>

@@ -47,6 +47,8 @@ describe("RoomManager", () => {
     render(<RoomManager buildings={BUILDINGS} rooms={ROOMS} canChangeManager={false} canAddRoom />);
     const dialog = openAddDialog();
 
+    expect(within(dialog).queryByRole("combobox", { name: "Gedung" })).toBeNull();
+    expect(within(dialog).getByText("Gedung H")).toBeTruthy();
     fireEvent.change(within(dialog).getByLabelText("Nama Ruangan"), { target: { value: " H.6.1 " } });
     fireEvent.change(within(dialog).getByLabelText("Tipe Ruangan"), { target: { value: "lab" } });
     fireEvent.change(within(dialog).getByLabelText("Lantai"), { target: { value: "6" } });
@@ -86,6 +88,20 @@ describe("RoomManager", () => {
     expect(within(screen.getByRole("region", { name: "Detail ruangan" })).getByText("Meeting Room")).toBeTruthy();
     // the type filter is reset so the edited room stays in the list
     expect((screen.getByLabelText("Tipe") as HTMLSelectElement).value).toBe("semua");
+  });
+
+  it("moves a room to another floor in the edit form, but not to another building", async () => {
+    render(<RoomManager buildings={BUILDINGS} rooms={ROOMS} canChangeManager={false} canAddRoom />);
+    fireEvent.click(screen.getByRole("button", { name: "Edit Kelas H.5.1" }));
+    const dialog = screen.getByRole("dialog", { name: "Edit Ruangan" });
+
+    expect(within(dialog).queryByRole("combobox", { name: "Gedung" })).toBeNull();
+    fireEvent.change(within(dialog).getByLabelText("Lantai"), { target: { value: "6" } });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Simpan" }));
+
+    await waitFor(() => expect((screen.getByLabelText("Lantai") as HTMLSelectElement).value).toBe("6"));
+    expect(screen.getByRole("heading", { name: "Kelas H.5.1" })).toBeTruthy();
+    expect(within(screen.getByRole("region", { name: "Detail ruangan" })).getByText("Lantai 6")).toBeTruthy();
   });
 
   it("has no Tambah Ruangan for admin universitas", () => {

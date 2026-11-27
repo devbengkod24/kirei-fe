@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Field, SelectInput } from "@/components/form/Field";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { Toast } from "@/components/ui/Toast";
 import { useLiveState } from "@/hooks/useLiveData";
 import type { Building, Room, RoomManagedBy, RoomType } from "@/types/room";
 import { AddRoomDialog } from "./AddRoomDialog";
@@ -121,22 +122,7 @@ export function RoomManager({ buildings, rooms: initialRooms, canChangeManager, 
 
   return (
     <div className="flex flex-col gap-6">
-      <Card className="flex flex-wrap items-center justify-end gap-2 p-3">
-        <div className="flex w-full flex-wrap gap-2 sm:mr-auto sm:w-auto">
-          {canAddRoom && !picking && (
-            <Button variant="primary" onClick={() => setAdding(true)} className="flex-1 sm:flex-none">
-              Tambah Ruangan
-            </Button>
-          )}
-          <Button
-            variant={picking ? "primary" : "primary-outline"}
-            aria-pressed={picking}
-            onClick={() => (picking ? stopPicking() : setPicking(true))}
-            className="flex-1 sm:flex-none"
-          >
-            {picking ? "Selesai memilih" : "Pilih banyak"}
-          </Button>
-        </div>
+      <Card className="flex flex-wrap items-center gap-2 p-3">
         <label className="flex min-w-0 flex-1 items-center gap-3 rounded-md border border-border px-3 py-1 sm:max-w-[233px]">
           <span className={FILTER_LABEL}>Tipe</span>
           <div className="flex-1">
@@ -182,11 +168,24 @@ export function RoomManager({ buildings, rooms: initialRooms, canChangeManager, 
             </SelectInput>
           </div>
         </label>
+        <div className="flex w-full flex-wrap gap-2 sm:ml-auto sm:w-auto">
+          {canAddRoom && !picking && (
+            <Button variant="primary" onClick={() => setAdding(true)} className="flex-1 sm:flex-none">
+              Tambah Ruangan
+            </Button>
+          )}
+          <Button
+            variant={picking ? "primary" : "primary-outline"}
+            aria-pressed={picking}
+            onClick={() => (picking ? stopPicking() : setPicking(true))}
+            className="flex-1 sm:flex-none"
+          >
+            {picking ? "Selesai memilih" : "Pilih banyak"}
+          </Button>
+        </div>
       </Card>
 
-      <p role="status" className={notice ? "-mt-3 text-sm text-success" : "sr-only"}>
-        {notice}
-      </p>
+      <Toast message={notice} onDismiss={() => setNotice("")} />
 
       <div className="grid gap-4 lg:grid-cols-[1fr_auto_363px]">
         <Card as="section" aria-label="Daftar ruangan" className="flex flex-col gap-3 p-4">
@@ -362,10 +361,9 @@ export function RoomManager({ buildings, rooms: initialRooms, canChangeManager, 
         )}
       </div>
 
-      {adding && (
+      {adding && building && (
         <AddRoomDialog
-          buildings={buildings}
-          initialBuildingId={buildingId}
+          building={building}
           initialFloor={floor}
           takenCodes={rooms.map((room) => room.code)}
           onClose={() => setAdding(false)}
@@ -374,7 +372,6 @@ export function RoomManager({ buildings, rooms: initialRooms, canChangeManager, 
             setAdditions([...additions, saved]);
             setAdding(false);
             setType("semua");
-            setBuildingId(saved.buildingId);
             setFloor(saved.floor);
             setSelectedId(saved.id);
             setNotice(`${roomTitle(saved)} ditambahkan.`);
@@ -394,6 +391,9 @@ export function RoomManager({ buildings, rooms: initialRooms, canChangeManager, 
             setEdits({ ...edits, [saved.id]: saved });
             // a new type would hide the room behind the type filter
             if (type !== "semua" && saved.type !== type) setType("semua");
+            // follow the room to its new floor
+            setFloor(saved.floor);
+            setSelectedId(saved.id);
             setEditing(false);
             setNotice(`${roomTitle(saved)} disimpan.`);
           }}

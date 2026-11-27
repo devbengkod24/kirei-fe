@@ -79,19 +79,22 @@ export function EditRoomDialog({ room, buildings, canChangeManager, takenCodes, 
             ))}
           </SelectInput>
         </Field>
-        <div className="flex flex-col gap-1">
-          <dl className="grid grid-cols-2 gap-2 rounded-md bg-page px-3 py-2">
-            <div className="flex min-w-0 flex-col">
-              <dt className="text-xs text-primary">Gedung</dt>
-              <dd className="text-sm break-words">{draftBuilding?.name ?? "-"}</dd>
-            </div>
-            <div className="flex min-w-0 flex-col">
-              <dt className="text-xs text-primary">Lantai</dt>
-              <dd className="text-sm">{draft.floor}</dd>
-            </div>
-          </dl>
-          <p className="text-[11px] text-muted">Gedung dan lantai mengikuti data master ruangan, jadi tidak bisa diubah di sini.</p>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="flex min-w-0 flex-col gap-1">
+            <p className="text-xs text-primary">Gedung</p>
+            <p className="flex min-h-11 items-center rounded-md bg-page px-3 text-sm break-words">{draftBuilding?.name ?? "-"}</p>
+          </div>
+          <Field label="Lantai" htmlFor="room-floor">
+            <SelectInput id="room-floor" value={draft.floor} onChange={(event) => setDraft({ ...draft, floor: Number(event.target.value) })}>
+              {draftBuilding?.floors.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </SelectInput>
+          </Field>
         </div>
+        <p className="-mt-2 text-[11px] text-muted">Gedung tidak bisa diubah.</p>
         {canChangeManager && (
           <Field label="Dikelola oleh" htmlFor="room-manager">
             <SelectInput
