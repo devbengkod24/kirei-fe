@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ReservationRecord } from "@/types/reservation";
 import { ReservationHistoryTable } from "./ReservationHistoryTable";
@@ -30,8 +30,10 @@ describe("ReservationHistoryTable", () => {
     // one in the table column, one in the narrow-screen card; never a third under Keperluan
     expect(screen.getAllByText(/Jadwal bentrok dengan kegiatan fakultas\./)).toHaveLength(2);
     expect(screen.queryByText("Alasan dibatalkan:")).toBeNull();
-    expect(screen.getByRole("button", { name: "Unduh Excel" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Unduh PDF" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Unduh Laporan" }));
+    const menu = screen.getByRole("dialog", { name: "Pilih format unduhan laporan" });
+    expect(within(menu).getByRole("button", { name: /Unduh Excel/ })).toBeTruthy();
+    expect(within(menu).getByRole("button", { name: /Unduh PDF/ })).toBeTruthy();
   });
 });
 

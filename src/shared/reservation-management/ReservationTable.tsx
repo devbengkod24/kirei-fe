@@ -141,29 +141,17 @@ export function ReservationTable({ tipe, tab, reservations: seeded, roomCodes, b
     setNotice(`Status hard copy ${reservation.borrowerName} diubah menjadi ${hardCopyLabel(submitted)}.`);
   };
 
-  // History rows have one action, shaped like the decision: a check opens the details, a cross opens
-  // them with the rejection reason.
-  const renderHistoryAction = (reservation: ReservationRequest) => {
-    const rejected = reservation.status === "ditolak";
-    return (
-      <button
-        type="button"
-        onClick={() => setViewing(reservation)}
-        aria-label={`${rejected ? "Lihat alasan penolakan" : "Lihat detail"} reservasi ${reservation.borrowerName}`}
-        className={`${ICON_BUTTON} ${
-          rejected
-            ? "border-danger-soft hover:border-danger-strong hover:bg-danger-soft"
-            : "border-transparent bg-success-soft hover:border-success"
-        }`}
-      >
-        {rejected ? (
-          <Image src="/icons/admin/reject.svg" alt="" width={7} height={7} />
-        ) : (
-          <Image src="/icons/admin/approve.svg" alt="" width={10} height={7} />
-        )}
-      </button>
-    );
-  };
+  // History rows have one action, an eye that opens the details (with the reason when rejected).
+  const renderHistoryAction = (reservation: ReservationRequest) => (
+    <button
+      type="button"
+      onClick={() => setViewing(reservation)}
+      aria-label={`${reservation.status === "ditolak" ? "Lihat alasan penolakan" : "Lihat detail"} reservasi ${reservation.borrowerName}`}
+      className={`${ICON_BUTTON} border-border hover:bg-page`}
+    >
+      <Image src="/icons/admin/view.svg" alt="" width={14} height={11} />
+    </button>
+  );
 
   const renderApprovalActions = (reservation: ReservationRequest) => (
     <div className="flex items-center gap-2">

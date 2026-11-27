@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/Button";
+import { MenuButton } from "@/components/ui/MenuButton";
 import type { ReservationType } from "@/types/reservation";
 import {
   buildHistoryExportFilename,
@@ -19,7 +19,7 @@ export interface ExportHistoryButtonsProps {
   dateItems: readonly { startsAt: string; endsAt: string }[];
 }
 
-/** "Unduh Excel" and "Unduh PDF" buttons for filtered reservation history lists. */
+/** "Unduh Laporan" menu (PDF or Excel) for filtered reservation history lists, like Laporan Pengguna. */
 export function ExportHistoryButtons({ tipe, title, columns, rows, dateItems }: ExportHistoryButtonsProps) {
   const [busy, setBusy] = useState<"xlsx" | "pdf" | null>(null);
   const [status, setStatus] = useState("");
@@ -47,22 +47,15 @@ export function ExportHistoryButtons({ tipe, title, columns, rows, dateItems }: 
 
   return (
     <div className="flex flex-col items-end gap-1">
-      <div className="flex flex-wrap items-center gap-2">
-        <Button
-          variant="primary-outline"
-          disabled={rows.length === 0 || busy !== null}
-          onClick={() => void handleExport("xlsx")}
-        >
-          {busy === "xlsx" ? "Menyiapkan Excel..." : "Unduh Excel"}
-        </Button>
-        <Button
-          variant="primary-outline"
-          disabled={rows.length === 0 || busy !== null}
-          onClick={() => void handleExport("pdf")}
-        >
-          {busy === "pdf" ? "Menyiapkan PDF..." : "Unduh PDF"}
-        </Button>
-      </div>
+      <MenuButton
+        label={busy === "pdf" ? "Menyiapkan PDF..." : busy === "xlsx" ? "Menyiapkan Excel..." : "Unduh Laporan"}
+        menuLabel="Pilih format unduhan laporan"
+        disabled={rows.length === 0 || busy !== null}
+        options={[
+          { key: "pdf", label: "Unduh PDF", hint: "Tabel riwayat siap cetak", onSelect: () => void handleExport("pdf") },
+          { key: "xlsx", label: "Unduh Excel", hint: "Berkas .xlsx untuk diolah lagi", onSelect: () => void handleExport("xlsx") },
+        ]}
+      />
       {status && (
         <p role="status" className="sr-only">
           {status}
