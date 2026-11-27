@@ -1,7 +1,7 @@
 # Graph Report - kirei-fe  (2026-11-27)
 
 ## Corpus Check
-- 478 files · ~264,859 words
+- 478 files · ~264,860 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 12 file(s) not represented in the graph (top: (none) 8, .example 1, .csv 1)
 

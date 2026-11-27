@@ -8,7 +8,11 @@ import type { LecturerSchedule } from "@/types/schedule";
 import { saveLecturerSchedule } from "./actions";
 import { parseScheduleCsv, SCHEDULE_COLUMNS, semesterSchema, type ParsedSchedule } from "./scheduleCsv";
 
+/** CSV is read in the browser; a PDF from TU is read by kirei-api. */
+export type ScheduleImportFormat = "csv" | "pdf";
+
 export interface ImportScheduleDialogProps {
+  format: ScheduleImportFormat;
   /** Rooms on the admin's floor plans, to check the CSV against. */
   roomCodes: string[];
   /** The current schedule's semester, so a new import usually only needs the file. */
@@ -19,40 +23,59 @@ export interface ImportScheduleDialogProps {
 }
 
 const CSV_MAX_SIZE_KB = 512;
+const PDF_MAX_SIZE_MB = 5;
 
-type Picked = { fileName: string; result: ParsedSchedule };
+/** Shown until kirei-api can read schedule PDFs; the CSV import keeps working meanwhile. */
+export const PDF_IMPORT_PENDING_MESSAGE =
+  "Import PDF dibaca oleh server dan belum tersedia. Untuk sementara gunakan Import CSV.";
 
-/** "Import Jadwal (CSV)": semester dates and the file, checked row by row before it replaces the schedule. */
-export function ImportScheduleDialog({ roomCodes, semester: current, templateHref, onClose, onSaved }: ImportScheduleDialogProps) {
+type Picked =
+  | { kind: "csv"; fileName: string; result: ParsedSchedule }
+  | { kind: "pdf"; fileName: string; file: File };
+
+/** "Import Jadwal": semester dates and a CSV or PDF file, which replaces the whole schedule. */
+export function ImportScheduleDialog({ format, roomCodes, semester: current, templateHref, onClose, onSaved }: ImportScheduleDialogProps) {
   const [semester, setSemester] = useState(current ?? { startDate: "", endDate: "" });
   const [picked, setPicked] = useState<Picked | null>(null);
   const [fileError, setFileError] = useState<string>();
   const [semesterErrors, setSemesterErrors] = useState<Partial<Record<"startDate" | "endDate", string>>>({});
   const [saveError, setSaveError] = useState<string>();
   const [saving, startSaving] = useTransition();
+  const isPdf = format === "pdf";
+  const label = format.toUpperCase();
 
   const pickFile = async (file: File | undefined) => {
     setSaveError(undefined);
     setPicked(null);
     if (!file) return;
-    if (!file.name.toLowerCase().endsWith(".csv")) return setFileError("Berkas harus berformat CSV.");
+    if (!file.name.toLowerCase().endsWith(`.${format}`)) return setFileError(`Berkas harus berformat ${label}.`);
+    if (isPdf) {
+      if (file.size > PDF_MAX_SIZE_MB * 1024 * 1024) return setFileError(`Ukuran berkas maksimal ${PDF_MAX_SIZE_MB} MB.`);
+      setFileError(undefined);
+      return setPicked({ kind: "pdf", fileName: file.name, file });
+    }
     if (file.size > CSV_MAX_SIZE_KB * 1024) return setFileError(`Ukuran berkas maksimal ${CSV_MAX_SIZE_KB} KB.`);
     setFileError(undefined);
-    setPicked({ fileName: file.name, result: parseScheduleCsv(await file.text(), roomCodes) });
+    setPicked({ kind: "csv", fileName: file.name, result: parseScheduleCsv(await file.text(), roomCodes) });
   };
 
-  const errors = picked?.result.errors ?? [];
-  const entries = picked?.result.entries ?? [];
-  const canSave = picked !== null && errors.length === 0 && entries.length > 0 && !saving;
+  const errors = picked?.kind === "csv" ? picked.result.errors : [];
+  const entries = picked?.kind === "csv" ? picked.result.entries : [];
+  const canSave = picked !== null && errors.length === 0 && (picked.kind === "pdf" || entries.length > 0) && !saving;
 
   const save = () => {
-    if (!picked) return setFileError("Pilih berkas CSV jadwal.");
+    if (!picked) return setFileError(`Pilih berkas ${label} jadwal.`);
     const parsedSemester = semesterSchema.safeParse(semester);
     if (!parsedSemester.success) {
       setSemesterErrors(Object.fromEntries(parsedSemester.error.issues.map((issue) => [String(issue.path[0]), issue.message])));
       return;
     }
     setSemesterErrors({});
+    if (picked.kind === "pdf") {
+      // TODO: POST the PDF (multipart) with the semester to kirei-api, which reads the timetable and
+      // returns the saved schedule or the rows it could not read.
+      return setSaveError(PDF_IMPORT_PENDING_MESSAGE);
+    }
     startSaving(async () => {
       const result = await saveLecturerSchedule({ semester: parsedSemester.data, entries });
       if (result.ok) onSaved(result.schedule);
@@ -64,7 +87,7 @@ export function ImportScheduleDialog({ roomCodes, semester: current, templateHre
     <Modal
       open
       onClose={onClose}
-      title="Import Jadwal (CSV)"
+      title={`Import Jadwal (${label})`}
       footer={
         <>
           <Button variant="danger-outline" onClick={onClose}>
@@ -78,7 +101,7 @@ export function ImportScheduleDialog({ roomCodes, semester: current, templateHre
     >
       <div className="flex flex-col gap-3">
         <p className="text-xs text-muted">
-          Tiap baris menutup ruangan itu setiap minggu pada hari dan jam kuliahnya, selama semester yang dipilih. Import baru
+          Tiap jadwal menutup ruangan itu setiap minggu pada hari dan jam kuliahnya, selama semester yang dipilih. Import baru
           menggantikan seluruh jadwal sebelumnya.
         </p>
 
@@ -107,27 +130,34 @@ export function ImportScheduleDialog({ roomCodes, semester: current, templateHre
           </Field>
         </div>
 
-        <Field label="Berkas CSV" htmlFor="schedule-file" error={fileError}>
+        <Field label={`Berkas ${label}`} htmlFor="schedule-file" error={fileError}>
           <input
             id="schedule-file"
             type="file"
-            accept=".csv,text/csv"
+            accept={isPdf ? ".pdf,application/pdf" : ".csv,text/csv"}
             onChange={(event) => void pickFile(event.target.files?.[0])}
             aria-invalid={fileError ? true : undefined}
             aria-describedby={fileError ? "schedule-file-error schedule-format" : "schedule-format"}
             className={`${INPUT_CLASS} file:mr-3 file:rounded-md file:border-0 file:bg-primary-soft file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-primary`}
           />
         </Field>
-        <p id="schedule-format" className="text-[11px] text-muted">
-          Kolom: <code className="break-words">{SCHEDULE_COLUMNS.join(", ")}</code>. Hari ditulis Senin sampai Minggu,
-          <code className="mx-1">slot_sks</code> dimulai dari 1 (07.00 WIB, 50 menit per SKS), dan
-          <code className="mx-1">kelompok</code> berisi kelas seperti A11.4301. Pemisah koma atau titik koma.{" "}
-          <a href={templateHref} download className="font-medium text-primary underline-offset-2 hover:underline">
-            Unduh contoh CSV
-          </a>
-        </p>
+        {isPdf ? (
+          <p id="schedule-format" className="text-[11px] text-muted">
+            PDF jadwal kuliah dari Tata Usaha, maksimal {PDF_MAX_SIZE_MB} MB. Isi tabelnya dibaca oleh server, lalu
+            ruangan yang bukan milik gedung Anda ditolak.
+          </p>
+        ) : (
+          <p id="schedule-format" className="text-[11px] text-muted">
+            Kolom: <code className="break-words">{SCHEDULE_COLUMNS.join(", ")}</code>. Hari ditulis Senin sampai Minggu,
+            <code className="mx-1">slot_sks</code> dimulai dari 1 (07.00 WIB, 50 menit per SKS), dan
+            <code className="mx-1">kelompok</code> berisi kelas seperti A11.4301. Pemisah koma atau titik koma.{" "}
+            <a href={templateHref} download className="font-medium text-primary underline-offset-2 hover:underline">
+              Unduh contoh CSV
+            </a>
+          </p>
+        )}
 
-        {picked && errors.length > 0 && (
+        {picked?.kind === "csv" && errors.length > 0 && (
           <div role="alert" className="flex flex-col gap-2 rounded-md bg-danger-soft px-3 py-2 text-xs text-danger">
             <p className="font-semibold">
               {errors.length} baris di {picked.fileName} perlu diperbaiki. Perbaiki berkasnya, lalu pilih ulang.
@@ -141,7 +171,7 @@ export function ImportScheduleDialog({ roomCodes, semester: current, templateHre
             </ul>
           </div>
         )}
-        {picked && errors.length === 0 && (
+        {picked?.kind === "csv" && errors.length === 0 && (
           <p role="status" className="rounded-md bg-primary-soft px-3 py-2 text-xs text-primary">
             {entries.length} jadwal dari {picked.fileName} siap disimpan.
           </p>
