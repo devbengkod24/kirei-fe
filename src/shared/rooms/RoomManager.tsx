@@ -7,9 +7,18 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { useLiveState } from "@/hooks/useLiveData";
 import type { Building, Room, RoomManagedBy, RoomType } from "@/types/room";
+import { AddRoomDialog } from "./AddRoomDialog";
 import { EditRoomDialog } from "./EditRoomDialog";
 import { managedByLabel, ROOM_TYPE_LABEL, roomManagedBy, roomTitle } from "./room-labels";
-import { applyRoomEdits, editManyRooms, localPhotoUrl, ROOM_EDITS_NAME, roomEditsSchema } from "./roomEdits";
+import {
+  applyRoomEdits,
+  editManyRooms,
+  localPhotoUrl,
+  ROOM_ADDITIONS_NAME,
+  ROOM_EDITS_NAME,
+  roomAdditionsSchema,
+  roomEditsSchema,
+} from "./roomEdits";
 import { RoomPhotoImage } from "./RoomPhotoImage";
 import { ROOM_PHOTO_ACCEPT, roomPhotoSchema, type RoomPhotoChange } from "./roomPhoto";
 
@@ -20,12 +29,15 @@ async function applyPhoto(room: Room, photo: RoomPhotoChange): Promise<Room> {
 }
 
 const NO_EDITS: Record<string, Room> = {};
+const NO_ADDITIONS: Room[] = [];
 
 export interface RoomManagerProps {
   buildings: Building[];
   rooms: Room[];
   /** Admin universitas: choose between the building's admin and admin universitas, one room or many at once. */
   canChangeManager: boolean;
+  /** Admin gedung only: Tambah Ruangan. Admin universitas does not add rooms. */
+  canAddRoom: boolean;
 }
 
 const FILTER_LABEL = "shrink-0 text-xs";
@@ -34,15 +46,18 @@ const FILE_BUTTON =
   "inline-flex min-h-11 items-center justify-center rounded-md border px-4 text-sm font-medium has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-border-focus";
 
 /** Kelola Ruangan: pick a building floor, then edit one room, or switch to Pilih banyak to change several at once. */
-export function RoomManager({ buildings, rooms: initialRooms, canChangeManager }: RoomManagerProps) {
+export function RoomManager({ buildings, rooms: initialRooms, canChangeManager, canAddRoom }: RoomManagerProps) {
   // Saved changes sit on top of the server's rooms; the "empty" data mode keeps them in this browser.
   const [edits, setEdits] = useLiveState(ROOM_EDITS_NAME, roomEditsSchema, NO_EDITS);
-  const rooms = applyRoomEdits(initialRooms, edits);
+  const [additions, setAdditions] = useLiveState(ROOM_ADDITIONS_NAME, roomAdditionsSchema, NO_ADDITIONS);
+  const allRooms = [...initialRooms, ...additions];
+  const rooms = applyRoomEdits(allRooms, edits);
   const [type, setType] = useState<RoomType | "semua">("semua");
   const [buildingId, setBuildingId] = useState(buildings[0]?.id ?? "");
   const [floor, setFloor] = useState(buildings[0]?.floors[0] ?? 0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
+  const [adding, setAdding] = useState(false);
   const [notice, setNotice] = useState("");
   // Pilih banyak: the chosen rooms stay chosen while the filters change.
   const [picking, setPicking] = useState(false);
@@ -84,14 +99,14 @@ export function RoomManager({ buildings, rooms: initialRooms, canChangeManager }
     setBulkPhotoError(undefined);
     // TODO: send the photo once with the room ids through the orval client.
     const photoUrl = await localPhotoUrl(parsed.data);
-    setEdits(editManyRooms(initialRooms, edits, pickedIds, { photoUrl }));
+    setEdits(editManyRooms(allRooms, edits, pickedIds, { photoUrl }));
     setNotice(`Foto ${picked.length} ruangan diganti.`);
   };
 
   const changePickedManager = () => {
     if (!bulkManagedBy || picked.length === 0) return;
     // TODO: PATCH the rooms' manager through the orval client.
-    setEdits(editManyRooms(initialRooms, edits, pickedIds, { managedBy: bulkManagedBy }));
+    setEdits(editManyRooms(allRooms, edits, pickedIds, { managedBy: bulkManagedBy }));
     const label = bulkManagedBy === "gedung" ? pickedBuildingAdmin : managedByLabel("universitas", "");
     setNotice(`${picked.length} ruangan sekarang dikelola ${label}.`);
   };
@@ -107,14 +122,21 @@ export function RoomManager({ buildings, rooms: initialRooms, canChangeManager }
   return (
     <div className="flex flex-col gap-6">
       <Card className="flex flex-wrap items-center justify-end gap-2 p-3">
-        <Button
-          variant={picking ? "primary" : "primary-outline"}
-          aria-pressed={picking}
-          onClick={() => (picking ? stopPicking() : setPicking(true))}
-          className="w-full sm:mr-auto sm:w-auto"
-        >
-          {picking ? "Selesai memilih" : "Pilih banyak"}
-        </Button>
+        <div className="flex w-full flex-wrap gap-2 sm:mr-auto sm:w-auto">
+          {canAddRoom && !picking && (
+            <Button variant="primary" onClick={() => setAdding(true)} className="flex-1 sm:flex-none">
+              Tambah Ruangan
+            </Button>
+          )}
+          <Button
+            variant={picking ? "primary" : "primary-outline"}
+            aria-pressed={picking}
+            onClick={() => (picking ? stopPicking() : setPicking(true))}
+            className="flex-1 sm:flex-none"
+          >
+            {picking ? "Selesai memilih" : "Pilih banyak"}
+          </Button>
+        </div>
         <label className="flex min-w-0 flex-1 items-center gap-3 rounded-md border border-border px-3 py-1 sm:max-w-[233px]">
           <span className={FILTER_LABEL}>Tipe</span>
           <div className="flex-1">
@@ -317,10 +339,12 @@ export function RoomManager({ buildings, rooms: initialRooms, canChangeManager }
                     <dt className="sr-only">Gedung</dt>
                     <dd>{building?.name}</dd>
                   </div>
-                  <div className="flex gap-1">
-                    <dt className="shrink-0">Dikelola oleh :</dt>
-                    <dd className="min-w-0 break-words">{managedByLabel(roomManagedBy(selected, building), building?.name ?? "gedung")}</dd>
-                  </div>
+                  {canChangeManager && (
+                    <div className="flex gap-1">
+                      <dt className="shrink-0">Dikelola oleh :</dt>
+                      <dd className="min-w-0 break-words">{managedByLabel(roomManagedBy(selected, building), building?.name ?? "gedung")}</dd>
+                    </div>
+                  )}
                   <div className="flex items-center gap-2">
                     <dt>Status :</dt>
                     <dd
@@ -338,6 +362,26 @@ export function RoomManager({ buildings, rooms: initialRooms, canChangeManager }
         )}
       </div>
 
+      {adding && (
+        <AddRoomDialog
+          buildings={buildings}
+          initialBuildingId={buildingId}
+          initialFloor={floor}
+          takenCodes={rooms.map((room) => room.code)}
+          onClose={() => setAdding(false)}
+          onSave={async (room, photo) => {
+            const saved = await applyPhoto(room, photo);
+            setAdditions([...additions, saved]);
+            setAdding(false);
+            setType("semua");
+            setBuildingId(saved.buildingId);
+            setFloor(saved.floor);
+            setSelectedId(saved.id);
+            setNotice(`${roomTitle(saved)} ditambahkan.`);
+          }}
+        />
+      )}
+
       {editing && selected && (
         <EditRoomDialog
           room={selected}
@@ -348,6 +392,8 @@ export function RoomManager({ buildings, rooms: initialRooms, canChangeManager }
           onSave={async (updated, photo) => {
             const saved = await applyPhoto(updated, photo);
             setEdits({ ...edits, [saved.id]: saved });
+            // a new type would hide the room behind the type filter
+            if (type !== "semua" && saved.type !== type) setType("semua");
             setEditing(false);
             setNotice(`${roomTitle(saved)} disimpan.`);
           }}

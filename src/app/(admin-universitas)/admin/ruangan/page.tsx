@@ -10,5 +10,5 @@ export default async function Page() {
   // All buildings: admin universitas is not limited to one faculty.
   const { buildings, rooms } = await getRooms({ fakultasId: null });
 
-  return <RoomManager buildings={buildings} rooms={rooms} canChangeManager />;
+  return <RoomManager buildings={buildings} rooms={rooms} canChangeManager canAddRoom={false} />;
 }

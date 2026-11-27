@@ -5,20 +5,24 @@ import type { Room } from "@/types/room";
 /** Rooms changed in Kelola Ruangan, by room id. The "empty" data mode keeps them in the browser. */
 export const ROOM_EDITS_NAME = "room-edits";
 
-export const roomEditsSchema: z.ZodType<Record<string, Room>> = z.record(
-  z.string(),
-  z.object({
-    id: z.string(),
-    code: z.string(),
-    type: z.enum(["ruang_kelas", "lab", "meeting_room", "auditorium", "gallery"]),
-    buildingId: z.string(),
-    floor: z.number(),
-    isActive: z.boolean(),
-    photoUrl: z.string().nullable(),
-    plan: z.object({ x: z.number(), y: z.number(), width: z.number(), height: z.number() }).nullable(),
-    managedBy: z.enum(["gedung", "universitas"]).optional(),
-  }),
-);
+const roomSchema = z.object({
+  id: z.string(),
+  code: z.string(),
+  type: z.enum(["ruang_kelas", "lab", "meeting_room", "auditorium", "gallery"]),
+  buildingId: z.string(),
+  floor: z.number(),
+  isActive: z.boolean(),
+  photoUrl: z.string().nullable(),
+  plan: z.object({ x: z.number(), y: z.number(), width: z.number(), height: z.number() }).nullable(),
+  managedBy: z.enum(["gedung", "universitas"]).optional(),
+});
+
+export const roomEditsSchema: z.ZodType<Record<string, Room>> = z.record(z.string(), roomSchema);
+
+/** Rooms added with Tambah Ruangan, until the API stores them. Later edits to them go in the room edits. */
+export const ROOM_ADDITIONS_NAME = "room-additions";
+
+export const roomAdditionsSchema: z.ZodType<Room[]> = z.array(roomSchema);
 
 export const applyRoomEdits = (rooms: Room[], edits: Record<string, Room>) => rooms.map((room) => edits[room.id] ?? room);
 
