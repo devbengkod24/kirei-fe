@@ -352,6 +352,7 @@ export function RoomReservationForm({
         onPickGap={pickRoomGap}
         onInspect={(room) => setInspectedRoomId(room.id === inspectedRoomId ? null : room.id)}
         fill={compact}
+        showHint={!compact}
       />
     ) : (
       <p className="flex min-h-48 flex-1 items-center justify-center rounded-lg border border-border px-6 text-center text-xs text-muted">
@@ -493,12 +494,15 @@ export function RoomReservationForm({
       <FormProvider {...form}>
         <form noValidate onSubmit={(event) => event.preventDefault()} className={`flex flex-col gap-3 ${fitClassName}`}>
           <Card as="section" aria-label="Lokasi dan tanggal" className="flex flex-wrap items-center gap-2 p-3">
-            <div className={`${FIELD_ROW} w-full sm:w-56`}>
-              <label htmlFor="reservation-building" className="shrink-0 text-xs">
-                Lokasi<RequiredMark /> :
-              </label>
-              {buildingSelect}
-            </div>
+            {/* Admin gedung manages one building, so there is nothing to pick; admin universitas picks one. */}
+            {buildings.length > 1 && (
+              <div className={`${FIELD_ROW} w-full sm:w-56`}>
+                <label htmlFor="reservation-building" className="shrink-0 text-xs">
+                  Lokasi<RequiredMark /> :
+                </label>
+                {buildingSelect}
+              </div>
+            )}
             <div className={`${FIELD_ROW} w-full sm:w-40`}>
               <label htmlFor="reservation-floor" className="shrink-0 text-xs">
                 Lantai<RequiredMark />
@@ -514,7 +518,6 @@ export function RoomReservationForm({
                 className="min-h-8 min-w-0 flex-1 rounded-sm bg-primary-soft px-2 text-[11px] font-medium text-primary aria-invalid:outline aria-invalid:outline-danger-strong"
               />
             </div>
-            {building?.fakultasName && <p className="text-[11px] text-muted">Milik {building.fakultasName}</p>}
             <ReviewButton onReview={openReview} className="sm:ml-auto sm:w-auto sm:px-6" />
             {errors.date && <p className={`${ERROR} w-full`}>{errors.date.message}</p>}
           </Card>
@@ -522,7 +525,6 @@ export function RoomReservationForm({
           <div className="flex min-h-0 flex-1 flex-col gap-3 lg:grid lg:grid-cols-[minmax(0,1fr)_20rem]">
             <Card className="flex min-h-0 flex-col gap-3 p-3">
               <ReservationSteps steps={STEPS_BY_TYPE.ruanganInternal} />
-              {categoryFilter}
               {calendar}
               {inspectedPanel}
               {roomError}

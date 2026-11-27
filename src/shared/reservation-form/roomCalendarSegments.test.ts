@@ -52,6 +52,17 @@ describe("pickSksSlotRange", () => {
     });
   });
 
+  it("unselects the clicked slot inside the chosen range", () => {
+    // Slots 6-7 (11:10-13:20, across the lunch break) chosen: clicking slot 6 keeps slot 7 only
+    expect(pickSksSlotRange(cells, 5, true, "11:10", "13:20")).toEqual({ startTime: "12:30", endTime: "13:20" });
+    // ...and clicking slot 7 keeps slot 6 only
+    expect(pickSksSlotRange(cells, 6, true, "11:10", "13:20")).toEqual({ startTime: "11:10", endTime: "12:00" });
+    // A middle slot cannot leave a hole, so it drops that slot and the ones after it
+    expect(pickSksSlotRange(cells, 1, true, "07:00", "09:30")).toEqual({ startTime: "07:00", endTime: "07:50" });
+    // The only chosen slot: nothing is left, the room is unselected
+    expect(pickSksSlotRange(cells, 0, true, "07:00", "07:50")).toBeNull();
+  });
+
   it("detects slots overlapping a chosen time range", () => {
     expect(slotInChosenRange(cells[0].slot, "07:00", "08:40")).toBe(true);
     expect(slotInChosenRange(cells[1].slot, "07:00", "08:40")).toBe(true);

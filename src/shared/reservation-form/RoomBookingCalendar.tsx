@@ -20,6 +20,8 @@ export interface RoomBookingCalendarProps {
   onInspect: (room: FloorPlanRoom) => void;
   /** Grow to the parent's height (a flex column) instead of capping the table at 460px. */
   fill?: boolean;
+  /** The "scroll right / click a free slot" hint next to the legend. */
+  showHint?: boolean;
 }
 
 const LEGEND = [
@@ -48,6 +50,7 @@ export function RoomBookingCalendar({
   onPickGap,
   onInspect,
   fill = false,
+  showHint = true,
 }: RoomBookingCalendarProps) {
   return (
     <div className={`flex flex-col gap-2 ${fill ? "min-h-0 flex-1" : ""}`}>
@@ -60,9 +63,11 @@ export function RoomBookingCalendar({
             </li>
           ))}
         </ul>
-        <p className="text-[11px] text-muted">
-          Geser ke kanan untuk slot SKS lain. Klik slot kosong untuk memilih ruangan dan rentang SKS.
-        </p>
+        {showHint && (
+          <p className="text-[11px] text-muted">
+            Geser ke kanan untuk slot SKS lain. Klik slot kosong untuk memilih ruangan dan rentang SKS.
+          </p>
+        )}
       </div>
 
       <div
@@ -202,9 +207,16 @@ export function RoomBookingCalendar({
                         <button
                           type="button"
                           aria-pressed={isPickedCell}
-                          onClick={() => onPickGap(room, nextRange.startTime, nextRange.endTime)}
-                          title={`Pilih ${room.code} (${displayTime(nextRange.startTime)} - ${displayTime(nextRange.endTime)} WIB)`}
-                          aria-label={`Pilih ${room.code} slot ${slot.slot} (${slotRange} WIB)`}
+                          // null: the only chosen slot was clicked, so the room is unselected
+                          onClick={() =>
+                            nextRange ? onPickGap(room, nextRange.startTime, nextRange.endTime) : onSelectRoom(room)
+                          }
+                          title={
+                            nextRange
+                              ? `Pilih ${room.code} (${displayTime(nextRange.startTime)} - ${displayTime(nextRange.endTime)} WIB)`
+                              : `Batalkan pilihan ${room.code}`
+                          }
+                          aria-label={`${isPickedCell ? "Batalkan" : "Pilih"} ${room.code} slot ${slot.slot} (${slotRange} WIB)`}
                           className={`flex min-h-12 w-full cursor-pointer flex-col items-center justify-center rounded-md border px-1.5 py-1 text-center transition-colors ${
                             isPickedCell
                               ? "border-plan-selected bg-plan-selected text-on-primary"

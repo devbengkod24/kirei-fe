@@ -66,4 +66,29 @@ describe("RoomBookingCalendar", () => {
     fireEvent.click(screen.getByRole("button", { name: /H\.5\.5 slot 4 \(09\.30 - 10\.20 WIB\) terpakai/ }));
     expect(onInspect).toHaveBeenCalledWith(ROOMS[1]);
   });
+
+  it("unselects the clicked chosen slot, not its neighbour", () => {
+    const onSelectRoom = vi.fn();
+    const onPickGap = vi.fn();
+    const props = {
+      rooms: ROOMS,
+      bookings: BOOKINGS,
+      dateKey: "2026-11-26",
+      statuses: STATUSES,
+      selectedRoomId: "room-h-5-1",
+      onSelectRoom,
+      onPickGap,
+      onInspect: vi.fn(),
+    };
+    // Slots 6 and 7 of H.5.1 chosen
+    const { rerender } = render(<RoomBookingCalendar {...props} startTime="11:10" endTime="13:20" />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Batalkan H\.5\.1 slot 6 / }));
+    expect(onPickGap).toHaveBeenLastCalledWith(ROOMS[0], "12:30", "13:20");
+
+    // Only slot 7 left: clicking it unselects the room
+    rerender(<RoomBookingCalendar {...props} startTime="12:30" endTime="13:20" />);
+    fireEvent.click(screen.getByRole("button", { name: /Batalkan H\.5\.1 slot 7 / }));
+    expect(onSelectRoom).toHaveBeenCalledWith(ROOMS[0]);
+  });
 });

@@ -20,7 +20,7 @@ export const STEPS_BY_TYPE = {
   ],
   // Reservasi Internal: the time comes from the slot picked on the calendar, so there is no time step.
   ruanganInternal: [
-    { label: "Pilih lokasi & tanggal", ...DATE },
+    { label: "Pilih lantai & tanggal", ...DATE },
     { label: "Klik slot kosong pada kalender untuk memilih ruangan dan jam", icon: "/icons/classroom.svg", size: 19 },
   ],
   gor: [
